@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>并发 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="scroll.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h3>📚 学习目录</h3>
+            <ul>
+                <li><a href="index.html">🏠 首页</a></li>
+                <li>
+                    <a href="introduction.html">📖 Go 语言简介</a>
+                </li>
+                <li>
+                    <a href="basics.html">🔤 基础语法</a>
+                    <ul>
+                        <li><a href="basics.html#variables">变量声明</a></li>
+                        <li><a href="basics.html#datatypes">数据类型</a></li>
+                        <li><a href="basics.html#arrays">数组与切片</a></li>
+                        <li><a href="basics.html#maps">映射</a></li>
+                        <li><a href="basics.html#go125">Go 1.25 新特性</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="control-flow.html">🔄 控制流</a>
+                    <ul>
+                        <li><a href="control-flow.html#if">if 语句</a></li>
+                        <li><a href="control-flow.html#switch">switch 语句</a></li>
+                        <li><a href="control-flow.html#for">for 循环</a></li>
+                        <li><a href="control-flow.html#defer">defer 语句</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="functions.html">⚡ 函数</a>
+                    <ul>
+                        <li><a href="functions.html#basic">基本函数</a></li>
+                        <li><a href="functions.html#multiple">多返回值</a></li>
+                        <li><a href="functions.html#variadic">可变参数</a></li>
+                        <li><a href="functions.html#closure">闭包</a></li>
+                        <li><a href="functions.html#methods">方法</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="structs.html">🏗️ 结构体与接口</a>
+                    <ul>
+                        <li><a href="structs.html#struct">结构体</a></li>
+                        <li><a href="structs.html#nested">嵌套结构体</a></li>
+                        <li><a href="structs.html#methods">结构体方法</a></li>
+                        <li><a href="structs.html#interface">接口</a></li>
+                        <li><a href="structs.html#tags">结构体标签</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="concurrency.html" class="active">🚀 并发编程</a>
+                    <ul>
+                        <li><a href="concurrency.html#goroutine">Goroutine</a></li>
+                        <li><a href="concurrency.html#channel">Channel</a></li>
+                        <li><a href="concurrency.html#select">Select</a></li>
+                        <li><a href="concurrency.html#mutex">互斥锁</a></li>
+                        <li><a href="concurrency.html#context">Context</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="generics.html">🧩 泛型</a>
+                    <ul>
+                        <li><a href="generics.html#functions">泛型函数</a></li>
+                        <li><a href="generics.html#types">泛型类型</a></li>
+                        <li><a href="generics.html#constraints">类型约束</a></li>
+                        <li><a href="generics.html#inference">类型推断</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="reflection.html">🔍 反射</a>
+                    <ul>
+                        <li><a href="reflection.html#typevalue">Type 和 Value</a></li>
+                        <li><a href="reflection.html#struct">结构体反射</a></li>
+                        <li><a href="reflection.html#modify">修改值</a></li>
+                        <li><a href="reflection.html#methods">调用方法</a></li>
+                        <li><a href="reflection.html#performance">性能考虑</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+        <div class="content">
+            <a href="index.html" class="back-link">← 返回首页</a>
+            <h1>并发</h1>
+
+            <h2 id="goroutine">Goroutine</h2>
+            <p>Goroutine 是 Go 语言轻量级的线程实现，由 Go 运行时管理。</p>
+
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">say</span>(s <span class="keyword">string</span>) {
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ {
+        time.<span class="function">Sleep</span>(<span class="number">100</span> * time.Millisecond)
+        fmt.<span class="function">Println</span>(s)
+    }
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 启动 goroutine</span>
+    <span class="keyword">go</span> <span class="function">say</span>(<span class="string">"world"</span>)
+    <span class="function">say</span>(<span class="string">"hello"</span>)
+}</code></pre>
+
+            <h2 id="channel">Channel</h2>
+            <p>Channel 是 goroutine 之间通信的管道。</p>
+
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">sum</span>(s []<span class="keyword">int</span>, c <span class="keyword">chan</span> <span class="keyword">int</span>) {
+    sum := <span class="number">0</span>
+    <span class="keyword">for</span> _, v := <span class="keyword">range</span> s {
+        sum += v
+    }
+    c &lt;- sum <span class="comment">// 将和发送到 channel</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    s := []<span class="keyword">int</span>{<span class="number">7</span>, <span class="number">2</span>, <span class="number">8</span>, -<span class="number">9</span>, <span class="number">4</span>, <span class="number">0</span>}
+
+    c := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">go</span> <span class="function">sum</span>(s[:<span class="function">len</span>(s)/<span class="number">2</span>], c)
+    <span class="keyword">go</span> <span class="function">sum</span>(s[<span class="function">len</span>(s)/<span class="number">2</span>:], c)
+    x, y := &lt;-c, &lt;-c <span class="comment">// 从 channel 接收</span>
+
+    fmt.<span class="function">Println</span>(x, y, x+y)
+}</code></pre>
+
+            <h2 id="buffered">Buffered Channel</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建带缓冲的 channel</span>
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">2</span>)
+
+    ch &lt;- <span class="number">1</span>
+    ch &lt;- <span class="number">2</span>
+
+    fmt.<span class="function">Println</span>(&lt;-ch)
+    fmt.<span class="function">Println</span>(&lt;-ch)
+}</code></pre>
+
+            <h2 id="range">Range 和 Close</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">fibonacci</span>(n <span class="keyword">int</span>, c <span class="keyword">chan</span> <span class="keyword">int</span>) {
+    x, y := <span class="number">0</span>, <span class="number">1</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; n; i++ {
+        c &lt;- x
+        x, y = y, x+y
+    }
+    <span class="keyword">close</span>(c) <span class="comment">// 关闭 channel</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    c := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">10</span>)
+    <span class="keyword">go</span> <span class="function">fibonacci</span>(<span class="number">cap</span>(c), c)
+
+    <span class="comment">// range 会持续从 channel 接收，直到 channel 被关闭</span>
+    <span class="keyword">for</span> i := <span class="keyword">range</span> c {
+        fmt.<span class="function">Println</span>(i)
+    }
+}</code></pre>
+
+            <h2 id="select">Select</h2>
+            <p>Select 语句让 goroutine 可以等待多个通信操作。</p>
+
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">fibonacci</span>(c, quit <span class="keyword">chan</span> <span class="keyword">int</span>) {
+    x, y := <span class="number">0</span>, <span class="number">1</span>
+    <span class="keyword">for</span> {
+        <span class="keyword">select</span> {
+        <span class="keyword">case</span> c &lt;- x:
+            x, y = y, x+y
+        <span class="keyword">case</span> &lt;-quit:
+            fmt.<span class="function">Println</span>(<span class="string">"quit"</span>)
+            <span class="keyword">return</span>
+        }
+    }
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    c := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    quit := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+
+    <span class="keyword">go</span> <span class="function">func</span>() {
+        <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ {
+            fmt.<span class="function">Println</span>(&lt;-c)
+        }
+        quit &lt;- <span class="number">0</span>
+    }()
+
+    <span class="function">fibonacci</span>(c, quit)
+}</code></pre>
+
+            <h2 id="default">默认选择</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    tick := time.<span class="function">Tick</span>(<span class="number">100</span> * time.Millisecond)
+    boom := time.<span class="function">After</span>(<span class="number">500</span> * time.Millisecond)
+
+    <span class="keyword">for</span> {
+        <span class="keyword">select</span> {
+        <span class="keyword">case</span> &lt;-tick:
+            fmt.<span class="function">Println</span>(<span class="string">"tick."</span>)
+        <span class="keyword">case</span> &lt;-boom:
+            fmt.<span class="function">Println</span>(<span class="string">"BOOM!"</span>)
+            <span class="keyword">return</span>
+        <span class="keyword">default</span>:
+            fmt.<span class="function">Println</span>(<span class="string">"    ."</span>)
+            time.<span class="function">Sleep</span>(<span class="number">50</span> * time.Millisecond)
+        }
+    }
+}</code></pre>
+
+            <h2 id="mutex">互斥锁（Mutex）</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="comment">// SafeCounter 是并发安全的计数器</span>
+<span class="keyword">type</span> SafeCounter <span class="keyword">struct</span> {
+    mu sync.Mutex
+    v  <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>
+}
+
+<span class="function">func</span> (c *SafeCounter) <span class="function">Inc</span>(key <span class="keyword">string</span>) {
+    c.mu.<span class="function">Lock</span>()
+    <span class="comment">// Lock 之后同一时刻只有一个 goroutine 能访问 c.v</span>
+    c.v[key]++
+    c.mu.<span class="function">Unlock</span>()
+}
+
+<span class="function">func</span> (c *SafeCounter) <span class="function">Value</span>(key <span class="keyword">string</span>) <span class="keyword">int</span> {
+    c.mu.<span class="function">Lock</span>()
+    <span class="comment">// Lock 之后同一时刻只有一个 goroutine 能访问 c.v</span>
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    <span class="keyword">return</span> c.v[key]
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    c := SafeCounter{v: <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>)}
+
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++ {
+        <span class="keyword">go</span> c.<span class="function">Inc</span>(<span class="string">"somekey"</span>)
+    }
+
+    time.<span class="function">Sleep</span>(time.Second)
+    fmt.<span class="function">Println</span>(c.<span class="function">Value</span>(<span class="string">"somekey"</span>))
+}</code></pre>
+
+            <h2 id="waitgroup">WaitGroup</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">worker</span>(id <span class="keyword">int</span>, wg *sync.WaitGroup) {
+    <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+
+    fmt.<span class="function">Printf</span>(<span class="string">"Worker %d 开始工作\n"</span>, id)
+    time.<span class="function">Sleep</span>(time.Second)
+    fmt.<span class="function">Printf</span>(<span class="string">"Worker %d 完成工作\n"</span>, id)
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> wg sync.WaitGroup
+
+    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= <span class="number">5</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="function">worker</span>(i, &amp;wg)
+    }
+
+    wg.<span class="function">Wait</span>()
+    fmt.<span class="function">Println</span>(<span class="string">"所有 worker 完成"</span>)
+}</code></pre>
+
+            <h2 id="context">Context</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建一个可取消的 context</span>
+    ctx, cancel := context.<span class="function">WithCancel</span>(context.<span class="function">Background</span>())
+
+    <span class="keyword">go</span> <span class="function">func</span>() {
+        <span class="keyword">for</span> {
+            <span class="keyword">select</span> {
+            <span class="keyword">case</span> &lt;-ctx.<span class="function">Done</span>():
+                fmt.<span class="function">Println</span>(<span class="string">"goroutine 被取消"</span>)
+                <span class="keyword">return</span>
+            <span class="keyword">default</span>:
+                fmt.<span class="function">Println</span>(<span class="string">"goroutine 运行中"</span>)
+                time.<span class="function">Sleep</span>(<span class="number">500</span> * time.Millisecond)
+            }
+        }
+    }()
+
+    time.<span class="function">Sleep</span>(<span class="number">2</span> * time.Second)
+    fmt.<span class="function">Println</span>(<span class="string">"取消 goroutine"</span>)
+    <span class="function">cancel</span>()
+    time.<span class="function">Sleep</span>(time.Second)
+}</code></pre>
+
+            <h2 id="timeout">超时控制</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">longRunningTask</span>(ctx context.Context) {
+    <span class="keyword">select</span> {
+    <span class="keyword">case</span> &lt;-time.<span class="function">After</span>(<span class="number">5</span> * time.Second):
+        fmt.<span class="function">Println</span>(<span class="string">"任务完成"</span>)
+    <span class="keyword">case</span> &lt;-ctx.<span class="function">Done</span>():
+        fmt.<span class="function">Println</span>(<span class="string">"任务超时:"</span>, ctx.<span class="function">Err</span>())
+    }
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 设置 2 秒超时</span>
+    ctx, cancel := context.<span class="function">WithTimeout</span>(context.<span class="function">Background</span>(), <span class="number">2</span>*time.Second)
+    <span class="keyword">defer</span> <span class="function">cancel</span>()
+
+    <span class="function">longRunningTask</span>(ctx)
+}</code></pre>
+        </div>
+    </div>
+</body>
+</html>

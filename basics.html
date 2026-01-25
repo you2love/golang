@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基础语法 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="scroll.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h3>📚 学习目录</h3>
+            <ul>
+                <li><a href="index.html">🏠 首页</a></li>
+                <li>
+                    <a href="introduction.html">📖 Go 语言简介</a>
+                </li>
+                <li>
+                    <a href="basics.html" class="active">🔤 基础语法</a>
+                    <ul>
+                        <li><a href="basics.html#variables">变量声明</a></li>
+                        <li><a href="basics.html#datatypes">数据类型</a></li>
+                        <li><a href="basics.html#arrays">数组与切片</a></li>
+                        <li><a href="basics.html#maps">映射</a></li>
+                        <li><a href="basics.html#go125">Go 1.25 新特性</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="control-flow.html">🔄 控制流</a>
+                    <ul>
+                        <li><a href="control-flow.html#if">if 语句</a></li>
+                        <li><a href="control-flow.html#switch">switch 语句</a></li>
+                        <li><a href="control-flow.html#for">for 循环</a></li>
+                        <li><a href="control-flow.html#defer">defer 语句</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="functions.html">⚡ 函数</a>
+                    <ul>
+                        <li><a href="functions.html#basic">基本函数</a></li>
+                        <li><a href="functions.html#multiple">多返回值</a></li>
+                        <li><a href="functions.html#variadic">可变参数</a></li>
+                        <li><a href="functions.html#closure">闭包</a></li>
+                        <li><a href="functions.html#methods">方法</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="structs.html">🏗️ 结构体与接口</a>
+                    <ul>
+                        <li><a href="structs.html#struct">结构体</a></li>
+                        <li><a href="structs.html#nested">嵌套结构体</a></li>
+                        <li><a href="structs.html#methods">结构体方法</a></li>
+                        <li><a href="structs.html#interface">接口</a></li>
+                        <li><a href="structs.html#tags">结构体标签</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="concurrency.html">🚀 并发编程</a>
+                    <ul>
+                        <li><a href="concurrency.html#goroutine">Goroutine</a></li>
+                        <li><a href="concurrency.html#channel">Channel</a></li>
+                        <li><a href="concurrency.html#select">Select</a></li>
+                        <li><a href="concurrency.html#mutex">互斥锁</a></li>
+                        <li><a href="concurrency.html#context">Context</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="generics.html">🧩 泛型</a>
+                    <ul>
+                        <li><a href="generics.html#functions">泛型函数</a></li>
+                        <li><a href="generics.html#types">泛型类型</a></li>
+                        <li><a href="generics.html#constraints">类型约束</a></li>
+                        <li><a href="generics.html#inference">类型推断</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="reflection.html">🔍 反射</a>
+                    <ul>
+                        <li><a href="reflection.html#typevalue">Type 和 Value</a></li>
+                        <li><a href="reflection.html#struct">结构体反射</a></li>
+                        <li><a href="reflection.html#modify">修改值</a></li>
+                        <li><a href="reflection.html#methods">调用方法</a></li>
+                        <li><a href="reflection.html#performance">性能考虑</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+        <div class="content">
+            <a href="index.html" class="back-link">← 返回首页</a>
+            <h1>基础语法</h1>
+
+            <h2 id="variables">变量声明</h2>
+            <p>Go 语言有多种声明变量的方式：</p>
+
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 方式1：使用 var 关键字</span>
+    <span class="keyword">var</span> name <span class="keyword">string</span> = <span class="string">"Go"</span>
+    <span class="keyword">var</span> age <span class="keyword">int</span> = <span class="number">10</span>
+
+    <span class="comment">// 方式2：类型推断</span>
+    <span class="keyword">var</span> language = <span class="string">"Golang"</span>
+
+    <span class="comment">// 方式3：短变量声明（最常用）</span>
+    version := <span class="string">"1.21"</span>
+
+    <span class="comment">// 方式4：声明多个变量</span>
+    <span class="keyword">var</span> (
+        x <span class="keyword">int</span> = <span class="number">1</span>
+        y <span class="keyword">int</span> = <span class="number">2</span>
+    )
+
+    fmt.<span class="function">Println</span>(name, age, language, version, x, y)
+}</code></pre>
+
+            <h2 id="datatypes">基本数据类型</h2>
+
+            <h3>数值类型</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 整型</span>
+    <span class="keyword">var</span> i <span class="keyword">int</span> = <span class="number">42</span>
+    <span class="keyword">var</span> i8 <span class="keyword">int8</span> = <span class="number">127</span>
+    <span class="keyword">var</span> i16 <span class="keyword">int16</span> = <span class="number">32767</span>
+    <span class="keyword">var</span> i32 <span class="keyword">int32</span> = <span class="number">2147483647</span>
+    <span class="keyword">var</span> i64 <span class="keyword">int64</span> = <span class="number">9223372036854775807</span>
+
+    <span class="comment">// 无符号整型</span>
+    <span class="keyword">var</span> u <span class="keyword">uint</span> = <span class="number">42</span>
+    <span class="keyword">var</span> u8 <span class="keyword">uint8</span> = <span class="number">255</span>
+    <span class="keyword">var</span> u16 <span class="keyword">uint16</span> = <span class="number">65535</span>
+    <span class="keyword">var</span> u32 <span class="keyword">uint32</span> = <span class="number">4294967295</span>
+    <span class="keyword">var</span> u64 <span class="keyword">uint64</span> = <span class="number">18446744073709551615</span>
+
+    <span class="comment">// 浮点型</span>
+    <span class="keyword">var</span> f32 <span class="keyword">float32</span> = <span class="number">3.14</span>
+    <span class="keyword">var</span> f64 <span class="keyword">float64</span> = <span class="number">3.141592653589793</span>
+
+    <span class="comment">// 复数</span>
+    <span class="keyword">var</span> c64 <span class="keyword">complex64</span> = <span class="number">1</span> + <span class="number">2i</span>
+    <span class="keyword">var</span> c128 <span class="keyword">complex128</span> = <span class="number">1</span> + <span class="number">2i</span>
+
+    fmt.<span class="function">Println</span>(i, i8, i16, i32, i64)
+    fmt.<span class="function">Println</span>(u, u8, u16, u32, u64)
+    fmt.<span class="function">Println</span>(f32, f64)
+    fmt.<span class="function">Println</span>(c64, c128)
+}</code></pre>
+
+            <h3>字符串和布尔类型</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 字符串</span>
+    <span class="keyword">var</span> str <span class="keyword">string</span> = <span class="string">"Hello, Go!"</span>
+    message := <span class="string">"Welcome to Go programming"</span>
+
+    <span class="comment">// 多行字符串</span>
+    multiline := <span class="string">`这是一个
+多行字符串
+示例`</span>
+
+    <span class="comment">// 布尔类型</span>
+    <span class="keyword">var</span> isTrue <span class="keyword">bool</span> = <span class="keyword">true</span>
+    isFalse := <span class="keyword">false</span>
+
+    fmt.<span class="function">Println</span>(str)
+    fmt.<span class="function">Println</span>(message)
+    fmt.<span class="function">Println</span>(multiline)
+    fmt.<span class="function">Println</span>(isTrue, isFalse)
+}</code></pre>
+
+            <h2 id="constants">常量</h2>
+            <p>常量使用 <code>const</code> 关键字声明，值在编译时确定且不可修改。</p>
+
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 单个常量</span>
+    <span class="keyword">const</span> PI = <span class="number">3.14159</span>
+    <span class="keyword">const</span> MaxConnections = <span class="number">100</span>
+
+    <span class="comment">// 常量组</span>
+    <span class="keyword">const</span> (
+        StatusOK       = <span class="number">200</span>
+        StatusNotFound = <span class="number">404</span>
+        StatusError    = <span class="number">500</span>
+    )
+
+    fmt.<span class="function">Println</span>(PI, MaxConnections)
+    fmt.<span class="function">Println</span>(StatusOK, StatusNotFound, StatusError)
+}</code></pre>
+
+            <h2 id="operators">运算符</h2>
+
+            <h3>算术运算符</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    a, b := <span class="number">10</span>, <span class="number">3</span>
+
+    fmt.<span class="function">Println</span>(<span class="string">"加法:"</span>, a + b)    <span class="comment">// 13</span>
+    fmt.<span class="function">Println</span>(<span class="string">"减法:"</span>, a - b)    <span class="comment">// 7</span>
+    fmt.<span class="function">Println</span>(<span class="string">"乘法:"</span>, a * b)    <span class="comment">// 30</span>
+    fmt.<span class="function">Println</span>(<span class="string">"除法:"</span>, a / b)    <span class="comment">// 3</span>
+    fmt.<span class="function">Println</span>(<span class="string">"取余:"</span>, a % b)    <span class="comment">// 1</span>
+}</code></pre>
+
+            <h3>比较运算符</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    a, b := <span class="number">10</span>, <span class="number">20</span>
+
+    fmt.<span class="function">Println</span>(<span class="string">"等于:"</span>, a == b)  <span class="comment">// false</span>
+    fmt.<span class="function">Println</span>(<span class="string">"不等于:"</span>, a != b)  <span class="comment">// true</span>
+    fmt.<span class="function">Println</span>(<span class="string">"小于:"</span>, a < b)   <span class="comment">// true</span>
+    fmt.<span class="function">Println</span>(<span class="string">"小于等于:"</span>, a <= b) <span class="comment">// true</span>
+    fmt.<span class="function">Println</span>(<span class="string">"大于:"</span>, a > b)   <span class="comment">// false</span>
+    fmt.<span class="function">Println</span>(<span class="string">"大于等于:"</span>, a >= b) <span class="comment">// false</span>
+}</code></pre>
+
+            <h3>逻辑运算符</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    a, b := <span class="keyword">true</span>, <span class="keyword">false</span>
+
+    fmt.<span class="function">Println</span>(<span class="string">"与:"</span>, a && b)  <span class="comment">// false</span>
+    fmt.<span class="function">Println</span>(<span class="string">"或:"</span>, a || b)  <span class="comment">// true</span>
+    fmt.<span class="function">Println</span>(<span class="string">"非:"</span>, !a)     <span class="comment">// false</span>
+}</code></pre>
+
+            <h2 id="strings">字符串操作</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"strings"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    str := <span class="string">"Hello, Go Programming!"</span>
+
+    <span class="comment">// 字符串长度</span>
+    fmt.<span class="function">Println</span>(<span class="string">"长度:"</span>, <span class="function">len</span>(str))
+
+    <span class="comment">// 字符串拼接</span>
+    str2 := str + <span class="string">" Welcome!"</span>
+    fmt.<span class="function">Println</span>(<span class="string">"拼接:"</span>, str2)
+
+    <span class="comment">// 字符串分割</span>
+    parts := strings.<span class="function">Split</span>(str, <span class="string">", "</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"分割:"</span>, parts)
+
+    <span class="comment">// 字符串包含</span>
+    fmt.<span class="function">Println</span>(<span class="string">"包含 Go:"</span>, strings.<span class="function">Contains</span>(str, <span class="string">"Go"</span>))
+
+    <span class="comment">// 字符串替换</span>
+    replaced := strings.<span class="function">Replace</span>(str, <span class="string">"Go"</span>, <span class="string">"Golang"</span>, <span class="number">1</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"替换:"</span>, replaced)
+
+    <span class="comment">// 大小写转换</span>
+    fmt.<span class="function">Println</span>(<span class="string">"大写:"</span>, strings.<span class="function">ToUpper</span>(str))
+    fmt.<span class="function">Println</span>(<span class="string">"小写:"</span>, strings.<span class="function">ToLower</span>(str))
+
+    <span class="comment">// 去除空格</span>
+    str3 := <span class="string">"  Hello  "</span>
+    fmt.<span class="function">Println</span>(<span class="string">"去除空格:"</span>, strings.<span class="function">Trim</span>(str3, <span class="string">" "</span>))
+}</code></pre>
+
+            <h2 id="arrays">数组</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 声明数组</span>
+    <span class="keyword">var</span> arr1 [<span class="number">5</span>]<span class="keyword">int</span>
+    arr1[<span class="number">0</span>] = <span class="number">1</span>
+    arr1[<span class="number">1</span>] = <span class="number">2</span>
+
+    <span class="comment">// 数组初始化</span>
+    arr2 := [<span class="number">5</span>]<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>
+
+    <span class="comment">// 让编译器计算长度</span>
+    arr3 := [...]<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}
+
+    fmt.<span class="function">Println</span>(<span class="string">"数组1:"</span>, arr1)
+    fmt.<span class="function">Println</span>(<span class="string">"数组2:"</span>, arr2)
+    fmt.<span class="function">Println</span>(<span class="string">"数组3:"</span>, arr3)
+    fmt.<span class="function">Println</span>(<span class="string">"数组2长度:"</span>, <span class="function">len</span>(arr2))
+}</code></pre>
+
+            <h2 id="slices">切片（Slice）</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建切片</span>
+    slice1 := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>
+
+    <span class="comment">// 使用 make 创建切片</span>
+    slice2 := <span class="function">make</span>([]<span class="keyword">int</span>, <span class="number">3</span>, <span class="number">5</span>)
+
+    <span class="comment">// 切片操作</span>
+    fmt.<span class="function">Println</span>(<span class="string">"完整切片:"</span>, slice1)
+    fmt.<span class="function">Println</span>(<span class="string">"子切片 [1:3]:"</span>, slice1[<span class="number">1</span>:<span class="number">3</span>])
+    fmt.<span class="function">Println</span>(<span class="string">"子切片 [:3]:"</span>, slice1[:<span class="number">3</span>])
+    fmt.<span class="function">Println</span>(<span class="string">"子切片 [2:]:"</span>, slice1[<span class="number">2</span>:])
+
+    <span class="comment">// 添加元素</span>
+    slice1 = <span class="function">append</span>(slice1, <span class="number">6</span>, <span class="number">7</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"追加后:"</span>, slice1)
+
+    <span class="comment">// 切片长度和容量</span>
+    fmt.<span class="function">Println</span>(<span class="string">"长度:"</span>, <span class="function">len</span>(slice1))
+    fmt.<span class="function">Println</span>(<span class="string">"容量:"</span>, <span class="function">cap</span>(slice1))
+}</code></pre>
+
+            <div class="note-box">
+                <h3>切片的内部结构</h3>
+                <p>切片在 Go 内部是一个结构体，包含三个字段：</p>
+                <pre><code><span class="keyword">type</span> sliceHeader <span class="keyword">struct</span> {
+    ptr unsafe.Pointer  <span class="comment">// 指向底层数组的指针</span>
+    len <span class="keyword">int</span>              <span class="comment">// 切片长度（可访问的元素数量）</span>
+    cap <span class="keyword">int</span>              <span class="comment">// 切片容量（底层数组从 ptr 开始的总大小）</span>
+}</code></pre>
+                <p>切片是对底层数组的引用，多个切片可以共享同一个底层数组。修改一个切片会影响其他共享底层数组的切片。</p>
+            </div>
+
+            <div class="example-box">
+                <h3>切片的实现原理</h3>
+                <p><strong>1. 切片的创建：</strong></p>
+                <pre><code><span class="comment">// 字面量创建</span>
+s := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}  <span class="comment">// 创建切片和底层数组</span>
+
+<span class="comment">// make 创建</span>
+s := <span class="function">make</span>([]<span class="keyword">int</span>, <span class="number">3</span>, <span class="number">5</span>)  <span class="comment">// len=3, cap=5</span>
+
+<span class="comment">// 从数组/切片创建</span>
+arr := [<span class="number">5</span>]<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>}
+s := arr[<span class="number">1</span>:<span class="number">4</span>]  <span class="comment">// 共享 arr 的底层数组</span></code></pre>
+
+                <p><strong>2. 切片的扩容机制：</strong></p>
+                <p>当使用 append 添加元素且容量不足时，Go 会自动扩容。扩容策略如下：</p>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    s := []<span class="keyword">int</span>{<span class="number">1</span>}
+    fmt.<span class="function">Printf</span>(<span class="string">"len=%d, cap=%d
+"</span>, <span class="function">len</span>(s), <span class="function">cap</span>(s))  <span class="comment">// len=1, cap=1</span>
+
+    s = <span class="function">append</span>(s, <span class="number">2</span>)
+    fmt.<span class="Function">Printf</span>(<span class="string">"len=%d, cap=%d
+"</span>, <span class="function">len</span>(s), <span class="function">cap</span>(s))  <span class="comment">// len=2, cap=2</span>
+
+    s = <span class="function">append</span>(s, <span class="number">3</span>)
+    fmt.<span class="Function">Printf</span>(<span class="string">"len=%d, cap=%d
+"</span>, <span class="function">len</span>(s), <span class="function">cap</span>(s))  <span class="comment">// len=3, cap=4 (扩容)</span>
+
+    s = <span class="function">append</span>(s, <span class="number">4</span>, <span class="number">5</span>)
+    fmt.<span class="Function">Printf</span>(<span class="string">"len=%d, cap=%d
+"</span>, <span class="function">len</span>(s), <span class="function">cap</span>(s))  <span class="comment">// len=5, cap=8 (扩容)</span>
+}</code></pre>
+                <p>扩容规则（Go 1.20+）：</p>
+                <ul>
+                    <li>新容量 ≥ 2×旧容量</li>
+                    <li>新容量 ≥ 旧容量 + 新元素数量</li>
+                    <li>对于大切片，扩容因子约为 1.25</li>
+                </ul>
+
+                <p><strong>3. 切片的共享问题：</strong></p>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    slice1 := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>}
+    slice2 := slice1[<span class="number">1</span>:<span class="number">3</span>]  <span class="comment">// [2, 3]</span>
+
+    <span class="comment">// 修改 slice2 会影响 slice1</span>
+    slice2[<span class="number">0</span>] = <span class="number">99</span>
+    fmt.<span class="function">Println</span>(<span class="string">"slice1:"</span>, slice1)  <span class="comment">// [1, 99, 3, 4, 5]</span>
+    fmt.<span class="function">Println</span>(<span class="string">"slice2:"</span>, slice2)  <span class="comment">// [99, 3]</span>
+}</code></pre>
+            </div>
+
+            <div class="note-box">
+                <h3>切片最佳实践</h3>
+                <p><strong>1. 预分配容量：</strong></p>
+                <pre><code><span class="comment">// 不推荐：频繁扩容</span>
+s := []<span class="keyword">int</span>{}
+<span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">1000</span>; i++ {
+    s = <span class="function">append</span>(s, i)  <span class="comment">// 多次扩容，性能差</span>
+}
+
+<span class="comment">// 推荐：预分配容量</span>
+s := <span class="function">make</span>([]<span class="keyword">int</span>, <span class="number">0</span>, <span class="number">1000</span>)
+<span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">1000</span>; i++ {
+    s = <span class="function">append</span>(s, i)  <span class="comment">// 无需扩容，性能好</span>
+}</code></pre>
+
+                <p><strong>2. 避免大内存泄漏：</strong></p>
+                <pre><code><span class="keyword">func</span> <span class="function">processLargeData</span>() {
+    <span class="comment">// 假设 data 是一个很大的切片</span>
+    data := <span class="function">make</span>([]<span class="keyword">byte</span>, <span class="number">1000000</span>)
+    
+    <span class="comment">// 只需要前 100 个字节</span>
+    header := data[:<span class="number">100</span>]
+    
+    <span class="comment">// 问题：header 仍然引用整个 data，导致 data 无法被 GC</span>
+    
+    <span class="comment">// 解决方案：复制需要的数据</span>
+    header = <span class="function">make</span>([]<span class="keyword">byte</span>, <span class="number">100</span>)
+    <span class="function">copy</span>(header, data[:<span class="number">100</span>])
+}</code></pre>
+
+                <p><strong>3. 使用 copy 而不是 append：</strong></p>
+                <pre><code><span class="comment">// 不推荐</span>
+result := []<span class="keyword">int</span>{}
+<span class="keyword">for</span> _, v := <span class="keyword">range</span> source {
+    result = <span class="function">append</span>(result, v)  <span class="comment">// 可能多次扩容</span>
+}
+
+<span class="comment">// 推荐</span>
+result := <span class="function">make</span>([]<span class="keyword">int</span>, <span class="number">0</span>, <span class="function">len</span>(source))
+<span class="keyword">for</span> _, v := <span class="keyword">range</span> source {
+    result = <span class="function">append</span>(result, v)
+}
+
+<span class="comment">// 或者直接使用 copy</span>
+result := <span class="function">make</span>([]<span class="keyword">int</span>, <span class="function">len</span>(source))
+<span class="function">copy</span>(result, source)</code></pre>
+
+                <p><strong>4. 切片作为函数参数：</strong></p>
+                <pre><code><span class="comment">// 切片是引用传递，但 len 和 cap 是值传递</span>
+<span class="function">func</span> <span class="function">modifySlice</span>(s []<span class="keyword">int</span>) {
+    <span class="comment">// 修改元素会影响原切片</span>
+    s[<span class="number">0</span>] = <span class="number">999</span>
+    
+    <span class="comment">// append 不会影响原切片（除非发生扩容）</span>
+    s = <span class="function">append</span>(s, <span class="number">100</span>)
+}
+
+<span class="comment">// 如果需要修改原切片，返回新的切片</span>
+<span class="function">func</span> <span class="function">appendSlice</span>(s []<span class="keyword">int</span>, values ...<span class="keyword">int</span>) []<span class="keyword">int</span> {
+    <span class="keyword">return</span> <span class="function">append</span>(s, values...)
+}</code></pre>
+
+                <p><strong>5. 检查切片是否为空：</strong></p>
+                <pre><code><span class="comment">// 不推荐</span>
+<span class="keyword">if</span> s != <span class="keyword">nil</span> {  <span class="comment">// nil 切片和空切片不同</span>
+    <span class="comment">// 处理</span>
+}
+
+<span class="comment">// 推荐</span>
+<span class="keyword">if</span> <span class="function">len</span>(s) > <span class="number">0</span> {  <span class="comment">// 检查长度</span>
+    <span class="comment">// 处理</span>
+}</code></pre>
+
+                <p><strong>6. 使用 range 遍历切片：</strong></p>
+                <pre><code><span class="comment">// range 返回索引和值的副本</span>
+<span class="keyword">for</span> i, v := <span class="keyword">range</span> slice {
+    <span class="comment">// v 是副本，修改 v 不会影响原切片</span>
+}
+
+<span class="comment">// 如果需要修改元素，使用索引</span>
+<span class="keyword">for</span> i := <span class="keyword">range</span> slice {
+    slice[i] = newValue
+}</code></pre>
+
+                <p><strong>7. 切片截取的内存共享陷阱：</strong></p>
+                <pre><code><span class="keyword">func</span> <span class="function">getFirstN</span>(data []<span class="keyword">byte</span>, n <span class="keyword">int</span>) []<span class="keyword">byte</span> {
+    <span class="comment">// 不推荐：返回的切片仍然引用整个 data</span>
+    <span class="keyword">return</span> data[:n]
+    
+    <span class="comment">// 推荐：复制数据，避免内存泄漏</span>
+    result := <span class="function">make</span>([]<span class="keyword">byte</span>, n)
+    <span class="function">copy</span>(result, data[:n])
+    <span class="keyword">return</span> result
+}</code></pre>
+            </div>
+
+            <h2 id="maps">映射（Map）</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建 map</span>
+    m1 := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>)
+    m1[<span class="string">"apple"</span>] = <span class="number">5</span>
+    m1[<span class="string">"banana"</span>] = <span class="number">3</span>
+
+    <span class="comment">// map 字面量</span>
+    m2 := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>{
+        <span class="string">"red"</span>:    <span class="number">255</span>,
+        <span class="string">"green"</span>:  <span class="number">128</span>,
+        <span class="string">"blue"</span>:   <span class="number">64</span>,
+    }
+
+    <span class="comment">// 读取值</span>
+    value, exists := m1[<span class="string">"apple"</span>]
+    fmt.<span class="function">Println</span>(<span class="string">"apple 的值:"</span>, value, <span class="string">"存在:"</span>, exists)
+
+    <span class="comment">// 删除键</span>
+    <span class="keyword">delete</span>(m1, <span class="string">"banana"</span>)
+
+    <span class="comment">// 遍历 map</span>
+    <span class="keyword">for</span> key, val := <span class="keyword">range</span> m2 {
+        fmt.<span class="function">Println</span>(key, <span class="string">":"</span>, val)
+    }
+
+    fmt.<span class="function">Println</span>(<span class="string">"map 长度:"</span>, <span class="function">len</span>(m2))
+}</code></pre>
+
+            <div class="note-box">
+                <h3>Map 的内部结构</h3>
+                <p>Map 在 Go 内部使用哈希表实现，主要包含以下结构：</p>
+                <pre><code><span class="keyword">type</span> hmap <span class="keyword">struct</span> {
+    count     <span class="keyword">int</span>         <span class="comment">// map 中元素的数量</span>
+    flags     <span class="keyword">uint8</span>       <span class="comment">// 状态标志</span>
+    B         <span class="keyword">uint8</span>       <span class="comment">// 桶数组大小的对数（bucket 数组大小 = 2^B）</span>
+    noverflow <span class="keyword">uint16</span>     <span class="comment">// 溢出的桶数量</span>
+    hash0     <span class="keyword">uint32</span>     <span class="comment">// 哈希种子</span>
+    buckets   unsafe.Pointer <span class="comment">// 桶数组的指针</span>
+    oldbuckets unsafe.Pointer <span class="comment">// 扩容时的旧桶数组</span>
+    nevacuate <span class="keyword">uintptr</span>    <span class="comment">// 扩容搬迁进度</span>
+    extra *mapextra <span class="comment">// 额外信息（溢出桶等）</span>
+}</code></pre>
+                <p>Map 的查找、插入和删除操作的平均时间复杂度为 O(1)。当 map 中的元素数量超过负载因子时，会自动扩容。</p>
+            </div>
+
+            <div class="example-box">
+                <h3>Map 的实现原理</h3>
+                <p><strong>1. 哈希计算：</strong></p>
+                <p>Go 使用哈希函数计算 key 的哈希值，然后根据哈希值确定元素在桶数组中的位置。</p>
+                <pre><code><span class="comment">// 哈希计算示例</span>
+<span class="comment">// 1. 计算 key 的哈希值</span>
+hash := hashFunction(key, hmap.hash0)
+
+<span class="comment">// 2. 取哈希值的低 B 位确定桶索引</span>
+<span class="comment">// 例如：B=3 时，bucket 数组大小为 8</span>
+bucketIndex := hash & (uintptr(1)<<hmap.B - <span class="number">1</span>)
+
+<span class="comment">// 3. 取哈希值的高 8 位作为 tophash</span>
+top := uint8(hash >> (<span class="keyword">unsafe</span>.Sizeof(hash)*<span class="number">8</span> - <span class="number">8</span>))</code></pre>
+                <p>不同类型的 key 使用不同的哈希算法：</p>
+                <ul>
+                    <li><strong>整数：</strong>直接使用整数值作为哈希</li>
+                    <li><strong>字符串：</strong>使用 FNV-1a 算法</li>
+                    <li><strong>指针：</strong>使用指针地址</li>
+                    <li><strong>结构体：</strong>递归计算各字段的哈希</li>
+                </ul>
+
+                <p><strong>2. 桶（Bucket）结构详解：</strong></p>
+                <p>每个桶可以存储最多 8 个键值对（bucketSize = 8）。桶的内存布局经过优化：</p>
+                <pre><code><span class="keyword">type</span> bmap <span class="keyword">struct</span> {
+    <span class="comment">// tophash 数组：存储每个键的哈希值高 8 位</span>
+    <span class="comment">// 用于快速判断键是否可能存在于桶中</span>
+    tophash [bucketSize]<span class="keyword">uint8</span>
+    
+    <span class="comment">// keys 和 values 数组交错存储，减少填充</span>
+    <span class="comment">// 实际内存布局：[tophash0][tophash1]...[key0][key1]...[val0][val1]...</span>
+    keys   [bucketSize]keyType
+    values [bucketSize]valueType
+    
+    <span class="comment">// overflow 指向溢出桶链表</span>
+    <span class="comment">// 当桶满时，新元素存储在溢出桶中</span>
+    overflow *bmap
+}</code></pre>
+
+                <p><strong>3. 查找过程详解：</strong></p>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    m := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>)
+    m[<span class="string">"apple"</span>] = <span class="number">5</span>
+    m[<span class="string">"banana"</span>] = <span class="number">3</span>
+    m[<span class="string">"cherry"</span>] = <span class="number">7</span>
+
+    <span class="comment">// 查找 "banana" 的详细过程：</span>
+    
+    <span class="comment">// 步骤 1：计算 "banana" 的哈希值</span>
+    hash := hashFunction(<span class="string">"banana"</span>, hash0)
+    fmt.<span class="Function">Printf</span>(<span class="string">"哈希值: %d
+"</span>, hash)
+    
+    <span class="comment">// 步骤 2：计算桶索引</span>
+    bucketIndex := hash & (bucketMask)
+    fmt.<span class="Function">Printf</span>(<span class="string">"桶索引: %d
+"</span>, bucketIndex)
+    
+    <span class="comment">// 步骤 3：在桶中查找</span>
+    bucket := buckets[bucketIndex]
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < bucketSize; i++ {
+        <span class="comment">// 先检查 tophash 快速过滤</span>
+        <span class="keyword">if</span> bucket.tophash[i] != top {
+            <span class="keyword">continue</span>
+        }
+        
+        <span class="comment">// 再比较完整的 key</span>
+        <span class="keyword">if</span> bucket.keys[i] == <span class="string">"banana"</span> {
+            <span class="comment">// 找到匹配，返回值</span>
+            <span class="keyword">return</span> bucket.values[i]
+        }
+    }
+    
+    <span class="comment">// 步骤 4：检查溢出桶链表</span>
+    <span class="keyword">for</span> bucket = bucket.overflow; bucket != <span class="keyword">nil</span>; bucket = bucket.overflow {
+        <span class="comment">// 在溢出桶中重复步骤 3</span>
+        <span class="comment">// ...</span>
+    }
+    
+    <span class="comment">// 步骤 5：未找到，返回零值</span>
+    <span class="keyword">return</span> zeroValue
+}</code></pre>
+
+                <p><strong>4. 插入过程详解：</strong></p>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    m := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>)
+    
+    <span class="comment">// 插入 "orange" 的过程：</span>
+    
+    <span class="comment">// 步骤 1：计算哈希和桶索引</span>
+    hash := hashFunction(<span class="string">"orange"</span>, hash0)
+    bucketIndex := hash & bucketMask
+    top := uint8(hash >> (<span class="keyword">unsafe</span>.Sizeof(hash)*<span class="number">8</span> - <span class="number">8</span>))
+    
+    <span class="comment">// 步骤 2：在桶中查找空位</span>
+    bucket := buckets[bucketIndex]
+    <span class="keyword">var</span> insertPos <span class="keyword">int</span> = -<span class="number">1</span>
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < bucketSize; i++ {
+        <span class="keyword">if</span> bucket.tophash[i] == empty {
+            <span class="comment">// 找到空位</span>
+            insertPos = i
+            <span class="keyword">break</span>
+        }
+    }
+    
+    <span class="keyword">if</span> insertPos != -<span class="number">1</span> {
+        <span class="comment">// 桶中有空位，直接插入</span>
+        bucket.tophash[insertPos] = top
+        bucket.keys[insertPos] = <span class="string">"orange"</span>
+        bucket.values[insertPos] = <span class="number">10</span>
+    } <span class="keyword">else</span> {
+        <span class="comment">// 桶已满，创建溢出桶</span>
+        <span class="keyword">if</span> bucket.overflow == <span class="keyword">nil</span> {
+            bucket.overflow = <span class="function">newbmap</span>()
+        }
+        <span class="comment">// 在溢出桶中插入</span>
+        insertIntoOverflow(bucket.overflow, <span class="string">"orange"</span>, <span class="number">10</span>)
+    }
+    
+    <span class="comment">// 步骤 3：检查是否需要扩容</span>
+    <span class="keyword">if</span> hmap.noverflow >= <span class="keyword">float64</span>(hmap.count)/loadFactor {
+        <span class="function">grow</span>(hmap)
+    }
+}</code></pre>
+
+                <p><strong>5. 删除过程详解：</strong></p>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    m := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>)
+    m[<span class="string">"apple"</span>] = <span class="number">5</span>
+    
+    <span class="comment">// 删除 "apple" 的过程：</span>
+    
+    <span class="comment">// 步骤 1：定位 key 的位置</span>
+    hash := hashFunction(<span class="string">"apple"</span>, hash0)
+    bucketIndex := hash & bucketMask
+    bucket := buckets[bucketIndex]
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < bucketSize; i++ {
+        <span class="keyword">if</span> bucket.tophash[i] != top {
+            <span class="keyword">continue</span>
+        }
+        <span class="keyword">if</span> bucket.keys[i] == <span class="string">"apple"</span> {
+            <span class="comment">// 找到 key，标记为已删除</span>
+            bucket.tophash[i] = emptyOne  <span class="comment">// 特殊标记：已删除</span>
+            bucket.keys[i] = zeroKey
+            bucket.values[i] = zeroValue
+            hmap.count--
+            <span class="keyword">break</span>
+        }
+    }
+    
+    <span class="comment">// 注意：删除操作不会立即回收空间</span>
+    <span class="comment">// 已删除的位置会被 emptyOne 标记</span>
+    <span class="comment">// 后续插入时可以复用这些位置</span>
+}</code></pre>
+
+                <p><strong>6. 扩容机制详解：</strong></p>
+                <p>Go 的 map 有两种扩容方式：</p>
+                
+                <p><strong>等量扩容（rehash）：</strong></p>
+                <ul>
+                    <li>触发条件：溢出桶过多（noverflow >= 1 << (B & <span class="number">15</span>))</li>
+                    <li>目的：减少溢出桶，提高查找效率</li>
+                    <li>过程：重新分配相同大小的桶数组，重新哈希所有元素</li>
+                </ul>
+                
+                <p><strong>增量扩容（grow）：</strong></p>
+                <ul>
+                    <li>触发条件：元素数量超过负载因子（count / bucketSize > loadFactor）</li>
+                    <li>负载因子通常为 6.5</li>
+                    <li>目的：增加桶数量，减少哈希冲突</li>
+                    <li>过程：桶数组大小翻倍（B++），渐进式搬迁元素</li>
+                </ul>
+                
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    m := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">int</span>]<span class="keyword">int</span>)
+
+    <span class="comment">// 观察扩容过程</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">100</span>; i++ {
+        <span class="keyword">beforeB</span> := m.B
+        m[i] = i * i
+        <span class="keyword">afterB</span> := m.B
+        
+        <span class="keyword">if</span> beforeB != afterB {
+            fmt.<span class="Function">Printf</span>(<span class="string">"扩容: B 从 %d 变为 %d
+"</span>, beforeB, afterB)
+        }
+    }
+}</code></pre>
+
+                <p><strong>7. 渐进式扩容详解：</strong></p>
+                <p>增量扩容时，Go 采用渐进式搬迁策略：</p>
+                <pre><code><span class="keyword">type</span> hmap <span class="keyword">struct</span> {
+    <span class="comment">// ... 其他字段</span>
+    
+    oldbuckets unsafe.Pointer  <span class="comment">// 旧桶数组</span>
+    nevacuate  <span class="keyword">uintptr</span>       <span class="comment">// 搬迁进度：已搬迁的桶数量</span>
+    noldbuckets <span class="keyword">uintptr</span>     <span class="comment">// 旧桶数组大小</span>
+}
+
+<span class="comment">// 搬迁过程</span>
+<span class="function">func</span> <span class="function">evacuate</span>(hmap *hmap) {
+    <span class="comment">// 每次操作最多搬迁 2 个桶</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">2</span>; i++ {
+        <span class="comment">// 搬迁旧桶数组的第 nevacuate 个桶</span>
+        oldbucket := (*bmap)(<span class="function">add</span>(hmap.oldbuckets, 
+            <span class="keyword">uintptr</span>(hmap.nevacuate)*bucketSize))
+        
+        <span class="comment">// 将桶中的所有元素重新哈希到新桶数组</span>
+        <span class="function">evacuateOne</span>(oldbucket, hmap)
+        
+        hmap.nevacuate++
+        
+        <span class="comment">// 搬迁完成，释放旧桶数组</span>
+        <span class="keyword">if</span> hmap.nevacuate == hmap.noldbuckets {
+            hmap.oldbuckets = <span class="keyword">nil</span>
+        }
+    }
+}</code></pre>
+                <p>渐进式扩容的优势：</p>
+                <ul>
+                    <li>避免单次操作的性能抖动</li>
+                    <li>分散扩容开销到多次操作</li>
+                    <li>提高系统的响应性</li>
+                </ul>
+
+                <p><strong>8. 溢出桶链表：</strong></p>
+                <p>当桶满时，新元素存储在溢出桶中，形成链表：</p>
+                <pre><code><span class="comment">// 桶结构</span>
+Bucket {
+    tophash: [<span class="keyword">uint8</span>]  <span class="comment">// [top1, top2, top3, top4, top5, top6, top7, top8]</span>
+    keys:    [KeyType]  <span class="comment">// [key1, key2, key3, key4, key5, key6, key7, key8]</span>
+    values:  [ValueType] <span class="comment">// [val1, val2, val3, val4, val5, val6, val7, val8]</span>
+    overflow: *Bucket    <span class="comment">// -> 溢出桶1 -> 溢出桶2 -> ...</span>
+}
+
+<span class="comment">// 查找时的遍历顺序：</span>
+<span class="comment">// 1. 主桶</span>
+<span class="comment">// 2. 溢出桶1</span>
+<span class="comment">// 3. 溢出桶2</span>
+<span class="comment">// ...</span></code></pre>
+
+                <p><strong>9. 空位标记：</strong></p>
+                <p>Go 使用特殊的 tophash 值标记空位：</p>
+                <pre><code><span class="keyword">const</span> (
+    emptyRest = <span class="number">0</span>      <span class="comment">// 空位，后面没有元素</span>
+    emptyOne  = <span class="number">1</span>      <span class="comment">// 已删除的位置</span>
+    minTopHash = <span class="number">4</span>     <span class="comment">// 最小有效的 tophash</span>
+)
+
+<span class="comment">// 查找时：</span>
+<span class="keyword">for</span> i := <span class="number">0</span>; i < bucketSize; i++ {
+    <span class="keyword">if</span> tophash[i] == emptyRest {
+        <span class="keyword">break</span>  <span class="comment">// 后面没有元素了</span>
+    }
+    <span class="keyword">if</span> tophash[i] == emptyOne {
+        <span class="keyword">continue</span>  <span class="comment">// 跳过已删除的位置</span>
+    }
+    <span class="comment">// 检查实际的键</span>
+}</code></pre>
+
+                <p><strong>10. 内存布局优化：</strong></p>
+                <p>Go 对 map 的内存布局进行了优化：</p>
+                <ul>
+                    <li><strong>减少填充：</strong>keys 和 values 数组交错存储</li>
+                    <li><strong>缓存友好：</span>tophash 数组在前面，便于快速过滤</li>
+                    <li><strong>内存对齐：</strong>根据类型大小自动对齐</li>
+                </ul>
+                <pre><code><span class="comment">// 实际内存布局（64位系统）</span>
+<span class="comment">// [8]byte tophash</span>
+<span class="comment">// [8]KeyType keys</span>
+<span class="comment">// [8]ValueType values</span>
+<span class="comment">// 指针 overflow</span>
+
+<span class="comment">// 假设 KeyType=int, ValueType=int</span>
+<span class="comment">// tophash: 8 bytes</span>
+<span class="comment">// keys: 8 * 8 = 64 bytes</span>
+<span class="comment">// values: 8 * 8 = 64 bytes</span>
+<span class="comment">// 总计: 8 + 64 + 64 = 136 bytes</span></code></pre>
+            </div>
+
+            <div class="note-box">
+                <h3>Map 最佳实践</h3>
+                <p><strong>1. 预分配 map 容量：</strong></p>
+                <pre><code><span class="comment">// 不推荐：频繁扩容</span>
+m := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>)
+<span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">1000</span>; i++ {
+    m[fmt.<span class="function">Sprintf</span>(<span class="string">"key%d"</span>, i)] = i  <span class="comment">// 多次扩容</span>
+}
+
+<span class="comment">// 推荐：预分配容量</span>
+m := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>, <span class="number">1000</span>)
+<span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">1000</span>; i++ {
+    m[fmt.<span class="Function">Sprintf</span>(<span class="string">"key%d"</span>, i)] = i  <span class="comment">// 无需扩容</span>
+}</code></pre>
+
+                <p><strong>2. 检查键是否存在：</strong></p>
+                <pre><code><span class="comment">// 推荐：使用两个返回值</span>
+<span class="keyword">if</span> value, ok := m[<span class="keyword">"key"</span>]; ok {
+    fmt.<span class="function">Println</span>(<span class="string">"键存在，值为:"</span>, value)
+} <span class="keyword">else</span> {
+    fmt.<span class="function">Println</span>(<span class="string">"键不存在"</span>)
+}</code></pre>
+
+                <p><strong>3. 遍历 map 的顺序：</strong></p>
+                <pre><code><span class="comment">// 注意：map 的遍历顺序是随机的</span>
+<span class="keyword">for</span> key, value := <span class="keyword">range</span> m {
+    fmt.<span class="function">Println</span>(key, value)
+}
+
+<span class="comment">// 如果需要有序遍历，先收集键并排序</span>
+keys := <span class="function">make</span>([]<span class="keyword">string</span>, <span class="number">0</span>, <span class="function">len</span>(m))
+<span class="keyword">for</span> key := <span class="keyword">range</span> m {
+    keys = <span class="function">append</span>(keys, key)
+}
+<span class="comment">// 排序键</span>
+<span class="keyword">for</span> _, key := <span class="keyword">range</span> keys {
+    fmt.<span class="function">Println</span>(key, m[key])
+}</code></pre>
+
+                <p><strong>4. 并发安全：</strong></p>
+                <pre><code><span class="comment">// 不推荐：map 不是并发安全的</span>
+<span class="keyword">var</span> m = <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">int</span>]<span class="keyword">int</span>)
+<span class="keyword">go</span> <span class="function">func</span>() {
+    m[<span class="number">1</span>] = <span class="number">1</span>  <span class="comment">// 可能导致 panic</span>
+}()
+
+<span class="comment">// 推荐：使用 sync.Map 或加锁</span>
+<span class="keyword">import</span> <span class="string">"sync"</span>
+
+<span class="comment">// 方式1：使用 sync.Map（适合读多写少）</span>
+<span class="keyword">var</span> m sync.Map
+m.<span class="function">Store</span>(<span class="number">1</span>, <span class="number">1</span>)
+<span class="keyword">if</span> value, ok := m.<span class="function">Load</span>(<span class="number">1</span>); ok {
+    fmt.<span class="function">Println</span>(value)
+}
+
+<span class="comment">// 方式2：使用互斥锁（适合读写均衡）</span>
+<span class="keyword">type</span> SafeMap <span class="keyword">struct</span> {
+    mu sync.RWMutex
+    m  <span class="keyword">map</span>[<span class="keyword">int</span>]<span class="keyword">int</span>
+}
+
+<span class="function">func</span> (sm *SafeMap) <span class="function">Get</span>(key <span class="keyword">int</span>) (<span class="keyword">int</span>, <span class="keyword">bool</span>) {
+    sm.mu.<span class="function">RLock</span>()
+    <span class="keyword">defer</span> sm.mu.<span class="function">RUnlock</span>()
+    v, ok := sm.m[key]
+    <span class="keyword">return</span> v, ok
+}
+
+<span class="function">func</span> (sm *SafeMap) <span class="function">Set</span>(key, value <span class="keyword">int</span>) {
+    sm.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> sm.mu.<span class="function">Unlock</span>()
+    sm.m[key] = value
+}</code></pre>
+
+                <p><strong>5. 删除键：</strong></p>
+                <pre><code><span class="comment">// 删除键</span>
+<span class="keyword">delete</span>(m, <span class="string">"key"</span>)
+
+<span class="comment">// 删除不存在的键是安全的，不会 panic</span>
+<span class="keyword">delete</span>(m, <span class="string">"nonexistent"</span>)</code></pre>
+
+                <p><strong>6. map 作为函数参数：</strong></p>
+                <pre><code><span class="comment">// map 是引用类型，传递的是指针</span>
+<span class="function">func</span> <span class="function">modifyMap</span>(m <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>) {
+    m[<span class="string">"new"</span>] = <span class="number">100</span>  <span class="comment">// 会影响原 map</span>
+    <span class="keyword">delete</span>(m, <span class="string">"old"</span>)   <span class="comment">// 会影响原 map</span>
+}
+
+<span class="comment">// 如果 map 可能为 nil，需要检查</span>
+<span class="function">func</span> <span class="function">safeSet</span>(m <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>, key <span class="keyword">string</span>, value <span class="keyword">int</span>) {
+    <span class="keyword">if</span> m == <span class="keyword">nil</span> {
+        m = <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>)
+    }
+    m[key] = value
+}</code></pre>
+
+                <p><strong>7. 选择合适的 key 类型：</strong></p>
+                <pre><code><span class="comment">// 推荐：可比较的类型作为 key</span>
+m1 := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>)    <span class="comment">// 字符串</span>
+m2 := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">int</span>]<span class="keyword">int</span>)        <span class="comment">// 整数</span>
+m3 := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">bool</span>]<span class="keyword">int</span>)       <span class="comment">// 布尔值</span>
+m4 := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">float64</span>]<span class="keyword">int</span>)    <span class="comment">// 浮点数（不推荐，精度问题）</span>
+
+<span class="comment">// 不推荐：不可比较的类型（slice、map、func）</span>
+<span class="comment">// m := make(map[[]int]int)  // 编译错误</span>
+
+<span class="comment">// 如果需要使用复合类型作为 key，确保它是可比较的</span>
+<span class="keyword">type</span> Point <span class="keyword">struct</span> {
+    X, Y <span class="keyword">int</span>
+}
+m5 := <span class="function">make</span>(<span class="keyword">map</span>[Point]<span class="keyword">string</span>)</code></pre>
+
+                <p><strong>8. 避免 map 的内存泄漏：</strong></p>
+                <pre><code><span class="comment">// 清空 map</span>
+<span class="keyword">for</span> key := <span class="keyword">range</span> m {
+    <span class="keyword">delete</span>(m, key)
+}
+<span class="comment">// 或者直接创建新的 map</span>
+m = <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>)
+
+<span class="comment">// 注意：如果 map 中存储了大量数据，即使清空后，</span>
+<span class="comment">// 底层数组可能不会被立即释放</span></code></pre>
+
+                <p><strong>9. 使用 value, ok 模式避免零值混淆：</strong></p>
+                <pre><code><span class="comment">// 问题：无法区分零值和键不存在</span>
+value := m[<span class="keyword">"key"</span>]  <span class="comment">// 如果 key 不存在，返回零值</span>
+
+<span class="comment">// 解决：使用 value, ok 模式</span>
+<span class="keyword">if</span> value, ok := m[<span class="keyword">"key"</span>]; ok {
+    fmt.<span class="function">Println</span>(<span class="string">"键存在，值为:"</span>, value)
+} <span class="keyword">else</span> {
+    fmt.<span class="function">Println</span>(<span class="string">"键不存在"</span>)
+}</code></pre>
+
+                <p><strong>10. map 的零值：</strong></p>
+                <pre><code><span class="comment">// map 的零值是 nil</span>
+<span class="keyword">var</span> m <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>
+fmt.<span class="function">Println</span>(m == <span class="keyword">nil</span>)  <span class="comment">// true</span>
+fmt.<span class="function">Println</span>(<span class="function">len</span>(m))   <span class="comment">// 0</span>
+
+<span class="comment">// 可以向 nil map 读取和写入</span>
+value := m[<span class="keyword">"key"</span>]  <span class="comment">// 返回零值，不 panic</span>
+m[<span class="keyword">"new"</span>] = <span class="number">1</span>    <span class="comment">// 自动初始化 map</span></code></pre>
+            </div>
+
+            <h2 id="go125">Go 1.25 新特性</h2>
+
+            <h3>range over integers</h3>
+            <p>Go 1.25 引入了整数范围的迭代，简化了循环写法。</p>
+
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 传统方式</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">5</span>; i++ {
+        fmt.<span class="function">Println</span>(<span class="string">"传统:"</span>, i)
+    }
+
+    <span class="comment">// Go 1.25 新方式：range over integers</span>
+    <span class="keyword">for</span> i := <span class="keyword">range</span> <span class="number">5</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"新方式:"</span>, i)
+    }
+
+    <span class="comment">// 带起始值</span>
+    <span class="keyword">for</span> i := <span class="keyword">range</span> <span class="number">3</span> : <span class="number">7</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"范围 3-6:"</span>, i)
+    }
+}</code></pre>
+
+            <h3>改进的 math/bits 包</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"math/bits"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 计算前导零</span>
+    x := <span class="keyword">uint</span>(<span class="number">16</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"前导零:"</span>, bits.<span class="function">LeadingZeros</span>(x))
+
+    <span class="comment">// 计算尾随零</span>
+    fmt.<span class="function">Println</span>(<span class="string">"尾随零:"</span>, bits.<span class="function">TrailingZeros</span>(x))
+
+    <span class="comment">// 计算设置位数</span>
+    fmt.<span class="function">Println</span>(<span class="string">"设置位数:"</span>, bits.<span class="function">OnesCount</span>(x))
+}</code></pre>
+
+            <h3>新的 slices 包</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"cmp"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"slices"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    numbers := []<span class="keyword">int</span>{<span class="number">5</span>, <span class="number">2</span>, <span class="number">8</span>, <span class="number">1</span>, <span class="number">9</span>}
+
+    <span class="comment">// 排序</span>
+    slices.<span class="function">Sort</span>(numbers)
+    fmt.<span class="function">Println</span>(<span class="string">"排序后:"</span>, numbers)
+
+    <span class="comment">// 二分查找</span>
+    index, found := slices.<span class="function">BinarySearch</span>(numbers, <span class="number">8</span>)
+    fmt.<span class="Function">Printf</span>(<span class="string">"查找 8: 索引=%d, 找到=%v\n"</span>, index, found)
+
+    <span class="comment">// 检查元素是否存在</span>
+    fmt.<span class="function">Println</span>(<span class="string">"包含 5:"</span>, slices.<span class="function">Contains</span>(numbers, <span class="number">5</span>))
+
+    <span class="comment">// 比较切片</span>
+    numbers2 := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">5</span>, <span class="number">8</span>, <span class="number">9</span>}
+    fmt.<span class="function">Println</span>(<span class="string">"切片相等:"</span>, slices.<span class="function">Equal</span>(numbers, numbers2))
+
+    <span class="comment">// 查找最大最小值</span>
+    fmt.<span class="function">Println</span>(<span class="string">"最小值:"</span>, slices.<span class="function">Min</span>(numbers))
+    fmt.<span class="function">Println</span>(<span class="string">"最大值:"</span>, slices.<span class="function">Max</span>(numbers))
+
+    <span class="comment">// 反转切片</span>
+    slices.<span class="function">Reverse</span>(numbers)
+    fmt.<span class="function">Println</span>(<span class="string">"反转后:"</span>, numbers)
+
+    <span class="comment">// 使用自定义比较函数排序</span>
+    names := []<span class="keyword">string</span>{<span class="string">"Alice"</span>, <span class="string">"Bob"</span>, <span class="string">"Charlie"</span>}
+    slices.<span class="function">SortFunc</span>(names, cmp.<span class="function">Compare</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"排序后的名字:"</span>, names)
+}</code></pre>
+
+            <h3>新的 maps 包</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"maps"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    m1 := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>{
+        <span class="string">"apple"</span>:  <span class="number">5</span>,
+        <span class="string">"banana"</span>: <span class="number">3</span>,
+        <span class="string">"orange"</span>: <span class="number">7</span>,
+    }
+
+    m2 := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>{
+        <span class="string">"apple"</span>:  <span class="number">5</span>,
+        <span class="string">"banana"</span>: <span class="number">3</span>,
+        <span class="string">"orange"</span>: <span class="number">7</span>,
+    }
+
+    <span class="comment">// 比较 map 是否相等</span>
+    fmt.<span class="function">Println</span>(<span class="string">"map 相等:"</span>, maps.<span class="function">Equal</span>(m1, m2))
+
+    <span class="comment">// 复制 map</span>
+    m3 := maps.<span class="function">Clone</span>(m1)
+    m3[<span class="string">"grape"</span>] = <span class="number">10</span>
+    fmt.<span class="function">Println</span>(<span class="string">"原 map:"</span>, m1)
+    fmt.<span class="function">Println</span>(<span class="string">"复制的 map:"</span>, m3)
+
+    <span class="comment">// 获取所有键</span>
+    keys := maps.<span class="function">Keys</span>(m1)
+    fmt.<span class="function">Println</span>(<span class="string">"所有键:"</span>, keys)
+
+    <span class="comment">// 获取所有值</span>
+    values := maps.<span class="function">Values</span>(m1)
+    fmt.<span class="function">Println</span>(<span class="string">"所有值:"</span>, values)
+}</code></pre>
+        </div>
+    </div>
+</body>
+</html>

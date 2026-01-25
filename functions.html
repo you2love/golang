@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>函数 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="scroll.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h3>📚 学习目录</h3>
+            <ul>
+                <li><a href="index.html">🏠 首页</a></li>
+                <li>
+                    <a href="introduction.html">📖 Go 语言简介</a>
+                </li>
+                <li>
+                    <a href="basics.html">🔤 基础语法</a>
+                    <ul>
+                        <li><a href="basics.html#variables">变量声明</a></li>
+                        <li><a href="basics.html#datatypes">数据类型</a></li>
+                        <li><a href="basics.html#arrays">数组与切片</a></li>
+                        <li><a href="basics.html#maps">映射</a></li>
+                        <li><a href="basics.html#go125">Go 1.25 新特性</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="control-flow.html">🔄 控制流</a>
+                    <ul>
+                        <li><a href="control-flow.html#if">if 语句</a></li>
+                        <li><a href="control-flow.html#switch">switch 语句</a></li>
+                        <li><a href="control-flow.html#for">for 循环</a></li>
+                        <li><a href="control-flow.html#defer">defer 语句</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="functions.html" class="active">⚡ 函数</a>
+                    <ul>
+                        <li><a href="functions.html#basic">基本函数</a></li>
+                        <li><a href="functions.html#multiple">多返回值</a></li>
+                        <li><a href="functions.html#variadic">可变参数</a></li>
+                        <li><a href="functions.html#closure">闭包</a></li>
+                        <li><a href="functions.html#methods">方法</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="structs.html">🏗️ 结构体与接口</a>
+                    <ul>
+                        <li><a href="structs.html#struct">结构体</a></li>
+                        <li><a href="structs.html#nested">嵌套结构体</a></li>
+                        <li><a href="structs.html#methods">结构体方法</a></li>
+                        <li><a href="structs.html#interface">接口</a></li>
+                        <li><a href="structs.html#tags">结构体标签</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="concurrency.html">🚀 并发编程</a>
+                    <ul>
+                        <li><a href="concurrency.html#goroutine">Goroutine</a></li>
+                        <li><a href="concurrency.html#channel">Channel</a></li>
+                        <li><a href="concurrency.html#select">Select</a></li>
+                        <li><a href="concurrency.html#mutex">互斥锁</a></li>
+                        <li><a href="concurrency.html#context">Context</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="generics.html">🧩 泛型</a>
+                    <ul>
+                        <li><a href="generics.html#functions">泛型函数</a></li>
+                        <li><a href="generics.html#types">泛型类型</a></li>
+                        <li><a href="generics.html#constraints">类型约束</a></li>
+                        <li><a href="generics.html#inference">类型推断</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="reflection.html">🔍 反射</a>
+                    <ul>
+                        <li><a href="reflection.html#typevalue">Type 和 Value</a></li>
+                        <li><a href="reflection.html#struct">结构体反射</a></li>
+                        <li><a href="reflection.html#modify">修改值</a></li>
+                        <li><a href="reflection.html#methods">调用方法</a></li>
+                        <li><a href="reflection.html#performance">性能考虑</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+        <div class="content">
+            <a href="index.html" class="back-link">← 返回首页</a>
+            <h1>函数</h1>
+
+            <h2 id="basic">基本函数定义</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// 无参数无返回值的函数</span>
+<span class="function">func</span> <span class="function">sayHello</span>() {
+    fmt.<span class="function">Println</span>(<span class="string">"Hello, World!"</span>)
+}
+
+<span class="comment">// 有参数的函数</span>
+<span class="function">func</span> <span class="function">greet</span>(name <span class="keyword">string</span>) {
+    fmt.<span class="function">Printf</span>(<span class="string">"Hello, %s!\n"</span>, name)
+}
+
+<span class="comment">// 有返回值的函数</span>
+<span class="function">func</span> <span class="function">add</span>(a, b <span class="keyword">int</span>) <span class="keyword">int</span> {
+    <span class="keyword">return</span> a + b
+}
+
+<span class="comment">// 多个返回值</span>
+<span class="function">func</span> <span class="function">divide</span>(a, b <span class="keyword">int</span>) (<span class="keyword">int</span>, <span class="keyword">error</span>) {
+    <span class="keyword">if</span> b == <span class="number">0</span> {
+        <span class="keyword">return</span> <span class="number">0</span>, fmt.<span class="function">Errorf</span>(<span class="string">"除数不能为零"</span>)
+    }
+    <span class="keyword">return</span> a / b, <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="function">sayHello</span>()
+    <span class="function">greet</span>(<span class="string">"Go"</span>)
+
+    result := <span class="function">add</span>(<span class="number">5</span>, <span class="number">3</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"5 + 3 ="</span>, result)
+
+    quotient, err := <span class="function">divide</span>(<span class="number">10</span>, <span class="number">2</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"错误:"</span>, err)
+    } <span class="keyword">else</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"10 / 2 ="</span>, quotient)
+    }
+}</code></pre>
+
+            <h2 id="named">命名返回值</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// 命名返回值</span>
+<span class="function">func</span> <span class="function">split</span>(sum <span class="keyword">int</span>) (x, y <span class="keyword">int</span>) {
+    x = sum * <span class="number">4</span> / <span class="number">9</span>
+    y = sum - x
+    <span class="keyword">return</span> <span class="comment">// 隐式返回</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    a, b := <span class="function">split</span>(<span class="number">17</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"x:"</span>, a, <span class="string">"y:"</span>, b)
+}</code></pre>
+
+            <h2 id="variadic">可变参数函数</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// 可变参数函数</span>
+<span class="function">func</span> <span class="function">sum</span>(numbers ...<span class="keyword">int</span>) <span class="keyword">int</span> {
+    total := <span class="number">0</span>
+    <span class="keyword">for</span> _, num := <span class="keyword">range</span> numbers {
+        total += num
+    }
+    <span class="keyword">return</span> total
+}
+
+<span class="comment">// 混合参数</span>
+<span class="function">func</span> <span class="function">printInfo</span>(prefix <span class="keyword">string</span>, values ...<span class="keyword">int</span>) {
+    fmt.<span class="function">Print</span>(prefix, <span class="string">": "</span>)
+    <span class="keyword">for</span> _, v := <span class="keyword">range</span> values {
+        fmt.<span class="function">Print</span>(v, <span class="string">" "</span>)
+    }
+    fmt.<span class="function">Println</span>()
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    fmt.<span class="function">Println</span>(<span class="function">sum</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>))
+    fmt.<span class="function">Println</span>(<span class="function">sum</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>))
+
+    <span class="comment">// 传递切片</span>
+    nums := []<span class="keyword">int</span>{<span class="number">10</span>, <span class="number">20</span>, <span class="number">30</span>}
+    fmt.<span class="function">Println</span>(<span class="function">sum</span>(nums...))
+
+    <span class="function">printInfo</span>(<span class="string">"数字"</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)
+}</code></pre>
+
+            <h2 id="closure">匿名函数和闭包</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 匿名函数</span>
+    <span class="function">func</span>() {
+        fmt.<span class="function">Println</span>(<span class="string">"匿名函数"</span>)
+    }()
+
+    <span class="comment">// 带参数的匿名函数</span>
+    <span class="function">func</span>(name <span class="keyword">string</span>) {
+        fmt.<span class="function">Println</span>(<span class="string">"Hello,"</span>, name)
+    }(<span class="string">"Go"</span>)
+
+    <span class="comment">// 匿名函数作为值</span>
+    add := <span class="function">func</span>(a, b <span class="keyword">int</span>) <span class="keyword">int</span> {
+        <span class="keyword">return</span> a + b
+    }
+    fmt.<span class="function">Println</span>(<span class="function">add</span>(<span class="number">5</span>, <span class="number">3</span>))
+
+    <span class="comment">// 闭包</span>
+    <span class="comment">// 函数可以访问外部变量</span>
+    number := <span class="number">10</span>
+
+    <span class="function">func</span>() {
+        fmt.<span class="function">Println</span>(<span class="string">"闭包访问外部变量:"</span>, number)
+    }()
+
+    <span class="comment">// 闭包函数工厂</span>
+    <span class="function">adder</span> := <span class="function">func</span>() <span class="function">func</span>(<span class="keyword">int</span>) <span class="keyword">int</span> {
+        sum := <span class="number">0</span>
+        <span class="keyword">return</span> <span class="function">func</span>(x <span class="keyword">int</span>) <span class="keyword">int</span> {
+            sum += x
+            <span class="keyword">return</span> sum
+        }
+    }
+
+    pos, neg := <span class="function">adder</span>(), <span class="function">adder</span>()
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">3</span>; i++ {
+        fmt.<span class="function">Println</span>(pos(i), neg(-<span class="number">2</span>*i))
+    }
+}</code></pre>
+
+            <h2 id="higherorder">函数作为参数和返回值</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// 函数类型</span>
+<span class="keyword">type</span> operation <span class="function">func</span>(<span class="keyword">int</span>, <span class="keyword">int</span>) <span class="keyword">int</span>
+
+<span class="comment">// 函数作为参数</span>
+<span class="function">func</span> <span class="function">calculate</span>(a, b <span class="keyword">int</span>, op operation) <span class="keyword">int</span> {
+    <span class="keyword">return</span> op(a, b)
+}
+
+<span class="comment">// 函数作为返回值</span>
+<span class="function">func</span> <span class="function">getOperation</span>(op <span class="keyword">string</span>) operation {
+    <span class="keyword">switch</span> op {
+    <span class="keyword">case</span> <span class="string">"add"</span>:
+        <span class="keyword">return</span> <span class="function">func</span>(a, b <span class="keyword">int</span>) <span class="keyword">int</span> {
+            <span class="keyword">return</span> a + b
+        }
+    <span class="keyword">case</span> <span class="string">"subtract"</span>:
+        <span class="keyword">return</span> <span class="function">func</span>(a, b <span class="keyword">int</span>) <span class="keyword">int</span> {
+            <span class="keyword">return</span> a - b
+        }
+    <span class="keyword">default</span>:
+        <span class="keyword">return</span> <span class="keyword">nil</span>
+    }
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 使用函数作为参数</span>
+    add := <span class="function">func</span>(a, b <span class="keyword">int</span>) <span class="keyword">int</span> { <span class="keyword">return</span> a + b }
+    multiply := <span class="function">func</span>(a, b <span class="keyword">int</span>) <span class="keyword">int</span> { <span class="keyword">return</span> a * b }
+
+    fmt.<span class="function">Println</span>(<span class="string">"10 + 5 ="</span>, <span class="function">calculate</span>(<span class="number">10</span>, <span class="number">5</span>, add))
+    fmt.<span class="function">Println</span>(<span class="string">"10 * 5 ="</span>, <span class="function">calculate</span>(<span class="number">10</span>, <span class="number">5</span>, multiply))
+
+    <span class="comment">// 使用函数作为返回值</span>
+    op := <span class="function">getOperation</span>(<span class="string">"add"</span>)
+    <span class="keyword">if</span> op != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"操作结果:"</span>, op(<span class="number">3</span>, <span class="number">4</span>))
+    }
+}</code></pre>
+
+            <h2 id="defer">defer 函数调用</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// defer 与返回值</span>
+    result := <span class="function">deferExample</span>()
+    fmt.<span class="function">Println</span>(<span class="string">"结果:"</span>, result)
+}
+
+<span class="function">func</span> <span class="function">deferExample</span>() (result <span class="keyword">int</span>) {
+    <span class="keyword">defer</span> <span class="function">func</span>() {
+        result *= <span class="number">2</span>
+        fmt.<span class="function">Println</span>(<span class="string">"defer 中修改返回值:"</span>, result)
+    }()
+
+    result = <span class="number">10</span>
+    fmt.<span class="function">Println</span>(<span class="string">"返回前:"</span>, result)
+    <span class="keyword">return</span> result
+}</code></pre>
+
+            <h2 id="methods">方法</h2>
+            <p>方法是带有接收者的函数。</p>
+
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// 定义结构体</span>
+<span class="keyword">type</span> Rectangle <span class="keyword">struct</span> {
+    width, height <span class="keyword">float64</span>
+}
+
+<span class="comment">// 值接收者方法</span>
+<span class="function">func</span> (r Rectangle) <span class="function">Area</span>() <span class="keyword">float64</span> {
+    <span class="keyword">return</span> r.width * r.height
+}
+
+<span class="comment">// 指针接收者方法</span>
+<span class="function">func</span> (r *Rectangle) <span class="function">Scale</span>(factor <span class="keyword">float64</span>) {
+    r.width *= factor
+    r.height *= factor
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    rect := Rectangle{width: <span class="number">3</span>, height: <span class="number">4</span>}
+
+    fmt.<span class="function">Printf</span>(<span class="string">"面积: %.2f\n"</span>, rect.<span class="function">Area</span>())
+
+    rect.<span class="function">Scale</span>(<span class="number">2</span>)
+    fmt.<span class="Function">Printf</span>(<span class="string">"缩放后面积: %.2f\n"</span>, rect.<span class="function">Area</span>())
+}</code></pre>
+        </div>
+    </div>
+</body>
+</html>

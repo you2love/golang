@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>控制流 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="scroll.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h3>📚 学习目录</h3>
+            <ul>
+                <li><a href="index.html">🏠 首页</a></li>
+                <li>
+                    <a href="introduction.html">📖 Go 语言简介</a>
+                </li>
+                <li>
+                    <a href="basics.html">🔤 基础语法</a>
+                    <ul>
+                        <li><a href="basics.html#variables">变量声明</a></li>
+                        <li><a href="basics.html#datatypes">数据类型</a></li>
+                        <li><a href="basics.html#arrays">数组与切片</a></li>
+                        <li><a href="basics.html#maps">映射</a></li>
+                        <li><a href="basics.html#go125">Go 1.25 新特性</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="control-flow.html" class="active">🔄 控制流</a>
+                    <ul>
+                        <li><a href="control-flow.html#if">if 语句</a></li>
+                        <li><a href="control-flow.html#switch">switch 语句</a></li>
+                        <li><a href="control-flow.html#for">for 循环</a></li>
+                        <li><a href="control-flow.html#defer">defer 语句</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="functions.html">⚡ 函数</a>
+                    <ul>
+                        <li><a href="functions.html#basic">基本函数</a></li>
+                        <li><a href="functions.html#multiple">多返回值</a></li>
+                        <li><a href="functions.html#variadic">可变参数</a></li>
+                        <li><a href="functions.html#closure">闭包</a></li>
+                        <li><a href="functions.html#methods">方法</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="structs.html">🏗️ 结构体与接口</a>
+                    <ul>
+                        <li><a href="structs.html#struct">结构体</a></li>
+                        <li><a href="structs.html#nested">嵌套结构体</a></li>
+                        <li><a href="structs.html#methods">结构体方法</a></li>
+                        <li><a href="structs.html#interface">接口</a></li>
+                        <li><a href="structs.html#tags">结构体标签</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="concurrency.html">🚀 并发编程</a>
+                    <ul>
+                        <li><a href="concurrency.html#goroutine">Goroutine</a></li>
+                        <li><a href="concurrency.html#channel">Channel</a></li>
+                        <li><a href="concurrency.html#select">Select</a></li>
+                        <li><a href="concurrency.html#mutex">互斥锁</a></li>
+                        <li><a href="concurrency.html#context">Context</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="generics.html">🧩 泛型</a>
+                    <ul>
+                        <li><a href="generics.html#functions">泛型函数</a></li>
+                        <li><a href="generics.html#types">泛型类型</a></li>
+                        <li><a href="generics.html#constraints">类型约束</a></li>
+                        <li><a href="generics.html#inference">类型推断</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="reflection.html">🔍 反射</a>
+                    <ul>
+                        <li><a href="reflection.html#typevalue">Type 和 Value</a></li>
+                        <li><a href="reflection.html#struct">结构体反射</a></li>
+                        <li><a href="reflection.html#modify">修改值</a></li>
+                        <li><a href="reflection.html#methods">调用方法</a></li>
+                        <li><a href="reflection.html#performance">性能考虑</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+        <div class="content">
+            <a href="index.html" class="back-link">← 返回首页</a>
+            <h1>控制流</h1>
+
+            <h2 id="if">if 语句</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 基本 if 语句</span>
+    age := <span class="number">18</span>
+    <span class="keyword">if</span> age >= <span class="number">18</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"成年人"</span>)
+    }
+
+    <span class="comment">// if-else 语句</span>
+    <span class="keyword">if</span> age >= <span class="number">18</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"成年人"</span>)
+    } <span class="keyword">else</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"未成年人"</span>)
+    }
+
+    <span class="comment">// if-else if-else 语句</span>
+    score := <span class="number">85</span>
+    <span class="keyword">if</span> score >= <span class="number">90</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"优秀"</span>)
+    } <span class="keyword">else if</span> score >= <span class="number">80</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"良好"</span>)
+    } <span class="keyword">else if</span> score >= <span class="number">60</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"及格"</span>)
+    } <span class="keyword">else</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"不及格"</span>)
+    }
+
+    <span class="comment">// 带初始化语句的 if</span>
+    <span class="keyword">if</span> num := <span class="number">10</span>; num % <span class="number">2</span> == <span class="number">0</span> {
+        fmt.<span class="function">Println</span>(num, <span class="string">"是偶数"</span>)
+    } <span class="keyword">else</span> {
+        fmt.<span class="function">Println</span>(num, <span class="string">"是奇数"</span>)
+    }
+}</code></pre>
+
+            <h2 id="switch">switch 语句</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 基本 switch</span>
+    day := <span class="number">3</span>
+    <span class="keyword">switch</span> day {
+    <span class="keyword">case</span> <span class="number">1</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"星期一"</span>)
+    <span class="keyword">case</span> <span class="number">2</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"星期二"</span>)
+    <span class="keyword">case</span> <span class="number">3</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"星期三"</span>)
+    <span class="keyword">case</span> <span class="number">4</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"星期四"</span>)
+    <span class="keyword">case</span> <span class="number">5</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"星期五"</span>)
+    <span class="keyword">default</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"周末"</span>)
+    }
+
+    <span class="comment">// 多个 case 共享处理</span>
+    grade := <span class="string">"B"</span>
+    <span class="keyword">switch</span> grade {
+    <span class="keyword">case</span> <span class="string">"A"</span>, <span class="string">"B"</span>, <span class="string">"C"</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"及格"</span>)
+    <span class="keyword">case</span> <span class="string">"D"</span>, <span class="string">"F"</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"不及格"</span>)
+    <span class="keyword">default</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"未知等级"</span>)
+    }
+
+    <span class="comment">// 无表达式的 switch（类似 if-else if）</span>
+    score := <span class="number">75</span>
+    <span class="keyword">switch</span> {
+    <span class="keyword">case</span> score >= <span class="number">90</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"优秀"</span>)
+    <span class="keyword">case</span> score >= <span class="number">70</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"良好"</span>)
+    <span class="keyword">case</span> score >= <span class="number">60</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"及格"</span>)
+    <span class="keyword">default</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"不及格"</span>)
+    }
+
+    <span class="comment">// 带初始化语句的 switch</span>
+    <span class="keyword">switch</span> num := <span class="number">15</span>; {
+    <span class="keyword">case</span> num < <span class="number">0</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"负数"</span>)
+    <span class="keyword">case</span> num == <span class="number">0</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"零"</span>)
+    <span class="keyword">case</span> num > <span class="number">0</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"正数"</span>)
+    }
+}</code></pre>
+
+            <h2 id="for">for 循环</h2>
+            <p>Go 语言只有一种循环结构：<code>for</code> 循环。</p>
+
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 标准 for 循环</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">5</span>; i++ {
+        fmt.<span class="function">Println</span>(i)
+    }
+
+    <span class="comment">// while 风格（只有条件）</span>
+    i := <span class="number">0</span>
+    <span class="keyword">for</span> i < <span class="number">5</span> {
+        fmt.<span class="function">Println</span>(i)
+        i++
+    }
+
+    <span class="comment">// 无限循环</span>
+    <span class="comment">// for {
+    //     fmt.Println("无限循环")
+    // }</span>
+
+    <span class="comment">// 遍历切片/数组</span>
+    numbers := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>}
+    <span class="keyword">for</span> index, value := <span class="keyword">range</span> numbers {
+        fmt.<span class="function">Printf</span>(<span class="string">"索引 %d: 值 %d\n"</span>, index, value)
+    }
+
+    <span class="comment">// 只需要值</span>
+    <span class="keyword">for</span> _, value := <span class="keyword">range</span> numbers {
+        fmt.<span class="function">Println</span>(<span class="string">"值:"</span>, value)
+    }
+
+    <span class="comment">// 遍历 map</span>
+    colors := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>{
+        <span class="string">"red"</span>:   <span class="string">"#FF0000"</span>,
+        <span class="string">"green"</span>: <span class="string">"#00FF00"</span>,
+        <span class="string">"blue"</span>:  <span class="string">"#0000FF"</span>,
+    }
+    <span class="keyword">for</span> key, value := <span class="keyword">range</span> colors {
+        fmt.<span class="function">Printf</span>(<span class="string">"%s: %s\n"</span>, key, value)
+    }
+
+    <span class="comment">// 遍历字符串</span>
+    str := <span class="string">"Hello"</span>
+    <span class="keyword">for</span> index, char := <span class="keyword">range</span> str {
+        fmt.<span class="Function">Printf</span>(<span class="string">"位置 %d: %c\n"</span>, index, char)
+    }
+
+    <span class="comment">// break 和 continue</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">10</span>; i++ {
+        <span class="keyword">if</span> i == <span class="number">3</span> {
+            <span class="keyword">continue</span> <span class="comment">// 跳过本次迭代</span>
+        }
+        <span class="keyword">if</span> i == <span class="number">7</span> {
+            <span class="keyword">break</span> <span class="comment">// 退出循环</span>
+        }
+        fmt.<span class="function">Println</span>(i)
+    }
+}</code></pre>
+
+            <h2 id="defer">defer 语句</h2>
+            <p><code>defer</code> 语句用于延迟函数的执行，直到包含它的函数返回。常用于资源清理。</p>
+
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// defer 的执行顺序（后进先出）</span>
+    <span class="keyword">defer</span> fmt.<span class="function">Println</span>(<span class="string">"第一个 defer"</span>)
+    <span class="keyword">defer</span> fmt.<span class="function">Println</span>(<span class="string">"第二个 defer"</span>)
+    <span class="keyword">defer</span> fmt.<span class="function">Println</span>(<span class="string">"第三个 defer"</span>)
+
+    fmt.<span class="function">Println</span>(<span class="string">"主函数"</span>)
+
+    <span class="comment">// defer 用于资源清理</span>
+    <span class="function">processFile</span>()
+}
+
+<span class="function">func</span> <span class="function">processFile</span>() {
+    fmt.<span class="function">Println</span>(<span class="string">"\n打开文件..."</span>)
+    <span class="comment">// 假设打开了一个文件</span>
+    <span class="keyword">defer</span> fmt.<span class="function">Println</span>(<span class="string">"关闭文件"</span>)
+
+    fmt.<span class="function">Println</span>(<span class="string">"处理文件内容..."</span>)
+}</code></pre>
+
+            <h2 id="panic">panic 和 recover</h2>
+            <p><code>panic</code> 用于处理运行时错误，<code>recover</code> 用于从 panic 中恢复。</p>
+
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 正常情况</span>
+    <span class="function">divide</span>(<span class="number">10</span>, <span class="number">2</span>)
+
+    <span class="comment">// 会触发 panic 的情况</span>
+    <span class="function">divide</span>(<span class="number">10</span>, <span class="number">0</span>)
+
+    fmt.<span class="function">Println</span>(<span class="string">"程序继续执行"</span>)
+}
+
+<span class="function">func</span> <span class="function">divide</span>(a, b <span class="keyword">int</span>) {
+    <span class="keyword">defer</span> <span class="function">func</span>() {
+        <span class="keyword">if</span> r := <span class="function">recover</span>(); r != <span class="keyword">nil</span> {
+            fmt.<span class="function">Println</span>(<span class="string">"恢复从 panic:"</span>, r)
+        }
+    }()
+
+    <span class="keyword">if</span> b == <span class="number">0</span> {
+        <span class="keyword">panic</span>(<span class="string">"除数不能为零"</span>)
+    }
+    result := a / b
+    fmt.<span class="function">Println</span>(<span class="string">"结果:"</span>, result)
+}</code></pre>
+
+            <h2 id="goto">goto 语句</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// goto 语句示例（谨慎使用）</span>
+    i := <span class="number">0</span>
+
+<span class="keyword">start</span>:
+    fmt.<span class="function">Println</span>(i)
+    i++
+
+    <span class="keyword">if</span> i < <span class="number">5</span> {
+        <span class="keyword">goto</span> start
+    }
+}</code></pre>
+        </div>
+    </div>
+</body>
+</html>

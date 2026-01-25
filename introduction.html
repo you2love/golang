@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go 语言简介 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h3>📚 学习目录</h3>
+            <ul>
+                <li><a href="index.html">🏠 首页</a></li>
+                <li>
+                    <a href="introduction.html" class="active">📖 Go 语言简介</a>
+                </li>
+                <li>
+                    <a href="basics.html">🔤 基础语法</a>
+                    <ul>
+                        <li><a href="basics.html#variables">变量声明</a></li>
+                        <li><a href="basics.html#datatypes">数据类型</a></li>
+                        <li><a href="basics.html#arrays">数组与切片</a></li>
+                        <li><a href="basics.html#maps">映射</a></li>
+                        <li><a href="basics.html#go125">Go 1.25 新特性</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="control-flow.html">🔄 控制流</a>
+                    <ul>
+                        <li><a href="control-flow.html#if">if 语句</a></li>
+                        <li><a href="control-flow.html#switch">switch 语句</a></li>
+                        <li><a href="control-flow.html#for">for 循环</a></li>
+                        <li><a href="control-flow.html#defer">defer 语句</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="functions.html">⚡ 函数</a>
+                    <ul>
+                        <li><a href="functions.html#basic">基本函数</a></li>
+                        <li><a href="functions.html#multiple">多返回值</a></li>
+                        <li><a href="functions.html#variadic">可变参数</a></li>
+                        <li><a href="functions.html#closure">闭包</a></li>
+                        <li><a href="functions.html#methods">方法</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="structs.html">🏗️ 结构体与接口</a>
+                    <ul>
+                        <li><a href="structs.html#struct">结构体</a></li>
+                        <li><a href="structs.html#nested">嵌套结构体</a></li>
+                        <li><a href="structs.html#methods">结构体方法</a></li>
+                        <li><a href="structs.html#interface">接口</a></li>
+                        <li><a href="structs.html#tags">结构体标签</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="concurrency.html">🚀 并发编程</a>
+                    <ul>
+                        <li><a href="concurrency.html#goroutine">Goroutine</a></li>
+                        <li><a href="concurrency.html#channel">Channel</a></li>
+                        <li><a href="concurrency.html#select">Select</a></li>
+                        <li><a href="concurrency.html#mutex">互斥锁</a></li>
+                        <li><a href="concurrency.html#context">Context</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="generics.html">🧩 泛型</a>
+                    <ul>
+                        <li><a href="generics.html#functions">泛型函数</a></li>
+                        <li><a href="generics.html#types">泛型类型</a></li>
+                        <li><a href="generics.html#constraints">类型约束</a></li>
+                        <li><a href="generics.html#inference">类型推断</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="reflection.html">🔍 反射</a>
+                    <ul>
+                        <li><a href="reflection.html#typevalue">Type 和 Value</a></li>
+                        <li><a href="reflection.html#struct">结构体反射</a></li>
+                        <li><a href="reflection.html#modify">修改值</a></li>
+                        <li><a href="reflection.html#methods">调用方法</a></li>
+                        <li><a href="reflection.html#performance">性能考虑</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+        <div class="content">
+            <a href="index.html" class="back-link">← 返回首页</a>
+            <h1>Go 语言简介</h1>
+
+            <h2>什么是 Go 语言？</h2>
+            <p>Go（又称 Golang）是由 Google 开发的一种开源编程语言。它于 2009 年首次公开发布，由 Robert Griesemer、Rob Pike 和 Ken Thompson 设计。Go 语言旨在提供一种简单、高效、可靠的方式来构建软件。</p>
+
+            <h2>Go 语言的特点</h2>
+            <ul>
+                <li><strong>简洁性：</strong>Go 的语法简洁明了，易于学习和使用</li>
+                <li><strong>高性能：</strong>编译型语言，执行速度快，接近 C/C++ 的性能</li>
+                <li><strong>并发支持：</strong>内置 goroutine 和 channel，轻松实现并发编程</li>
+                <li><strong>垃圾回收：</strong>自动内存管理，减少内存泄漏风险</li>
+                <li><strong>跨平台：</strong>支持多种操作系统和架构</li>
+                <li><strong>丰富的标准库：</strong>提供大量实用的包和工具</li>
+            </ul>
+
+            <h2>Go 语言的应用场景</h2>
+            <ul>
+                <li><strong>Web 开发：</strong>构建高性能的 Web 服务器和 API</li>
+                <li><strong>微服务：</strong>适合构建分布式系统和微服务架构</li>
+                <li><strong>云原生应用：</strong>Docker、Kubernetes 等云原生工具都用 Go 编写</li>
+                <li><strong>网络编程：</strong>处理高并发的网络服务</li>
+                <li><strong>命令行工具：</strong>开发高效的 CLI 工具</li>
+                <li><strong>区块链：</strong>许多区块链项目使用 Go 开发</li>
+            </ul>
+
+            <h2>安装 Go</h2>
+            <p>要开始使用 Go，首先需要在您的系统上安装它。访问 <a href="https://golang.org/dl/" target="_blank">https://golang.org/dl/</a> 下载适合您操作系统的安装包。</p>
+
+            <div class="example-box">
+                <h3>验证安装</h3>
+                <p>安装完成后，打开终端并运行以下命令验证安装：</p>
+                <pre><code><span class="keyword">go</span> version</code></pre>
+                <p>如果安装成功，您将看到类似以下的输出：</p>
+                <pre><code><span class="keyword">go</span> version <span class="keyword">go</span>1.25.0 darwin/amd64</code></pre>
+            </div>
+
+            <h2>第一个 Go 程序</h2>
+            <p>让我们创建您的第一个 Go 程序 - 经典的 "Hello, World!"</p>
+
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    fmt.<span class="function">Println</span>(<span class="string">"Hello, World!"</span>)
+}</code></pre>
+
+            <div class="note-box">
+                <h3>代码解析</h3>
+                <ul>
+                    <li><code>package main</code>：声明程序所属的包，main 包是程序的入口</li>
+                    <li><code>import "fmt"</code>：导入 fmt 包，用于格式化 I/O 操作</li>
+                    <li><code>func main()</code>：main 函数是程序的入口点</li>
+                    <li><code>fmt.Println</code>：打印一行文本到控制台</li>
+                </ul>
+            </div>
+
+            <h2>运行 Go 程序</h2>
+            <p>将上面的代码保存为 <code>hello.go</code>，然后使用以下命令运行：</p>
+
+            <pre><code><span class="comment"># 直接运行</span>
+<span class="keyword">go</span> run hello.go
+
+<span class="comment"># 或者先编译再运行</span>
+<span class="keyword">go</span> build hello.go
+./hello</code></pre>
+
+            <h2>Go 开发工具</h2>
+            <p>推荐使用以下开发工具来提高开发效率：</p>
+            <ul>
+                <li><strong>VS Code</strong>：安装 Go 扩展插件</li>
+                <li><strong>GoLand</strong>：JetBrains 出品的 Go IDE</li>
+                <li><strong>Vim/Neovim</strong>：配置 vim-go 插件</li>
+                <li><strong>Emacs</strong>：配置 go-mode</li>
+            </ul>
+
+        </div>
+    </div>
+</body>
+</html>

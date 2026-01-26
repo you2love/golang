@@ -83,6 +83,34 @@ html {
     color: white;
 }
 
+.sidebar .nav-item > a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar .nav-toggle {
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.3s ease;
+    font-size: 0.8em;
+    padding: 0 5px;
+}
+
+.sidebar .nav-toggle.collapsed {
+    transform: rotate(-90deg);
+}
+
+.sidebar .nav-submenu {
+    max-height: 1000px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.sidebar .nav-submenu.collapsed {
+    max-height: 0;
+}
+
 .level-1 {
     margin: 20px 0 10px;
     padding: 0;

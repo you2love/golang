@@ -82,23 +82,13 @@
                     <span class="level-badge">阶段三：高级</span>
                 </li>
                 <li class="nav-item">
-                    <a href="concurrency.html"><span>🚀 7. 并发编程</span><span class="nav-toggle">▼</span></a>
+                    <a href="concurrency.html"><span>🚀 8. 并发编程</span><span class="nav-toggle">▼</span></a>
                     <ul class="nav-submenu">
                         <li><a href="concurrency.html#goroutine">Goroutine</a></li>
                         <li><a href="concurrency.html#channel">Channel</a></li>
                         <li><a href="concurrency.html#select">Select</a></li>
                         <li><a href="concurrency.html#mutex">互斥锁</a></li>
                         <li><a href="concurrency.html#context">Context</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a href="embed.html"><span>📁 8. Embed 标准库</span><span class="nav-toggle">▼</span></a>
-                    <ul class="nav-submenu">
-                        <li><a href="embed.html#introduction">Embed 简介</a></li>
-                        <li><a href="embed.html#basics">基础用法</a></li>
-                        <li><a href="embed.html#filesystem">文件系统</a></li>
-                        <li><a href="embed.html#advanced">高级用法</a></li>
-                        <li><a href="embed.html#bestpractices">最佳实践</a></li>
                     </ul>
                 </li>
                 <li class="nav-item">
@@ -111,6 +101,7 @@
                         <li><a href="stdlib.html#io">io 输入输出</a></li>
                         <li><a href="stdlib.html#bufio">bufio 缓冲 I/O</a></li>
                         <li><a href="stdlib.html#exp">exp 实验性库</a></li>
+                        <li><a href="stdlib.html#embed">embed 文件嵌入</a></li>
                         <li><a href="stdlib.html#bestpractices">最佳实践</a></li>
                     </ul>
                 </li>
@@ -135,11 +126,12 @@
                         <li><a href="ecosystem.html#cobra">Cobra 命令行工具</a></li>
                         <li><a href="ecosystem.html#gomicro">Go-Micro 微服务</a></li>
                         <li><a href="ecosystem.html#etcd">Etcd 分布式存储</a></li>
+                                                <li><a href="ecosystem.html#protobuf">Protobuf 数据序列化</a></li>
+                        <li><a href="ecosystem.html#redis">Redis 客户端</a></li>
+                        <li><a href="ecosystem.html#mysql">MySQL 客户端</a></li>
                         <li><a href="ecosystem.html#bestpractices">最佳实践</a></li>
                     </ul>
-                </li>
-                <li class="nav-item">
-                    <a href="generics.html"><span>🧩 12. 泛型</span><span class="nav-toggle">▼</span></a>
+                </li><span class="nav-toggle">▼</span></a>
                     <ul class="nav-submenu">
                         <li><a href="generics.html#functions">泛型函数</a></li>
                         <li><a href="generics.html#types">泛型类型</a></li>
@@ -2509,7 +2501,436 @@ cli.<span class="function">Put</span>(ctx, <span class="string">"/config/databas
 micro.<span class="function">RegisterSubscriber</span>(<span class="string">"topic"</span>, service.<span class="function">Server</span>(), handler)</code></pre>
             </div>
             
-            <h3>总结</h3>
+            
+            <h2 id="protobuf">Protobuf 数据序列化</h2>
+            <p>Protocol Buffers (Protobuf) 是 Google 开发的一种语言无关、平台无关的序列化结构数据的方法。</p>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="comment">// 安装 protoc 编译器</span>
+<span class="comment">// macOS: brew install protobuf</span>
+<span class="comment">// Ubuntu: apt-get install protobuf-compiler</span>
+
+<span class="comment">// 安装 Go 插件</span>
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest</code></pre>
+            
+            <h3>定义 .proto 文件</h3>
+            <pre><code><span class="comment">// user.proto</span>
+syntax = <span class="string">"proto3"</span>;
+
+<span class="keyword">package</span> user;
+
+<span class="keyword">option</span> go_package = <span class="string">"./user"</span>;
+
+<span class="keyword">message</span> User {
+    <span class="keyword">int32</span> id = 1;
+    <span class="keyword">string</span> name = 2;
+    <span class="keyword">string</span> email = 3;
+    <span class="keyword">repeated</span> <span class="keyword">string</span> tags = 4;
+    <span class="keyword">enum</span> Status {
+        UNKNOWN = 0;
+        ACTIVE = 1;
+        INACTIVE = 2;
+    }
+    Status status = 5;
+}
+
+<span class="keyword">message</span> GetUserRequest {
+    <span class="keyword">int32</span> id = 1;
+}
+
+<span class="keyword">message</span> GetUserResponse {
+    User user = 1;
+}</code></pre>
+            
+            <h3>生成 Go 代码</h3>
+            <pre><code><span class="comment">// 生成代码</span>
+protoc --go_out=. --go_opt=paths=source_relative \
+       --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+       user.proto</code></pre>
+            
+            <h3>序列化和反序列化</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"google.golang.org/protobuf/proto"</span>
+    <span class="string">"path/to/user"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建消息</span>
+    u := &user.User{
+        Id:    1,
+        Name:  <span class="string">"张三"</span>,
+        Email: <span class="string">"zhangsan@example.com"</span>,
+        Tags:  []<span class="keyword">string</span>{<span class="string">"admin"</span>, <span class="string">"user"</span>},
+        Status: user.User_ACTIVE,
+    }
+    
+    <span class="comment">// 序列化</span>
+    data, err := proto.<span class="function">Marshal</span>(u)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    fmt.<span class="function">Printf</span>(<span class="string">"序列化结果: %x\n"</span>, data)
+    
+    <span class="comment">// 反序列化</span>
+    <span class="keyword">var</span> u2 user.User
+    err = proto.<span class="function">Unmarshal</span>(data, &u2)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    fmt.<span class="function">Printf</span>(<span class="string">"反序列化结果: %+v\n"</span>, u2)
+}</code></pre>
+            
+            <h3>Protobuf 最佳实践</h3>
+            <div class="note-box">
+                <h4>1. 字段编号规范</h4>
+                <pre><code><span class="comment">// 1-15: 单字节编码，常用字段</span>
+<span class="comment">// 16-2047: 两字节编码，不常用字段</span>
+<span class="comment">// 保留字段编号：19000-19999</span>
+
+<span class="keyword">message</span> User {
+    <span class="keyword">string</span> name = 1;   <span class="comment">// 常用字段</span>
+    <span class="keyword">string</span> email = 2;  <span class="comment">// 常用字段</span>
+    <span class="keyword">string</span> phone = 16; <span class="comment">// 不常用字段</span>
+}</code></pre>
+                
+                <h4>2. 使用 oneof</h4>
+                <pre><code><span class="keyword">message</span> Result {
+    <span class="keyword">oneof</span> result {
+        <span class="keyword">string</span> error = 1;
+        <span class="keyword">string</span> data = 2;
+    }
+}</code></pre>
+                
+                <h4>3. 使用 map</h4>
+                <pre><code><span class="keyword">message</span> User {
+    <span class="keyword">map</span>&lt;<span class="keyword">string</span>, <span class="keyword">string</span>&gt; metadata = 10;
+}</code></pre>
+                
+                <h4>4. 版本兼容性</h4>
+                <pre><code><span class="comment">// 新增字段时使用 optional</span>
+<span class="keyword">message</span> User {
+    <span class="keyword">string</span> name = 1;
+    <span class="keyword">optional</span> <span class="keyword">string</span> nickname = 10; <span class="comment">// 新增字段</span>
+}
+
+<span class="comment">// 保留废弃字段</span>
+<span class="keyword">message</span> User {
+    <span class="keyword">int32</span> old_id = 1 [deprecated = <span class="keyword">true</span>];
+    <span class="keyword">string</span> new_id = 2;
+}</code></pre>
+            </div>
+
+            <h2 id="redis">Redis 客户端</h2>
+            <p>Redis 是一个高性能的键值存储数据库，Go 中常用 go-redis 库进行操作。</p>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">go get</span> github.com/redis/go-redis/v9</code></pre>
+            
+            <h3>基本操作</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    <span class="string">"github.com/redis/go-redis/v9"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建客户端</span>
+    rdb := redis.<span class="function">NewClient</span>(&redis.Options{
+        Addr:     <span class="string">"localhost:6379"</span>,
+        Password: <span class="string">""</span>,
+        DB:       0,
+    })
+    
+    ctx := context.<span class="function">Background</span>()
+    
+    <span class="comment">// 设置键值</span>
+    err := rdb.<span class="function">Set</span>(ctx, <span class="string">"key"</span>, <span class="string">"value"</span>, 0).<span class="function">Err</span>()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    
+    <span class="comment">// 获取键值</span>
+    val, err := rdb.<span class="function">Get</span>(ctx, <span class="string">"key"</span>).<span class="function">Result</span>()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    fmt.<span class="function">Println</span>(<span class="string">"key:"</span>, val)
+    
+    <span class="comment">// 设置过期时间</span>
+    rdb.<span class="function">Set</span>(ctx, <span class="string">"key"</span>, <span class="string">"value"</span>, 10*time.Minute)
+    
+    <span class="comment">// 删除键</span>
+    rdb.<span class="function">Del</span>(ctx, <span class="string">"key"</span>)
+}</code></pre>
+            
+            <h3>数据结构操作</h3>
+            <pre><code><span class="comment">// 1. Hash 操作</span>
+rdb.<span class="function">HSet</span>(ctx, <span class="string">"user:1"</span>, <span class="string">"name"</span>, <span class="string">"张三"</span>)
+rdb.<span class="function">HSet</span>(ctx, <span class="string">"user:1"</span>, <span class="string">"email"</span>, <span class="string">"zhangsan@example.com"</span>)
+name, _ := rdb.<span class="function">HGet</span>(ctx, <span class="string">"user:1"</span>, <span class="string">"name"</span>).<span class="function">Result</span>()
+
+<span class="comment">// 2. List 操作</span>
+rdb.<span class="function">LPush</span>(ctx, <span class="string">"list"</span>, <span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>)
+val, _ := rdb.<span class="function">RPop</span>(ctx, <span class="string">"list"</span>).<span class="function">Result</span>()
+
+<span class="comment">// 3. Set 操作</span>
+rdb.<span class="function">SAdd</span>(ctx, <span class="string">"set"</span>, <span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>)
+members, _ := rdb.<span class="function">SMembers</span>(ctx, <span class="string">"set"</span>).<span class="function">Result</span>()
+
+<span class="comment">// 4. Sorted Set 操作</span>
+rdb.<span class="function">ZAdd</span>(ctx, <span class="string">"zset"</span>, redis.Z{Score: 1, Member: <span class="string">"a"</span>})
+rdb.<span class="function">ZAdd</span>(ctx, <span class="string">"zset"</span>, redis.Z{Score: 2, Member: <span class="string">"b"</span>})
+result, _ := rdb.<span class="function">ZRangeWithScores</span>(ctx, <span class="string">"zset"</span>, 0, -1).<span class="function">Result</span>()</code></pre>
+            
+            <h3>发布订阅</h3>
+            <pre><code><span class="comment">// 发布消息</span>
+err := rdb.<span class="function">Publish</span>(ctx, <span class="string">"channel"</span>, <span class="string">"message"</span>).<span class="function">Err</span>()
+
+<span class="comment">// 订阅消息</span>
+pubsub := rdb.<span class="function">Subscribe</span>(ctx, <span class="string">"channel"</span>)
+<span class="keyword">defer</span> pubsub.<span class="function">Close</span>()
+
+<span class="keyword">for</span> {
+    msg, err := pubsub.<span class="function">ReceiveMessage</span>(ctx)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    fmt.<span class="function">Println</span>(<span class="string">"收到消息:"</span>, msg.Payload)
+}</code></pre>
+            
+            <h3>事务</h3>
+            <pre><code><span class="comment">// 使用事务</span>
+<span class="function">func</span> <span class="function">transfer</span>(from, to <span class="keyword">string</span>, amount <span class="keyword">int64</span>) <span class="keyword">error</span> {
+    tx := rdb.<span class="function">TxPipeline</span>()
+    
+    err := tx.<span class="function">DecrBy</span>(ctx, from, amount).<span class="function">Err</span>()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    tx.<span class="function">IncrBy</span>(ctx, to, amount)
+    
+    _, err = tx.<span class="function">Exec</span>(ctx)
+    <span class="keyword">return</span> err
+}</code></pre>
+            
+            <h3>Redis 最佳实践</h3>
+            <div class="note-box">
+                <h4>1. 连接池配置</h4>
+                <pre><code>rdb := redis.<span class="function">NewClient</span>(&redis.Options{
+    Addr:         <span class="string">"localhost:6379"</span>,
+    Password:     <span class="string">""</span>,
+    DB:           0,
+    PoolSize:     10,   <span class="comment">// 连接池大小</span>
+    MinIdleConns: 5,    <span class="comment">// 最小空闲连接</span>
+    MaxRetries:   3,    <span class="comment">// 最大重试次数</span>
+})</code></pre>
+                
+                <h4>2. 使用 Pipeline</h4>
+                <pre><code><span class="comment">// 批量操作使用 Pipeline</span>
+pipe := rdb.<span class="function">Pipeline</span>()
+pipe.<span class="function">Set</span>(ctx, <span class="string">"key1"</span>, <span class="string">"value1"</span>, 0)
+pipe.<span class="function">Set</span>(ctx, <span class="string">"key2"</span>, <span class="string">"value2"</span>, 0)
+pipe.<span class="function">Set</span>(ctx, <span class="string">"key3"</span>, <span class="string">"value3"</span>, 0)
+cmds, err := pipe.<span class="function">Exec</span>(ctx)</code></pre>
+                
+                <h4>3. 键命名规范</h4>
+                <pre><code><span class="comment">// 使用冒号分隔的层次结构</span>
+<span class="string">"user:1:name"</span>
+<span class="string">"user:1:email"</span>
+<span class="string">"session:abc123"</span>
+<span class="string">"cache:product:123"</span></code></pre>
+                
+                <h4>4. 缓存策略</h4>
+                <pre><code><span class="comment">// Cache-Aside 模式</span>
+<span class="function">func</span> <span class="function">getUser</span>(id <span class="keyword">int64</span>) (*User, <span class="keyword">error</span>) {
+    <span class="comment">// 1. 先查缓存</span>
+    key := fmt.<span class="function">Sprintf</span>(<span class="string">"user:%d"</span>, id)
+    val, err := rdb.<span class="function">Get</span>(ctx, key).<span class="function">Result</span>()
+    <span class="keyword">if</span> err == <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="function">unmarshalUser</span>(val)
+    }
+    
+    <span class="comment">// 2. 查数据库</span>
+    user, err := db.<span class="function">GetUser</span>(id)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    <span class="comment">// 3. 写入缓存</span>
+    data, _ := json.<span class="function">Marshal</span>(user)
+    rdb.<span class="function">Set</span>(ctx, key, data, 10*time.Minute)
+    
+    <span class="keyword">return</span> user, <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+
+            <h2 id="mysql">MySQL 客户端</h2>
+            <p>Go 中常用 GORM 或 database/sql 操作 MySQL 数据库。</p>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">go get</span> gorm.io/gorm
+<span class="keyword">go get</span> gorm.io/driver/mysql</code></pre>
+            
+            <h3>连接数据库</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"gorm.io/driver/mysql"</span>
+    <span class="string">"gorm.io/gorm"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    dsn := <span class="string">"user:password@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"</span>
+    db, err := gorm.<span class="function">Open</span>(mysql.<span class="function">Open</span>(dsn), &gorm.Config{})
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+}</code></pre>
+            
+            <h3>定义模型</h3>
+            <pre><code><span class="keyword">type</span> User <span class="keyword">struct</span> {
+    ID        <span class="keyword">uint</span>           <span class="string">`gorm:"primaryKey"`</span>
+    Name      <span class="keyword">string</span>         <span class="string">`gorm:"size:255;not null"`</span>
+    Email     <span class="keyword">string</span>         <span class="string">`gorm:"size:255;uniqueIndex"`</span>
+    Age       <span class="keyword">int</span>            <span class="string">`gorm:"default:0"`</span>
+    CreatedAt time.Time
+    UpdatedAt time.Time
+    DeletedAt gorm.DeletedAt <span class="string">`gorm:"index"`</span>
+}
+
+<span class="comment">// 自动迁移</span>
+db.<span class="function">AutoMigrate</span>(&User{})</code></pre>
+            
+            <h3>CRUD 操作</h3>
+            <pre><code><span class="comment">// 创建</span>
+user := User{Name: <span class="string">"张三"</span>, Email: <span class="string">"zhangsan@example.com"</span>}
+result := db.<span class="function">Create</span>(&user)
+
+<span class="comment">// 查询</span>
+<span class="keyword">var</span> user User
+db.<span class="function">First</span>(&user, 1)  <span class="comment">// 根据 ID 查询</span>
+db.<span class="function">Where</span>(<span class="string">"name = ?"</span>, <span class="string">"张三"</span>).<span class="function">First</span>(&user)
+db.<span class="function">Find</span>(&users)  <span class="comment">// 查询所有</span>
+
+<span class="comment">// 更新</span>
+db.<span class="function">Model</span>(&user).<span class="function">Update</span>(<span class="string">"name"</span>, <span class="string">"李四"</span>)
+db.<span class="function">Model</span>(&user).<span class="function">Updates</span>(User{Name: <span class="string">"李四"</span>, Age: 30})
+
+<span class="comment">// 删除</span>
+db.<span class="function">Delete</span>(&user)  <span class="comment">// 软删除</span>
+db.<span class="function">Unscoped</span>().<span class="function">Delete</span>(&user)  <span class="comment">// 永久删除</span></code></pre>
+            
+            <h3>复杂查询</h3>
+            <pre><code><span class="comment">// 条件查询</span>
+db.<span class="function">Where</span>(<span class="string">"age > ?"</span>, 18).<span class="function">Find</span>(&users)
+db.<span class="function">Where</span>(<span class="string">"name LIKE ?"</span>, <span class="string">"%张%"</span>).<span class="function">Find</span>(&users)
+
+<span class="comment">// Or 查询</span>
+db.<span class="function">Where</span>(<span class="string">"name = ?"</span>, <span class="string">"张三"</span>).<span class="function">Or</span>(<span class="string">"name = ?"</span>, <span class="string">"李四"</span>).<span class="function">Find</span>(&users)
+
+<span class="comment">// 排序和分页</span>
+db.<span class="function">Order</span>(<span class="string">"age desc"</span>).<span class="function">Offset</span>(0).<span class="function">Limit</span>(10).<span class="function">Find</span>(&users)
+
+<span class="comment">// 统计</span>
+<span class="keyword">var</span> count <span class="keyword">int64</span>
+db.<span class="function">Model</span>(&User{}).<span class="function">Count</span>(&count)
+
+<span class="comment">// 原生 SQL</span>
+db.<span class="function">Raw</span>(<span class="string">"SELECT * FROM users WHERE age > ?"</span>, 18).<span class="function">Scan</span>(&users)</code></pre>
+            
+            <h3>事务</h3>
+            <pre><code><span class="comment">// 自动事务</span>
+err := db.<span class="function">Transaction</span>(<span class="keyword">func</span>(tx *gorm.DB) <span class="keyword">error</span> {
+    <span class="keyword">if</span> err := tx.<span class="function">Create</span>(&user1).<span class="function">Error</span>; err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">if</span> err := tx.<span class="function">Create</span>(&user2).<span class="function">Error</span>; err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+})
+
+<span class="comment">// 手动事务</span>
+tx := db.<span class="function">Begin</span>()
+<span class="keyword">defer</span> <span class="function">func</span>() {
+    <span class="keyword">if</span> r := <span class="function">recover</span>(); r != <span class="keyword">nil</span> {
+        tx.<span class="function">Rollback</span>()
+    }
+}()
+
+<span class="keyword">if</span> err := tx.<span class="function">Create</span>(&user).<span class="function">Error</span>; err != <span class="keyword">nil</span> {
+    tx.<span class="function">Rollback</span>()
+    <span class="keyword">return</span> err
+}
+
+tx.<span class="function">Commit</span>()</code></pre>
+            
+            <h3>MySQL 最佳实践</h3>
+            <div class="note-box">
+                <h4>1. 连接池配置</h4>
+                <pre><code>sqlDB, _ := db.<span class="function">DB</span>()
+sqlDB.<span class="function">SetMaxIdleConns</span>(10)
+sqlDB.<span class="function">SetMaxOpenConns</span>(100)
+sqlDB.<span class="function">SetConnMaxLifetime</span>(time.Hour)</code></pre>
+                
+                <h4>2. 使用索引</h4>
+                <pre><code><span class="keyword">type</span> User <span class="keyword">struct</span> {
+    Email <span class="keyword">string</span> <span class="string">`gorm:"uniqueIndex"`</span>
+    Age   <span class="keyword">int</span>    <span class="string">`gorm:"index"`</span>
+}</code></pre>
+                
+                <h4>3. 批量操作</h4>
+                <pre><code><span class="comment">// 使用 CreateInBatches 批量插入</span>
+users := []User{{Name: <span class="string">"a"</span>}, {Name: <span class="string">"b"</span>}, {Name: <span class="string">"c"</span>}}
+db.<span class="function">CreateInBatches</span>(users, 100)</code></pre>
+                
+                <h4>4. 预加载避免 N+1</h4>
+                <pre><code><span class="comment">// 使用 Preload 预加载关联</span>
+db.<span class="function">Preload</span>(<span class="string">"Orders"</span>).<span class="function">Find</span>(&users)</code></pre>
+                
+                <h4>5. 使用软删除</h4>
+                <pre><code><span class="keyword">type</span> User <span class="keyword">struct</span> {
+    DeletedAt gorm.DeletedAt <span class="string">`gorm:"index"`</span>
+}</code></pre>
+            </div>
+
+            <h3>集成最佳实践</h3>
+            <div class="example-box">
+                <h4>完整的数据访问层</h4>
+                <pre><code><span class="keyword">type</span> UserRepository <span class="keyword">interface</span> {
+    <span class="function">Create</span>(user *User) <span class="keyword">error</span>
+    <span class="function">GetByID</span>(id <span class="keyword">uint</span>) (*User, <span class="keyword">error</span>)
+    <span class="function">GetByEmail</span>(email <span class="keyword">string</span>) (*User, <span class="keyword">error</span>)
+    <span class="function">Update</span>(user *User) <span class="keyword">error</span>
+    <span class="function">Delete</span>(id <span class="keyword">uint</span>) <span class="keyword">error</span>
+}
+
+<span class="keyword">type</span> userRepository <span class="keyword">struct</span> {
+    db *gorm.DB
+}
+
+<span class="function">func</span> <span class="function">NewUserRepository</span>(db *gorm.DB) UserRepository {
+    <span class="keyword">return</span> &userRepository{db: db}
+}
+
+<span class="function">func</span> (r *userRepository) <span class="function">GetByID</span>(id <span class="keyword">uint</span>) (*User, <span class="keyword">error</span>) {
+    <span class="keyword">var</span> user User
+    err := r.db.<span class="function">First</span>(&user, id).<span class="function">Error</span>
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    <span class="keyword">return</span> &user, <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+<h3>总结</h3>
             <div class="example-box">
                 <p>本章介绍了 Go 语言生态中更多重要的社区库：</p>
                 <ul>

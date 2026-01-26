@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go-Micro 微服务 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+                <div class="content">
+            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
+            <h2 id="gomicro">Go-Micro 微服务框架</h2>
+            
+            <h3>简介</h3>
+            <p>Go-Micro 是一个用于构建微服务的 Go 语言框架，提供服务发现、负载均衡、消息编码、RPC 通信等功能。它支持多种传输协议、编码格式和服务发现机制，是构建分布式系统的理想选择。</p>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get -u github.com/micro/go-micro/v2
+<span class="keyword">go</span> get -u github.com/micro/go-micro/v2/api</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"github.com/micro/go-micro/v2"</span>
+    proto <span class="string">"github.com/micro/go-micro/v2/examples/greeter/proto"</span>
+)
+
+<span class="keyword">type</span> Greeter <span class="keyword">struct</span> {}
+
+<span class="function">func</span> (g *Greeter) <span class="function">Hello</span>(ctx context.Context, req *proto.HelloRequest, rsp *proto.HelloResponse) <span class="keyword">error</span> {
+    rsp.Greeting = <span class="string">"Hello "</span> + req.Name
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建服务</span>
+    service := micro.<span class="function">NewService</span>(
+        micro.<span class="function">Name</span>(<span class="string">"greeter"</span>),
+        micro.<span class="function">Version</span>(<span class="string">"latest"</span>),
+    )
+    
+    <span class="comment">// 初始化服务</span>
+    service.<span class="function">Init</span>()
+    
+    <span class="comment">// 注册处理器</span>
+    proto.<span class="function">RegisterGreeterHandler</span>(service.<span class="function">Server</span>(), &Greeter{})
+    
+    <span class="comment">// 运行服务</span>
+    <span class="keyword">if</span> err := service.<span class="function">Run</span>(); err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(err)
+    }
+}</code></pre>
+            
+            <h3>服务发现</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    
+    <span class="string">"github.com/micro/go-micro/v2"</span>
+    <span class="string">"github.com/micro/go-micro/v2/client"</span>
+    <span class="string">"github.com/micro/go-micro/v2/registry"</span>
+    <span class="string">"github.com/micro/go-micro/v2/registry/etcd"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 使用 Etcd 作为注册中心</span>
+    reg := etcd.<span class="function">NewRegistry</span>(registry.<span class="function">Addrs</span>(<span class="string">"127.0.0.1:2379"</span>))
+    
+    <span class="comment">// 创建服务</span>
+    service := micro.<span class="function">NewService</span>(
+        micro.<span class="function">Registry</span>(reg),
+        micro.<span class="function">Name</span>(<span class="string">"greeter"</span>),
+    )
+    
+    service.<span class="function">Init</span>()
+    
+    <span class="comment">// 创建客户端</span>
+    cli := service.<span class="function">Client</span>()
+    
+    <span class="comment">// 调用服务</span>
+    rsp := &HelloResponse{}
+    err := cli.<span class="function">Call</span>(
+        context.<span class="function">Background</span>(),
+        client.NewRequest(<span class="string">"greeter"</span>, <span class="string">"Greeter.Hello"</span>, &HelloRequest{Name: <span class="string">"World"</span>}),
+        rsp,
+        client.<span class="function">WithRetries</span>(<span class="number">3</span>),
+        client.<span class="function">WithRequestTimeout</span>(time.Second * <span class="number">5</span>),
+    )
+    
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Response:"</span>, rsp.Greeting)
+}</code></pre>
+            
+            <h3>服务间通信</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"github.com/micro/go-micro/v2"</span>
+)
+
+<span class="comment">// 定义服务接口</span>
+<span class="keyword">type</span> UserService <span class="keyword">interface</span> {
+    <span class="function">GetUser</span>(ctx context.Context, req *GetUserRequest, rsp *GetUserResponse) <span class="keyword">error</span>
+}
+
+<span class="comment">// 服务 A：用户服务</span>
+<span class="keyword">type</span> UserHandler <span class="keyword">struct</span> {}
+
+<span class="function">func</span> (h *UserHandler) <span class="function">GetUser</span>(ctx context.Context, req *GetUserRequest, rsp *GetUserResponse) <span class="keyword">error</span> {
+    <span class="comment">// 获取用户信息</span>
+    rsp.User = &User{ID: req.Id, Name: <span class="string">"Alice"</span>}
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="comment">// 服务 B：订单服务</span>
+<span class="keyword">type</span> OrderHandler <span class="keyword">struct</span> {
+    userService UserService
+}
+
+<span class="function">func</span> (h *OrderHandler) <span class="function">CreateOrder</span>(ctx context.Context, req *CreateOrderRequest, rsp *CreateOrderResponse) <span class="keyword">error</span> {
+    <span class="comment">// 调用用户服务</span>
+    userReq := &GetUserRequest{Id: req.UserId}
+    userRsp := &GetUserResponse{}
+    err := h.userService.<span class="function">GetUser</span>(ctx, userReq, userRsp)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="comment">// 创建订单</span>
+    rsp.Order = &Order{ID: <span class="string">"1"</span>, User: userRsp.User}
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建服务</span>
+    service := micro.<span class="function">NewService</span>(
+        micro.<span class="function">Name</span>(<span class="string">"order"</span>),
+    )
+    
+    service.<span class="function">Init</span>()
+    
+    <span class="comment">// 创建用户服务客户端</span>
+    userService := micro.<span class="function">NewService</span>(
+        micro.<span class="function">Name</span>(<span class="string">"order"</span>),  <span class="comment">// 使用当前服务的客户端</span>
+    )
+    
+    <span class="comment">// 注册订单服务</span>
+    micro.<span class="function">RegisterHandler</span>(service.<span class="function">Server</span>(), &OrderHandler{
+        userService: userService.<span class="function">Client</span>(),
+    })
+    
+    service.<span class="function">Run</span>()
+}</code></pre>
+            
+            <h3>消息发布订阅</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    
+    <span class="string">"github.com/micro/go-micro/v2"</span>
+    <span class="string">"github.com/micro/go-micro/v2/broker"</span>
+    <span class="string">"github.com/micro/go-micro/v2/broker/nats"</span>
+)
+
+<span class="comment">// 发布者</span>
+<span class="function">func</span> <span class="function">publisher</span>() {
+    <span class="comment">// 创建 Broker</span>
+    b := nats.<span class="function">NewBroker</span>(broker.<span class="function">Addrs</span>(<span class="string">"127.0.0.1:4222"</span>))
+    
+    <span class="keyword">if</span> err := b.<span class="function">Connect</span>(); err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Broker connect error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="comment">// 发布消息</span>
+    msg := &broker.Message{
+        Header: <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>{
+            <span class="string">"Content-Type"</span>: <span class="string">"application/json"</span>,
+        },
+        Body: []<span class="keyword">byte</span>(<span class="string">`{"event":"user.created","user_id":"123"}`</span>),
+    }
+    
+    <span class="keyword">if</span> err := b.<span class="function">Publish</span>(<span class="string">"user.created"</span>, msg); err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Publish error:"</span>, err)
+    }
+}
+
+<span class="comment">// 订阅者</span>
+<span class="function">func</span> <span class="function">subscriber</span>() {
+    <span class="comment">// 创建服务</span>
+    service := micro.<span class="function">NewService</span>(
+        micro.<span class="function">Broker</span>(nats.<span class="function">NewBroker</span>(broker.<span class="function">Addrs</span>(<span class="string">"127.0.0.1:4222"</span>))),
+    )
+    
+    service.<span class="function">Init</span>()
+    
+    <span class="comment">// 订阅消息</span>
+    micro.<span class="function">RegisterSubscriber</span>(<span class="string">"user.created"</span>, service.<span class="function">Server</span>(), <span class="keyword">func</span>(ctx context.Context, msg *broker.Message) <span class="keyword">error</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"Received message: %s\n"</span>, string(msg.Body))
+        <span class="keyword">return</span> <span class="keyword">nil</span>
+    })
+    
+    service.<span class="function">Run</span>()
+}</code></pre>
+            
+            <h3>中间件</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    
+    <span class="string">"github.com/micro/go-micro/v2"</span>
+    <span class="string">"github.com/micro/go-micro/v2/server"</span>
+)
+
+<span class="comment">// 日志中间件</span>
+<span class="function">func</span> <span class="function">logWrapper</span>(fn server.HandlerFunc) server.HandlerFunc {
+    <span class="keyword">return</span> <span class="keyword">func</span>(ctx context.Context, req server.Request, rsp interface{}) <span class="keyword">error</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"[Request] %s %s\n"</span>, req.<span class="function">Method</span>(), req.<span class="function">Endpoint</span>())
+        err := fn(ctx, req, rsp)
+        fmt.<span class="function">Printf</span>(<span class="string">"[Response] %s\n"</span>, err)
+        <span class="keyword">return</span> err
+    }
+}
+
+<span class="comment">// 认证中间件</span>
+<span class="function">func</span> <span class="function">authWrapper</span>(fn server.HandlerFunc) server.HandlerFunc {
+    <span class="keyword">return</span> <span class="keyword">func</span>(ctx context.Context, req server.Request, rsp interface{}) <span class="keyword">error</span> {
+        <span class="comment">// 检查认证令牌</span>
+        token := req.<span class="function">Header</span>().<span class="function">Get</span>(<span class="string">"Authorization"</span>)
+        <span class="keyword">if</span> token == <span class="string">""</span> {
+            <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"Unauthorized"</span>)
+        }
+        
+        <span class="keyword">return</span> fn(ctx, req, rsp)
+    }
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建服务</span>
+    service := micro.<span class="function">NewService</span>(
+        micro.<span class="function">Name</span>(<span class="string">"greeter"</span>),
+        micro.<span class="function">WrapHandler</span>(logWrapper),
+        micro.<span class="function">WrapHandler</span>(authWrapper),
+    )
+    
+    service.<span class="function">Init</span>()
+    service.<span class="function">Run</span>()
+}</code></pre>
+            
+            
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excelize Excel - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+        <div class="content">
+            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
+            <h2 id="excelize">Excelize Excel</h2>
+            <p>Excelize 是一个用于处理 Microsoft Excel™（.xlsx）文件的 Go 语言库。它提供了丰富的功能来创建、读取、修改和写入 Excel 文件，支持复杂的格式设置、图表、图片、数据透视表等功能，是 Go 生态中最强大的 Excel 处理库之一。</p>
+            
+            <h3>核心特性</h3>
+            <ul>
+                <li><strong>读写 Excel</strong>：支持读取和写入 .xlsx 格式的 Excel 文件（97-2003 和 2007+）</li>
+                <li><strong>格式设置</strong>：支持单元格格式、字体、颜色、边框、对齐方式等</li>
+                <li><strong>图表支持</strong>：支持创建柱状图、折线图、饼图等多种图表类型</li>
+                <li><strong>图片插入</strong>：支持在 Excel 文件中插入图片和形状</li>
+                <li><strong>数据透视</strong>：支持创建和操作数据透视表</li>
+                <li><strong>公式计算</strong>：支持 Excel 公式和函数</li>
+                <li><strong>流式处理</strong>：支持流式读取大型 Excel 文件，降低内存占用</li>
+                <li><strong>模板支持</strong>：支持从模板创建新文件</li>
+            </ul>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get github.com/xuri/excelize/v2</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/xuri/excelize/v2"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建新的 Excel 文件</span>
+    f := excelize.<span class="function">NewFile</span>()
+    <span class="keyword">defer</span> <span class="function">func</span>() {
+        <span class="keyword">if</span> err := f.<span class="function">Close</span>(); err != <span class="keyword">nil</span> {
+            fmt.<span class="function">Println</span>(err)
+        }
+    }()
+    
+    <span class="comment">// 设置单元格值</span>
+    f.<span class="function">SetCellValue</span>(<span class="string">"Sheet1"</span>, <span class="string">"A1"</span>, <span class="string">"姓名"</span>)
+    f.<span class="function">SetCellValue</span>(<span class="string">"Sheet1"</span>, <span class="string">"B1"</span>, <span class="string">"年龄"</span>)
+    f.<span class="function">SetCellValue</span>(<span class="string">"Sheet1"</span>, <span class="string">"A2"</span>, <span class="string">"Alice"</span>)
+    f.<span class="function">SetCellValue</span>(<span class="string">"Sheet1"</span>, <span class="string">"B2"</span>, 30)
+    
+    <span class="comment">// 保存文件</span>
+    <span class="keyword">if</span> err := f.<span class="function">SaveAs</span>(<span class="string">"Book1.xlsx"</span>); err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(err)
+    }
+}</code></pre>
+            
+            <h3>高级用法</h3>
+            
+            <h4>1. 读取 Excel 文件</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/xuri/excelize/v2"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 打开现有文件</span>
+    f, err := excelize.<span class="function">OpenFile</span>(<span class="string">"Book1.xlsx"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(err)
+        <span class="keyword">return</span>
+    }
+    <span class="keyword">defer</span> <span class="function">func</span>() {
+        <span class="keyword">if</span> err := f.<span class="function">Close</span>(); err != <span class="keyword">nil</span> {
+            fmt.<span class="function">Println</span>(err)
+        }
+    }()
+    
+    <span class="comment">// 获取单元格值</span>
+    cell, _ := f.<span class="function">GetCellValue</span>(<span class="string">"Sheet1"</span>, <span class="string">"A2"</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"A2 的值:"</span>, cell)
+    
+    <span class="comment">// 获取所有行</span>
+    rows, _ := f.<span class="function">GetRows</span>(<span class="string">"Sheet1"</span>)
+    <span class="keyword">for</span> _, row := <span class="keyword">range</span> rows {
+        fmt.<span class="function">Println</span>(row)
+    }
+}</code></pre>
+            
+            <h4>2. 单元格格式设置</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/xuri/excelize/v2"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    f := excelize.<span class="function">NewFile</span>()
+    <span class="keyword">defer</span> f.<span class="function">Close</span>()
+    
+    <span class="comment">// 设置字体样式</span>
+    style, _ := f.<span class="function">NewStyle</span>(&excelize.Style{
+        Font: &excelize.Font{
+            Bold:   <span class="keyword">true</span>,
+            Italic: <span class="keyword">true</span>,
+            Family: <span class="string">"Arial"</span>,
+            Size:   14,
+            Color:  <span class="string">"#FF0000"</span>,
+        },
+    })
+    f.<span class="function">SetCellStyle</span>(<span class="string">"Sheet1"</span>, <span class="string">"A1"</span>, <span class="string">"A1"</span>, style)
+    
+    <span class="comment">// 设置边框</span>
+    borderStyle, _ := f.<span class="function">NewStyle</span>(&excelize.Style{
+        Border: []excelize.Border{
+            {Type: <span class="string">"left"</span>, Color: <span class="string">"#000000"</span>, Style: 1},
+            {Type: <span class="string">"top"</span>, Color: <span class="string">"#000000"</span>, Style: 1},
+            {Type: <span class="string">"bottom"</span>, Color: <span class="string">"#000000"</span>, Style: 1},
+            {Type: <span class="string">"right"</span>, Color: <span class="string">"#000000"</span>, Style: 1},
+        },
+    })
+    f.<span class="function">SetCellStyle</span>(<span class="string">"Sheet1"</span>, <span class="string">"A1"</span>, <span class="string">"C10"</span>, borderStyle)
+    
+    <span class="comment">// 设置背景颜色</span>
+    fillStyle, _ := f.<span class="function">NewStyle</span>(&excelize.Style{
+        Fill: excelize.Fill{
+            Type:    <span class="string">"pattern"</span>,
+            Color:   []<span class="keyword">string</span>{<span class="string">"#E0E0E0"</span>},
+            Pattern: 1,
+        },
+    })
+    f.<span class="function">SetCellStyle</span>(<span class="string">"Sheet1"</span>, <span class="string">"A1"</span>, <span class="string">"A1"</span>, fillStyle)
+    
+    f.<span class="function">SaveAs</span>(<span class="string">"styled.xlsx"</span>)
+}</code></pre>
+            
+            <h4>3. 创建图表</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/xuri/excelize/v2"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    f := excelize.<span class="function">NewFile</span>()
+    <span class="keyword">defer</span> f.<span class="function">Close</span>()
+    
+    <span class="comment">// 添加数据</span>
+    <span class="keyword">for</span> i, row := <span class="keyword">range</span> [][]<span class="keyword">interface</span>{}{
+        {<span class="string">"产品"</span>, <span class="string">"销售量"</span>},
+        {<span class="string">"A"</span>, 100},
+        {<span class="string">"B"</span>, 200},
+        {<span class="string">"C"</span>, 150},
+    } {
+        <span class="keyword">for</span> j, cell := <span class="keyword">range</span> row {
+            f.<span class="function">SetCellValue</span>(<span class="string">"Sheet1"</span>, 
+                fmt.<span class="function">Sprintf</span>(<span class="string">"%c%d"</span>, <span class="string">'A'</span>+j, i+1), cell)
+        }
+    }
+    
+    <span class="comment">// 创建柱状图</span>
+    <span class="keyword">if</span> err := f.<span class="function">AddChart</span>(<span class="string">"Sheet1"</span>, <span class="string">"E1"</span>, &excelize.Chart{
+        Type: excelize.<span class="function">Col</span>,
+        Series: []excelize.ChartSeries{
+            {
+                Name:       <span class="string">"Sheet1!$B$1"</span>,
+                Categories: <span class="string">"Sheet1!$A$2:$A$4"</span>,
+                Values:     <span class="string">"Sheet1!$B$2:$B$4"</span>,
+            },
+        },
+        Format: excelize.GraphicOptions{
+            ScaleX: 1,
+            ScaleY: 1,
+        },
+        Title: []excelize.ChartTitle{
+            {Text: <span class="string">"产品销售量柱状图"</span>},
+        },
+    }); err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(err)
+    }
+    
+    f.<span class="function">SaveAs</span>(<span class="string">"chart.xlsx"</span>)
+}</code></pre>
+            
+            <h4>4. 插入图片</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/xuri/excelize/v2"</span>
+    <span class="string">_ "image/jpeg"</span>
+    <span class="string">_ "image/png"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    f := excelize.<span class="function">NewFile</span>()
+    <span class="keyword">defer</span> f.<span class="function">Close</span>()
+    
+    <span class="comment">// 插入图片</span>
+    <span class="keyword">if</span> err := f.<span class="function">AddPicture</span>(<span class="string">"Sheet1"</span>, <span class="string">"A1"</span>, <span class="string">"image.png"</span>, 
+        &excelize.Picture{
+            Format:     excelize.<span class="function">PictureType</span>(<span class="string">"image/png"</span>),
+            Width:      200,
+            Height:     150,
+            PrintObj:   <span class="keyword">true</span>,
+            LockAspect: <span class="keyword">true</span>,
+        }); err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(err)
+    }
+    
+    f.<span class="function">SaveAs</span>(<span class="string">"image.xlsx"</span>)
+}</code></pre>
+            
+            <h4>5. 流式读取大型 Excel 文件</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/xuri/excelize/v2"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    f, err := excelize.<span class="function">OpenFile</span>(<span class="string">"large_file.xlsx"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(err)
+        <span class="keyword">return</span>
+    }
+    <span class="keyword">defer</span> f.<span class="function">Close</span>()
+    
+    <span class="comment">// 使用流式读取器</span>
+    rows, err := f.<span class="function">Rows</span>(<span class="string">"Sheet1"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(err)
+        <span class="keyword">return</span>
+    }
+    <span class="keyword">defer</span> rows.<span class="function">Close</span>()
+    
+    <span class="keyword">for</span> rows.<span class="function">Next</span>() {
+        row, err := rows.<span class="function">Columns</span>()
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            fmt.<span class="function">Println</span>(err)
+            <span class="keyword">continue</span>
+        }
+        fmt.<span class="function">Println</span>(row)
+    }
+}</code></pre>
+            
+            <h4>6. 使用公式和函数</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/xuri/excelize/v2"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    f := excelize.<span class="function">NewFile</span>()
+    <span class="keyword">defer</span> f.<span class="function">Close</span>()
+    
+    <span class="comment">// 设置数据</span>
+    f.<span class="function">SetCellValue</span>(<span class="string">"Sheet1"</span>, <span class="string">"A1"</span>, 10)
+    f.<span class="function">SetCellValue</span>(<span class="string">"Sheet1"</span>, <span class="string">"A2"</span>, 20)
+    f.<span class="function">SetCellValue</span>(<span class="string">"Sheet1"</span>, <span class="string">"A3"</span>, 30)
+    
+    <span class="comment">// 使用公式</span>
+    f.<span class="function">SetCellValue</span>(<span class="string">"Sheet1"</span>, <span class="string">"A4"</span>, <span class="string">"=SUM(A1:A3)"</span>)
+    f.<span class="function">SetCellValue</span>(<span class="string">"Sheet1"</span>, <span class="string">"A5"</span>, <span class="string">"=AVERAGE(A1:A3)"</span>)
+    f.<span class="function">SetCellValue</span>(<span class="string">"Sheet1"</span>, <span class="string">"A6"</span>, <span class="string">"=MAX(A1:A3)"</span>)
+    f.<span class="function">SetCellValue</span>(<span class="string">"Sheet1"</span>, <span class="string">"A7"</span>, <span class="string">"=MIN(A1:A3)"</span>)
+    
+    <span class="comment">// 计算公式结果</span>
+    result, _ := f.<span class="function">GetCellValue</span>(<span class="string">"Sheet1"</span>, <span class="string">"A4"</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"SUM 结果:"</span>, result)
+    
+    f.<span class="function">SaveAs</span>(<span class="string">"formula.xlsx"</span>)
+}</code></pre>
+            
+            <h3>最佳实践</h3>
+            
+            <h4>1. 内存管理</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/xuri/excelize/v2"</span>
+)
+
+<span class="function">func</span> <span class="function">processLargeExcel</span>(filePath <span class="keyword">string</span>) <span class="keyword">error</span> {
+    <span class="comment">// 使用流式读取避免内存溢出</span>
+    f, err := excelize.<span class="function">OpenFile</span>(filePath, excelize.Options{
+        Password: <span class="string">""</span>,
+    })
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> f.<span class="function">Close</span>()
+    
+    <span class="comment">// 使用 Rows 流式读取</span>
+    rows, err := f.<span class="function">Rows</span>(<span class="string">"Sheet1"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> rows.<span class="function">Close</span>()
+    
+    <span class="keyword">for</span> rows.<span class="function">Next</span>() {
+        row, _ := rows.<span class="function">Columns</span>()
+        <span class="comment">// 处理每一行</span>
+        _ = row
+    }
+    
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            
+            <h4>2. 错误处理和验证</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/xuri/excelize/v2"</span>
+)
+
+<span class="function">func</span> <span class="function">safeSetCellValue</span>(f *excelize.File, sheet, cell <span class="keyword">string</span>, value <span class="keyword">interface</span>{}) <span class="keyword">error</span> {
+    <span class="keyword">if</span> err := f.<span class="function">SetCellValue</span>(sheet, cell, value); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"设置单元格 %s 失败: %v"</span>, cell, err)
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">validateCellValue</span>(value <span class="keyword">interface</span>{}) <span class="keyword">error</span> {
+    <span class="keyword">switch</span> v := value.(<span class="keyword">type</span>) {
+    <span class="keyword">case</span> <span class="keyword">string</span>:
+        <span class="keyword">if</span> <span class="function">len</span>(v) > 32767 {
+            <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"字符串长度超过 Excel 限制"</span>)
+        }
+    <span class="keyword">case</span> <span class="keyword">int</span>, <span class="keyword">int64</span>:
+        <span class="keyword">if</span> v < -9007199254740992 || v > 9007199254740992 {
+            <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"数值超出 Excel 范围"</span>)
+        }
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            
+            <h4>3. 性能优化</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/xuri/excelize/v2"</span>
+)
+
+<span class="function">func</span> <span class="function">batchWriteCells</span>(f *excelize.File, sheet <span class="keyword">string</span>, data [][]<span class="keyword">interface</span>{}) <span class="keyword">error</span> {
+    <span class="comment">// 批量写入单元格，减少 I/O 操作</span>
+    <span class="keyword">for</span> i, row := <span class="keyword">range</span> data {
+        <span class="keyword">for</span> j, cell := <span class="keyword">range</span> row {
+            cellName, _ := excelize.<span class="function">CoordinatesToCellName</span>(j+1, i+1)
+            <span class="keyword">if</span> err := f.<span class="function">SetCellValue</span>(sheet, cellName, cell); err != <span class="keyword">nil</span> {
+                <span class="keyword">return</span> err
+            }
+        }
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">optimizeStyle</span>(f *excelize.File) {
+    <span class="comment">// 复用样式对象，减少内存分配</span>
+    headerStyle, _ := f.<span class="function">NewStyle</span>(&excelize.Style{
+        Font: &excelize.Font{Bold: <span class="keyword">true</span>},
+    })
+    
+    <span class="comment">// 应用样式到多个单元格</span>
+    f.<span class="function">SetCellStyle</span>(<span class="string">"Sheet1"</span>, <span class="string">"A1"</span>, <span class="string">"Z1"</span>, headerStyle)
+}</code></pre>
+            
+            <h4>4. 模板处理</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/xuri/excelize/v2"</span>
+)
+
+<span class="function">func</span> <span class="function">generateReportFromTemplate</span>(templatePath, outputPath <span class="keyword">string</span>, data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}) <span class="keyword">error</span> {
+    <span class="comment">// 从模板创建新文件</span>
+    f, err := excelize.<span class="function">OpenFile</span>(templatePath)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> f.<span class="function">Close</span>()
+    
+    <span class="comment">// 替换模板中的占位符</span>
+    <span class="keyword">for</span> key, value := <span class="keyword">range</span> data {
+        f.<span class="function">SetCellValue</span>(<span class="string">"Sheet1"</span>, key, value)
+    }
+    
+    <span class="comment">// 保存为新文件</span>
+    <span class="keyword">return</span> f.<span class="function">SaveAs</span>(outputPath)
+}</code></pre>
+            
+            <h4>5. 并发处理</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"sync"</span>
+    <span class="string">"github.com/xuri/excelize/v2"</span>
+)
+
+<span class="function">func</span> <span class="function">processMultipleSheets</span>(filePath <span class="keyword">string</span>) <span class="keyword">error</span> {
+    f, err := excelize.<span class="function">OpenFile</span>(filePath)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> f.<span class="function">Close</span>()
+    
+    sheets := f.<span class="function">GetSheetList</span>()
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="comment">// 并发处理多个工作表</span>
+    <span class="keyword">for</span> _, sheet := <span class="keyword">range</span> sheets {
+        wg.<span class="function">Add</span>(1)
+        <span class="keyword">go</span> <span class="function">func</span>(s <span class="keyword">string</span>) {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            <span class="comment">// 处理工作表</span>
+            _ = s
+        }(sheet)
+    }
+    
+    wg.<span class="function">Wait</span>()
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            
+            <h3>使用场景</h3>
+            <ul>
+                <li><strong>报表生成</strong>：生成业务报表、财务报表、销售报表等</li>
+                <li><strong>数据导出</strong>：将数据库数据导出为 Excel 文件</li>
+                <li><strong>数据导入</strong>：从 Excel 文件导入数据到数据库</li>
+                <li><strong>数据分析</strong>：读取 Excel 数据进行分析和处理</li>
+                <li><strong>模板填充</strong>：基于模板生成标准化文档</li>
+            </ul>
+            
+            <h3>注意事项</h3>
+            <ul>
+                <li>处理大型 Excel 文件时，建议使用流式读取避免内存溢出</li>
+                <li>注意 Excel 的单元格限制（字符串长度 32767 字符，数值范围等）</li>
+                <li>样式对象应该复用，避免重复创建</li>
+                <li>使用完毕后记得关闭文件，释放资源</li>
+                <li>在并发环境中使用时，注意线程安全问题</li>
+                <li>公式计算可能需要额外的性能开销</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>版本管理 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+                <div class="content">
+            <a href="modules.html" class="back-link">← 返回 modules</a>
+            <h2 id="version">版本控制</h2>
+            
+            <h3>语义化版本</h3>
+            <p>Go Module 使用语义化版本（Semantic Versioning）格式：<code>vMAJOR.MINOR.PATCH</code></p>
+            <ul>
+                <li><strong>MAJOR</strong>：不兼容的 API 变更</li>
+                <li><strong>MINOR</strong>：向后兼容的功能性新增</li>
+                <li><strong>PATCH</strong>：向后兼容的问题修正</li>
+            </ul>
+
+            <h3>版本选择规则</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/gin-gonic/gin"</span>
+)
+
+<span class="comment">// go.mod 中的依赖声明</span>
+<span class="comment">// require github.com/gin-gonic/gin v1.9.1</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    r := gin.<span class="function">Default</span>()
+    r.<span class="function">GET</span>(<span class="string">"/"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        c.<span class="function">JSON</span>(<span class="number">200</span>, gin.H{
+            <span class="string">"message"</span>: <span class="string">"Hello, World!"</span>,
+        })
+    })
+    r.<span class="function">Run</span>()
+}</code></pre>
+
+            <div class="note-box">
+                <h3>最小版本选择（MVS）</h3>
+                <p>Go Module 使用最小版本选择算法：</p>
+                <ul>
+                    <li>选择满足所有依赖要求的最小版本</li>
+                    <li>确保构建的可重现性</li>
+                    <li>避免依赖冲突</li>
+                </ul>
+                <pre><code><span class="comment"># 示例：如果 A 需要 v1.2.0，B 需要 v1.3.0</span>
+<span class="comment"># Go Module 会选择 v1.3.0（满足两者的最小版本）</span></code></pre>
+            
+        </div>
+    </div>
+</body>
+</html>

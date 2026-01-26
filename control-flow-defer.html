@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>defer 语句 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+                <div class="content">
+            <a href="control-flow.html" class="back-link">← 返回 control-flow</a>
+            <h2 id="defer">defer 语句</h2>
+            <p><code>defer</code> 语句用于延迟函数的执行，直到包含它的函数返回。常用于资源清理。</p>
+
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// defer 的执行顺序（后进先出）</span>
+    <span class="keyword">defer</span> fmt.<span class="function">Println</span>(<span class="string">"第一个 defer"</span>)
+    <span class="keyword">defer</span> fmt.<span class="function">Println</span>(<span class="string">"第二个 defer"</span>)
+    <span class="keyword">defer</span> fmt.<span class="function">Println</span>(<span class="string">"第三个 defer"</span>)
+
+    fmt.<span class="function">Println</span>(<span class="string">"主函数"</span>)
+
+    <span class="comment">// defer 用于资源清理</span>
+    <span class="function">processFile</span>()
+}
+
+<span class="function">func</span> <span class="function">processFile</span>() {
+    fmt.<span class="function">Println</span>(<span class="string">"\n打开文件..."</span>)
+    <span class="comment">// 假设打开了一个文件</span>
+    <span class="keyword">defer</span> fmt.<span class="function">Println</span>(<span class="string">"关闭文件"</span>)
+
+    fmt.<span class="function">Println</span>(<span class="string">"处理文件内容..."</span>)
+}</code></pre>
+
+            
+        </div>
+    </div>
+</body>
+</html>

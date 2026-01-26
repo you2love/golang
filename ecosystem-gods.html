@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoDS 数据结构 - Go 教程</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <!-- 导航栏将通过JavaScript动态加载 -->
+        </div>
+        
+        <div class="content">
+            <h1>GoDS 数据结构</h1>
+            
+            <p>GoDS（Go Data Structures）是一个纯 Go 语言实现的、高性能的开源数据结构和算法库。它提供了丰富的数据结构，如链表、栈、队列、集合、树、堆、哈希表等，以及多种算法实现。GoDS 的设计目标是提供与 Go 标准库兼容的 API，同时提供更好的性能和更丰富的功能。</p>
+            
+            <h2>核心特性</h2>
+            <ul>
+                <li><strong>丰富的数据结构</strong>：提供链表、栈、队列、集合、树、堆、哈希表等</li>
+                <li><strong>高性能</strong>：优化的实现，性能优于标准库</li>
+                <li><strong>内存高效</strong>：使用内存池和对象池减少内存分配</li>
+                <li><strong>并发安全</strong>：提供并发安全的数据结构实现</li>
+                <li><strong>序列化支持</strong>：支持 JSON、Gob 等序列化格式</li>
+                <li><strong>类型安全</strong>：使用泛型提供类型安全的 API</li>
+            </ul>
+            
+            <h2>安装</h2>
+            <pre><code><span class="keyword">go</span> get github.com/emirpasic/gods/v2</code></pre>
+            
+            <h2>快速开始</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/emirpasic/gods/v2/list"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建链表</span>
+    l := list.<span class="function">New</span>()
+    l.<span class="function">PushBack</span>(1)
+    l.<span class="function">PushBack</span>(2)
+    l.<span class="function">PushBack</span>(3)
+    
+    <span class="comment">// 遍历链表</span>
+    it := l.<span class="function">Front</span>()
+    <span class="keyword">for</span> it.<span class="function">Next</span>() {
+        fmt.<span class="function">Println</span>(it.<span class="function">Value</span>())
+    }
+}</code></pre>
+            
+            <h2>常用数据结构</h2>
+            
+            <h3>1. 链表（List）</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/emirpasic/gods/v2/list"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建链表</span>
+    l := list.<span class="function">New</span>()
+    
+    <span class="comment">// 添加元素</span>
+    l.<span class="function">PushBack</span>(1)
+    l.<span class="function">PushFront</span>(0)
+    l.<span class="function">PushBack</span>(2)
+    
+    <span class="comment">// 访问元素</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Front:"</span>, l.<span class="function">Front</span>().<span class="function">Value</span>())
+    fmt.<span class="function">Println</span>(<span class="string">"Back:"</span>, l.<span class="function">Back</span>().<span class="function">Value</span>())
+    
+    <span class="comment">// 移除元素</span>
+    l.<span class="function">Remove</span>(l.<span class="function">Front</span>())
+    
+    <span class="comment">// 遍历</span>
+    <span class="keyword">for</span> it := l.<span class="function">Front</span>(); it != <span class="keyword">nil</span>; it = it.<span class="function">Next</span>() {
+        fmt.<span class="function">Println</span>(it.<span class="function">Value</span>())
+    }
+}</code></pre>
+            
+            <h3>2. 栈（Stack）</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/emirpasic/gods/v2/stack"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建栈</span>
+    s := stack.<span class="function">New</span>()
+    
+    <span class="comment">// 入栈</span>
+    s.<span class="function">Push</span>(1)
+    s.<span class="function">Push</span>(2)
+    s.<span class="function">Push</span>(3)
+    
+    <span class="comment">// 查看栈顶</span>
+    <span class="keyword">if</span> top, ok := s.<span class="function">Peek</span>(); ok {
+        fmt.<span class="function">Println</span>(<span class="string">"Top:"</span>, top)
+    }
+    
+    <span class="comment">// 出栈</span>
+    <span class="keyword">if</span> value, ok := s.<span class="function">Pop</span>(); ok {
+        fmt.<span class="function">Println</span>(<span class="string">"Popped:"</span>, value)
+    }
+    
+    <span class="comment">// 检查栈是否为空</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Empty:"</span>, s.<span class="function">Empty</span>())
+}</code></pre>
+            
+            <h3>3. 队列（Queue）</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/emirpasic/gods/v2/queue"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建队列</span>
+    q := queue.<span class="function">New</span>()
+    
+    <span class="comment">// 入队</span>
+    q.<span class="function">Enqueue</span>(1)
+    q.<span class="function">Enqueue</span>(2)
+    q.<span class="function">Enqueue</span>(3)
+    
+    <span class="comment">// 查看队首</span>
+    <span class="keyword">if</span> front, ok := q.<span class="function">Peek</span>(); ok {
+        fmt.<span class="function">Println</span>(<span class="string">"Front:"</span>, front)
+    }
+    
+    <span class="comment">// 出队</span>
+    <span class="keyword">if</span> value, ok := q.<span class="function">Dequeue</span>(); ok {
+        fmt.<span class="function">Println</span>(<span class="string">"Dequeued:"</span>, value)
+    }
+    
+    <span class="comment">// 检查队列大小</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Size:"</span>, q.<span class="function">Size</span>())
+}</code></pre>
+            
+            <h3>4. 集合（Set）</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/emirpasic/gods/v2/hashset"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建集合</span>
+    set := hashset.<span class="function">New</span>()
+    
+    <span class="comment">// 添加元素</span>
+    set.<span class="function">Add</span>(1)
+    set.<span class="function">Add</span>(2)
+    set.<span class="function">Add</span>(3)
+    
+    <span class="comment">// 检查元素是否存在</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Contains 2:"</span>, set.<span class="function">Contains</span>(2))
+    
+    <span class="comment">// 移除元素</span>
+    set.<span class="function">Remove</span>(2)
+    
+    <span class="comment">// 遍历集合</span>
+    set.<span class="function">Each</span>(<span class="function">func</span>(value <span class="keyword">interface</span>{}) <span class="keyword">bool</span> {
+        fmt.<span class="function">Println</span>(value)
+        <span class="keyword">return</span> <span class="keyword">true</span>
+    })
+}</code></pre>
+            
+            <h3>5. 树（Tree）</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/emirpasic/gods/v2/treemap"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建树形映射</span>
+    tree := treemap.<span class="function">NewWithStringComparator</span>()
+    
+    <span class="comment">// 添加键值对</span>
+    tree.<span class="function">Put</span>(<span class="string">"a"</span>, 1)
+    tree.<span class="function">Put</span>(<span class="string">"b"</span>, 2)
+    tree.<span class="function">Put</span>(<span class="string">"c"</span>, 3)
+    
+    <span class="comment">// 获取值</span>
+    <span class="keyword">if</span> value, ok := tree.<span class="function">Get</span>(<span class="string">"b"</span>); ok {
+        fmt.<span class="function">Println</span>(<span class="string">"Value for 'b':"</span>, value)
+    }
+    
+    <span class="comment">// 遍历树</span>
+    it := tree.<span class="function">Iterator</span>()
+    <span class="keyword">for</span> it.<span class="function">Begin</span>(); it.<span class="function">End</span>(); it.<span class="function">Next</span>() {
+        key, value := it.<span class="function">Key</span>(), it.<span class="function">Value</span>()
+        fmt.<span class="function">Printf</span>(<span class="string">"%s: %v\n"</span>, key, value)
+    }
+}</code></pre>
+            
+            <h3>6. 堆（Heap）</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"container/heap"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="keyword">type</span> IntHeap []<span class="keyword">int</span>
+
+<span class="function">func</span> (h IntHeap) <span class="function">Len</span>() <span class="keyword">int</span>           { <span class="keyword">return</span> <span class="function">len</span>(h) }
+<span class="function">func</span> (h IntHeap) <span class="function">Less</span>(i, j <span class="keyword">int</span>) <span class="keyword">bool</span> { <span class="keyword">return</span> h[i] &lt; h[j] }
+<span class="function">func</span> (h IntHeap) <span class="function">Swap</span>(i, j <span class="keyword">int</span>)      { h[i], h[j] = h[j], h[i] }
+<span class="function">func</span> (h *IntHeap) <span class="function">Push</span>(x <span class="keyword">interface</span>{})     { *h = <span class="function">append</span>(*h, x.(<span class="keyword">int</span>)) }
+<span class="function">func</span> (h *IntHeap) <span class="function">Pop</span>() <span class="keyword">interface</span>{} {
+    old := *h
+    n := <span class="function">len</span>(old)
+    x := old[n-1]
+    *h = old[0 : n-1]
+    <span class="keyword">return</span> x
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    h := &amp;IntHeap{3, 1, 4, 1, 5, 9}
+    heap.<span class="function">Init</span>(h)
+    
+    <span class="comment">// 弹出最小值</span>
+    <span class="keyword">for</span> h.<span class="function">Len</span>() &gt; 0 {
+        fmt.<span class="function">Println</span>(heap.<span class="function">Pop</span>(h))
+    }
+}</code></pre>
+            
+            <h2>高级功能</h2>
+            
+            <h3>1. 并发安全的数据结构</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+    <span class="string">"github.com/emirpasic/gods/v2/list"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建并发安全的链表</span>
+    l := list.<span class="function">New</span>()
+    <span class="keyword">var</span> mu sync.Mutex
+    
+    <span class="comment">// 并发操作</span>
+    <span class="keyword">for</span> i := 0; i &lt; 10; i++ {
+        <span class="keyword">go</span> <span class="function">func</span>(n <span class="keyword">int</span>) {
+            mu.<span class="function">Lock</span>()
+            <span class="keyword">defer</span> mu.<span class="function">Unlock</span>()
+            l.<span class="function">PushBack</span>(n)
+        }(i)
+    }
+}</code></pre>
+            
+            <h3>2. 自定义比较器</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/emirpasic/gods/v2/treemap"</span>
+    <span class="string">"github.com/emirpasic/gods/v2/utils"</span>
+)
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    Name <span class="keyword">string</span>
+    Age  <span class="keyword">int</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 使用自定义比较器创建树</span>
+    tree := treemap.<span class="function">NewWith</span>(utils.<span class="function">Comparator</span>(<span class="keyword">func</span>(a, b <span class="keyword">interface</span>{}) <span class="keyword">int</span> {
+        <span class="keyword">return</span> a.(<span class="keyword">int</span>) - b.(<span class="keyword">int</span>)
+    }))
+    
+    tree.<span class="function">Put</span>(10, <span class="string">"ten"</span>)
+    tree.<span class="function">Put</span>(5, <span class="string">"five"</span>)
+    tree.<span class="function">Put</span>(15, <span class="string">"fifteen"</span>)
+    
+    <span class="comment">// 遍历树（按键排序）</span>
+    it := tree.<span class="function">Iterator</span>()
+    <span class="keyword">for</span> it.<span class="function">Begin</span>(); it.<span class="function">End</span>(); it.<span class="function">Next</span>() {
+        key, value := it.<span class="function">Key</span>(), it.<span class="function">Value</span>()
+        fmt.<span class="function">Printf</span>(<span class="string">"%d: %v\n"</span>, key, value)
+    }
+}</code></pre>
+            
+            <h3>3. 序列化</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/emirpasic/gods/v2/list"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    l := list.<span class="function">New</span>()
+    l.<span class="function">PushBack</span>(1)
+    l.<span class="function">PushBack</span>(2)
+    l.<span class="function">PushBack</span>(3)
+    
+    <span class="comment">// 转换为切片</span>
+    values := l.<span class="function">Values</span>()
+    
+    <span class="comment">// JSON 序列化</span>
+    data, _ := json.<span class="function">Marshal</span>(values)
+    fmt.<span class="function">Println</span>(<span class="function">String</span>(data))
+}</code></pre>
+            
+            <h2>最佳实践</h2>
+            
+            <h3>1. 选择合适的数据结构</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/emirpasic/gods/v2/list"</span>
+    <span class="string">"github.com/emirpasic/gods/v2/hashmap"</span>
+    <span class="string">"github.com/emirpasic/gods/v2/hashset"</span>
+)
+
+<span class="function">func</span> <span class="function">chooseDataStructure</span>() {
+    <span class="comment">// 频繁的插入和删除 - 使用链表</span>
+    l := list.<span class="function">New</span>()
+    
+    <span class="comment">// 需要快速查找 - 使用哈希表</span>
+    m := hashmap.<span class="function">New</span>()
+    
+    <span class="comment">// 需要唯一元素 - 使用集合</span>
+    s := hashset.<span class="function">New</span>()
+    
+    <span class="comment">// 需要排序 - 使用树</span>
+}</code></pre>
+            
+            <h3>2. 内存管理</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/emirpasic/gods/v2/list"</span>
+)
+
+<span class="function">func</span> <span class="function">manageMemory</span>() {
+    l := list.<span class="function">New</span>()
+    
+    <span class="comment">// 及时清理不需要的元素</span>
+    <span class="keyword">for</span> l.<span class="function">Size</span>() &gt; 1000 {
+        l.<span class="function">Remove</span>(l.<span class="function">Front</span>())
+    }
+    
+    <span class="comment">// 使用迭代器避免创建不必要的切片</span>
+    <span class="keyword">for</span> it := l.<span class="function">Front</span>(); it != <span class="keyword">nil</span>; it = it.<span class="function">Next</span>() {
+        _ = it.<span class="function">Value</span>()
+    }
+}</code></pre>
+            
+            <h3>3. 性能优化</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/emirpasic/gods/v2/hashmap"</span>
+)
+
+<span class="function">func</span> <span class="function">optimizePerformance</span>() {
+    <span class="comment">// 预分配容量</span>
+    m := hashmap.<span class="function">New</span>()
+    m.<span class="function">Resize</span>(1000)
+    
+    <span class="comment">// 批量操作</span>
+    <span class="keyword">for</span> i := 0; i &lt; 1000; i++ {
+        m.<span class="function">Put</span>(i, i*2)
+    }
+}</code></pre>
+            
+            <h3>4. 迭代器使用</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/emirpasic/gods/v2/list"</span>
+)
+
+<span class="function">func</span> <span class="function">useIterator</span>() {
+    l := list.<span class="function">New</span>()
+    l.<span class="function">PushBack</span>(1)
+    l.<span class="function">PushBack</span>(2)
+    l.<span class="function">PushBack</span>(3)
+    
+    <span class="comment">// 正向迭代</span>
+    <span class="keyword">for</span> it := l.<span class="function">Front</span>(); it != <span class="keyword">nil</span>; it = it.<span class="function">Next</span>() {
+        _ = it.<span class="function">Value</span>()
+    }
+    
+    <span class="comment">// 反向迭代</span>
+    <span class="keyword">for</span> it := l.<span class="function">Back</span>(); it != <span class="keyword">nil</span>; it = it.<span class="function">Prev</span>() {
+        _ = it.<span class="function">Value</span>()
+    }
+}</code></pre>
+            
+            <h3>5. 与标准库对比</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"container/list"</span>
+    <span class="string">"github.com/emirpasic/gods/v2/list"</span>
+)
+
+<span class="function">func</span> <span class="function">compareWithStdLib</span>() {
+    <span class="comment">// 标准库链表</span>
+    stdList := list.<span class="function">New</span>()
+    stdList.<span class="function">PushBack</span>(1)
+    
+    <span class="comment">// GoDS 链表</span>
+    godsList := list.<span class="function">New</span>()
+    godsList.<span class="function">PushBack</span>(1)
+    
+    <span class="comment">// GoDS 提供了更丰富的功能</span>
+    <span class="comment">// 如：Values()、Each()、Select() 等</span>
+}</code></pre>
+            
+            <h2>使用场景</h2>
+            <ul>
+                <li><strong>算法实现</strong>：实现各种算法如排序、搜索、图算法</li>
+                <li><strong>缓存系统</strong>：使用 LRU 缓存等数据结构</li>
+                <li><strong>任务队列</strong>：使用队列和栈管理任务</li>
+                <li><strong>数据去重</strong>：使用集合进行数据去重</li>
+                <li><strong>事件处理</strong>：使用队列处理事件流</li>
+            </ul>
+            
+            <h2>注意事项</h2>
+            <ul>
+                <li>根据使用场景选择合适的数据结构</li>
+                <li>注意内存使用，特别是对于大型数据集</li>
+                <li>并发环境中使用适当的同步机制</li>
+                <li>GoDS 的 API 与标准库不同，需要适应</li>
+                <li>定期检查性能，确保选择的数据结构合适</li>
+                <li>注意迭代器的使用，避免在迭代时修改数据结构</li>
+            </ul>
+        </div>
+    </div>
+    
+    &lt;script src="navigation.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;

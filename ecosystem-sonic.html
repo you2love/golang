@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonic JSON - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+        <div class="content">
+            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
+            <h2 id="sonic">Sonic JSON</h2>
+            <p>Sonic 是字节跳动开源的高性能 JSON 库，基于 SIMD 指令集优化，在 Go 语言中提供了比标准库 `encoding/json` 更快的 JSON 序列化和反序列化性能。它完全兼容标准库 API，可以作为标准库的替代品使用。</p>
+            
+            <h3>核心特性</h3>
+            <ul>
+                <li><strong>极致性能</strong>：基于 SIMD 指令集优化，序列化和反序列化性能比标准库快 2-10 倍</li>
+                <li><strong>完全兼容</strong>：100% 兼容标准库 `encoding/json` 的 API，无需修改现有代码</li>
+                <li><strong>零依赖</strong>：纯 Go 实现，无 CGO 依赖，跨平台支持</li>
+                <li><strong>内存安全</strong>：使用安全的内存管理，避免内存泄漏</li>
+                <li><strong>类型推断</strong>：支持自动类型推断，减少代码量</li>
+            </ul>
+            
+            <h3>性能对比</h3>
+            <div class="example-box">
+                <p>与标准库和其他 JSON 库的性能对比（数据来源：Sonic 官方基准测试）：</p>
+                <table>
+                    <tr>
+                        <th>库</th>
+                        <th>序列化</th>
+                        <th>反序列化</th>
+                    </tr>
+                    <tr>
+                        <td>encoding/json</td>
+                        <td>1x (基准)</td>
+                        <td>1x (基准)</td>
+                    </tr>
+                    <tr>
+                        <td>json-iterator/go</td>
+                        <td>1.5x</td>
+                        <td>1.8x</td>
+                    </tr>
+                    <tr>
+                        <td>easyjson</td>
+                        <td>2.5x</td>
+                        <td>3.0x</td>
+                    </tr>
+                    <tr>
+                        <td><strong>sonic</strong></td>
+                        <td><strong>3.5x</strong></td>
+                        <td><strong>4.2x</strong></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get -u github.com/bytedance/sonic</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/bytedance/sonic"</span>
+)
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    ID    <span class="keyword">int</span>    <span class="string">`json:"id"`</span>
+    Name  <span class="keyword">string</span> <span class="string">`json:"name"`</span>
+    Email <span class="keyword">string</span> <span class="string">`json:"email"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 序列化</span>
+    user := User{ID: 1, Name: <span class="string">"Alice"</span>, Email: <span class="string">"alice@example.com"</span>}
+    data, err := sonic.<span class="function">Marshal</span>(user)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    fmt.<span class="function">Println</span>(<span class="keyword">string</span>(data))
+    <span class="comment">// 输出: {"id":1,"name":"Alice","email":"alice@example.com"}</span>
+    
+    <span class="comment">// 反序列化</span>
+    <span class="keyword">var</span> decoded User
+    err = sonic.<span class="function">Unmarshal</span>(data, &decoded)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    fmt.<span class="function">Printf</span>(<span class="string">"%+v\n"</span>, decoded)
+    <span class="comment">// 输出: {ID:1 Name:Alice Email:alice@example.com}</span>
+}</code></pre>
+            
+            <h3>高级用法</h3>
+            
+            <h4>1. 使用配置选项</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/bytedance/sonic"</span>
+    <span class="string">"github.com/bytedance/sonic/option"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建自定义配置</span>
+    cfg := sonic.<span class="function">Config</span>{
+        EscapeHTML: <span class="keyword">false</span>,
+        SortKeys:   <span class="keyword">true</span>,
+    }
+    
+    api := sonic.<span class="function">ConfigStd</span>(cfg)
+    
+    user := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}{
+        <span class="string">"name"</span>:  <span class="string">"Bob"</span>,
+        <span class="string">"email"</span>: <span class="string">"bob@example.com"</span>,
+    }
+    
+    data, _ := api.<span class="function">Marshal</span>(user)
+    fmt.<span class="function">Println</span>(<span class="keyword">string</span>(data))
+}</code></pre>
+            
+            <h4>2. 流式处理</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"bytes"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/bytedance/sonic"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 使用 Encoder 进行流式序列化</span>
+    <span class="keyword">var</span> buf bytes.Buffer
+    encoder := sonic.<span class="function">ConfigDefault</span>().<span class="function">NewEncoder</span>(&buf)
+    
+    users := []<span class="keyword">string</span>{<span class="string">"Alice"</span>, <span class="string">"Bob"</span>, <span class="string">"Charlie"</span>}
+    <span class="keyword">for</span> _, name := <span class="keyword">range</span> users {
+        encoder.<span class="function">Encode</span>(name)
+    }
+    
+    fmt.<span class="function">Println</span>(buf.<span class="function">String</span>())
+}</code></pre>
+            
+            <h4>3. 使用 Node API 处理动态 JSON</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/bytedance/sonic"</span>
+    <span class="string">"github.com/bytedance/sonic/ast"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    jsonStr := <span class="string">`{"name":"Alice","age":30,"email":"alice@example.com"}`</span>
+    
+    <span class="comment">// 解析为 Node</span>
+    node, err := ast.<span class="function">NewNode</span>(jsonStr)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    
+    <span class="comment">// 访问字段</span>
+    name, _ := node.<span class="function">GetByPath</span>(<span class="string">"name"</span>).<span class="function">String</span>()
+    age, _ := node.<span class="function">GetByPath</span>(<span class="string">"age"</span>).<span class="function">Int64</span>()
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Name: %s, Age: %d\n"</span>, name, age)
+    
+    <span class="comment">// 修改字段</span>
+    node.<span class="function">SetByPath</span>(<span class="string">"age"</span>, 31)
+    
+    <span class="comment">// 转换回 JSON</span>
+    modified, _ := node.<span class="function">MarshalJSON</span>()
+    fmt.<span class="function">Println</span>(<span class="keyword">string</span>(modified))
+}</code></pre>
+            
+            <h4>4. 与 HTTP 服务器集成</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json"</span>
+    <span class="string">"net/http"</span>
+    <span class="string">"github.com/bytedance/sonic"</span>
+)
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    ID   <span class="keyword">int</span>    <span class="string">`json:"id"`</span>
+    Name <span class="keyword">string</span> <span class="string">`json:"name"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    http.<span class="function">HandleFunc</span>(<span class="string">"/user"</span>, <span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) {
+        <span class="keyword">if</span> r.Method == <span class="string">"POST"</span> {
+            <span class="keyword">var</span> user User
+            <span class="comment">// 使用 Sonic 解析 JSON</span>
+            err := sonic.<span class="function">Unmarshal</span>([]<span class="keyword">byte</span>(r.FormValue(<span class="string">"data"</span>)), &user)
+            <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+                http.<span class="function">Error</span>(w, err.<span class="function">Error</span>(), http.StatusBadRequest)
+                <span class="keyword">return</span>
+            }
+            
+            <span class="comment">// 使用 Sonic 序列化响应</span>
+            data, _ := sonic.<span class="function">Marshal</span>(user)
+            w.<span class="function">Header</span>().<span class="function">Set</span>(<span class="string">"Content-Type"</span>, <span class="string">"application/json"</span>)
+            w.<span class="function">Write</span>(data)
+        }
+    })
+    
+    http.<span class="function">ListenAndServe</span>(<span class="string">":8080"</span>, <span class="keyword">nil</span>)
+}</code></pre>
+            
+            <h3>最佳实践</h3>
+            
+            <h4>1. 性能优化</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/bytedance/sonic"</span>
+    <span class="string">"github.com/bytedance/sonic/option"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 使用预编译的 API 提升性能</span>
+    api := sonic.<span class="function">ConfigFastest</span>()
+    
+    <span class="comment">// 对于频繁使用的类型，使用预编译</span>
+    type User <span class="keyword">struct</span> {
+        Name <span class="keyword">string</span> <span class="string">`json:"name"`</span>
+        Age  <span class="keyword">int</span>    <span class="string">`json:"age"`</span>
+    }
+    
+    <span class="comment">// 预编译类型的序列化器</span>
+    marshaler, _ := api.<span class="function">NewMarshaler</span>(User{})
+    
+    user := User{Name: <span class="string">"Alice"</span>, Age: 30}
+    data, _ := marshaler.<span class="function">Marshal</span>(user)
+}</code></pre>
+            
+            <h4>2. 错误处理</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/bytedance/sonic"</span>
+)
+
+<span class="function">func</span> <span class="function">safeUnmarshal</span>(data []<span class="keyword">byte</span>, v <span class="keyword">interface</span>{}) <span class="keyword">error</span> {
+    <span class="keyword">if</span> err := sonic.<span class="function">Unmarshal</span>(data, v); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"JSON 解析失败: %w"</span>, err)
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">safeMarshal</span>(v <span class="keyword">interface</span>{}) ([]<span class="keyword">byte</span>, <span class="keyword">error</span>) {
+    data, err := sonic.<span class="function">Marshal</span>(v)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, fmt.<span class="function">Errorf</span>(<span class="string">"JSON 序列化失败: %w"</span>, err)
+    }
+    <span class="keyword">return</span> data, <span class="keyword">nil</span>
+}</code></pre>
+            
+            <h4>3. 兼容性处理</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json"</span>
+    <span class="string">"github.com/bytedance/sonic"</span>
+)
+
+<span class="keyword">type</span> JSONMarshaler <span class="keyword">interface</span> {
+    <span class="function">MarshalJSON</span>() ([]<span class="keyword">byte</span>, <span class="keyword">error</span>)
+}
+
+<span class="keyword">type</span> JSONUnmarshaler <span class="keyword">interface</span> {
+    <span class="function">UnmarshalJSON</span>([]<span class="keyword">byte</span>) <span class="keyword">error</span>
+}
+
+<span class="comment">// Sonic 完全支持标准库的 MarshalJSON 和 UnmarshalJSON 接口</span>
+<span class="keyword">type</span> CustomType <span class="keyword">struct</span> {
+    Value <span class="keyword">string</span>
+}
+
+<span class="function">func</span> (c *CustomType) <span class="function">MarshalJSON</span>() ([]<span class="keyword">byte</span>, <span class="keyword">error</span>) {
+    <span class="keyword">return</span> json.<span class="function">Marshal</span>(c.Value)
+}
+
+<span class="function">func</span> (c *CustomType) <span class="function">UnmarshalJSON</span>(data []<span class="keyword">byte</span>) <span class="keyword">error</span> {
+    <span class="keyword">return</span> json.<span class="function">Unmarshal</span>(data, &c.Value)
+}</code></pre>
+            
+            <h3>使用场景</h3>
+            <ul>
+                <li><strong>高性能 API 服务</strong>：需要处理大量 JSON 请求和响应的 Web 服务</li>
+                <li><strong>微服务架构</strong>：服务间通信使用 JSON 协议的场景</li>
+                <li><strong>数据处理管道</strong>：需要快速解析和生成 JSON 数据的数据处理流程</li>
+                <li><strong>实时系统</strong>：对性能要求极高的实时数据处理系统</li>
+                <li><strong>大数据处理</strong>：需要处理海量 JSON 数据的大数据应用</li>
+            </ul>
+            
+            <h3>注意事项</h3>
+            <ul>
+                <li>Sonic 在某些特殊情况下可能与标准库的行为有细微差异</li>
+                <li>对于非常复杂的嵌套结构，建议进行充分的测试</li>
+                <li>在生产环境使用前，建议进行性能基准测试</li>
+                <li>Sonic 需要 Go 1.16+ 版本支持</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

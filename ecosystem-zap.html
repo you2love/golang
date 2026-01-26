@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zap 日志 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+                <div class="content">
+            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
+            <h2 id="zap">Zap 日志</h2>
+            
+            <h3>简介</h3>
+            <p>Zap 是 Uber 开发的高性能、结构化日志库，专为 Go 语言设计。它提供了零内存分配的日志记录和结构化日志支持，性能远超标准库的 log 包和其他日志库。</p>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get -u go.uber.org/zap
+<span class="keyword">go</span> get -u go.uber.org/zap/zapcore</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"go.uber.org/zap"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建开发环境 logger</span>
+    logger, _ := zap.<span class="function">NewDevelopment</span>()
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    <span class="comment">// 记录日志</span>
+    logger.<span class="function">Info</span>(<span class="string">"Hello, World!"</span>)
+    logger.<span class="function">Debug</span>(<span class="string">"Debug message"</span>)
+    logger.<span class="function">Warn</span>(<span class="string">"Warning message"</span>)
+    logger.<span class="function">Error</span>(<span class="string">"Error message"</span>)
+}</code></pre>
+            
+            <h3>生产环境 Logger</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"go.uber.org/zap"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建生产环境 logger</span>
+    logger, _ := zap.<span class="function">NewProduction</span>()
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    <span class="comment">// 记录日志</span>
+    logger.<span class="function">Info</span>(<span class="string">"Server started"</span>,
+        zap.<span class="function">String</span>(<span class="string">"host"</span>, <span class="string">"localhost"</span>),
+        zap.<span class="function">Int</span>(<span class="string">"port"</span>, <span class="number">8080</span>),
+    )
+}</code></pre>
+            
+            <h3>自定义 Logger</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"os"</span>
+    
+    <span class="string">"go.uber.org/zap"</span>
+    <span class="string">"go.uber.org/zap/zapcore"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 自定义配置</span>
+    config := zap.Config{
+        Level:            zap.NewAtomicLevelAt(zapcore.InfoLevel),
+        Development:      <span class="keyword">false</span>,
+        Encoding:         <span class="string">"json"</span>,
+        EncoderConfig: zapcore.EncoderConfig{
+            TimeKey:        <span class="string">"timestamp"</span>,
+            LevelKey:       <span class="string">"level"</span>,
+            NameKey:        <span class="string">"logger"</span>,
+            CallerKey:      <span class="string">"caller"</span>,
+            MessageKey:     <span class="string">"msg"</span>,
+            StacktraceKey:  <span class="string">"stacktrace"</span>,
+            LineEnding:     zapcore.DefaultLineEnding,
+            EncodeLevel:    zapcore.LowercaseLevelEncoder,
+            EncodeTime:     zapcore.ISO8601TimeEncoder,
+            EncodeDuration: zapcore.SecondsDurationEncoder,
+            EncodeCaller:   zapcore.ShortCallerEncoder,
+        },
+        OutputPaths:      []<span class="keyword">string</span>{<span class="string">"stdout"</span>},
+        ErrorOutputPaths: []<span class="keyword">string</span>{<span class="string">"stderr"</span>},
+    }
+    
+    logger, _ := config.<span class="function">Build</span>()
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    logger.<span class="function">Info</span>(<span class="string">"Custom logger initialized"</span>)
+}</code></pre>
+            
+            <h3>结构化日志</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"go.uber.org/zap"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    logger, _ := zap.<span class="function">NewProduction</span>()
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    <span class="comment">// 添加字段</span>
+    logger.<span class="function">Info</span>(<span class="string">"User logged in"</span>,
+        zap.<span class="function">String</span>(<span class="string">"user_id"</span>, <span class="string">"123"</span>),
+        zap.<span class="function">String</span>(<span class="string">"username"</span>, <span class="string">"alice"</span>),
+        zap.<span class="function">String</span>(<span class="string">"ip"</span>, <span class="string">"192.168.1.1"</span>),
+    )
+    
+    <span class="comment">// 使用结构化对象</span>
+    <span class="keyword">type</span> User <span class="keyword">struct</span> {
+        ID    <span class="keyword">string</span>
+        Name  <span class="keyword">string</span>
+        Email <span class="keyword">string</span>
+    }
+    
+    user := User{ID: <span class="string">"123"</span>, Name: <span class="string">"Alice"</span>, Email: <span class="string">"alice@example.com"</span>}
+    logger.<span class="function">Info</span>(<span class="string">"User created"</span>, zap.<span class="function">Any</span>(<span class="string">"user"</span>, user))
+}</code></pre>
+            
+            <h3>日志级别</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"go.uber.org/zap"</span>
+    <span class="string">"go.uber.org/zap/zapcore"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 设置日志级别</span>
+    config := zap.NewProductionConfig()
+    config.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
+    
+    logger, _ := config.<span class="function">Build</span>(zap.<span class="function">AddCaller</span>())
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    <span class="comment">// 不同级别的日志</span>
+    logger.<span class="function">Debug</span>(<span class="string">"Debug information"</span>)
+    logger.<span class="function">Info</span>(<span class="string">"Information"</span>)
+    logger.<span class="function">Warn</span>(<span class="string">"Warning"</span>)
+    logger.<span class="function">Error</span>(<span class="string">"Error occurred"</span>)
+    
+    <span class="comment">// Fatal 会调用 os.Exit(1)</span>
+    <span class="comment">// logger.Fatal("Fatal error")</span>
+    
+    <span class="comment">// Panic 会调用 panic()</span>
+    <span class="comment">// logger.Panic("Panic situation")</span>
+}</code></pre>
+            
+            <h3>输出到文件</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"go.uber.org/zap"</span>
+    <span class="string">"go.uber.org/zap/zapcore"</span>
+    <span class="string">"gopkg.in/natefinch/lumberjack.v2"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 日志轮转配置</span>
+    writer := &lumberjack.Logger{
+        Filename:   <span class="string">"logs/app.log"</span>,
+        MaxSize:    <span class="number">100</span>, <span class="comment">// MB</span>
+        MaxBackups: <span class="number">3</span>,
+        MaxAge:     <span class="number">28</span>,   <span class="comment">// days</span>
+        Compress:   <span class="keyword">true</span>,
+    }
+    
+    <span class="comment">// 创建 core</span>
+    core := zapcore.<span class="function">NewCore</span>(
+        zapcore.<span class="function">NewJSONEncoder</span>(zap.NewProductionEncoderConfig()),
+        zapcore.<span class="function">AddSync</span>(writer),
+        zapcore.InfoLevel,
+    )
+    
+    logger := zap.<span class="function">New</span>(core, zap.<span class="function">AddCaller</span>())
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    logger.<span class="function">Info</span>(<span class="string">"Logging to file"</span>)
+}</code></pre>
+            
+            <h3>同时输出到多个地方</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"os"</span>
+    <span class="string">"go.uber.org/zap"</span>
+    <span class="string">"go.uber.org/zap/zapcore"</span>
+    <span class="string">"gopkg.in/natefinch/lumberjack.v2"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 文件输出</span>
+    fileWriter := &lumberjack.Logger{
+        Filename:   <span class="string">"logs/app.log"</span>,
+        MaxSize:    <span class="number">100</span>,
+        MaxBackups: <span class="number">3</span>,
+        MaxAge:     <span class="number">28</span>,
+        Compress:   <span class="keyword">true</span>,
+    }
+    
+    <span class="comment">// 控制台输出</span>
+    consoleWriter := zapcore.<span class="function">AddSync</span>(os.Stdout)
+    
+    <span class="comment">// 创建 encoder</span>
+    encoderConfig := zap.NewProductionEncoderConfig()
+    encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+    encoder := zapcore.<span class="function">NewJSONEncoder</span>(encoderConfig)
+    
+    <span class="comment">// 创建 core</span>
+    core := zapcore.<span class="function">NewTee</span>(
+        zapcore.<span class="function">NewCore</span>(encoder, zapcore.<span class="function">AddSync</span>(fileWriter), zapcore.InfoLevel),
+        zapcore.<span class="function">NewCore</span>(encoder, consoleWriter, zapcore.DebugLevel),
+    )
+    
+    logger := zap.<span class="function">New</span>(core, zap.<span class="function">AddCaller</span>())
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    logger.<span class="function">Info</span>(<span class="string">"Logging to both file and console"</span>)
+}</code></pre>
+            
+            <h3>Sugar Logger</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"go.uber.org/zap"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    logger, _ := zap.<span class="function">NewProduction</span>()
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    <span class="comment">// Sugar logger 提供更方便的 API</span>
+    sugar := logger.<span class="function">Sugar</span>()
+    
+    <span class="comment">// Printf 风格</span>
+    sugar.<span class="function">Infof</span>(<span class="string">"User %s logged in from %s"</span>, <span class="string">"alice"</span>, <span class="string">"192.168.1.1"</span>)
+    
+    <span class="comment">// 惯用风格</span>
+    sugar.<span class="function">Infow</span>(<span class="string">"User logged in"</span>,
+        <span class="string">"user"</span>, <span class="string">"alice"</span>,
+        <span class="string">"ip"</span>, <span class="string">"192.168.1.1"</span>,
+    )
+    
+    <span class="comment">// 简单风格</span>
+    sugar.<span class="function">Info</span>(<span class="string">"Simple log message"</span>, <span class="string">"arg1"</span>, <span class="string">"arg2"</span>)
+}</code></pre>
+            
+            <h3>错误处理</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"errors"</span>
+    <span class="string">"go.uber.org/zap"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    logger, _ := zap.<span class="function">NewProduction</span>()
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    <span class="comment">// 记录错误</span>
+    err := errors.<span class="function">New</span>(<span class="string">"something went wrong"</span>)
+    logger.<span class="function">Error</span>(<span class="string">"Operation failed"</span>,
+        zap.<span class="function">Error</span>(err),
+        zap.<span class="function">String</span>(<span class="string">"operation"</span>, <span class="string">"create_user"</span>),
+    )
+    
+    <span class="comment">// 记录堆栈</span>
+    logger.<span class="function">Error</span>(<span class="string">"Error with stack"</span>,
+        zap.<span class="function">Error</span>(err),
+        zap.<span class="function">Stack</span>(<span class="string">"stack"</span>),
+    )
+}</code></pre>
+            
+            
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>函数作为参数和返回值 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+                        <div class="content">
+            <a href="functions.html" class="back-link">← 返回 函数</a>
+            <h2 id="higherorder">函数作为参数和返回值</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// 函数类型</span>
+<span class="keyword">type</span> operation <span class="function">func</span>(<span class="keyword">int</span>, <span class="keyword">int</span>) <span class="keyword">int</span>
+
+<span class="comment">// 函数作为参数</span>
+<span class="function">func</span> <span class="function">calculate</span>(a, b <span class="keyword">int</span>, op operation) <span class="keyword">int</span> {
+    <span class="keyword">return</span> op(a, b)
+}
+
+<span class="comment">// 函数作为返回值</span>
+<span class="function">func</span> <span class="function">getOperation</span>(op <span class="keyword">string</span>) operation {
+    <span class="keyword">switch</span> op {
+    <span class="keyword">case</span> <span class="string">"add"</span>:
+        <span class="keyword">return</span> <span class="function">func</span>(a, b <span class="keyword">int</span>) <span class="keyword">int</span> {
+            <span class="keyword">return</span> a + b
+        }
+    <span class="keyword">case</span> <span class="string">"subtract"</span>:
+        <span class="keyword">return</span> <span class="function">func</span>(a, b <span class="keyword">int</span>) <span class="keyword">int</span> {
+            <span class="keyword">return</span> a - b
+        }
+    <span class="keyword">default</span>:
+        <span class="keyword">return</span> <span class="keyword">nil</span>
+    }
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 使用函数作为参数</span>
+    add := <span class="function">func</span>(a, b <span class="keyword">int</span>) <span class="keyword">int</span> { <span class="keyword">return</span> a + b }
+    multiply := <span class="function">func</span>(a, b <span class="keyword">int</span>) <span class="keyword">int</span> { <span class="keyword">return</span> a * b }
+
+    fmt.<span class="function">Println</span>(<span class="string">"10 + 5 ="</span>, <span class="function">calculate</span>(<span class="number">10</span>, <span class="number">5</span>, add))
+    fmt.<span class="function">Println</span>(<span class="string">"10 * 5 ="</span>, <span class="function">calculate</span>(<span class="number">10</span>, <span class="number">5</span>, multiply))
+
+    <span class="comment">// 使用函数作为返回值</span>
+    op := <span class="function">getOperation</span>(<span class="string">"add"</span>)
+    <span class="keyword">if</span> op != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"操作结果:"</span>, op(<span class="number">3</span>, <span class="number">4</span>))
+    }
+}</code></pre>
+
+            
+        </div>
+    </div>
+</body>
+</html>

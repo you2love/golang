@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>io 输入输出 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+                <div class="content">
+            <a href="stdlib.html" class="back-link">← 返回 stdlib</a>
+            <h2 id="io">io 输入输出</h2>
+
+            <h3>读取文件</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"io"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 打开文件</span>
+    file, err := os.<span class="function">Open</span>(<span class="string">"test.txt"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    <span class="comment">// 读取整个文件</span>
+    data, err := io.<span class="function">ReadAll</span>(file)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    fmt.<span class="function">Println</span>(<span class="string">"File content:"</span>, <span class="keyword">string</span>(data))
+}</code></pre>
+
+            <h3>写入文件</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 写入文件（覆盖）</span>
+    err := os.<span class="function">WriteFile</span>(<span class="string">"output.txt"</span>, []<span class="keyword">byte</span>(<span class="string">"Hello, World!"</span>), <span class="number">0644</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="comment">// 追加写入</span>
+    f, err := os.<span class="function">OpenFile</span>(<span class="string">"output.txt"</span>, os.O_APPEND|os.O_WRONLY, <span class="number">0644</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    <span class="keyword">defer</span> f.<span class="function">Close</span>()
+    
+    _, err = f.<span class="function">WriteString</span>(<span class="string">"\nAppended text"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+    }
+}</code></pre>
+
+            <h3>读取目录</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 读取目录内容</span>
+    entries, err := os.<span class="function">ReadDir</span>(<span class="string">"."</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="keyword">for</span> _, entry := <span class="keyword">range</span> entries {
+        fmt.<span class="function">Printf</span>(<span class="string">"%s (%v)\n"</span>, entry.<span class="function">Name</span>(), entry.<span class="function">IsDir</span>())
+    }
+}</code></pre>
+
+            <h3>创建和删除文件/目录</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建目录</span>
+    err := os.<span class="function">MkdirAll</span>(<span class="string">"testdir/subdir"</span>, <span class="number">0755</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+    }
+    
+    <span class="comment">// 创建文件</span>
+    file, err := os.<span class="function">Create</span>(<span class="string">"testdir/test.txt"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+    }
+    file.<span class="function">Close</span>()
+    
+    <span class="comment">// 删除文件</span>
+    os.<span class="function">Remove</span>(<span class="string">"testdir/test.txt"</span>)
+    
+    <span class="comment">// 删除目录</span>
+    os.<span class="function">RemoveAll</span>(<span class="string">"testdir"</span>)
+}</code></pre>
+
+            <h3>使用 io.Copy</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"io"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">copyFile</span>(src, dst <span class="keyword">string</span>) <span class="keyword">error</span> {
+    source, err := os.<span class="function">Open</span>(src)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> source.<span class="function">Close</span>()
+    
+    destination, err := os.<span class="function">Create</span>(dst)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> destination.<span class="function">Close</span>()
+    
+    _, err = io.<span class="function">Copy</span>(destination, source)
+    <span class="keyword">return</span> err
+}</code></pre>
+
+            <h3>使用 io.LimitReader</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"io"</span>
+    <span class="string">"strings"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    reader := strings.<span class="function">NewReader</span>(<span class="string">"Hello, World! This is a long string."</span>)
+    
+    <span class="comment">// 限制读取 5 个字节</span>
+    limitedReader := io.<span class="function">LimitReader</span>(reader, <span class="number">5</span>)
+    
+    data, _ := io.<span class="function">ReadAll</span>(limitedReader)
+    fmt.<span class="function">Println</span>(<span class="string">"Limited read:"</span>, <span class="keyword">string</span>(data))
+}</code></pre>
+
+            
+        </div>
+    </div>
+</body>
+</html>

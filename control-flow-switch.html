@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>switch 语句 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+                <div class="content">
+            <a href="control-flow.html" class="back-link">← 返回 control-flow</a>
+            <h2 id="switch">switch 语句</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 基本 switch</span>
+    day := <span class="number">3</span>
+    <span class="keyword">switch</span> day {
+    <span class="keyword">case</span> <span class="number">1</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"星期一"</span>)
+    <span class="keyword">case</span> <span class="number">2</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"星期二"</span>)
+    <span class="keyword">case</span> <span class="number">3</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"星期三"</span>)
+    <span class="keyword">case</span> <span class="number">4</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"星期四"</span>)
+    <span class="keyword">case</span> <span class="number">5</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"星期五"</span>)
+    <span class="keyword">default</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"周末"</span>)
+    }
+
+    <span class="comment">// 多个 case 共享处理</span>
+    grade := <span class="string">"B"</span>
+    <span class="keyword">switch</span> grade {
+    <span class="keyword">case</span> <span class="string">"A"</span>, <span class="string">"B"</span>, <span class="string">"C"</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"及格"</span>)
+    <span class="keyword">case</span> <span class="string">"D"</span>, <span class="string">"F"</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"不及格"</span>)
+    <span class="keyword">default</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"未知等级"</span>)
+    }
+
+    <span class="comment">// 无表达式的 switch（类似 if-else if）</span>
+    score := <span class="number">75</span>
+    <span class="keyword">switch</span> {
+    <span class="keyword">case</span> score >= <span class="number">90</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"优秀"</span>)
+    <span class="keyword">case</span> score >= <span class="number">70</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"良好"</span>)
+    <span class="keyword">case</span> score >= <span class="number">60</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"及格"</span>)
+    <span class="keyword">default</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"不及格"</span>)
+    }
+
+    <span class="comment">// 带初始化语句的 switch</span>
+    <span class="keyword">switch</span> num := <span class="number">15</span>; {
+    <span class="keyword">case</span> num < <span class="number">0</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"负数"</span>)
+    <span class="keyword">case</span> num == <span class="number">0</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"零"</span>)
+    <span class="keyword">case</span> num > <span class="number">0</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"正数"</span>)
+    }
+}</code></pre>
+
+            
+        </div>
+    </div>
+</body>
+</html>

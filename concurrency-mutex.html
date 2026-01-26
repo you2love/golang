@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mutex - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+                <div class="content">
+            <a href="concurrency.html" class="back-link">← 返回 concurrency</a>
+            <h2 id="mutex">互斥锁（Mutex）</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="comment">// SafeCounter 是并发安全的计数器</span>
+<span class="keyword">type</span> SafeCounter <span class="keyword">struct</span> {
+    mu sync.Mutex
+    v  <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>
+}
+
+<span class="function">func</span> (c *SafeCounter) <span class="function">Inc</span>(key <span class="keyword">string</span>) {
+    c.mu.<span class="function">Lock</span>()
+    <span class="comment">// Lock 之后同一时刻只有一个 goroutine 能访问 c.v</span>
+    c.v[key]++
+    c.mu.<span class="function">Unlock</span>()
+}
+
+<span class="function">func</span> (c *SafeCounter) <span class="function">Value</span>(key <span class="keyword">string</span>) <span class="keyword">int</span> {
+    c.mu.<span class="function">Lock</span>()
+    <span class="comment">// Lock 之后同一时刻只有一个 goroutine 能访问 c.v</span>
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    <span class="keyword">return</span> c.v[key]
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    c := SafeCounter{v: <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>)}
+
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++ {
+        <span class="keyword">go</span> c.<span class="function">Inc</span>(<span class="string">"somekey"</span>)
+    }
+
+    time.<span class="function">Sleep</span>(time.Second)
+    fmt.<span class="function">Println</span>(c.<span class="function">Value</span>(<span class="string">"somekey"</span>))
+}</code></pre>
+
+            
+        </div>
+    </div>
+</body>
+</html>

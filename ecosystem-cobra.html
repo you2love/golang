@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cobra 命令行工具 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+                <div class="content">
+            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
+            <h2 id="cobra">Cobra 命令行工具</h2>
+            
+            <h3>简介</h3>
+            <p>Cobra 是 Go 语言中最流行的命令行应用框架，被广泛用于许多知名项目（如 Docker、Kubernetes、Hugo 等）。它提供了强大的命令解析、子命令支持、自动生成帮助文档等功能。</p>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get -u github.com/spf13/cobra
+<span class="keyword">go</span> get -u github.com/spf13/pflag</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/spf13/cobra"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> name <span class="keyword">string</span>
+    
+    rootCmd := &cobra.Command{
+        Use:   <span class="string">"myapp"</span>,
+        Short: <span class="string">"My application"</span>,
+        Long:  <span class="string">"A longer description of my application"</span>,
+        Run: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            fmt.<span class="function">Printf</span>(<span class="string">"Hello, %s!\n"</span>, name)
+        },
+    }
+    
+    rootCmd.<span class="function">Flags</span>().<span class="function">StringVarP</span>(&name, <span class="string">"name"</span>, <span class="string">"n"</span>, <span class="string">"World"</span>, <span class="string">"Name to greet"</span>)
+    
+    rootCmd.<span class="function">Execute</span>()
+}</code></pre>
+            
+            <h3>子命令</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/spf13/cobra"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    rootCmd := &cobra.Command{
+        Use:   <span class="string">"myapp"</span>,
+        Short: <span class="string">"My application"</span>,
+    }
+    
+    <span class="comment">// 添加子命令</span>
+    rootCmd.<span class="function">AddCommand</span>(<span class="function">createCommand</span>())
+    rootCmd.<span class="function">AddCommand</span>(<span class="function">listCommand</span>())
+    rootCmd.<span class="function">AddCommand</span>(<span class="function">deleteCommand</span>())
+    
+    rootCmd.<span class="function">Execute</span>()
+}
+
+<span class="function">func</span> <span class="function">createCommand</span>() *cobra.Command {
+    <span class="keyword">return</span> &cobra.Command{
+        Use:   <span class="string">"create"</span>,
+        Short: <span class="string">"Create a new resource"</span>,
+        Run: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            fmt.<span class="function">Println</span>(<span class="string">"Creating resource..."</span>)
+        },
+    }
+}
+
+<span class="function">func</span> <span class="function">listCommand</span>() *cobra.Command {
+    <span class="keyword">return</span> &cobra.Command{
+        Use:   <span class="string">"list"</span>,
+        Short: <span class="string">"List all resources"</span>,
+        Run: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            fmt.<span class="function">Println</span>(<span class="string">"Listing resources..."</span>)
+        },
+    }
+}
+
+<span class="function">func</span> <span class="function">deleteCommand</span>() *cobra.Command {
+    <span class="keyword">return</span> &cobra.Command{
+        Use:   <span class="string">"delete [id]"</span>,
+        Short: <span class="string">"Delete a resource"</span>,
+        Args:  cobra.ExactArgs(<span class="number">1</span>),
+        Run: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            fmt.<span class="function">Printf</span>(<span class="string">"Deleting resource: %s\n"</span>, args[<span class="number">0</span>])
+        },
+    }
+}</code></pre>
+            
+            <h3>参数验证</h3>
+            <pre><code><span class="keyword">func</span> <span class="function">createCommand</span>() *cobra.Command {
+    <span class="keyword">var</span> name <span class="keyword">string</span>
+    <span class="keyword">var</span> age <span class="keyword">int</span>
+    
+    cmd := &cobra.Command{
+        Use:   <span class="string">"create"</span>,
+        Short: <span class="string">"Create a new user"</span>,
+        Run: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            <span class="comment">// 验证参数</span>
+            <span class="keyword">if</span> name == <span class="string">""</span> {
+                fmt.<span class="function">Println</span>(<span class="string">"Error: name is required"</span>)
+                <span class="keyword">return</span>
+            }
+            <span class="keyword">if</span> age <= <span class="number">0</span> {
+                fmt.<span class="function">Println</span>(<span class="string">"Error: age must be positive"</span>)
+                <span class="keyword">return</span>
+            }
+            
+            fmt.<span class="function">Printf</span>(<span class="string">"Creating user: %s, age: %d\n"</span>, name, age)
+        },
+    }
+    
+    cmd.<span class="function">Flags</span>().<span class="function">StringVarP</span>(&name, <span class="string">"name"</span>, <span class="string">"n"</span>, <span class="string">""</span>, <span class="string">"User name"</span>)
+    cmd.<span class="function">Flags</span>().<span class="function">IntVarP</span>(&age, <span class="string">"age"</span>, <span class="string">"a"</span>, <span class="number">0</span>, <span class="string">"User age"</span>)
+    
+    <span class="comment">// 标记为必填</span>
+    cmd.<span class="function">MarkFlagRequired</span>(<span class="string">"name"</span>)
+    
+    <span class="keyword">return</span> cmd
+}</code></pre>
+            
+            <h3>持久化标志</h3>
+            <pre><code><span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> verbose <span class="keyword">bool</span>
+    <span class="keyword">var</span> config <span class="keyword">string</span>
+    
+    rootCmd := &cobra.Command{
+        Use:   <span class="string">"myapp"</span>,
+        Short: <span class="string">"My application"</span>,
+        PersistentPreRun: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            <span class="keyword">if</span> verbose {
+                fmt.<span class="function">Println</span>(<span class="string">"Verbose mode enabled"</span>)
+            }
+            fmt.<span class="function">Printf</span>(<span class="string">"Using config: %s\n"</span>, config)
+        },
+    }
+    
+    <span class="comment">// 持久化标志：所有子命令都可以使用</span>
+    rootCmd.<span class="function">PersistentFlags</span>().<span class="function">BoolVarP</span>(&verbose, <span class="string">"verbose"</span>, <span class="string">"v"</span>, <span class="keyword">false</span>, <span class="string">"Verbose output"</span>)
+    rootCmd.<span class="function">PersistentFlags</span>().<span class="function">StringVarP</span>(&config, <span class="string">"config"</span>, <span class="string">"c"</span>, <span class="string">"config.yaml"</span>, <span class="string">"Config file"</span>)
+    
+    rootCmd.<span class="function">AddCommand</span>(<span class="function">createCommand</span>())
+    rootCmd.<span class="function">Execute</span>()
+}</code></pre>
+            
+            <h3>配置文件集成</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/spf13/cobra"</span>
+    <span class="string">"github.com/spf13/viper"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    rootCmd := &cobra.Command{
+        Use:   <span class="string">"myapp"</span>,
+        Short: <span class="string">"My application"</span>,
+        PersistentPreRun: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            <span class="comment">// 初始化 Viper</span>
+            viper.<span class="function">SetConfigName</span>(<span class="string">"config"</span>)
+            viper.<span class="function">SetConfigType</span>(<span class="string">"yaml"</span>)
+            viper.<span class="function">AddConfigPath</span>(<span class="string">"./"</span>)
+            
+            <span class="keyword">if</span> err := viper.<span class="function">ReadInConfig</span>(); err != <span class="keyword">nil</span> {
+                fmt.<span class="function">Println</span>(<span class="string">"Using default config"</span>)
+            }
+            
+            <span class="comment">// 绑定命令行标志</span>
+            viper.<span class="function">BindPFlag</span>(<span class="string">"port"</span>, cmd.<span class="function">PersistentFlags</span>().<span class="function">Lookup</span>(<span class="string">"port"</span>))
+        },
+    }
+    
+    rootCmd.<span class="function">PersistentFlags</span>().<span class="function">IntP</span>(<span class="string">"port"</span>, <span class="string">"p"</span>, <span class="number">8080</span>, <span class="string">"Server port"</span>)
+    
+    rootCmd.<span class="function">AddCommand</span>(<span class="function">serveCommand</span>())
+    rootCmd.<span class="function">Execute</span>()
+}
+
+<span class="function">func</span> <span class="function">serveCommand</span>() *cobra.Command {
+    <span class="keyword">return</span> &cobra.Command{
+        Use:   <span class="string">"serve"</span>,
+        Short: <span class="string">"Start the server"</span>,
+        Run: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            port := viper.<span class="function">GetInt</span>(<span class="string">"port"</span>)
+            fmt.<span class="function">Printf</span>(<span class="string">"Starting server on port %d\n"</span>, port)
+        },
+    }
+}</code></pre>
+            
+            <h3>自动生成文档</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/spf13/cobra"</span>
+    <span class="string">"github.com/spf13/cobra/doc"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    rootCmd := &cobra.Command{
+        Use:   <span class="string">"myapp"</span>,
+        Short: <span class="string">"My application"</span>,
+        Run: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            fmt.<span class="function">Println</span>(<span class="string">"Hello, World!"</span>)
+        },
+    }
+    
+    rootCmd.<span class="function">AddCommand</span>(&cobra.Command{
+        Use:   <span class="string">"version"</span>,
+        Short: <span class="string">"Print version"</span>,
+        Run: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            fmt.<span class="function">Println</span>(<span class="string">"Version 1.0.0"</span>)
+        },
+    })
+    
+    <span class="comment">// 生成 Markdown 文档</span>
+    doc.<span class="function">GenMarkdownTree</span>(rootCmd, <span class="string">"./docs"</span>)
+    
+    <span class="comment">// 生成 Man 页面</span>
+    doc.<span class="function">GenManTree</span>(rootCmd, &doc.GenManHeader{
+        Section: <span class="string">"1"</span>,
+    }, <span class="string">"./man"</span>)
+    
+    <span class="comment">// 生成 ReStructuredText</span>
+    doc.<span class="function">GenReSTTree</span>(rootCmd, <span class="string">"./rst"</span>)
+}</code></pre>
+            
+            <h3>Shell 自动补全</h3>
+            <pre><code><span class="keyword">func</span> <span class="function">main</span>() {
+    rootCmd := &cobra.Command{
+        Use:   <span class="string">"myapp"</span>,
+        Short: <span class="string">"My application"</span>,
+    }
+    
+    <span class="comment">// 生成 Bash 补全</span>
+    rootCmd.<span class="function">GenBashCompletionFile</span>(<span class="string">"/etc/bash_completion.d/myapp"</span>)
+    
+    <span class="comment">// 生成 Zsh 补全</span>
+    rootCmd.<span class="function">GenZshCompletionFile</span>(<span class="string">"/usr/local/share/zsh/site-functions/_myapp"</span>)
+    
+    <span class="comment">// 生成 Fish 补全</span>
+    rootCmd.<span class="function">GenFishCompletionFile</span>(<span class="string">"/usr/share/fish/vendor_completions.d/myapp.fish"</span>)
+    
+    rootCmd.<span class="function">Execute</span>()
+}</code></pre>
+            
+            
+        </div>
+    </div>
+</body>
+</html>

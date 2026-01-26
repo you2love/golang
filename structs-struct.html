@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>结构体 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+                <div class="content">
+            <a href="structs.html" class="back-link">← 返回 structs</a>
+            <h2 id="struct">定义结构体</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// 定义结构体</span>
+<span class="keyword">type</span> Person <span class="keyword">struct</span> {
+    Name    <span class="keyword">string</span>
+    Age     <span class="keyword">int</span>
+    Email   <span class="keyword">string</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建结构体实例</span>
+    <span class="comment">// 方式1：按字段顺序</span>
+    p1 := Person{<span class="string">"张三"</span>, <span class="number">25</span>, <span class="string">"zhangsan@example.com"</span>}
+
+    <span class="comment">// 方式2：按字段名（推荐）</span>
+    p2 := Person{
+        Name:  <span class="string">"李四"</span>,
+        Age:   <span class="number">30</span>,
+        Email: <span class="string">"lisi@example.com"</span>,
+    }
+
+    <span class="comment">// 方式3：使用 new 关键字</span>
+    p3 := <span class="keyword">new</span>(Person)
+    p3.Name = <span class="string">"王五"</span>
+    p3.Age = <span class="number">28</span>
+    p3.Email = <span class="string">"wangwu@example.com"</span>
+
+    fmt.<span class="function">Println</span>(<span class="string">"p1:"</span>, p1)
+    fmt.<span class="function">Println</span>(<span class="string">"p2:"</span>, p2)
+    fmt.<span class="function">Println</span>(<span class="string">"p3:"</span>, p3)
+}</code></pre>
+
+            
+        </div>
+    </div>
+</body>
+</html>

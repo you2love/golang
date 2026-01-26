@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>私有模块 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+                <div class="content">
+            <a href="modules.html" class="back-link">← 返回 modules</a>
+            <h2 id="private">私有 Module</h2>
+            
+            <h3>配置私有仓库</h3>
+            <pre><code><span class="comment"># 方法1：使用 go env 配置</span>
+<span class="keyword">go</span> env -w GOPRIVATE=github.com/yourcompany/*
+
+<span class="comment"># 方法2：配置多个私有仓库</span>
+<span class="keyword">go</span> env -w GOPRIVATE=github.com/yourcompany/*,gitlab.com/yourcompany/*</code></pre>
+
+            <h3>配置 Git 认证</h3>
+            <pre><code><span class="comment"># 配置 Git 使用 SSH</span>
+<span class="keyword">git</span> config --global url.<span class="string">"git@github.com:"</span>.insteadOf <span class="string">"https://github.com/"</span>
+
+<span class="comment"># 或者使用 netrc 配置 HTTPS 认证</span>
+<span class="comment"># 创建 ~/.netrc 文件</span>
+machine github.com
+login your-username
+password your-token</code></pre>
+
+            <h3>本地 Module 开发</h3>
+            <pre><code><span class="comment">// go.mod 中使用 replace 指令</span>
+<span class="keyword">replace</span> github.com/yourcompany/module => ../module
+
+<span class="comment">// 或者使用绝对路径</span>
+<span class="keyword">replace</span> github.com/yourcompany/module => /absolute/path/to/module</code></pre>
+
+            <div class="example-box">
+                <h3>Go Module 最佳实践</h3>
+                
+                <p><strong>1. 项目结构最佳实践</strong></p>
+                <pre><code><span class="comment">// 推荐的项目结构</span>
+myproject/
+├── cmd/
+│   ├── server/
+│   │   └── main.go
+│   └── client/
+│       └── main.go
+├── internal/
+│   ├── config/
+│   ├── handler/
+│   └── service/
+├── pkg/
+│   └── utils/
+├── api/
+│   └── proto/
+├── go.mod
+├── go.sum
+└── README.md</code></pre>
+
+                <p><strong>2. 依赖管理最佳实践</strong></p>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/gin-gonic/gin"</span>
+)
+
+<span class="comment">// 最佳实践：</span>
+<span class="comment">// 1. 定期运行 go mod tidy 清理未使用的依赖</span>
+<span class="comment">// 2. 使用 go mod verify 验证依赖完整性</span>
+<span class="comment">// 3. 提交 go.mod 和 go.sum 到版本控制</span>
+<span class="comment">// 4. 不要提交 vendor 目录（除非有特殊需求）</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 验证依赖</span>
+    <span class="comment">// go mod verify</span>
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Hello, Module!"</span>)
+}</code></pre>
+
+                <p><strong>3. 版本发布最佳实践</strong></p>
+                <pre><code><span class="comment">// 1. 使用语义化版本</span>
+<span class="comment">// 2. 为每个版本打 tag</span>
+<span class="comment">// 3. 使用 go get -u 更新依赖</span>
+
+<span class="comment">// 发布新版本</span>
+<span class="keyword">git</span> tag v1.0.0
+<span class="keyword">git</span> push origin v1.0.0
+
+<span class="comment">// 发布补丁版本</span>
+<span class="keyword">git</span> tag v1.0.1
+<span class="keyword">git</span> push origin v1.0.1</code></pre>
+
+                <p><strong>4. 多 Module 项目</strong></p>
+                <pre><code><span class="comment">// monorepo 结构</span>
+company/
+├── services/
+│   ├── user-service/
+│   │   └── go.mod
+│   └── order-service/
+│       └── go.mod
+├── shared/
+│   └── common/
+│       └── go.mod
+└── go.work  <span class="comment">// Go Workspace 文件</span>
+
+<span class="comment">// go.work 文件内容</span>
+<span class="keyword">go</span> 1.21
+
+<span class="keyword">use</span> (
+    ./services/user-service
+    ./services/order-service
+    ./shared/common
+)</code></pre>
+
+                <p><strong>5. 依赖安全</strong></p>
+                <pre><code><span class="comment"># 检查依赖安全漏洞</span>
+<span class="keyword">go</span> list -json -m all | <span class="keyword">go</span> mod download -json
+
+<span class="comment"># 使用 govulncheck 检查漏洞</span>
+<span class="keyword">go</span> install golang.org/x/vuln/cmd/govulncheck@latest
+<span class="keyword">govulncheck</span> ./...</code></pre>
+
+                <p><strong>6. 性能优化</strong></p>
+                <pre><code><span class="comment"># 使用 Go Module Proxy 加速下载</span>
+<span class="keyword">go</span> env -w GOPROXY=https://goproxy.cn,direct
+
+<span class="comment"># 配置私有仓库不走代理</span>
+<span class="keyword">go</span> env -w GOPRIVATE=github.com/yourcompany/*
+
+<span class="comment"># 禁用校验（仅用于开发环境）</span>
+<span class="keyword">go</span> env -w GOSUMDB=off</code></pre>
+
+                <p><strong>7. 常用命令速查</strong></p>
+                <pre><code><span class="comment"># 初始化模块</span>
+<span class="keyword">go</span> mod init module-path
+
+<span class="comment"># 添加依赖</span>
+<span class="keyword">go</span> get package@version
+
+<span class="comment"># 整理依赖</span>
+<span class="keyword">go</span> mod tidy
+
+<span class="comment"># 验证依赖</span>
+<span class="keyword">go</span> mod verify
+
+<span class="comment"># 下载依赖</span>
+<span class="keyword">go</span> mod download
+
+<span class="comment"># 查看依赖图</span>
+<span class="keyword">go</span> mod graph
+
+<span class="comment"># 为什么需要某个依赖</span>
+<span class="keyword">go</span> mod why package</code></pre>
+
+                <p><strong>8. 错误处理</strong></p>
+                <pre><code><span class="comment"># 常见错误及解决方案</span>
+
+<span class="comment">// 错误1：module not found</span>
+<span class="comment">// 解决：检查 GOPROXY 设置</span>
+<span class="keyword">go</span> env -w GOPROXY=https://goproxy.cn,direct
+
+<span class="comment">// 错误2：版本冲突</span>
+<span class="comment">// 解决：使用 go mod why 查看依赖关系</span>
+<span class="keyword">go</span> mod why github.com/conflicting/package
+
+<span class="comment">// 错误3：校验失败</span>
+<span class="comment">// 解决：更新 go.sum 或重新下载</span>
+<span class="keyword">go</span> mod download
+<span class="keyword">go</span> mod verify</code></pre>
+            
+        </div>
+    </div>
+</body>
+</html>

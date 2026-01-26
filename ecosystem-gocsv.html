@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoCarina/gocsv - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+        <div class="content">
+            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
+            <h2 id="gocsv">GoCarina/gocsv</h2>
+            <p>gocsv 是一个功能强大且易于使用的 Go 语言 CSV 文件读写库，由 GoCarina 开发。它提供了简洁的 API，支持将 CSV 文件与 Go 结构体进行自动映射，大大简化了 CSV 文件的处理工作。</p>
+            
+            <h3>核心特性</h3>
+            <ul>
+                <li><strong>自动映射</strong>：通过结构体标签自动映射 CSV 列到结构体字段</li>
+                <li><strong>高性能</strong>：优化的读写性能，适合处理大型 CSV 文件</li>
+                <li><strong>灵活配置</strong>：支持自定义分隔符、引号字符、注释等</li>
+                <li><strong>流式处理</strong>：支持流式读写，内存占用低</li>
+                <li><strong>类型转换</strong>：自动处理基本类型和自定义类型的转换</li>
+                <li><strong>错误处理</strong>：详细的错误信息和行号追踪</li>
+            </ul>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get github.com/gocarina/gocsv</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/csv"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+    <span class="string">"github.com/gocarina/gocsv"</span>
+)
+
+<span class="keyword">type</span> Client <span class="keyword">struct</span> {
+    Id      <span class="keyword">string</span> <span class="string">`csv:"id"`</span>
+    Name    <span class="keyword">string</span> <span class="string">`csv:"name"`</span>
+    Age     <span class="keyword">int</span>    <span class="string">`csv:"age"`</span>
+    Country <span class="keyword">string</span> <span class="string">`csv:"country"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    clients := []Client{
+        {Id: <span class="string">"1"</span>, Name: <span class="string">"Alice"</span>, Age: 30, Country: <span class="string">"USA"</span>},
+        {Id: <span class="string">"2"</span>, Name: <span class="string">"Bob"</span>, Age: 25, Country: <span class="string">"UK"</span>},
+        {Id: <span class="string">"3"</span>, Name: <span class="string">"Charlie"</span>, Age: 35, Country: <span class="string">"Canada"</span>},
+    }
+    
+    <span class="comment">// 写入 CSV 文件</span>
+    file, _ := os.<span class="function">OpenFile</span>(<span class="string">"clients.csv"</span>, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    gocsv.<span class="function">MarshalFile</span>(&clients, file)
+    
+    <span class="comment">// 读取 CSV 文件</span>
+    clientsFile, _ := os.<span class="function">OpenFile</span>(<span class="string">"clients.csv"</span>, os.O_RDWR|os.O_CREATE, 0755)
+    <span class="keyword">defer</span> clientsFile.<span class="function">Close</span>()
+    
+    <span class="keyword">var</span> clientsRead []Client
+    gocsv.<span class="function">UnmarshalFile</span>(clientsFile, &clientsRead)
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"%+v\n"</span>, clientsRead)
+}</code></pre>
+            
+            <h3>高级用法</h3>
+            
+            <h4>1. 自定义分隔符和配置</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/gocarina/gocsv"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 使用分号作为分隔符</span>
+    gocsv.<span class="function">SetCSVReader</span>(gocsv.<span class="function">CustomReader</span>{
+        Separator: <span class="string">';'</span>,
+    })
+    
+    <span class="comment">// 使用分号作为分隔符写入</span>
+    gocsv.<span class="function">SetCSVWriter</span>(gocsv.<span class="function">CustomWriter</span>{
+        Separator: <span class="string">';'</span>,
+    })
+}</code></pre>
+            
+            <h4>2. 处理带标题的 CSV</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+    <span class="string">"github.com/gocarina/gocsv"</span>
+)
+
+<span class="keyword">type</span> Product <span class="keyword">struct</span> {
+    SKU      <span class="keyword">string</span>  <span class="string">`csv:"SKU"`</span>
+    Name     <span class="keyword">string</span>  <span class="string">`csv:"Product Name"`</span>
+    Price    <span class="keyword">float64</span> <span class="string">`csv:"Price"`</span>
+    Quantity <span class="keyword">int</span>     <span class="string">`csv:"Quantity"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    file, _ := os.<span class="function">Open</span>(<span class="string">"products.csv"</span>)
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    <span class="keyword">var</span> products []Product
+    gocsv.<span class="function">UnmarshalFile</span>(file, &products)
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"读取到 %d 个产品\n"</span>, <span class="function">len</span>(products))
+}</code></pre>
+            
+            <h4>3. 流式读取大型 CSV 文件</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+    <span class="string">"io"</span>
+    <span class="string">"github.com/gocarina/gocsv"</span>
+)
+
+<span class="keyword">type</span> LogEntry <span class="keyword">struct</span> {
+    Timestamp <span class="keyword">string</span> <span class="string">`csv:"timestamp"`</span>
+    Level     <span class="keyword">string</span> <span class="string">`csv:"level"`</span>
+    Message   <span class="keyword">string</span> <span class="string">`csv:"message"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    file, _ := os.<span class="function">Open</span>(<span class="string">"large_logs.csv"</span>)
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    <span class="comment">// 流式读取，逐行处理</span>
+    reader := gocsv.<span class="function">NewDecoder</span>(file)
+    
+    <span class="keyword">for</span> {
+        <span class="keyword">var</span> entry LogEntry
+        err := reader.<span class="function">Decode</span>(&entry)
+        <span class="keyword">if</span> err == io.EOF {
+            <span class="keyword">break</span>
+        }
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            fmt.<span class="function">Printf</span>(<span class="string">"解析错误: %v\n"</span>, err)
+            <span class="keyword">continue</span>
+        }
+        
+        <span class="comment">// 处理每行数据</span>
+        fmt.<span class="function">Printf</span>(<span class="string">"[%s] %s: %s\n"</span>, entry.Timestamp, entry.Level, entry.Message)
+    }
+}</code></pre>
+            
+            <h4>4. 处理嵌套结构</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/gocarina/gocsv"</span>
+)
+
+<span class="keyword">type</span> Address <span class="keyword">struct</span> {
+    Street  <span class="keyword">string</span> <span class="string">`csv:"street"`</span>
+    City    <span class="keyword">string</span> <span class="string">`csv:"city"`</span>
+    Country <span class="keyword">string</span> <span class="string">`csv:"country"`</span>
+}
+
+<span class="keyword">type</span> Person <span class="keyword">struct</span> {
+    Name    <span class="keyword">string</span>  <span class="string">`csv:"name"`</span>
+    Age     <span class="keyword">int</span>     <span class="string">`csv:"age"`</span>
+    Address Address  <span class="string">`csv:"address"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// gocsv 支持嵌套结构</span>
+    csvData := <span class="string">`name,age,street,city,country
+Alice,30,123 Main St,New York,USA
+Bob,25,456 Oak Ave,London,UK`</span>
+    
+    <span class="keyword">var</span> people []Person
+    gocsv.<span class="function">Unmarshal</span>([]<span class="keyword">byte</span>(csvData), &people)
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"%+v\n"</span>, people)
+}</code></pre>
+            
+            <h4>5. 自定义类型转换</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    <span class="string">"github.com/gocarina/gocsv"</span>
+)
+
+<span class="keyword">type</span> Transaction <span class="keyword">struct</span> {
+    ID        <span class="keyword">string</span>    <span class="string">`csv:"id"`</span>
+    Amount    <span class="keyword">float64</span>   <span class="string">`csv:"amount"`</span>
+    Date      <span class="keyword">string</span>    <span class="string">`csv:"date"`</span>
+    DateParsed time.Time  <span class="string">`csv:"-"`</span> <span class="comment">// 不从 CSV 读取</span>
+}
+
+<span class="function">func</span> (t *Transaction) <span class="function">UnmarshalCSV</span>(csv <span class="keyword">string</span>) <span class="keyword">error</span> {
+    <span class="comment">// 自定义解析逻辑</span>
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> (t *Transaction) <span class="function">MarshalCSV</span>() (<span class="keyword">string</span>, <span class="keyword">error</span>) {
+    <span class="comment">// 自定义序列化逻辑</span>
+    <span class="keyword">return</span> <span class="string">""</span>, <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 使用自定义类型转换</span>
+    transactions := []Transaction{
+        {ID: <span class="string">"1"</span>, Amount: 100.50, Date: <span class="string">"2024-01-15"</span>},
+    }
+    
+    csvData, _ := gocsv.<span class="function">MarshalString</span>(&transactions)
+    fmt.<span class="function">Println</span>(csvData)
+}</code></pre>
+            
+            <h3>最佳实践</h3>
+            
+            <h4>1. 错误处理和验证</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+    <span class="string">"github.com/gocarina/gocsv"</span>
+)
+
+<span class="keyword">type</span> ValidatedRecord <span class="keyword">struct</span> {
+    Email <span class="keyword">string</span> <span class="string">`csv:"email" validate:"required,email"`</span>
+    Phone <span class="keyword">string</span> <span class="string">`csv:"phone" validate:"required"`</span>
+}
+
+<span class="function">func</span> <span class="function">validateRecord</span>(record ValidatedRecord) <span class="keyword">error</span> {
+    <span class="keyword">if</span> record.Email == <span class="string">""</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"邮箱不能为空"</span>)
+    }
+    <span class="comment">// 更多验证逻辑...</span>
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    file, _ := os.<span class="function">Open</span>(<span class="string">"data.csv"</span>)
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    <span class="keyword">var</span> records []ValidatedRecord
+    <span class="keyword">if</span> err := gocsv.<span class="function">UnmarshalFile</span>(file, &records); err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"CSV 解析失败: %v\n"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="comment">// 验证每条记录</span>
+    <span class="keyword">for</span> i, record := <span class="keyword">range</span> records {
+        <span class="keyword">if</span> err := <span class="function">validateRecord</span>(record); err != <span class="keyword">nil</span> {
+            fmt.<span class="function">Printf</span>(<span class="string">"第 %d 行验证失败: %v\n"</span>, i+1, err)
+        }
+    }
+}</code></pre>
+            
+            <h4>2. 性能优化</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"bufio"</span>
+    <span class="string">"os"</span>
+    <span class="string">"io"</span>
+    <span class="string">"github.com/gocarina/gocsv"</span>
+)
+
+<span class="function">func</span> <span class="function">processLargeCSV</span>(filePath <span class="keyword">string</span>) <span class="keyword">error</span> {
+    <span class="comment">// 使用缓冲读取提升性能</span>
+    file, err := os.<span class="function">Open</span>(filePath)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    <span class="comment">// 使用 bufio 包装文件</span>
+    bufferedFile := bufio.<span class="function">NewReader</span>(file)
+    
+    <span class="comment">// 流式处理，避免内存溢出</span>
+    reader := gocsv.<span class="function">NewDecoder</span>(bufferedFile)
+    
+    <span class="keyword">for</span> {
+        <span class="keyword">var</span> record <span class="keyword">interface</span>{}, err := reader.<span class="function">Decode</span>(&record)
+        <span class="keyword">if</span> err == io.EOF {
+            <span class="keyword">break</span>
+        }
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">continue</span>
+        }
+        
+        <span class="comment">// 处理记录</span>
+    }
+    
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            
+            <h4>3. 处理特殊字符和转义</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/gocarina/gocsv"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 配置处理包含特殊字符的字段</span>
+    gocsv.<span class="function">SetCSVReader</span>(gocsv.<span class="function">CustomReader</span>{
+        LazyQuotes:    <span class="keyword">true</span>,  <span class="comment">// 宽松的引号处理</span>
+        TrimLeadingSpace: <span class="keyword">true</span>,  <span class="comment">// 去除前导空格</span>
+        ReuseRecord:    <span class="keyword">true</span>,  <span class="comment">// 重用记录以减少内存分配</span>
+    })
+    
+    <span class="comment">// 处理包含逗号、引号、换行符的字段</span>
+    data := <span class="keyword">struct</span> {
+        Name    <span class="keyword">string</span> <span class="string">`csv:"name"`</span>
+        Comment <span class="keyword">string</span> <span class="string">`csv:"comment"`</span>
+    }{
+        Name:    <span class="string">"Alice, Bob"</span>,
+        Comment: <span class="string">"This is a \"quoted\" string"</span>,
+    }
+}</code></pre>
+            
+            <h4>4. 批量处理和并发</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"sync"</span>
+    <span class="string">"github.com/gocarina/gocsv"</span>
+)
+
+<span class="function">func</span> <span class="function">processBatch</span>(records []<span class="keyword">interface</span>{}) {
+    <span class="comment">// 使用 worker pool 并发处理</span>
+    <span class="keyword">var</span> wg sync.WaitGroup
+    workerCount := 10
+    
+    recordChan := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">interface</span>{}, workerCount*2)
+    
+    <span class="comment">// 启动 workers</span>
+    <span class="keyword">for</span> i := 0; i < workerCount; i++ {
+        wg.<span class="function">Add</span>(1)
+        <span class="keyword">go</span> <span class="function">worker</span>(recordChan, &wg)
+    }
+    
+    <span class="comment">// 发送记录</span>
+    <span class="keyword">for</span> _, record := <span class="keyword">range</span> records {
+        recordChan <- record
+    }
+    
+    <span class="function">close</span>(recordChan)
+    wg.<span class="function">Wait</span>()
+}
+
+<span class="function">func</span> <span class="function">worker</span>(recordChan <span class="keyword">chan</span> <span class="keyword">interface</span>{}, wg *sync.WaitGroup) {
+    <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+    <span class="keyword">for</span> record := <span class="keyword">range</span> recordChan {
+        <span class="comment">// 处理记录</span>
+        _ = record
+    }
+}</code></pre>
+            
+            <h4>5. 与数据库集成</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"database/sql"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+    <span class="string">"_ github.com/go-sql-driver/mysql"</span>
+    <span class="string">"github.com/gocarina/gocsv"</span>
+)
+
+<span class="keyword">type</span> Customer <span class="keyword">struct</span> {
+    ID   <span class="keyword">int</span>    <span class="string">`csv:"id" db:"id"`</span>
+    Name <span class="keyword">string</span> <span class="string">`csv:"name" db:"name"`</span>
+    Email <span class="keyword">string</span> <span class="string">`csv:"email" db:"email"`</span>
+}
+
+<span class="function">func</span> <span class="function">importCSVToDatabase</span>(csvPath <span class="keyword">string</span>, db *sql.DB) <span class="keyword">error</span> {
+    <span class="comment">// 从 CSV 读取数据</span>
+    file, err := os.<span class="function">Open</span>(csvPath)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    <span class="keyword">var</span> customers []Customer
+    <span class="keyword">if</span> err := gocsv.<span class="function">UnmarshalFile</span>(file, &customers); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="comment">// 批量插入数据库</span>
+    stmt, err := db.<span class="function">Prepare</span>(<span class="string">"INSERT INTO customers (name, email) VALUES (?, ?)"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> stmt.<span class="function">Close</span>()
+    
+    <span class="keyword">for</span> _, customer := <span class="keyword">range</span> customers {
+        _, err := stmt.<span class="function">Exec</span>(customer.Name, customer.Email)
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            fmt.<span class="function">Printf</span>(<span class="string">"插入失败: %v\n"</span>, err)
+        }
+    }
+    
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">exportDatabaseToCSV</span>(db *sql.DB, csvPath <span class="keyword">string</span>) <span class="keyword">error</span> {
+    <span class="comment">// 从数据库查询数据</span>
+    rows, err := db.<span class="function">Query</span>(<span class="string">"SELECT id, name, email FROM customers"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> rows.<span class="function">Close</span>()
+    
+    <span class="keyword">var</span> customers []Customer
+    <span class="keyword">for</span> rows.<span class="function">Next</span>() {
+        <span class="keyword">var</span> customer Customer
+        err := rows.<span class="function">Scan</span>(&customer.ID, &customer.Name, &customer.Email)
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">continue</span>
+        }
+        customers = <span class="function">append</span>(customers, customer)
+    }
+    
+    <span class="comment">// 写入 CSV 文件</span>
+    file, err := os.<span class="function">Create</span>(csvPath)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    <span class="keyword">return</span> gocsv.<span class="function">MarshalFile</span>(&customers, file)
+}</code></pre>
+            
+            <h3>使用场景</h3>
+            <ul>
+                <li><strong>数据导入导出</strong>：将数据库数据导出为 CSV 或从 CSV 导入数据</li>
+                <li><strong>数据迁移</strong>：在不同系统之间迁移数据</li>
+                <li><strong>日志分析</strong>：处理和分析 CSV 格式的日志文件</li>
+                <li><strong>报表生成</strong>：生成 CSV 格式的业务报表</li>
+                <li><strong>数据交换</strong>：与外部系统进行数据交换</li>
+            </ul>
+            
+            <h3>注意事项</h3>
+            <ul>
+                <li>处理大型 CSV 文件时，建议使用流式处理避免内存溢出</li>
+                <li>注意处理 CSV 文件中的特殊字符（逗号、引号、换行符等）</li>
+                <li>建议对数据进行验证，确保数据质量</li>
+                <li>处理日期时间等特殊类型时，需要自定义类型转换逻辑</li>
+                <li>在并发环境中使用时，注意线程安全问题</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

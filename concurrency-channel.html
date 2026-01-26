@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channel - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+                <div class="content">
+            <a href="concurrency.html" class="back-link">← 返回 concurrency</a>
+            <h2 id="channel">Channel</h2>
+            <p>Channel 是 goroutine 之间通信的管道。</p>
+
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">sum</span>(s []<span class="keyword">int</span>, c <span class="keyword">chan</span> <span class="keyword">int</span>) {
+    sum := <span class="number">0</span>
+    <span class="keyword">for</span> _, v := <span class="keyword">range</span> s {
+        sum += v
+    }
+    c &lt;- sum <span class="comment">// 将和发送到 channel</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    s := []<span class="keyword">int</span>{<span class="number">7</span>, <span class="number">2</span>, <span class="number">8</span>, -<span class="number">9</span>, <span class="number">4</span>, <span class="number">0</span>}
+
+    c := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">go</span> <span class="function">sum</span>(s[:<span class="function">len</span>(s)/<span class="number">2</span>], c)
+    <span class="keyword">go</span> <span class="function">sum</span>(s[<span class="function">len</span>(s)/<span class="number">2</span>:], c)
+    x, y := &lt;-c, &lt;-c <span class="comment">// 从 channel 接收</span>
+
+    fmt.<span class="function">Println</span>(x, y, x+y)
+}</code></pre>
+
+            <div class="note-box">
+                <h3>Channel 内部实现原理</h3>
+                
+                <p><strong>1. Channel 的核心数据结构：</strong></p>
+                <p>Channel 在 Go 运行时中的核心结构是 <code>hchan</code>：</p>
+                <pre><code><span class="comment">// runtime/chan.go - Channel 的核心结构（简化版）</span>
+<span class="keyword">type</span> hchan <span class="keyword">struct</span> {
+    qcount   uint           <span class="comment">// 当前队列中元素个数</span>
+    dataqsiz uint           <span class="comment">// 环形队列大小（容量）</span>
+    buf      unsafe.Pointer <span class="comment">// 环形队列指针</span>
+    elemsize uint16         <span class="comment">// 元素大小</span>
+    closed   uint32         <span class="comment">// channel 是否关闭</span>
+    elemtype *_type         <span class="comment">// 元素类型</span>
+    sendx    uint           <span class="comment">// 发送索引</span>
+    recvx    uint           <span class="comment">// 接收索引</span>
+    recvq    waitq          <span class="comment">// 接收等待队列</span>
+    sendq    waitq          <span class="comment">// 发送等待队列</span>
+    lock     mutex          <span class="comment">// 互斥锁</span>
+}</code></pre>
+
+                <p><strong>2. 环形队列实现：</strong></p>
+                <p>Channel 使用环形队列来存储数据，这是一个高效的循环缓冲区：</p>
+                <pre><code><span class="comment">// 环形队列的工作原理示例</span>
+<span class="comment">// 假设容量为 5 的 channel</span>
+
+<span class="comment">// 初始状态: []</span>
+<span class="comment">// sendx = 0, recvx = 0</span>
+
+<span class="comment">// 发送 1, 2, 3: [1, 2, 3, _, _]</span>
+<span class="comment">// sendx = 3, recvx = 0</span>
+
+<span class="comment">// 接收 2 个值: [_, _, 3, _, _]</span>
+<span class="comment">// sendx = 3, recvx = 2</span>
+
+<span class="comment">// 继续发送 4, 5: [_, _, 3, 4, 5]</span>
+<span class="comment">// sendx = 0, recvx = 2 (循环回到开头)</span>
+
+<span class="comment">// 接收 3 个值: [_, _, _, _, _]</span>
+<span class="comment">// sendx = 0, recvx = 0 (队列为空)</span></code></pre>
+
+                <p><strong>3. 发送操作流程：</strong></p>
+                <pre><code><span class="comment">// 发送操作: ch &lt;- value</span>
+
+<span class="comment">// 步骤 1: 获取 channel 锁</span>
+<span class="comment">// lock(&amp;c.lock)</span>
+
+<span class="comment">// 步骤 2: 检查是否有接收者在等待</span>
+<span class="keyword">if</span> sg := c.recvq.<span class="function">dequeue</span>(); sg != <span class="keyword">nil</span> {
+    <span class="comment">// 直接传递数据给接收者，不经过缓冲区</span>
+    <span class="function">send</span>(c, sg, ep)
+    <span class="keyword">return</span>
+}
+
+<span class="comment">// 步骤 3: 如果缓冲区有空间，放入缓冲区</span>
+<span class="keyword">if</span> c.qcount &lt; c.dataqsiz {
+    <span class="comment">// 将数据放入环形队列</span>
+    qp := <span class="function">chanbuf</span>(c, c.sendx)
+    <span class="function">typedmemmove</span>(c.elemtype, qp, ep)
+    c.sendx++
+    <span class="keyword">if</span> c.sendx == c.dataqsiz {
+        c.sendx = <span class="number">0</span>
+    }
+    c.qcount++
+    <span class="keyword">return</span>
+}
+
+<span class="comment">// 步骤 4: 缓冲区已满，阻塞当前 goroutine</span>
+<span class="comment">// 将当前 goroutine 加入发送等待队列</span>
+<span class="comment">// gopark() - 让出 CPU，等待被唤醒</span></code></pre>
+
+                <p><strong>4. 接收操作流程：</strong></p>
+                <pre><code><span class="comment">// 接收操作: value := &lt;-ch</span>
+
+<span class="comment">// 步骤 1: 获取 channel 锁</span>
+<span class="comment">// lock(&amp;c.lock)</span>
+
+<span class="comment">// 步骤 2: 检查是否有发送者在等待</span>
+<span class="keyword">if</span> sg := c.sendq.<span class="function">dequeue</span>(); sg != <span class="keyword">nil</span> {
+    <span class="comment">// 直接从发送者获取数据</span>
+    <span class="function">recv</span>(c, sg, ep)
+    <span class="keyword">return</span>
+}
+
+<span class="comment">// 步骤 3: 如果缓冲区有数据，从缓冲区读取</span>
+<span class="keyword">if</span> c.qcount &gt; <span class="number">0</span> {
+    qp := <span class="function">chanbuf</span>(c, c.recvx)
+    <span class="keyword">if</span> ep != <span class="keyword">nil</span> {
+        <span class="function">typedmemmove</span>(c.elemtype, ep, qp)
+    }
+    <span class="function">typedmemclr</span>(c.elemtype, qp)
+    c.recvx++
+    <span class="keyword">if</span> c.recvx == c.dataqsiz {
+        c.recvx = <span class="number">0</span>
+    }
+    c.qcount--
+    <span class="keyword">return</span>
+}
+
+<span class="comment">// 步骤 4: 缓冲区为空且未关闭，阻塞当前 goroutine</span>
+<span class="comment">// 将当前 goroutine 加入接收等待队列</span>
+<span class="comment">// gopark() - 让出 CPU，等待被唤醒</span></code></pre>
+
+                <p><strong>5. 关闭操作流程：</strong></p>
+                <pre><code><span class="comment">// 关闭操作: close(ch)</span>
+
+<span class="comment">// 步骤 1: 获取 channel 锁</span>
+<span class="comment">// lock(&amp;c.lock)</span>
+
+<span class="comment">// 步骤 2: 标记 channel 为已关闭</span>
+c.closed = <span class="number">1</span>
+
+<span class="comment">// 步骤 3: 唤醒所有等待的接收者</span>
+<span class="keyword">for</span> {
+    sg := c.recvq.<span class="function">dequeue</span>()
+    <span class="keyword">if</span> sg == <span class="keyword">nil</span> {
+        <span class="keyword">break</span>
+    }
+    sg.elem = <span class="keyword">nil</span>  <span class="comment">// 接收者获得零值</span>
+    <span class="function">goready</span>(sg.g)  <span class="comment">// 唤醒 goroutine</span>
+}
+
+<span class="comment">// 步骤 4: 唤醒所有等待的发送者（它们会 panic）</span>
+<span class="keyword">for</span> {
+    sg := c.sendq.<span class="function">dequeue</span>()
+    <span class="keyword">if</span> sg == <span class="keyword">nil</span> {
+        <span class="keyword">break</span>
+    }
+    sg.elem = <span class="keyword">nil</span>
+    <span class="function">goready</span>(sg.g)  <span class="comment">// 唤醒后发送者会 panic</span>
+}</code></pre>
+            
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GORM ORM - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+                <div class="content">
+            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
+            <h2 id="gorm">GORM ORM</h2>
+            
+            <h3>简介</h3>
+            <p>GORM 是 Go 语言中最流行的 ORM（对象关系映射）库，提供了友好的 API，支持多种数据库（MySQL、PostgreSQL、SQLite、SQL Server 等），并包含自动迁移、关联、钩子等功能。</p>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get -u gorm.io/gorm
+<span class="keyword">go</span> get -u gorm.io/driver/mysql</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"gorm.io/driver/mysql"</span>
+    <span class="string">"gorm.io/gorm"</span>
+)
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    ID       <span class="keyword">uint</span>   <span class="string">`gorm:"primaryKey"`</span>
+    Name     <span class="keyword">string</span> <span class="string">`gorm:"size:255;not null"`</span>
+    Email    <span class="keyword">string</span> <span class="string">`gorm:"size:255;uniqueIndex;not null"`</span>
+    Age      <span class="keyword">int</span>    <span class="string">`gorm:"default:0"`</span>
+    CreatedAt time.Time
+    UpdatedAt time.Time
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 连接数据库</span>
+    dsn := <span class="string">"user:password@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"</span>
+    db, err := gorm.<span class="function">Open</span>(mysql.<span class="function">Open</span>(dsn), &gorm.Config{})
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(<span class="string">"Failed to connect database"</span>)
+    }
+    
+    <span class="comment">// 自动迁移</span>
+    db.<span class="function">AutoMigrate</span>(&User{})
+    
+    <span class="comment">// 创建记录</span>
+    user := User{Name: <span class="string">"Alice"</span>, Email: <span class="string">"alice@example.com"</span>, Age: <span class="number">25</span>}
+    result := db.<span class="function">Create</span>(&user)
+    fmt.<span class="function">Println</span>(<span class="string">"Created user ID:"</span>, user.ID)
+    fmt.<span class="function">Println</span>(<span class="string">"Rows affected:"</span>, result.RowsAffected)
+}</code></pre>
+            
+            <h3>创建记录</h3>
+            <pre><code><span class="comment">// 创建单条记录</span>
+user := User{Name: <span class="string">"Bob"</span>, Email: <span class="string">"bob@example.com"</span>, Age: <span class="number">30</span>}
+db.<span class="function">Create</span>(&user)
+
+<span class="comment">// 创建多条记录</span>
+users := []User{
+    {Name: <span class="string">"Charlie"</span>, Email: <span class="string">"charlie@example.com"</span>, Age: <span class="number">28</span>},
+    {Name: <span class="string">"David"</span>, Email: <span class="string">"david@example.com"</span>, Age: <span class="number">32</span>},
+}
+db.<span class="function">Create</span>(&users)
+
+<span class="comment">// 使用 Select 指定字段</span>
+db.<span class="function">Select</span>(<span class="string">"Name"</span>, <span class="string">"Email"</span>).<span class="function">Create</span>(&user)
+
+<span class="comment">// 使用 Omit 忽略字段</span>
+db.<span class="function">Omit</span>(<span class="string">"Age"</span>).<span class="function">Create</span>(&user)</code></pre>
+            
+            <h3>查询记录</h3>
+            <pre><code><span class="comment">// 查询第一条记录</span>
+<span class="keyword">var</span> user User
+db.<span class="function">First</span>(&user)
+<span class="comment">// SELECT * FROM users ORDER BY id LIMIT 1;</span>
+
+<span class="comment">// 根据主键查询</span>
+db.<span class="function">First</span>(&user, <span class="number">1</span>)
+<span class="comment">// SELECT * FROM users WHERE id = 1;</span>
+
+<span class="comment">// 查询所有记录</span>
+<span class="keyword">var</span> users []User
+db.<span class="function">Find</span>(&users)
+<span class="comment">// SELECT * FROM users;</span>
+
+<span class="comment">// 条件查询</span>
+db.<span class="function">Where</span>(<span class="string">"name = ?"</span>, <span class="string">"Alice"</span>).<span class="function">First</span>(&user)
+db.<span class="function">Where</span>(<span class="string">"age > ?"</span>, <span class="number">25</span>).<span class="function">Find</span>(&users)
+db.<span class="function">Where</span>(<span class="string">"name LIKE ?"</span>, <span class="string">"%A%"</span>).<span class="function">Find</span>(&users)
+
+<span class="comment">// 多条件</span>
+db.<span class="function">Where</span>(<span class="string">"name = ? AND age > ?"</span>, <span class="string">"Alice"</span>, <span class="number">20</span>).<span class="function">First</span>(&user)
+
+<span class="comment">// 使用 Map</span>
+db.<span class="function">Where</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}{<span class="string">"name"</span>: <span class="string">"Alice"</span>, <span class="string">"age"</span>: <span class="number">25</span>}).<span class="function">First</span>(&user)
+
+<span class="comment">// 使用 Struct</span>
+db.<span class="function">Where</span>(User{Name: <span class="string">"Alice"</span>, Age: <span class="number">25</span>}).<span class="function">First</span>(&user)
+
+<span class="comment">// Or 条件</span>
+db.<span class="function">Where</span>(<span class="string">"name = ?"</span>, <span class="string">"Alice"</span>).<span class="function">Or</span>(<span class="string">"name = ?"</span>, <span class="string">"Bob"</span>).<span class="function">Find</span>(&users)
+
+<span class="comment">// Not 条件</span>
+db.<span class="function">Not</span>(<span class="string">"name = ?"</span>, <span class="string">"Alice"</span>).<span class="function">Find</span>(&users)
+
+<span class="comment">// 排序</span>
+db.<span class="function">Order</span>(<span class="string">"age desc"</span>).<span class="function">Find</span>(&users)
+
+<span class="comment">// 限制和偏移</span>
+db.<span class="function">Limit</span>(<span class="number">10</span>).<span class="function">Offset</span>(<span class="number">20</span>).<span class="function">Find</span>(&users)
+
+<span class="comment">// 统计</span>
+<span class="keyword">var</span> count <span class="keyword">int64</span>
+db.<span class="function">Model</span>(&User{}).<span class="function">Count</span>(&count)
+
+<span class="comment">// 选择特定字段</span>
+db.<span class="function">Select</span>(<span class="string">"name"</span>, <span class="string">"email"</span>).<span class="function">Find</span>(&users)</code></pre>
+            
+            <h3>更新记录</h3>
+            <pre><code><span class="comment">// 更新单个字段</span>
+db.<span class="function">Model</span>(&user).<span class="function">Update</span>(<span class="string">"age"</span>, <span class="number">26</span>)
+
+<span class="comment">// 更新多个字段</span>
+db.<span class="function">Model</span>(&user).<span class="function">Updates</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}{
+    <span class="string">"name"</span>: <span class="string">"Alice Updated"</span>,
+    <span class="string">"age"</span>:  <span class="number">26</span>,
+})
+
+<span class="comment">// 使用 Struct 更新</span>
+db.<span class="function">Model</span>(&user).<span class="function">Updates</span>(User{Name: <span class="string">"Alice Updated"</span>, Age: <span class="number">26</span>})
+
+<span class="comment">// 只更新非零字段</span>
+db.<span class="function">Model</span>(&user).<span class="function">Updates</span>(User{Name: <span class="string">"Alice"</span>})
+
+<span class="comment">// 更新所有字段（包括零值）</span>
+db.<span class="function">Model</span>(&user).<span class="function">Select</span>(<span class="string">"*"</span>).<span class="function">Updates</span>(User{Name: <span class="string">""</span>, Age: <span class="number">0</span>})
+
+<span class="comment">// 条件更新</span>
+db.<span class="function">Model</span>(&User{}).<span class="function">Where</span>(<span class="string">"age > ?"</span>, <span class="number">20</span>).<span class="function">Update</span>(<span class="string">"status"</span>, <span class="string">"active"</span>)
+
+<span class="comment">// 批量更新</span>
+db.<span class="function">Model</span>(&User{}).<span class="function">Where</span>(<span class="string">"age > ?"</span>, <span class="number">20</span>).<span class="function">Updates</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}{<span class="string">"status"</span>: <span class="string">"active"</span>})</code></pre>
+            
+            <h3>删除记录</h3>
+            <pre><code><span class="comment">// 删除记录</span>
+db.<span class="function">Delete</span>(&user)
+<span class="comment">// DELETE FROM users WHERE id = 1;</span>
+
+<span class="comment">// 根据主键删除</span>
+db.<span class="function">Delete</span>(&User{}, <span class="number">1</span>)
+
+<span class="comment">// 批量删除</span>
+db.<span class="function">Where</span>(<span class="string">"age < ?"</span>, <span class="number">18</span>).<span class="function">Delete</span>(&User{})
+
+<span class="comment">// 软删除</span>
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    ID        <span class="keyword">uint</span>
+    Name      <span class="keyword">string</span>
+    DeletedAt gorm.DeletedAt <span class="string">`gorm:"index"`</span>
+}
+<span class="comment">// 软删除不会真正删除记录，而是设置 deleted_at 字段</span>
+
+<span class="comment">// 永久删除</span>
+db.<span class="function">Unscoped</span>().<span class="function">Delete</span>(&user)</code></pre>
+            
+            <h3>关联</h3>
+            <pre><code><span class="keyword">type</span> User <span class="keyword">struct</span> {
+    gorm.Model
+    Name   <span class="keyword">string</span>
+    Posts  []Post
+}
+
+<span class="keyword">type</span> Post <span class="keyword">struct</span> {
+    gorm.Model
+    Title   <span class="keyword">string</span>
+    UserID  <span class="keyword">uint</span>
+    User    User
+}
+
+<span class="comment">// 预加载关联</span>
+<span class="keyword">var</span> users []User
+db.<span class="function">Preload</span>(<span class="string">"Posts"</span>).<span class="function">Find</span>(&users)
+
+<span class="comment">// 创建关联</span>
+user := User{Name: <span class="string">"Alice"</span>}
+db.<span class="function">Create</span>(&user)
+db.<span class="function">Model</span>(&user).<span class="function">Association</span>(<span class="string">"Posts"</span>).<span class="function">Append</span>([]Post{
+    {Title: <span class="string">"Post 1"</span>},
+    {Title: <span class="string">"Post 2"</span>},
+})
+
+<span class="comment">// 查找关联</span>
+<span class="keyword">var</span> posts []Post
+db.<span class="function">Model</span>(&user).<span class="function">Association</span>(<span class="string">"Posts"</span>).<span class="function">Find</span>(&posts)
+
+<span class="comment">// 替换关联</span>
+db.<span class="function">Model</span>(&user).<span class="function">Association</span>(<span class="string">"Posts"</span>).<span class="function">Replace</span>([]Post{
+    {Title: <span class="string">"New Post 1"</span>},
+})
+
+<span class="comment">// 删除关联</span>
+db.<span class="function">Model</span>(&user).<span class="function">Association</span>(<span class="string">"Posts"</span>).<span class="function">Delete</span>(posts)
+
+<span class="comment">// 清空关联</span>
+db.<span class="function">Model</span>(&user).<span class="function">Association</span>(<span class="string">"Posts"</span>).<span class="function">Clear</span>()</code></pre>
+            
+            <h3>钩子</h3>
+            <pre><code><span class="keyword">type</span> User <span class="keyword">struct</span> {
+    gorm.Model
+    Name  <span class="keyword">string</span>
+    Email <span class="keyword">string</span>
+}
+
+<span class="comment">// 创建前钩子</span>
+<span class="function">func</span> (u *User) <span class="function">BeforeCreate</span>(tx *gorm.DB) <span class="keyword">error</span> {
+    fmt.<span class="function">Println</span>(<span class="string">"Before create:"</span>, u.Name)
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="comment">// 创建后钩子</span>
+<span class="function">func</span> (u *User) <span class="function">AfterCreate</span>(tx *gorm.DB) <span class="keyword">error</span> {
+    fmt.<span class="function">Println</span>(<span class="string">"After create:"</span>, u.ID)
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="comment">// 更新前钩子</span>
+<span class="function">func</span> (u *User) <span class="function">BeforeUpdate</span>(tx *gorm.DB) <span class="keyword">error</span> {
+    fmt.<span class="function">Println</span>(<span class="string">"Before update:"</span>, u.Name)
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="comment">// 查询前钩子</span>
+<span class="function">func</span> (u *User) <span class="function">AfterFind</span>(tx *gorm.DB) <span class="keyword">error</span> {
+    fmt.<span class="function">Println</span>(<span class="string">"After find:"</span>, u.Name)
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            
+            <h3>事务</h3>
+            <pre><code><span class="comment">// 自动事务</span>
+err := db.<span class="function">Transaction</span>(<span class="keyword">func</span>(tx *gorm.DB) <span class="keyword">error</span> {
+    <span class="comment">// 创建用户</span>
+    <span class="keyword">if</span> err := tx.<span class="function">Create</span>(&User{Name: <span class="string">"Alice"</span>}).Error; err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="comment">// 创建订单</span>
+    <span class="keyword">if</span> err := tx.<span class="function">Create</span>(&Order{UserID: <span class="number">1</span>}).Error; err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+})
+
+<span class="comment">// 手动事务</span>
+tx := db.<span class="function">Begin</span>()
+
+<span class="keyword">if</span> err := tx.<span class="function">Create</span>(&User{Name: <span class="string">"Bob"</span>}).Error; err != <span class="keyword">nil</span> {
+    tx.<span class="function">Rollback</span>()
+}
+
+<span class="keyword">if</span> err := tx.<span class="function">Commit</span>().Error; err != <span class="keyword">nil</span> {
+    tx.<span class="function">Rollback</span>()
+}</code></pre>
+            
+            
+        </div>
+    </div>
+</body>
+</html>

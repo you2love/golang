@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>惯用模式 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+                <div class="content">
+            <a href="tips.html" class="back-link">← 返回 tips</a>
+            <h2 id="idioms">惯用模式</h2>
+
+            <h3>1. 错误处理最佳实践</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"errors"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="comment">// ✅ 好的做法：立即处理错误</span>
+<span class="function">func</span> <span class="function">goodErrorHandling</span>() <span class="keyword">error</span> {
+    data, err := <span class="function">readData</span>()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"failed to read data: %w"</span>, err)
+    }
+    
+    result, err := <span class="function">processData</span>(data)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"failed to process data: %w"</span>, err)
+    }
+    
+    <span class="keyword">return</span> <span class="function">saveResult</span>(result)
+}
+
+<span class="comment">// ❌ 坏的做法：忽略错误</span>
+<span class="function">func</span> <span class="function">badErrorHandling</span>() {
+    data, _ := <span class="function">readData</span>()  <span class="comment">// 忽略错误</span>
+    <span class="function">processData</span>(data)
+}
+
+<span class="comment">// ✅ 使用 errors.Is 和 errors.As</span>
+<span class="function">func</span> <span class="function">checkError</span>(err <span class="keyword">error</span>) {
+    <span class="keyword">var</span> notFoundErr *NotFoundError
+    <span class="keyword">if</span> errors.<span class="function">As</span>(err, &notFoundErr) {
+        fmt.<span class="function">Println</span>(<span class="string">"Not found:"</span>, notFoundErr)
+    }
+    
+    <span class="keyword">if</span> errors.<span class="function">Is</span>(err, ErrInvalidInput) {
+        fmt.<span class="function">Println</span>(<span class="string">"Invalid input"</span>)
+    }
+}
+
+<span class="comment">// ✅ 自定义错误类型</span>
+<span class="keyword">type</span> ValidationError <span class="keyword">struct</span> {
+    Field   <span class="keyword">string</span>
+    Message <span class="keyword">string</span>
+}
+
+<span class="function">func</span> (e *ValidationError) <span class="function">Error</span>() <span class="keyword">string</span> {
+    <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"validation error on field %s: %s"</span>, e.Field, e.Message)
+}
+
+<span class="function">func</span> <span class="function">validate</span>(input <span class="keyword">string</span>) <span class="keyword">error</span> {
+    <span class="keyword">if</span> input == <span class="string">""</span> {
+        <span class="keyword">return</span> &ValidationError{
+            Field:   <span class="string">"input"</span>,
+            Message: <span class="string">"cannot be empty"</span>,
+        }
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+
+            <h3>2. 接口设计原则</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// ✅ 好的做法：接口应该小而专注</span>
+<span class="keyword">type</span> Reader <span class="keyword">interface</span> {
+    <span class="function">Read</span>(p []<span class="keyword">byte</span>) (<span class="keyword">n</span> <span class="keyword">int</span>, err <span class="keyword">error</span>)
+}
+
+<span class="keyword">type</span> Writer <span class="keyword">interface</span> {
+    <span class="function">Write</span>(p []<span class="keyword">byte</span>) (<span class="keyword">n</span> <span class="keyword">int</span>, err <span class="keyword">error</span>)
+}
+
+<span class="keyword">type</span> ReadWriter <span class="keyword">interface</span> {
+    Reader
+    Writer
+}
+
+<span class="comment">// ❌ 坏的做法：接口太大</span>
+<span class="keyword">type</span> BadInterface <span class="keyword">interface</span> {
+    <span class="function">Read</span>(p []<span class="keyword">byte</span>) (<span class="keyword">n</span> <span class="keyword">int</span>, err <span class="keyword">error</span>)
+    <span class="function">Write</span>(p []<span class="keyword">byte</span>) (<span class="keyword">n</span> <span class="keyword">int</span>, err <span class="keyword">error</span>)
+    <span class="function">Close</span>() <span class="keyword">error</span>
+    <span class="function">Seek</span>(offset <span class="keyword">int64</span>, whence <span class="keyword">int</span>) (<span class="keyword">int64</span>, <span class="keyword">error</span>)
+    <span class="comment">// ... 更多方法</span>
+}
+
+<span class="comment">// ✅ 接受接口，返回结构体</span>
+<span class="function">func</span> <span class="function">processData</span>(r Reader) {
+    data := <span class="function">make</span>([]<span class="keyword">byte</span>, <span class="number">1024</span>)
+    r.<span class="function">Read</span>(data)
+}
+
+<span class="keyword">type</span> MyReader <span class="keyword">struct</span> {
+    data []<span class="keyword">byte</span>
+}
+
+<span class="function">func</span> (m *MyReader) <span class="function">Read</span>(p []<span class="keyword">byte</span>) (<span class="keyword">n</span> <span class="keyword">int</span>, err <span class="keyword">error</span>) {
+    <span class="comment">// 实现</span>
+    <span class="keyword">return</span> <span class="number">0</span>, <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    reader := &MyReader{}
+    <span class="function">processData</span>(reader)
+}</code></pre>
+
+            <h3>3. 并发模式</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="comment">// ✅ Worker Pool 模式</span>
+<span class="keyword">type</span> WorkerPool <span class="keyword">struct</span> {
+    tasks   <span class="keyword">chan</span> Task
+    workers <span class="keyword">int</span>
+    wg      sync.WaitGroup
+}
+
+<span class="keyword">type</span> Task <span class="keyword">struct</span> {
+    ID   <span class="keyword">int</span>
+    Data <span class="keyword">string</span>
+}
+
+<span class="function">func</span> <span class="function">NewWorkerPool</span>(workers <span class="keyword">int</span>) *WorkerPool {
+    <span class="keyword">return</span> &WorkerPool{
+        tasks:   <span class="function">make</span>(<span class="keyword">chan</span> Task, <span class="number">100</span>),
+        workers: workers,
+    }
+}
+
+<span class="function">func</span> (wp *WorkerPool) <span class="function">Start</span>() {
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < wp.workers; i++ {
+        wp.wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> wp.<span class="function">worker</span>(i)
+    }
+}
+
+<span class="function">func</span> (wp *WorkerPool) <span class="function">worker</span>(id <span class="keyword">int</span>) {
+    <span class="keyword">defer</span> wp.wg.<span class="function">Done</span>()
+    <span class="keyword">for</span> task := <span class="keyword">range</span> wp.tasks {
+        fmt.<span class="function">Printf</span>(<span class="string">"Worker %d processing task %d\n"</span>, id, task.ID)
+    }
+}
+
+<span class="function">func</span> (wp *WorkerPool) <span class="function">Submit</span>(task Task) {
+    wp.tasks <- task
+}
+
+<span class="function">func</span> (wp *WorkerPool) <span class="function">Stop</span>() {
+    <span class="keyword">close</span>(wp.tasks)
+    wp.wg.<span class="function">Wait</span>()
+}
+
+<span class="comment">// ✅ Context 取消模式</span>
+<span class="function">func</span> <span class="function">workerWithContext</span>(ctx context.Context, id <span class="keyword">int</span>) {
+    <span class="keyword">for</span> {
+        <span class="keyword">select</span> {
+        <span class="keyword">case</span> <-ctx.<span class="function">Done</span>():
+            fmt.<span class="function">Printf</span>(<span class="string">"Worker %d stopped\n"</span>, id)
+            <span class="keyword">return</span>
+        <span class="keyword">default</span>
+            fmt.<span class="function">Printf</span>(<span class="string">"Worker %d working\n"</span>, id)
+        }
+    }
+}
+
+<span class="comment">// ✅ Fan-out/Fan-in 模式</span>
+<span class="function">func</span> <span class="function">fanOut</span>(input <-<span class="keyword">chan</span> <span class="keyword">int</span>, workers <span class="keyword">int</span>) []<-<span class="keyword">chan</span> <span class="keyword">int</span> {
+    outputs := <span class="function">make</span>([]<-<span class="keyword">chan</span> <span class="keyword">int</span>, workers)
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < workers; i++ {
+        outputs[i] = <span class="function">worker</span>(input)
+    }
+    <span class="keyword">return</span> outputs
+}
+
+<span class="function">func</span> <span class="function">worker</span>(input <-<span class="keyword">chan</span> <span class="keyword">int</span>) <-<span class="keyword">chan</span> <span class="keyword">int</span> {
+    output := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">defer</span> <span class="function">close</span>(output)
+        <span class="keyword">for</span> v := <span class="keyword">range</span> input {
+            output <- v * <span class="number">2</span>
+        }
+    }()
+    <span class="keyword">return</span> output
+}
+
+<span class="function">func</span> <span class="function">fanIn</span>(inputs ...<-<span class="keyword">chan</span> <span class="keyword">int</span>) <-<span class="keyword">chan</span> <span class="keyword">int</span> {
+    output := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="keyword">for</span> _, input := <span class="keyword">range</span> inputs {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>(ch <-<span class="keyword">chan</span> <span class="keyword">int</span>) {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            <span class="keyword">for</span> v := <span class="keyword">range</span> ch {
+                output <- v
+            }
+        }(input)
+    }
+    
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        wg.<span class="function">Wait</span>()
+        <span class="function">close</span>(output)
+    }()
+    
+    <span class="keyword">return</span> output
+}</code></pre>
+
+            <h3>4. 资源管理</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"database/sql"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="comment">// ✅ 使用 defer 确保资源释放</span>
+<span class="function">func</span> <span class="function">processFile</span>(filename <span class="keyword">string</span>) <span class="keyword">error</span> {
+    file, err := os.<span class="function">Open</span>(filename)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    <span class="comment">// 处理文件</span>
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="comment">// ✅ 使用 defer 处理数据库连接</span>
+<span class="function">func</span> <span class="function">queryDatabase</span>(db *sql.DB) <span class="keyword">error</span> {
+    tx, err := db.<span class="function">Begin</span>()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> <span class="keyword">func</span>() {
+        <span class="keyword">if</span> p := <span class="function">recover</span>(); p != <span class="keyword">nil</span> {
+            tx.<span class="function">Rollback</span>()
+            <span class="function">panic</span>(p)
+        } <span class="keyword">else if</span> err != <span class="keyword">nil</span> {
+        tx.<span class="function">Rollback</span>()
+    } <span class="keyword">else</span> {
+        err = tx.<span class="function">Commit</span>()
+    }
+    }()
+    
+    <span class="comment">// 执行查询</span>
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="comment">// ✅ 使用 context 控制超时</span>
+<span class="function">func</span> <span class="function">fetchWithTimeout</span>(ctx context.Context, url <span class="keyword">string</span>) ([]<span class="keyword">byte</span>, <span class="keyword">error</span>) {
+    <span class="comment">// 使用 ctx 控制请求超时</span>
+    <span class="keyword">return</span> <span class="keyword">nil</span>, <span class="keyword">nil</span>
+}</code></pre>
+
+            
+        </div>
+    </div>
+</body>
+</html>

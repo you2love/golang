@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validator 参数校验 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+                <div class="content">
+            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
+            <h2 id="validator">Validator 参数校验</h2>
+            
+            <h3>简介</h3>
+            <p>Validator 是 Go 语言中最流行的参数校验库，基于结构体标签实现，支持多种校验规则，可以轻松集成到 Gin 等 Web 框架中。它支持自定义校验规则、国际化错误消息等功能。</p>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get -u github.com/go-playground/validator/v10</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/go-playground/validator/v10"</span>
+)
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    Name  <span class="keyword">string</span> <span class="string">`validate:"required,min=3,max=32"`</span>
+    Email <span class="keyword">string</span> <span class="string">`validate:"required,email"`</span>
+    Age   <span class="keyword">int</span>    <span class="string">`validate:"required,gte=0,lte=130"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    validate := validator.<span class="function">New</span>()
+    
+    user := User{
+        Name:  <span class="string">"Alice"</span>,
+        Email: <span class="string">"alice@example.com"</span>,
+        Age:   <span class="number">25</span>,
+    }
+    
+    err := validate.<span class="function">Struct</span>(user)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Validation failed:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Validation passed!"</span>)
+}</code></pre>
+            
+            <h3>常用校验规则</h3>
+            <pre><code><span class="keyword">type</span> User <span class="keyword">struct</span> {
+    <span class="comment">// 必填字段</span>
+    Name <span class="keyword">string</span> <span class="string">`validate:"required"`</span>
+    
+    <span class="comment">// 字符串长度</span>
+    Username <span class="keyword">string</span> <span class="string">`validate:"min=3,max=20"`</span>
+    
+    <span class="comment">// 邮箱格式</span>
+    Email <span class="keyword">string</span> <span class="string">`validate:"email"`</span>
+    
+    <span class="comment">// URL 格式</span>
+    Website <span class="keyword">string</span> <span class="string">`validate:"url"`</span>
+    
+    <span class="comment">// 数值范围</span>
+    Age <span class="keyword">int</span> <span class="string">`validate:"gte=0,lte=130"`</span>
+    
+    <span class="comment">// 大于等于 (gte)、大于 (gt)、小于等于 (lte)、小于 (lt)</span>
+    Price <span class="keyword">float64</span> <span class="string">`validate:"gt=0"`</span>
+    
+    <span class="comment">// 正则表达式</span>
+    Phone <span class="keyword">string</span> <span class="string">`validate:"required,^1[3-9]\\d{9}$"`</span>
+    
+    <span class="comment">// 枚举值</span>
+    Gender <span class="keyword">string</span> <span class="string">`validate:"oneof=male female other"`</span>
+    
+    <span class="comment">// 字符串包含</span>
+    Password <span class="keyword">string</span> <span class="string">`validate:"containsany=!@#$%"`</span>
+    
+    <span class="comment">// 唯一性（需要自定义校验）</span>
+    Username <span class="keyword">string</span> <span class="string">`validate:"unique"`</span>
+    
+    <span class="comment">// 可选字段</span>
+    Nickname <span class="keyword">string</span> <span class="string">`validate:"omitempty,min=2"`</span>
+    
+    <span class="comment">// 排除某些值</span>
+    Role <span class="keyword">string</span> <span class="string">`validate:"nefield=Password"`</span>
+    
+    <span class="comment">// 字段相等</span>
+    ConfirmPassword <span class="keyword">string</span> <span class="string">`validate:"eqfield=Password"`</span>
+    
+    <span class="comment">// 字段不等</span>
+    NewEmail <span class="keyword">string</span> <span class="string">`validate:"nefield=OldEmail"`</span>
+}</code></pre>
+            
+            <h3>错误处理</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/go-playground/validator/v10"</span>
+)
+
+<span class="function">func</span> <span class="function">handleValidationError</span>(err <span class="keyword">error</span>) {
+    <span class="comment">// 类型断言</span>
+    validationErrors, ok := err.(validator.ValidationErrors)
+    <span class="keyword">if</span> !ok {
+        fmt.<span class="function">Println</span>(<span class="string">"Unknown error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="comment">// 遍历所有错误</span>
+    <span class="keyword">for</span>, e := <span class="keyword">range</span> validationErrors {
+        fmt.<span class="function">Printf</span>(<span class="string">"Field: %s, Tag: %s, Param: %s\n"</span>, e.<span class="function">Field</span>(), e.<span class="function">Tag</span>(), e.<span class="function">Param</span>())
+    }
+}
+
+<span class="comment">// 自定义错误消息</span>
+<span class="keyword">type</span> ErrorResponse <span class="keyword">struct</span> {
+    Field   <span class="keyword">string</span> <span class="string">`json:"field"`</span>
+    Message <span class="keyword">string</span> <span class="string">`json:"message"`</span>
+}
+
+<span class="function">func</span> <span class="function">getValidationErrors</span>(err <span class="keyword">error</span>) []ErrorResponse {
+    <span class="keyword">var</span> errors []ErrorResponse
+    
+    validationErrors := err.(validator.ValidationErrors)
+    <span class="keyword">for</span>, e := <span class="keyword">range</span> validationErrors {
+        errors = <span class="function">append</span>(errors, ErrorResponse{
+            Field:   e.<span class="function">Field</span>(),
+            Message: <span class="function">getErrorMessage</span>(e),
+        })
+    }
+    
+    <span class="keyword">return</span> errors
+}
+
+<span class="function">func</span> <span class="function">getErrorMessage</span>(e validator.FieldError) <span class="keyword">string</span> {
+    <span class="keyword">switch</span> e.<span class="function">Tag</span>() {
+    <span class="keyword">case</span> <span class="string">"required"</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%s is required"</span>, e.<span class="function">Field</span>())
+    <span class="keyword">case</span> <span class="string">"email"</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%s must be a valid email"</span>, e.<span class="function">Field</span>())
+    <span class="keyword">case</span> <span class="string">"min"</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%s must be at least %s characters"</span>, e.<span class="function">Field</span>(), e.<span class="function">Param</span>())
+    <span class="keyword">case</span> <span class="string">"max"</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%s must be at most %s characters"</span>, e.<span class="function">Field</span>(), e.<span class="function">Param</span>())
+    <span class="keyword">default</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%s is invalid"</span>, e.<span class="function">Field</span>())
+    }
+}</code></pre>
+            
+            <h3>自定义校验规则</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/go-playground/validator/v10"</span>
+    <span class="string">"regexp"</span>
+)
+
+<span class="comment">// 自定义校验：手机号</span>
+<span class="function">func</span> <span class="function">validateMobile</span>(fl validator.FieldLevel) <span class="keyword">bool</span> {
+    mobile := fl.<span class="function">Field</span>().<span class="function">String</span>()
+    matched, _ := regexp.<span class="function">MatchString</span>(<span class="string">`^1[3-9]\d{9}$`</span>, mobile)
+    <span class="keyword">return</span> matched
+}
+
+<span class="comment">// 自定义校验：用户名唯一性</span>
+<span class="function">func</span> <span class="function">validateUsernameUnique</span>(fl validator.FieldLevel) <span class="keyword">bool</span> {
+    username := fl.<span class="function">Field</span>().<span class="function">String</span>()
+    <span class="comment">// 这里应该查询数据库检查用户名是否已存在</span>
+    <span class="comment">// 简化示例：假设用户名不能是 "admin"</span>
+    <span class="keyword">return</span> username != <span class="string">"admin"</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    validate := validator.<span class="function">New</span>()
+    
+    <span class="comment">// 注册自定义校验</span>
+    validate.<span class="function">RegisterValidation</span>(<span class="string">"mobile"</span>, <span class="function">validateMobile</span>)
+    validate.<span class="function">RegisterValidation</span>(<span class="string">"username_unique"</span>, <span class="function">validateUsernameUnique</span>)
+    
+    <span class="keyword">type</span> User <span class="keyword">struct</span> {
+        Username <span class="keyword">string</span> <span class="string">`validate:"required,username_unique"`</span>
+        Mobile   <span class="keyword">string</span> <span class="string">`validate:"required,mobile"`</span>
+    }
+    
+    user := User{
+        Username: <span class="string">"admin"</span>,
+        Mobile:   <span class="string">"13800138000"</span>,
+    }
+    
+    err := validate.<span class="function">Struct</span>(user)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Validation failed:"</span>, err)
+    }
+}</code></pre>
+            
+            <h3>与 Gin 集成</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/gin-gonic/gin"</span>
+    <span class="string">"github.com/go-playground/validator/v10"</span>
+    <span class="string">"net/http"</span>
+)
+
+<span class="keyword">type</span> CreateUserRequest <span class="keyword">struct</span> {
+    Name     <span class="keyword">string</span> <span class="string">`json:"name" validate:"required,min=3,max=32"`</span>
+    Email    <span class="keyword">string</span> <span class="string">`json:"email" validate:"required,email"`</span>
+    Password <span class="keyword">string</span> <span class="string">`json:"password" validate:"required,min=8"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    r := gin.<span class="function">Default</span>()
+    
+    <span class="comment">// 获取 Gin 的 validator</span>
+    <span class="keyword">if</span> v, ok := binding.Validator.<span class="function">Engine</span>().(*validator.Validate); ok {
+        <span class="comment">// 注册自定义校验</span>
+        v.<span class="function">RegisterValidation</span>(<span class="string">"mobile"</span>, <span class="function">validateMobile</span>)
+    }
+    
+    r.<span class="function">POST</span>(<span class="string">"/users"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        <span class="keyword">var</span> req CreateUserRequest
+        
+        <span class="comment">// 绑定和校验</span>
+        <span class="keyword">if</span> err := c.<span class="function">ShouldBindJSON</span>(&req); err != <span class="keyword">nil</span> {
+            c.<span class="function">JSON</span>(http.StatusBadRequest, gin.H{
+                <span class="string">"error"</span>: <span class="function">getValidationErrors</span>(err),
+            })
+            <span class="keyword">return</span>
+        }
+        
+        c.<span class="function">JSON</span>(http.StatusCreated, gin.H{
+            <span class="string">"message"</span>: <span class="string">"User created"</span>,
+            <span class="string">"user"</span>:    req,
+        })
+    })
+    
+    r.<span class="function">Run</span>(<span class="string">":8080"</span>)
+}</code></pre>
+            
+            <h3>结构体嵌套校验</h3>
+            <pre><code><span class="keyword">type</span> Address <span class="keyword">struct</span> {
+    Street  <span class="keyword">string</span> <span class="string">`validate:"required"`</span>
+    City    <span class="keyword">string</span> <span class="string">`validate:"required"`</span>
+    ZipCode <span class="keyword">string</span> <span class="string">`validate:"required,len=6"`</span>
+}
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    Name    <span class="keyword">string</span>  <span class="string">`validate:"required"`</span>
+    Address Address  <span class="string">`validate:"required,dive"`</span>  <span class="comment">// dive 表示校验嵌套结构体</span>
+}</code></pre>
+            
+            <h3>数组/切片校验</h3>
+            <pre><code><span class="keyword">type</span> Order <span class="keyword">struct</span> {
+    Items []Item <span class="string">`validate:"required,min=1,dive"`</span>  <span class="comment">// 校验数组中的每个元素</span>
+}
+
+<span class="keyword">type</span> Item <span class="keyword">struct</span> {
+    Name  <span class="keyword">string</span>  <span class="string">`validate:"required"`</span>
+    Price <span class="keyword">float64</span> <span class="string">`validate:"required,gt=0"`</span>
+}</code></pre>
+            
+            
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etcd 分布式存储 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+                <div class="content">
+            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
+            <h2 id="etcd">Etcd 分布式键值存储</h2>
+            
+            <h3>简介</h3>
+            <p>Etcd 是一个分布式、可靠的键值存储系统，用于配置管理和服务发现。它使用 Raft 算法保证数据一致性，支持强一致性读写、事务、租约等功能，是 Kubernetes 等项目的核心组件。</p>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get -u go.etcd.io/etcd/client/v3</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    
+    <span class="string">"go.etcd.io/etcd/client/v3"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建客户端</span>
+    cli, err := clientv3.<span class="function">New</span>(clientv3.Config{
+        Endpoints:   []<span class="keyword">string</span>{<span class="string">"127.0.0.1:2379"</span>},
+        DialTimeout: <span class="number">5</span> * time.Second,
+    })
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
+    <span class="keyword">defer</span> cli.<span class="function">Close</span>()
+    
+    <span class="comment">// 设置键值</span>
+    ctx, cancel := context.<span class="function">WithTimeout</span>(context.<span class="function">Background</span>(), <span class="number">5</span>*time.Second)
+    resp, err := cli.<span class="function">Put</span>(ctx, <span class="string">"key"</span>, <span class="string">"value"</span>)
+    cancel()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
+    fmt.<span class="function">Println</span>(<span class="string">"Revision:"</span>, resp.Header.Revision)
+    
+    <span class="comment">// 获取键值</span>
+    ctx, cancel = context.<span class="function">WithTimeout</span>(context.<span class="function">Background</span>(), <span class="number">5</span>*time.Second)
+    resp, err = cli.<span class="function">Get</span>(ctx, <span class="string">"key"</span>)
+    cancel()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
+    
+    <span class="keyword">for</span> _, ev := <span class="keyword">range</span> resp.Kvs {
+        fmt.<span class="function">Printf</span>(<span class="string">"%s : %s\n"</span>, ev.Key, ev.Value)
+    }
+}</code></pre>
+            
+            <h3>键值操作</h3>
+            <pre><code><span class="comment">// 设置键值</span>
+resp, err := cli.<span class="function">Put</span>(ctx, <span class="string">"key"</span>, <span class="string">"value"</span>)
+
+<span class="comment">// 获取单个键</span>
+resp, err := cli.<span class="function">Get</span>(ctx, <span class="string">"key"</span>)
+
+<span class="comment">// 获取多个键（前缀匹配）</span>
+resp, err := cli.<span class="function">Get</span>(ctx, <span class="string">"prefix"</span>, clientv3.<span class="function">WithPrefix</span>())
+
+<span class="comment">// 获取所有键</span>
+resp, err := cli.<span class="function">Get</span>(ctx, <span class="string">""</span>, clientv3.<span class="function">WithFromKey</span>(), clientv3.<span class="function">WithLimit</span>(<span class="number">100</span>))
+
+<span class="comment">// 删除键</span>
+resp, err := cli.<span class="function">Delete</span>(ctx, <span class="string">"key"</span>)
+
+<span class="comment">// 删除多个键（前缀匹配）</span>
+resp, err := cli.<span class="function">Delete</span>(ctx, <span class="string">"prefix"</span>, clientv3.<span class="function">WithPrefix</span>())
+
+<span class="comment">// 删除所有键</span>
+resp, err := cli.<span class="function">Delete</span>(ctx, <span class="string">""</span>, clientv3.<span class="function">WithPrefix</span>())</code></pre>
+            
+            <h3>租约（Lease）</h3>
+            <pre><code><span class="comment">// 创建租约（10秒过期）</span>
+lease, err := cli.<span class="function">Grant</span>(ctx, <span class="number">10</span>)
+<span class="keyword">if</span> err != <span class="keyword">nil</span> {
+    <span class="function">panic</span>(err)
+}
+
+<span class="comment">// 绑定租约到键</span>
+resp, err := cli.<span class="function">Put</span>(ctx, <span class="string">"key"</span>, <span class="string">"value"</span>, clientv3.<span class="function">WithLease</span>(lease.ID))
+
+<span class="comment">// 续租</span>
+keepAlive, err := cli.<span class="function">KeepAlive</span>(ctx, lease.ID)
+<span class="keyword">for</span> ka := <span class="keyword">range</span> keepAlive {
+    fmt.<span class="function">Printf</span>(<span class="string">"TTL: %d\n"</span>, ka.TTL)
+}
+
+<span class="comment">// 撤销租约</span>
+_, err = cli.<span class="function">Revoke</span>(ctx, lease.ID)</code></pre>
+            
+            <h3>事务</h3>
+            <pre><code><span class="comment">// 事务操作</span>
+txn := cli.<span class="function">Txn</span>(ctx)
+
+<span class="comment">// If 条件</span>
+txn.<span class="function">If</span>(
+    clientv3.<span class="function">Compare</span>(clientv3.<span class="function">Value</span>(<span class="string">"key"</span>), <span class="string">"="</span>, <span class="string">"value"</span>),
+).
+<span class="function">Then</span>(
+    clientv3.<span class="function">OpPut</span>(<span class="string">"key"</span>, <span class="string">"new_value"</span>),
+).
+<span class="function">Else</span>(
+    clientv3.<span class="function">OpPut</span>(<span class="string">"key"</span>, <span class="string">"default_value"</span>),
+).
+<span class="function">Commit</span>()
+
+<span class="comment">// 事务示例：分布式锁</span>
+<span class="function">func</span> <span class="function">acquireLock</span>(cli *clientv3.Client, key <span class="keyword">string</span>, ttl <span class="keyword">int64</span>) (<span class="keyword">bool</span>, error) {
+    <span class="comment">// 创建租约</span>
+    lease, err := cli.<span class="function">Grant</span>(context.<span class="function">Background</span>(), ttl)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">false</span>, err
+    }
+    
+    <span class="comment">// 事务：如果键不存在，则设置</span>
+    txn := cli.<span class="function">Txn</span>(context.<span class="function">Background</span>())
+    txn.<span class="function">If</span>(
+        clientv3.<span class="function">Compare</span>(clientv3.<span class="function">CreateRevision</span>(key), <span class="string">"="</span>, <span class="number">0</span>),
+    ).
+    <span class="function">Then</span>(
+        clientv3.<span class="function">OpPut</span>(key, <span class="string">"locked"</span>, clientv3.<span class="function">WithLease</span>(lease.ID)),
+    ).
+    <span class="function">Commit</span>()
+    
+    <span class="keyword">return</span> txn.<span class="function">Succeeded</span>(), <span class="keyword">nil</span>
+}</code></pre>
+            
+            <h3>监听变化</h3>
+            <pre><code><span class="comment">// 监听单个键</span>
+watchChan := cli.<span class="function">Watch</span>(ctx, <span class="string">"key"</span>)
+<span class="keyword">for</span> watchResp := <span class="keyword">range</span> watchChan {
+    <span class="keyword">for</span> _, event := <span class="keyword">range</span> watchResp.Events {
+        fmt.<span class="function">Printf</span>(<span class="string">"Type: %s, Key: %s, Value: %s\n"</span>, 
+            event.Type, event.Kv.Key, event.Kv.Value)
+    }
+}
+
+<span class="comment">// 监听前缀</span>
+watchChan = cli.<span class="function">Watch</span>(ctx, <span class="string">"prefix"</span>, clientv3.<span class="function">WithPrefix</span>())
+<span class="keyword">for</span> watchResp := <span class="keyword">range</span> watchChan {
+    <span class="keyword">for</span> _, event := <span class="keyword">range</span> watchResp.Events {
+        fmt.<span class="function">Printf</span>(<span class="string">"Type: %s, Key: %s, Value: %s\n"</span>, 
+            event.Type, event.Kv.Key, event.Kv.Value)
+    }
+}
+
+<span class="comment">// 从指定版本开始监听</span>
+watchChan = cli.<span class="function">Watch</span>(ctx, <span class="string">"key"</span>, clientv3.<span class="function">WithRev</span>(<span class="number">100</span>))</code></pre>
+            
+            <h3>服务发现</h3>
+            <pre><code><span class="comment">// 注册服务</span>
+<span class="function">func</span> <span class="function">registerService</span>(cli *clientv3.Client, serviceID, address <span class="keyword">string</span>, ttl <span class="keyword">int64</span>) (<span class="keyword">string</span>, error) {
+    <span class="comment">// 创建租约</span>
+    lease, err := cli.<span class="function">Grant</span>(context.<span class="function">Background</span>(), ttl)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, err
+    }
+    
+    <span class="comment">// 注册服务</span>
+    key := fmt.<span class="function">Sprintf</span>(<span class="string">"/services/%s"</span>, serviceID)
+    _, err = cli.<span class="function">Put</span>(context.<span class="function">Background</span>(), key, address, clientv3.<span class="function">WithLease</span>(lease.ID))
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, err
+    }
+    
+    <span class="comment">// 续租</span>
+    keepAlive, err := cli.<span class="function">KeepAlive</span>(context.<span class="function">Background</span>(), lease.ID)
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">for</span> <span class="keyword">range</span> keepAlive {
+            <span class="comment">// 保持续租</span>
+        }
+    }()
+    
+    <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d"</span>, lease.ID), <span class="keyword">nil</span>
+}
+
+<span class="comment">// 发现服务</span>
+<span class="function">func</span> <span class="function">discoverService</span>(cli *clientv3.Client, serviceID <span class="keyword">string</span>) (<span class="keyword">string</span>, error) {
+    key := fmt.<span class="function">Sprintf</span>(<span class="string">"/services/%s"</span>, serviceID)
+    resp, err := cli.<span class="function">Get</span>(context.<span class="function">Background</span>(), key)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, err
+    }
+    
+    <span class="keyword">if</span> <span class="function">len</span>(resp.Kvs) == <span class="number">0</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, fmt.<span class="function">Errorf</span>(<span class="string">"service not found"</span>)
+    }
+    
+    <span class="keyword">return</span> string(resp.Kvs[<span class="number">0</span>].Value), <span class="keyword">nil</span>
+}</code></pre>
+            
+            <h3>配置管理</h3>
+            <pre><code><span class="comment">// 监听配置变化</span>
+<span class="function">func</span> <span class="function">watchConfig</span>(cli *clientv3.Client, key <span class="keyword">string</span>) {
+    watchChan := cli.<span class="function">Watch</span>(context.<span class="function">Background</span>(), key)
+    <span class="keyword">for</span> watchResp := <span class="keyword">range</span> watchChan {
+        <span class="keyword">for</span> _, event := <span class="keyword">range</span> watchResp.Events {
+            <span class="keyword">switch</span> event.Type {
+            <span class="keyword">case</span> clientv3.EventTypePut:
+                fmt.<span class="function">Printf</span>(<span class="string">"Config updated: %s\n"</span>, event.Kv.Value)
+                <span class="comment">// 重新加载配置</span>
+            <span class="keyword">case</span> clientv3.EventTypeDelete:
+                fmt.<span class="function">Println</span>(<span class="string">"Config deleted"</span>)
+            }
+        }
+    }
+}
+
+<span class="comment">// 获取配置</span>
+<span class="function">func</span> <span class="function">getConfig</span>(cli *clientv3.Client, key <span class="keyword">string</span>) (<span class="keyword">string</span>, error) {
+    resp, err := cli.<span class="function">Get</span>(context.<span class="function">Background</span>(), key)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, err
+    }
+    
+    <span class="keyword">if</span> <span class="function">len</span>(resp.Kvs) == <span class="number">0</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, fmt.<span class="function">Errorf</span>(<span class="string">"config not found"</span>)
+    }
+    
+    <span class="keyword">return</span> string(resp.Kvs[<span class="number">0</span>].Value), <span class="keyword">nil</span>
+}</code></pre>
+            
+            <h2 id="bestpractices">最佳实践</h2>
+            
+            <h3>Validator 最佳实践</h3>
+            <div class="note-box">
+                <h4>1. 统一错误处理</h4>
+                <pre><code><span class="keyword">type</span> ValidationError <span class="keyword">struct</span> {
+    Field   <span class="keyword">string</span> <span class="string">`json:"field"`</span>
+    Message <span class="keyword">string</span> <span class="string">`json:"message"`</span>
+}
+
+<span class="function">func</span> <span class="function">HandleValidationError</span>(err <span class="keyword">error</span>) []ValidationError {
+    <span class="keyword">var</span> errors []ValidationError
+    validationErrors := err.(validator.ValidationErrors)
+    <span class="keyword">for</span>, e := <span class="keyword">range</span> validationErrors {
+        errors = <span class="function">append</span>(errors, ValidationError{
+            Field:   e.<span class="function">Field</span>(),
+            Message: <span class="function">getErrorMessage</span>(e),
+        })
+    }
+    <span class="keyword">return</span> errors
+}</code></pre>
+                
+                <h4>2. 自定义校验规则</h4>
+                <pre><code><span class="comment">// 业务相关的自定义校验</span>
+<span class="function">func</span> <span class="function">validateBusinessRule</span>(fl validator.FieldLevel) <span class="keyword">bool</span> {
+    <span class="comment">// 实现业务规则校验</span>
+    <span class="keyword">return</span> <span class="keyword">true</span>
+}</code></pre>
+                
+                <h4>3. 分层校验</h4>
+                <pre><code><span class="comment">// Controller 层：格式校验</span>
+<span class="keyword">if</span> err := c.<span class="function">ShouldBindJSON</span>(&req); err != <span class="keyword">nil</span> {
+    <span class="keyword">return</span> err
+}
+
+<span class="comment">// Service 层：业务校验</span>
+<span class="keyword">if</span> err := s.<span class="function">ValidateBusiness</span>(&req); err != <span class="keyword">nil</span> {
+    <span class="keyword">return</span> err
+}</code></pre>
+            </div>
+            
+            <h3>Cobra 最佳实践</h3>
+            <div class="note-box">
+                <h4>1. 结构化命令</h4>
+                <pre><code><span class="comment">// cmd/root.go</span>
+<span class="keyword">package</span> cmd
+
+<span class="keyword">var</span> rootCmd = &cobra.Command{
+    Use:   <span class="string">"myapp"</span>,
+    Short: <span class="string">"My application"</span>,
+}
+
+<span class="function">func</span> <span class="function">Execute</span>() {
+    <span class="keyword">if</span> err := rootCmd.<span class="function">Execute</span>(); err != <span class="keyword">nil</span> {
+        os.<span class="function">Exit</span>(<span class="number">1</span>)
+    }
+}
+
+<span class="comment">// cmd/create.go</span>
+<span class="keyword">package</span> cmd
+
+<span class="keyword">var</span> createCmd = &cobra.Command{
+    Use:   <span class="string">"create"</span>,
+    Short: <span class="string">"Create resource"</span>,
+}
+
+<span class="function">func</span> <span class="function">init</span>() {
+    rootCmd.<span class="function">AddCommand</span>(createCmd)
+}</code></pre>
+                
+                <h4>2. 配置管理</h4>
+                <pre><code><span class="comment">// 使用 Viper 管理配置</span>
+<span class="keyword">var</span> cfgFile <span class="keyword">string</span>
+
+<span class="function">func</span> <span class="function">init</span>() {
+    cobra.<span class="function">OnInitialize</span>(<span class="function">initConfig</span>)
+    rootCmd.<span class="function">PersistentFlags</span>().<span class="function">StringVar</span>(&cfgFile, <span class="string">"config"</span>, <span class="string">""</span>, <span class="string">"config file"</span>)
+}
+
+<span class="function">func</span> <span class="function">initConfig</span>() {
+    <span class="keyword">if</span> cfgFile != <span class="string">""</span> {
+        viper.<span class="function">SetConfigFile</span>(cfgFile)
+    } <span class="keyword">else</span> {
+        home, _ := os.<span class="function">UserHomeDir</span>()
+        viper.<span class="function">AddConfigPath</span>(home)
+        viper.<span class="function">SetConfigName</span>(<span class="string">".myapp"</span>)
+    }
+    
+    viper.<span class="function">ReadInConfig</span>()
+}</code></pre>
+                
+                <h4>3. 生成文档</h4>
+                <pre><code><span class="comment">// 自动生成文档</span>
+<span class="keyword">go</span> run main.go docs</code></pre>
+            </div>
+            
+            <h3>Go-Micro 最佳实践</h3>
+            <div class="note-box">
+                <h4>1. 服务拆分</h4>
+                <pre><code><span class="comment">// 按业务领域拆分服务</span>
+<span class="comment">// - user-service</span>
+<span class="comment">// - order-service</span>
+<span class="comment">// - payment-service</span></code></pre>
+                
+                <h4>2. 接口设计</h4>
+                <pre><code><span class="comment">// 使用 Protobuf 定义接口</span>
+syntax = <span class="string">"proto3"</span>;
+
+<span class="keyword">package</span> user;
+
+<span class="keyword">service</span> UserService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+}</code></pre>
+                
+                <h4>3. 错误处理</h4>
+                <pre><code><span class="comment">// 统一错误处理</span>
+<span class="keyword">type</span> ErrorResponse <span class="keyword">struct</span> {
+    Code    <span class="keyword">string</span> <span class="string">`json:"code"`</span>
+    Message <span class="keyword">string</span> <span class="string">`json:"message"`</span>
+}
+
+<span class="function">func</span> <span class="function">HandleError</span>(err <span class="keyword">error</span>) *ErrorResponse {
+    <span class="keyword">return</span> &ErrorResponse{
+        Code:    <span class="string">"ERROR"</span>,
+        Message: err.<span class="function">Error</span>(),
+    }
+}</code></pre>
+            </div>
+            
+            <h3>Etcd 最佳实践</h3>
+            <div class="note-box">
+                <h4>1. 键命名规范</h4>
+                <pre><code><span class="comment">// 使用层次化的键名</span>
+<span class="comment">// /services/user-service/instances/192.168.1.1:8080</span>
+<span class="comment">// /config/database/host</span>
+<span class="comment">// /locks/resource-123</span></code></pre>
+                
+                <h4>2. 租约管理</h4>
+                <pre><code><span class="comment">// 自动续租</span>
+keepAlive, err := cli.<span class="function">KeepAlive</span>(ctx, lease.ID)
+<span class="keyword">defer</span> cli.<span class="function">Revoke</span>(ctx, lease.ID)</code></pre>
+                
+                <h4>3. 事务使用</h4>
+                <pre><code><span class="comment">// 使用事务实现原子操作</span>
+txn := cli.<span class="function">Txn</span>(ctx)
+<span class="comment">// ...</span>
+txn.<span class="function">Commit</span>()</code></pre>
+                
+                <h4>4. 监听机制</h4>
+                <pre><code><span class="comment">// 使用监听实现配置热更新</span>
+watchChan := cli.<span class="function">Watch</span>(ctx, <span class="string">"/config"</span>, clientv3.<span class="function">WithPrefix</span>())</code></pre>
+            </div>
+            
+            <h3>微服务架构最佳实践</h3>
+            <div class="note-box">
+                <h4>1. 服务注册与发现</h4>
+                <pre><code><span class="comment">// 使用 Etcd 作为注册中心</span>
+registry := etcd.<span class="function">NewRegistry</span>(registry.<span class="function">Addrs</span>(<span class="string">"127.0.0.1:2379"</span>))
+service := micro.<span class="function">NewService</span>(micro.<span class="function">Registry</span>(registry))</code></pre>
+                
+                <h4>2. 配置中心</h4>
+                <pre><code><span class="comment">// 使用 Etcd 存储配置</span>
+cli.<span class="function">Put</span>(ctx, <span class="string">"/config/database/host"</span>, <span class="string">"localhost"</span>)</code></pre>
+                
+                <h4>3. 分布式锁</h4>
+                <pre><code><span class="comment">// 使用 Etcd 实现分布式锁</span>
+<span class="function">func</span> <span class="function">acquireLock</span>(cli *clientv3.Client, key <span class="keyword">string</span>) (<span class="keyword">bool</span>, error) {
+    <span class="comment">// ...</span>
+}</code></pre>
+                
+                <h4>4. 消息队列</h4>
+                <pre><code><span class="comment">// 使用 Go-Micro Broker</span>
+micro.<span class="function">RegisterSubscriber</span>(<span class="string">"topic"</span>, service.<span class="function">Server</span>(), handler)</code></pre>
+            </div>
+            
+            
+            
+        </div>
+    </div>
+</body>
+</html>

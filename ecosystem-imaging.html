@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imaging 图片处理 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+        <div class="content">
+            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
+            <h2 id="imaging">Imaging 图片处理</h2>
+            <p>Imaging 是一个简单而强大的 Go 语言图片处理库，提供了丰富的功能来处理图片，包括缩放、裁剪、旋转、滤镜、颜色调整等。它基于标准库 `image` 和 `image/draw`，易于使用且性能优秀。</p>
+            
+            <h3>核心特性</h3>
+            <ul>
+                <li><strong>基础操作</strong>：支持图片缩放、裁剪、旋转、翻转等基础操作</li>
+                <li><strong>滤镜效果</strong>：提供模糊、锐化、边缘检测等滤镜效果</li>
+                <li><strong>颜色调整</strong>：支持亮度、对比度、饱和度、色相调整</li>
+                <li><strong>格式支持</strong>：支持 JPEG、PNG、GIF、TIFF、BMP 等常见格式</li>
+                <li><strong>高性能</strong>：优化的算法，处理速度快</li>
+                <li><strong>简单易用</strong>：简洁的 API 设计，易于集成</li>
+            </ul>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get github.com/disintegration/imaging</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"log"</span>
+    <span class="string">"github.com/disintegration/imaging"</span>
+    <span class="string">"image"</span>
+    <span class="string">_ "image/jpeg"</span>
+    <span class="string">_ "image/png"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 打开图片</span>
+    src, err := imaging.<span class="function">Open</span>(<span class="string">"input.jpg"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        log.<span class="function">Fatal</span>(err)
+    }
+    <span class="keyword">defer</span> src.<span class="function">Close</span>()
+    
+    <span class="comment">// 缩放图片</span>
+    dst := imaging.<span class="function">Resize</span>(src, 800, 0, imaging.<span class="function">Lanczos</span>)
+    
+    <span class="comment">// 保存图片</span>
+    err = imaging.<span class="function">Save</span>(dst, <span class="string">"output.jpg"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        log.<span class="function">Fatal</span>(err)
+    }
+}</code></pre>
+            
+            <h3>常用功能</h3>
+            
+            <h4>1. 缩放和裁剪</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/disintegration/imaging"</span>
+    <span class="string">"image"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    src, _ := imaging.<span class="function">Open</span>(<span class="string">"input.jpg"</span>)
+    <span class="keyword">defer</span> src.<span class="function">Close</span>()
+    
+    <span class="comment">// 按宽度缩放，保持宽高比</span>
+    resized1 := imaging.<span class="function">Resize</span>(src, 800, 0, imaging.<span class="function">Lanczos</span>)
+    
+    <span class="comment">// 按高度缩放，保持宽高比</span>
+    resized2 := imaging.<span class="function">Resize</span>(src, 0, 600, imaging.<span class="function">Lanczos</span>)
+    
+    <span class="comment">// 缩放到指定尺寸（可能变形）</span>
+    resized3 := imaging.<span class="function">Resize</span>(src, 800, 600, imaging.<span class="function">Lanczos</span>)
+    
+    <span class="comment">// 裁剪图片</span>
+    cropped := imaging.<span class="function">Crop</span>(src, image.Rect(100, 100, 500, 500))
+    
+    <span class="comment">// 缩略图生成</span>
+    thumbnail := imaging.<span class="function">Thumbnail</span>(src, 100, 100, imaging.<span class="function">Lanczos</span>)
+    
+    imaging.<span class="function">Save</span>(resized1, <span class="string">"resized1.jpg"</span>)
+    imaging.<span class="function">Save</span>(cropped, <span class="string">"cropped.jpg"</span>)
+    imaging.<span class="function">Save</span>(thumbnail, <span class="string">"thumbnail.jpg"</span>)
+}</code></pre>
+            
+            <h4>2. 旋转和翻转</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/disintegration/imaging"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    src, _ := imaging.<span class="function">Open</span>(<span class="string">"input.jpg"</span>)
+    <span class="keyword">defer</span> src.<span class="function">Close</span>()
+    
+    <span class="comment">// 旋转 90 度</span>
+    rotated90 := imaging.<span class="function">Rotate90</span>(src)
+    
+    <span class="comment">// 旋转 180 度</span>
+    rotated180 := imaging.<span class="function">Rotate180</span>(src)
+    
+    <span class="comment">// 旋转 270 度</span>
+    rotated270 := imaging.<span class="function">Rotate270</span>(src)
+    
+    <span class="comment">// 旋转任意角度</span>
+    rotated45 := imaging.<span class="function">Rotate</span>(src, 45, <span class="keyword">nil</span>)
+    
+    <span class="comment">// 水平翻转</span>
+    flippedH := imaging.<span class="function">FlipH</span>(src)
+    
+    <span class="comment">// 垂直翻转</span>
+    flippedV := imaging.<span class="function">FlipV</span>(src)
+    
+    imaging.<span class="function">Save</span>(rotated90, <span class="string">"rotated90.jpg"</span>)
+    imaging.<span class="function">Save</span>(flippedH, <span class="string">"flipped_h.jpg"</span>)
+}</code></pre>
+            
+            <h4>3. 滤镜效果</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/disintegration/imaging"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    src, _ := imaging.<span class="function">Open</span>(<span class="string">"input.jpg"</span>)
+    <span class="keyword">defer</span> src.<span class="function">Close</span>()
+    
+    <span class="comment">// 模糊效果</span>
+    blurred := imaging.<span class="function">Blur</span>(src, 5.0)
+    
+    <span class="comment">// 锐化效果</span>
+    sharpened := imaging.<span class="function">Sharpen</span>(src, 2.0)
+    
+    <span class="comment">// 调整亮度</span>
+    brighter := imaging.<span class="function">AdjustBrightness</span>(src, 20)
+    darker := imaging.<span class="function">AdjustBrightness</span>(src, -20)
+    
+    <span class="comment">// 调整对比度</span>
+    contrast := imaging.<span class="function">AdjustContrast</span>(src, 20)
+    
+    <span class="comment">// 调整饱和度</span>
+    saturated := imaging.<span class="function">AdjustSaturation</span>(src, 50)
+    
+    <span class="comment">// 灰度化</span>
+    grayscale := imaging.<span class="function">Grayscale</span>(src)
+    
+    <span class="comment">// 反色</span>
+    inverted := imaging.<span class="function">Invert</span>(src)
+    
+    imaging.<span class="function">Save</span>(blurred, <span class="string">"blurred.jpg"</span>)
+    imaging.<span class="function">Save</span>(grayscale, <span class="string">"grayscale.jpg"</span>)
+    imaging.<span class="function">Save</span>(inverted, <span class="string">"inverted.jpg"</span>)
+}</code></pre>
+            
+            <h4>4. 图片合成</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/disintegration/imaging"</span>
+    <span class="string">"image"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 加载两张图片</span>
+    bg, _ := imaging.<span class="function">Open</span>(<span class="string">"background.jpg"</span>)
+    <span class="keyword">defer</span> bg.<span class="function">Close</span>()
+    
+    overlay, _ := imaging.<span class="function">Open</span>(<span class="string">"overlay.png"</span>)
+    <span class="keyword">defer</span> overlay.<span class="function">Close</span>()
+    
+    <span class="comment">// 调整overlay图片大小</span>
+    overlay = imaging.<span class="function">Resize</span>(overlay, 200, 0, imaging.<span class="function">Lanczos</span>)
+    
+    <span class="comment">// 在背景图上绘制overlay</span>
+    dst := imaging.<span class="function">Overlay</span>(bg, overlay, image.Pt(100, 100), 1.0)
+    
+    <span class="comment">// 创建水印效果（半透明）</span>
+    watermark := imaging.<span class="function">Overlay</span>(bg, overlay, image.Pt(100, 100), 0.5)
+    
+    imaging.<span class="function">Save</span>(dst, <span class="string">"overlay.jpg"</span>)
+    imaging.<span class="function">Save</span>(watermark, <span class="string">"watermark.jpg"</span>)
+}</code></pre>
+            
+            <h4>5. 批量处理</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"os"</span>
+    <span class="string">"path/filepath"</span>
+    <span class="string">"github.com/disintegration/imaging"</span>
+)
+
+<span class="function">func</span> <span class="function">batchProcessImages</span>(inputDir, outputDir <span class="keyword">string</span>) <span class="keyword">error</span> {
+    <span class="comment">// 遍历输入目录</span>
+    err := filepath.<span class="function">Walk</span>(inputDir, <span class="function">func</span>(path <span class="keyword">string</span>, info os.FileInfo, err <span class="keyword">error</span>) <span class="keyword">error</span> {
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> err
+        }
+        
+        <span class="comment">// 跳过目录</span>
+        <span class="keyword">if</span> info.<span class="function">IsDir</span>() {
+            <span class="keyword">return</span> <span class="keyword">nil</span>
+        }
+        
+        <span class="comment">// 只处理图片文件</span>
+        ext := filepath.<span class="function">Ext</span>(path)
+        <span class="keyword">if</span> ext != <span class="string">".jpg"</span> && ext != <span class="string">".png"</span> {
+            <span class="keyword">return</span> <span class="keyword">nil</span>
+        }
+        
+        <span class="comment">// 打开图片</span>
+        src, err := imaging.<span class="function">Open</span>(path)
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> err
+        }
+        <span class="keyword">defer</span> src.<span class="function">Close</span>()
+        
+        <span class="comment">// 调整大小</span>
+        dst := imaging.<span class="function">Resize</span>(src, 800, 0, imaging.<span class="function">Lanczos</span>)
+        
+        <span class="comment">// 保存到输出目录</span>
+        outputPath := filepath.<span class="function">Join</span>(outputDir, filepath.<span class="function">Base</span>(path))
+        <span class="keyword">return</span> imaging.<span class="function">Save</span>(dst, outputPath)
+    })
+    
+    <span class="keyword">return</span> err
+}</code></pre>
+            
+            <h3>最佳实践</h3>
+            
+            <h4>1. 内存管理</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/disintegration/imaging"</span>
+)
+
+<span class="function">func</span> <span class="function">processLargeImage</span>(filePath <span class="keyword">string</span>) <span class="keyword">error</span> {
+    <span class="comment">// 使用 io.Reader 逐步读取大图片</span>
+    src, err := imaging.<span class="function">Open</span>(filePath)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> src.<span class="function">Close</span>()
+    
+    <span class="comment">// 处理完后立即释放资源</span>
+    dst := imaging.<span class="function">Resize</span>(src, 800, 0, imaging.<span class="function">Lanczos</span>)
+    
+    <span class="comment">// 保存后关闭</span>
+    err = imaging.<span class="function">Save</span>(dst, <span class="string">"output.jpg"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="comment">// 显式释放内存</span>
+    dst = <span class="keyword">nil</span>
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            
+            <h4>2. 错误处理</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/disintegration/imaging"</span>
+)
+
+<span class="function">func</span> <span class="function">safeProcessImage</span>(inputPath, outputPath <span class="keyword">string</span>) <span class="keyword">error</span> {
+    <span class="comment">// 验证输入文件</span>
+    src, err := imaging.<span class="function">Open</span>(inputPath)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"无法打开图片 %s: %v"</span>, inputPath, err)
+    }
+    <span class="keyword">defer</span> src.<span class="function">Close</span>()
+    
+    <span class="comment">// 验证输出路径</span>
+    <span class="keyword">if</span> outputPath == <span class="string">""</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"输出路径不能为空"</span>)
+    }
+    
+    <span class="comment">// 处理图片</span>
+    dst := imaging.<span class="function">Resize</span>(src, 800, 0, imaging.<span class="function">Lanczos</span>)
+    
+    <span class="comment">// 保存并处理错误</span>
+    <span class="keyword">if</span> err := imaging.<span class="function">Save</span>(dst, outputPath); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"保存图片失败: %v"</span>, err)
+    }
+    
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            
+            <h4>3. 性能优化</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/disintegration/imaging"</span>
+    <span class="string">"image"</span>
+)
+
+<span class="function">func</span> <span class="function">optimizeProcessing</span>(src image.Image) image.Image {
+    <span class="comment">// 使用合适的插值算法</span>
+    <span class="comment">// Lanczos: 高质量但慢</span>
+    <span class="comment">// CatmullRom: 平衡质量和速度</span>
+    <span class="comment">// Linear: 快速但质量较低</span>
+    
+    <span class="comment">// 根据图片大小选择算法</span>
+    bounds := src.<span class="function">Bounds</span>()
+    <span class="keyword">if</span> bounds.<span class="function">Dx</span>() > 2000 || bounds.<span class="function">Dy</span>() > 2000 {
+        <span class="comment">// 大图片使用快速算法</span>
+        <span class="keyword">return</span> imaging.<span class="function">Resize</span>(src, 800, 0, imaging.<span class="function">Linear</span>)
+    } <span class="keyword">else</span> {
+        <span class="comment">// 小图片使用高质量算法</span>
+        <span class="keyword">return</span> imaging.<span class="function">Resize</span>(src, 800, 0, imaging.<span class="function">Lanczos</span>)
+    }
+}</code></pre>
+            
+            <h4>4. 格式转换</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"path/filepath"</span>
+    <span class="string">"github.com/disintegration/imaging"</span>
+)
+
+<span class="function">func</span> <span class="function">convertFormat</span>(inputPath, outputFormat <span class="keyword">string</span>) <span class="keyword">error</span> {
+    src, err := imaging.<span class="function">Open</span>(inputPath)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> src.<span class="function">Close</span>()
+    
+    <span class="comment">// 构建输出路径</span>
+    outputPath := filepath.<span class="function">Join</span>(
+        filepath.<span class="function">Dir</span>(inputPath),
+        filepath.<span class="function">Base</span>(inputPath[:<span class="function">len</span>(inputPath)-<span class="function">len</span>(filepath.<span class="function">Ext</span>(inputPath))])+<span class="string">"."</span>+outputFormat,
+    )
+    
+    <span class="comment">// 根据格式调整质量</span>
+    <span class="keyword">if</span> outputFormat == <span class="string">"jpg"</span> {
+        <span class="comment">// JPEG 格式，使用默认质量</span>
+        <span class="keyword">return</span> imaging.<span class="function">Save</span>(src, outputPath)
+    } <span class="keyword">else if</span> outputFormat == <span class="string">"png"</span> {
+        <span class="comment">// PNG 格式，无损压缩</span>
+        <span class="keyword">return</span> imaging.<span class="function">Save</span>(src, outputPath)
+    }
+    
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            
+            <h3>使用场景</h3>
+            <ul>
+                <li><strong>图片缩略图</strong>：生成网站或应用的缩略图</li>
+                <li><strong>图片压缩</strong>：优化图片大小，节省存储空间</li>
+                <li><strong>图片水印</strong>：为图片添加版权水印</li>
+                <li><strong>图片编辑</strong>：实现简单的图片编辑功能</li>
+                <li><strong>批量处理</strong>：批量处理大量图片文件</li>
+            </ul>
+            
+            <h3>注意事项</h3>
+            <ul>
+                <li>处理大图片时注意内存使用，及时释放资源</li>
+                <li>选择合适的插值算法平衡质量和性能</li>
+                <li>JPEG 格式是有损压缩，PNG 是无损压缩</li>
+                <li>注意处理透明通道（PNG）</li>
+                <li>批量处理时建议使用 goroutine 并发处理</li>
+                <li>保存图片时注意选择合适的格式和质量</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

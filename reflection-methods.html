@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>反射方法 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+                <div class="content">
+            <a href="reflection.html" class="back-link">← 返回 reflection</a>
+            <h2 id="methods">调用方法</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"reflect"</span>
+)
+
+<span class="keyword">type</span> Calculator <span class="keyword">struct</span> {
+    result <span class="keyword">float64</span>
+}
+
+<span class="function">func</span> (c *Calculator) <span class="function">Add</span>(a, b <span class="keyword">float64</span>) <span class="keyword">float64</span> {
+    c.result = a + b
+    <span class="keyword">return</span> c.result
+}
+
+<span class="function">func</span> (c *Calculator) <span class="function">Subtract</span>(a, b <span class="keyword">float64</span>) <span class="keyword">float64</span> {
+    c.result = a - b
+    <span class="keyword">return</span> c.result
+}
+
+<span class="function">func</span> (c *Calculator) <span class="function">GetResult</span>() <span class="keyword">float64</span> {
+    <span class="keyword">return</span> c.result
+}
+
+<span class="function">func</span> <span class="function">callMethod</span>(obj <span class="keyword">interface</span>{}, methodName <span class="keyword">string</span>, args ...<span class="keyword">interface</span>{}) {
+    v := reflect.<span class="function">ValueOf</span>(obj)
+
+    <span class="comment">// 解引用指针</span>
+    <span class="keyword">if</span> v.<span class="function">Kind</span>() == reflect.Ptr {
+        v = v.<span class="function">Elem</span>()
+    }
+
+    method := v.<span class="function">MethodByName</span>(methodName)
+
+    <span class="keyword">if</span> method.<span class="function">IsValid</span>() {
+        <span class="comment">// 准备参数</span>
+        in := <span class="function">make</span>([]reflect.Value, <span class="function">len</span>(args))
+        <span class="keyword">for</span> i, arg := <span class="keyword">range</span> args {
+            in[i] = reflect.<span class="function">ValueOf</span>(arg)
+        }
+
+        <span class="comment">// 调用方法</span>
+        results := method.<span class="function">Call</span>(in)
+
+        <span class="comment">// 输出结果</span>
+        <span class="keyword">for</span> _, result := <span class="keyword">range</span> results {
+            fmt.<span class="function">Printf</span>(<span class="string">"结果: %v\n"</span>, result.<span class="function">Interface</span>())
+        }
+    } <span class="keyword">else</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"方法 %s 不存在\n"</span>, methodName)
+    }
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    calc := &Calculator{}
+
+    <span class="function">callMethod</span>(calc, <span class="string">"Add"</span>, <span class="number">10.0</span>, <span class="number">5.0</span>)
+    <span class="function">callMethod</span>(calc, <span class="string">"Subtract"</span>, <span class="number">20.0</span>, <span class="number">8.0</span>)
+    <span class="function">callMethod</span>(calc, <span class="string">"GetResult"</span>)
+}</code></pre>
+
+            
+        </div>
+    </div>
+</body>
+</html>

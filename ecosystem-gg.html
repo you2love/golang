@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>gg 图形库 - Go 教程</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <!-- 导航栏将通过JavaScript动态加载 -->
+        </div>
+        
+        <div class="content">
+            <h1>gg 图形库</h1>
+            
+            <p>gg 是一个纯 Go 语言实现的高性能 2D 图形库，提供了丰富的绘图功能，包括路径绘制、图像处理、文本渲染、变换、渐变、透明度等。gg 的设计目标是提供简单易用、性能优秀的 2D 图形处理能力，适用于数据可视化、游戏开发、图像处理等场景。</p>
+            
+            <h2>核心特性</h2>
+            <ul>
+                <li><strong>纯 Go 实现</strong>：不依赖任何外部 C 库，完全用 Go 语言实现</li>
+                <li><strong>高性能</strong>：优化的渲染引擎，支持硬件加速</li>
+                <li><strong>丰富的绘图功能</strong>：支持路径、形状、文本、图像等</li>
+                <li><strong>变换支持</strong>：支持平移、旋转、缩放等变换</li>
+                <li><strong>渐变和透明度</strong>：支持线性渐变、径向渐变、透明度</li>
+                <li><strong>多种输出格式</strong>：支持 PNG、JPEG、GIF、TIFF 等格式</li>
+                <li><strong>字体支持</strong>：支持 TrueType 和 OpenType 字体</li>
+            </ul>
+            
+            <h2>安装</h2>
+            <pre><code><span class="keyword">go</span> get github.com/fogleman/gg</code></pre>
+            
+            <h2>快速开始</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/fogleman/gg"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建 800x600 的画布</span>
+    dc := gg.<span class="function">NewContext</span>(800, 600)
+    
+    <span class="comment">// 设置背景色</span>
+    dc.<span class="function">SetRGB</span>(1, 1, 1)
+    dc.<span class="function">Clear</span>()
+    
+    <span class="comment">// 绘制红色矩形</span>
+    dc.<span class="function">SetRGB255</span>(255, 0, 0)
+    dc.<span class="function">DrawRectangle</span>(100, 100, 200, 150)
+    dc.<span class="function">Fill</span>()
+    
+    <span class="comment">// 保存为 PNG</span>
+    dc.<span class="function">SavePNG</span>(<span class="string">"output.png"</span>)
+}</code></pre>
+            
+            <h2>常用功能</h2>
+            
+            <h3>1. 基本形状绘制</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/fogleman/gg"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    dc := gg.<span class="function">NewContext</span>(800, 600)
+    dc.<span class="function">SetRGB</span>(1, 1, 1)
+    dc.<span class="function">Clear</span>()
+    
+    <span class="comment">// 绘制矩形</span>
+    dc.<span class="function">SetRGB255</span>(255, 0, 0)
+    dc.<span class="function">DrawRectangle</span>(50, 50, 200, 150)
+    dc.<span class="function">Fill</span>()
+    
+    <span class="comment">// 绘制圆形</span>
+    dc.<span class="function">SetRGB255</span>(0, 255, 0)
+    dc.<span class="function">DrawCircle</span>(400, 300, 100)
+    dc.<span class="function">Fill</span>()
+    
+    <span class="comment">// 绘制椭圆</span>
+    dc.<span class="function">SetRGB255</span>(0, 0, 255)
+    dc.<span class="function">DrawEllipse</span>(600, 200, 100, 50)
+    dc.<span class="function">Fill</span>()
+    
+    <span class="comment">// 绘制线条</span>
+    dc.<span class="function">SetRGB255</span>(0, 0, 0)
+    dc.<span class="function">SetLineWidth</span>(5)
+    dc.<span class="function">DrawLine</span>(50, 400, 750, 400)
+    dc.<span class="function">Stroke</span>()
+    
+    dc.<span class="function">SavePNG</span>(<span class="string">"shapes.png"</span>)
+}</code></pre>
+            
+            <h3>2. 路径绘制</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/fogleman/gg"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    dc := gg.<span class="function">NewContext</span>(800, 600)
+    dc.<span class="function">SetRGB</span>(1, 1, 1)
+    dc.<span class="function">Clear</span>()
+    
+    <span class="comment">// 绘制多边形路径</span>
+    dc.<span class="function">SetRGB255</span>(255, 0, 0)
+    dc.<span class="function">MoveTo</span>(100, 100)
+    dc.<span class="function">LineTo</span>(200, 50)
+    dc.<span class="function">LineTo</span>(300, 100)
+    dc.<span class="function">LineTo</span>(300, 200)
+    dc.<span class="function">LineTo</span>(200, 250)
+    dc.<span class="function">LineTo</span>(100, 200)
+    dc.<span class="function">ClosePath</span>()
+    dc.<span class="function">Fill</span>()
+    
+    <span class="comment">// 绘制贝塞尔曲线</span>
+    dc.<span class="function">SetRGB255</span>(0, 0, 255)
+    dc.<span class="function">SetLineWidth</span>(3)
+    dc.<span class="function">MoveTo</span>(400, 300)
+    dc.<span class="function">QuadCurveTo</span>(500, 200, 600, 300)
+    dc.<span class="function">CubicCurveTo</span>(650, 350, 700, 250, 750, 300)
+    dc.<span class="function">Stroke</span>()
+    
+    dc.<span class="function">SavePNG</span>(<span class="string">"paths.png"</span>)
+}</code></pre>
+            
+            <h3>3. 文本渲染</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/fogleman/gg"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    dc := gg.<span class="function">NewContext</span>(800, 600)
+    dc.<span class="function">SetRGB</span>(1, 1, 1)
+    dc.<span class="function">Clear</span>()
+    
+    <span class="comment">// 加载字体</span>
+    <span class="keyword">if</span> err := dc.<span class="function">LoadFontFace</span>(<span class="string">"arial.ttf"</span>, 48); err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    
+    <span class="comment">// 绘制文本</span>
+    dc.<span class="function">SetRGB255</span>(0, 0, 0)
+    dc.<span class="function">DrawString</span>(<span class="string">"Hello, gg!"</span>, 100, 100)
+    
+    <span class="comment">// 绘制带阴影的文本</span>
+    dc.<span class="function">SetRGB255</span>(200, 200, 200)
+    dc.<span class="function">DrawString</span>(<span class="string">"Shadow Text"</span>, 102, 202)
+    dc.<span class="function">SetRGB255</span>(0, 0, 0)
+    dc.<span class="function">DrawString</span>(<span class="string">"Shadow Text"</span>, 100, 200)
+    
+    <span class="comment">// 绘制旋转的文本</span>
+    dc.<span class="function">Push</span>()
+    dc.<span class="function">RotateAbout</span>(gg.<span class="function">Radians</span>(45), 400, 400)
+    dc.<span class="function">SetRGB255</span>(255, 0, 0)
+    dc.<span class="function">DrawString</span>(<span class="string">"Rotated Text"</span>, 350, 400)
+    dc.<span class="function">Pop</span>()
+    
+    dc.<span class="function">SavePNG</span>(<span class="string">"text.png"</span>)
+}</code></pre>
+            
+            <h3>4. 图像处理</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/fogleman/gg"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    dc := gg.<span class="function">NewContext</span>(800, 600)
+    dc.<span class="function">SetRGB</span>(1, 1, 1)
+    dc.<span class="function">Clear</span>()
+    
+    <span class="comment">// 加载图像</span>
+    img, err := gg.<span class="function">LoadImage</span>(<span class="string">"input.png"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    
+    <span class="comment">// 绘制图像（原始大小）</span>
+    dc.<span class="function">DrawImage</span>(img, 50, 50)
+    
+    <span class="comment">// 绘制缩放后的图像</span>
+    dc.<span class="function">DrawImageAnchored</span>(img, 400, 300, 0.5, 0.5)
+    
+    <span class="comment">// 绘制旋转后的图像</span>
+    dc.<span class="function">Push</span>()
+    dc.<span class="function">RotateAbout</span>(gg.<span class="function">Radians</span>(30), 600, 400)
+    dc.<span class="function">DrawImageAnchored</span>(img, 600, 400, 0.5, 0.5)
+    dc.<span class="function">Pop</span>()
+    
+    dc.<span class="function">SavePNG</span>(<span class="string">"image.png"</span>)
+}</code></pre>
+            
+            <h3>5. 渐变和透明度</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/fogleman/gg"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    dc := gg.<span class="function">NewContext</span>(800, 600)
+    dc.<span class="function">SetRGB</span>(1, 1, 1)
+    dc.<span class="function">Clear</span>()
+    
+    <span class="comment">// 线性渐变</span>
+    gradient := gg.<span class="function">NewLinearGradient</span>(0, 0, 400, 400)
+    gradient.<span class="function">AddColorStop</span>(0, gg.<span class="function">NewRGBA</span>(255, 0, 0, 255))
+    gradient.<span class="function">AddColorStop</span>(1, gg.<span class="function">NewRGBA</span>(0, 0, 255, 255))
+    dc.<span class="function">SetFillStyle</span>(gradient)
+    dc.<span class="function">DrawRectangle</span>(50, 50, 300, 300)
+    dc.<span class="function">Fill</span>()
+    
+    <span class="comment">// 径向渐变</span>
+    radial := gg.<span class="function">NewRadialGradient</span>(600, 300, 0, 600, 300, 150)
+    radial.<span class="function">AddColorStop</span>(0, gg.<span class="function">NewRGBA</span>(255, 255, 0, 255))
+    radial.<span class="function">AddColorStop</span>(1, gg.<span class="function">NewRGBA</span>(255, 0, 0, 255))
+    dc.<span class="function">SetFillStyle</span>(radial)
+    dc.<span class="function">DrawCircle</span>(600, 300, 150)
+    dc.<span class="function">Fill</span>()
+    
+    <span class="comment">// 透明度</span>
+    dc.<span class="function">SetRGBA255</span>(0, 255, 0, 128)
+    dc.<span class="function">DrawRectangle</span>(100, 400, 200, 150)
+    dc.<span class="function">Fill</span>()
+    
+    dc.<span class="function">SavePNG</span>(<span class="string">"gradient.png"</span>)
+}</code></pre>
+            
+            <h3>6. 变换操作</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/fogleman/gg"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    dc := gg.<span class="function">NewContext</span>(800, 600)
+    dc.<span class="function">SetRGB</span>(1, 1, 1)
+    dc.<span class="function">Clear</span>()
+    
+    <span class="comment">// 平移</span>
+    dc.<span class="function">Push</span>()
+    dc.<span class="function">Translate</span>(100, 100)
+    dc.<span class="function">SetRGB255</span>(255, 0, 0)
+    dc.<span class="function">DrawRectangle</span>(0, 0, 100, 100)
+    dc.<span class="function">Fill</span>()
+    dc.<span class="function">Pop</span>()
+    
+    <span class="comment">// 旋转</span>
+    dc.<span class="function">Push</span>()
+    dc.<span class="function">Translate</span>(300, 300)
+    dc.<span class="function">Rotate</span>(gg.<span class="function">Radians</span>(45))
+    dc.<span class="function">SetRGB255</span>(0, 255, 0)
+    dc.<span class="function">DrawRectangle</span>(-50, -50, 100, 100)
+    dc.<span class="function">Fill</span>()
+    dc.<span class="function">Pop</span>()
+    
+    <span class="comment">// 缩放</span>
+    dc.<span class="function">Push</span>()
+    dc.<span class="function">Translate</span>(500, 400)
+    dc.<span class="function">Scale</span>(2, 0.5)
+    dc.<span class="function">SetRGB255</span>(0, 0, 255)
+    dc.<span class="function">DrawCircle</span>(0, 0, 50)
+    dc.<span class="function">Fill</span>()
+    dc.<span class="function">Pop</span>()
+    
+    dc.<span class="function">SavePNG</span>(<span class="string">"transform.png"</span>)
+}</code></pre>
+            
+            <h2>高级功能</h2>
+            
+            <h3>1. 裁剪</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/fogleman/gg"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    dc := gg.<span class="function">NewContext</span>(800, 600)
+    dc.<span class="function">SetRGB</span>(1, 1, 1)
+    dc.<span class="function">Clear</span>()
+    
+    <span class="comment">// 绘制圆形裁剪区域</span>
+    dc.<span class="function">DrawCircle</span>(400, 300, 200)
+    dc.<span class="function">Clip</span>()
+    
+    <span class="comment">// 在裁剪区域内绘制</span>
+    <span class="keyword">for</span> i := 0; i < 10; i++ {
+        dc.<span class="function">SetRGB255</span>(<span class="function">byte</span>(i*25), 0, <span class="function">byte</span>(255-i*25))
+        dc.<span class="function">DrawRectangle</span>(<span class="function">float64</span>(i*80), 0, 80, 600)
+        dc.<span class="function">Fill</span>()
+    }
+    
+    dc.<span class="function">SavePNG</span>(<span class="string">"clip.png"</span>)
+}</code></pre>
+            
+            <h3>2. 阴影</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/fogleman/gg"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    dc := gg.<span class="function">NewContext</span>(800, 600)
+    dc.<span class="function">SetRGB</span>(1, 1, 1)
+    dc.<span class="function">Clear</span>()
+    
+    <span class="comment">// 绘制阴影</span>
+    dc.<span class="function">SetRGBA255</span>(0, 0, 0, 100)
+    dc.<span class="function">DrawRoundedRectangle</span>(110, 110, 200, 150, 20)
+    dc.<span class="function">Fill</span>()
+    
+    <span class="comment">// 绘制主体</span>
+    dc.<span class="function">SetRGB255</span>(255, 0, 0)
+    dc.<span class="function">DrawRoundedRectangle</span>(100, 100, 200, 150, 20)
+    dc.<span class="function">Fill</span>()
+    
+    dc.<span class="function">SavePNG</span>(<span class="string">"shadow.png"</span>)
+}</code></pre>
+            
+            <h3>3. 混合模式</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/fogleman/gg"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    dc := gg.<span class="function">NewContext</span>(800, 600)
+    dc.<span class="function">SetRGB</span>(1, 1, 1)
+    dc.<span class="function">Clear</span>()
+    
+    <span class="comment">// 绘制红色圆形</span>
+    dc.<span class="function">SetRGB255</span>(255, 0, 0)
+    dc.<span class="function">DrawCircle</span>(300, 300, 150)
+    dc.<span class="function">Fill</span>()
+    
+    <span class="comment">// 使用混合模式绘制蓝色圆形</span>
+    dc.<span class="function">SetCompositionOp</span>(gg.<span class="function">CompositionOperatorXor</span>)
+    dc.<span class="function">SetRGB255</span>(0, 0, 255)
+    dc.<span class="function">DrawCircle</span>(500, 300, 150)
+    dc.<span class="function">Fill</span>()
+    
+    dc.<span class="function">SavePNG</span>(<span class="string">"blend.png"</span>)
+}</code></pre>
+            
+            <h2>最佳实践</h2>
+            
+            <h3>1. 性能优化</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/fogleman/gg"</span>
+)
+
+<span class="function">func</span> <span class="function">optimizePerformance</span>() {
+    dc := gg.<span class="function">NewContext</span>(800, 600)
+    
+    <span class="comment">// 批量绘制</span>
+    <span class="keyword">for</span> i := 0; i < 1000; i++ {
+        dc.<span class="function">MoveTo</span>(<span class="function">float64</span>(i), <span class="function">float64</span>(i%600))
+        dc.<span class="function">LineTo</span>(<span class="function">float64</span>(i+1), <span class="function">float64</span>((i+1)%600))
+    }
+    dc.<span class="function">Stroke</span>()
+    
+    <span class="comment">// 避免频繁的状态切换</span>
+    dc.<span class="function">SetRGB255</span>(255, 0, 0)
+    <span class="keyword">for</span> i := 0; i < 100; i++ {
+        dc.<span class="function">DrawCircle</span>(<span class="function">float64</span>(i*8), 300, 5)
+    }
+    dc.<span class="function">Fill</span>()
+}</code></pre>
+            
+            <h3>2. 资源管理</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/fogleman/gg"</span>
+)
+
+<span class="function">func</span> <span class="function">manageResources</span>() {
+    <span class="comment">// 重用 Context</span>
+    dc := gg.<span class="function">NewContext</span>(800, 600)
+    
+    <span class="comment">// 加载图像一次，多次使用</span>
+    img, _ := gg.<span class="function">LoadImage</span>(<span class="string">"sprite.png"</span>)
+    
+    <span class="keyword">for</span> i := 0; i < 10; i++ {
+        dc.<span class="function">Clear</span>()
+        dc.<span class="function">DrawImage</span>(img, <span class="function">float64</span>(i*80), 100)
+        dc.<span class="function">SavePNG</span>(<span class="function">Sprintf</span>(<span class="string">"frame%d.png"</span>, i))
+    }
+}</code></pre>
+            
+            <h3>3. 错误处理</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"log"</span>
+    <span class="string">"github.com/fogleman/gg"</span>
+)
+
+<span class="function">func</span> <span class="function">handleErrors</span>() {
+    dc := gg.<span class="function">NewContext</span>(800, 600)
+    
+    <span class="comment">// 加载字体</span>
+    <span class="keyword">if</span> err := dc.<span class="function">LoadFontFace</span>(<span class="string">"font.ttf"</span>, 24); err != <span class="keyword">nil</span> {
+        log.<span class="function">Fatal</span>(<span class="string">"Failed to load font:"</span>, err)
+    }
+    
+    <span class="comment">// 保存图像</span>
+    <span class="keyword">if</span> err := dc.<span class="function">SavePNG</span>(<span class="string">"output.png"</span>); err != <span class="keyword">nil</span> {
+        log.<span class="function">Fatal</span>(<span class="string">"Failed to save image:"</span>, err)
+    }
+}</code></pre>
+            
+            <h3>4. 使用模板</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/fogleman/gg"</span>
+)
+
+<span class="function">func</span> <span class="function">useTemplates</span>() {
+    <span class="comment">// 创建模板</span>
+    templateDC := gg.<span class="function">NewContext</span>(800, 600)
+    templateDC.<span class="function">SetRGB</span>(1, 1, 1)
+    templateDC.<span class="function">Clear</span>()
+    templateDC.<span class="function">DrawRectangle</span>(10, 10, 780, 580)
+    templateDC.<span class="function">SetLineWidth</span>(5)
+    templateDC.<span class="function">Stroke</span>()
+    
+    <span class="comment">// 使用模板创建新图像</span>
+    dc := gg.<span class="function">NewContext</span>(800, 600)
+    dc.<span class="function">DrawImage</span>(templateDC.<span class="function">Image</span>(), 0, 0)
+    
+    <span class="comment">// 添加自定义内容</span>
+    dc.<span class="function">SetRGB255</span>(255, 0, 0)
+    dc.<span class="function">DrawCircle</span>(400, 300, 100)
+    dc.<span class="function">Fill</span>()
+}</code></pre>
+            
+            <h2>使用场景</h2>
+            <ul>
+                <li><strong>数据可视化</strong>：创建图表、图形、仪表盘</li>
+                <li><strong>图像处理</strong>：图像编辑、滤镜、合成</li>
+                <li><strong>游戏开发</strong>：2D 游戏渲染、精灵绘制</li>
+                <li><strong>报告生成</strong>：生成 PDF、图片报告</li>
+                <li><strong>Web 图形</strong>：生成网站图形、缩略图</li>
+                <li><strong>艺术创作</strong>：生成艺术、创意设计</li>
+            </ul>
+            
+            <h2>注意事项</h2>
+            <ul>
+                <li>字体文件需要单独提供，确保字体文件存在</li>
+                <li>大尺寸图像可能消耗较多内存</li>
+                <li>频繁的保存操作会影响性能</li>
+                <li>注意坐标系统的方向（左上角为原点）</li>
+                <li>变换操作会影响后续所有绘制，使用 Push/Pop 管理状态</li>
+                <li>路径操作需要正确关闭路径</li>
+                <li>透明度和混合模式可能影响性能</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script src="navigation.js"></script>
+</body>
+</html>

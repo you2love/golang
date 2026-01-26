@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>常用技巧与最佳实践 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="scroll.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h3>📚 学习目录</h3>
+            <ul>
+                <li><a href="index.html">🏠 首页</a></li>
+                
+                <li class="level-1">
+                    <span class="level-badge">阶段一：入门</span>
+                </li>
+                <li>
+                    <a href="introduction.html">📖 1. Go 语言简介</a>
+                    <ul>
+                        <li><a href="introduction.html#history">Go 的历史</a></li>
+                        <li><a href="introduction.html#features">Go 的特点</a></li>
+                        <li><a href="introduction.html#install">安装与配置</a></li>
+                        <li><a href="introduction.html#helloworld">Hello World</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="basics.html">🔤 2. 基础语法</a>
+                    <ul>
+                        <li><a href="basics.html#variables">变量声明</a></li>
+                        <li><a href="basics.html#datatypes">数据类型</a></li>
+                        <li><a href="basics.html#operators">运算符</a></li>
+                        <li><a href="basics.html#arrays">数组与切片</a></li>
+                        <li><a href="basics.html#maps">映射</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="control-flow.html">🔄 3. 控制流</a>
+                    <ul>
+                        <li><a href="control-flow.html#if">if 语句</a></li>
+                        <li><a href="control-flow.html#switch">switch 语句</a></li>
+                        <li><a href="control-flow.html#for">for 循环</a></li>
+                        <li><a href="control-flow.html#defer">defer 语句</a></li>
+                    </ul>
+                </li>
+                
+                <li class="level-1">
+                    <span class="level-badge">阶段二：进阶</span>
+                </li>
+                <li>
+                    <a href="functions.html">⚡ 4. 函数</a>
+                    <ul>
+                        <li><a href="functions.html#basic">基本函数</a></li>
+                        <li><a href="functions.html#multiple">多返回值</a></li>
+                        <li><a href="functions.html#variadic">可变参数</a></li>
+                        <li><a href="functions.html#closure">闭包</a></li>
+                        <li><a href="functions.html#methods">方法</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="structs.html">🏗️ 5. 结构体与接口</a>
+                    <ul>
+                        <li><a href="structs.html#struct">结构体</a></li>
+                        <li><a href="structs.html#nested">嵌套结构体</a></li>
+                        <li><a href="structs.html#methods">结构体方法</a></li>
+                        <li><a href="structs.html#interface">接口</a></li>
+                        <li><a href="structs.html#tags">结构体标签</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="modules.html">📦 6. 模块化与 Go Module</a>
+                    <ul>
+                        <li><a href="modules.html#introduction">Go Module 简介</a></li>
+                        <li><a href="modules.html#init">初始化 Module</a></li>
+                        <li><a href="modules.html#dependency">依赖管理</a></li>
+                        <li><a href="modules.html#version">版本控制</a></li>
+                        <li><a href="modules.html#private">私有 Module</a></li>
+                    </ul>
+                </li>
+                
+                <li class="level-1">
+                    <span class="level-badge">阶段三：高级</span>
+                </li>
+                <li>
+                    <a href="concurrency.html">🚀 7. 并发编程</a>
+                    <ul>
+                        <li><a href="concurrency.html#goroutine">Goroutine</a></li>
+                        <li><a href="concurrency.html#channel">Channel</a></li>
+                        <li><a href="concurrency.html#select">Select</a></li>
+                        <li><a href="concurrency.html#mutex">互斥锁</a></li>
+                        <li><a href="concurrency.html#context">Context</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="embed.html">📁 8. Embed 标准库</a>
+                    <ul>
+                        <li><a href="embed.html#introduction">Embed 简介</a></li>
+                        <li><a href="embed.html#basics">基础用法</a></li>
+                        <li><a href="embed.html#filesystem">文件系统</a></li>
+                        <li><a href="embed.html#advanced">高级用法</a></li>
+                        <li><a href="embed.html#bestpractices">最佳实践</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="stdlib.html">📚 9. 常用标准库</a>
+                    <ul>
+                        <li><a href="stdlib.html#regexp">regexp 正则表达式</a></li>
+                        <li><a href="stdlib.html#sync">sync 并发原语</a></li>
+                        <li><a href="stdlib.html#json">json 数据编码</a></li>
+                        <li><a href="stdlib.html#bestpractices">最佳实践</a></li>
+                        <li><a href="stdlib.html#exp">exp 实验性库</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="tips.html" class="active">💡 10. 常用技巧与最佳实践</a>
+                    <ul>
+                        <li><a href="tips.html#idioms">惯用模式</a></li>
+                        <li><a href="tips.html#performance">性能优化</a></li>
+                        <li><a href="tips.html#error">错误处理</a></li>
+                        <li><a href="tips.html#testing">测试技巧</a></li>
+                        <li><a href="tips.html#debug">调试技巧</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="generics.html">🧩 12. 泛型</a>
+                    <ul>
+                        <li><a href="generics.html#functions">泛型函数</a></li>
+                        <li><a href="generics.html#types">泛型类型</a></li>
+                        <li><a href="generics.html#constraints">类型约束</a></li>
+                        <li><a href="generics.html#inference">类型推断</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="reflection.html">🔍 13. 反射</a>
+                    <ul>
+                        <li><a href="reflection.html#typevalue">Type 和 Value</a></li>
+                        <li><a href="reflection.html#struct">结构体反射</a></li>
+                        <li><a href="reflection.html#modify">修改值</a></li>
+                        <li><a href="reflection.html#methods">调用方法</a></li>
+                        <li><a href="reflection.html#performance">性能考虑</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+        <div class="content">
+            <a href="index.html" class="back-link">← 返回首页</a>
+            <h1>常用技巧与最佳实践</h1>
+
+            <h2 id="idioms">惯用模式</h2>
+
+            <h3>1. 错误处理最佳实践</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"errors"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="comment">// ✅ 好的做法：立即处理错误</span>
+<span class="function">func</span> <span class="function">goodErrorHandling</span>() <span class="keyword">error</span> {
+    data, err := <span class="function">readData</span>()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"failed to read data: %w"</span>, err)
+    }
+    
+    result, err := <span class="function">processData</span>(data)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"failed to process data: %w"</span>, err)
+    }
+    
+    <span class="keyword">return</span> <span class="function">saveResult</span>(result)
+}
+
+<span class="comment">// ❌ 坏的做法：忽略错误</span>
+<span class="function">func</span> <span class="function">badErrorHandling</span>() {
+    data, _ := <span class="function">readData</span>()  <span class="comment">// 忽略错误</span>
+    <span class="function">processData</span>(data)
+}
+
+<span class="comment">// ✅ 使用 errors.Is 和 errors.As</span>
+<span class="function">func</span> <span class="function">checkError</span>(err <span class="keyword">error</span>) {
+    <span class="keyword">var</span> notFoundErr *NotFoundError
+    <span class="keyword">if</span> errors.<span class="function">As</span>(err, &notFoundErr) {
+        fmt.<span class="function">Println</span>(<span class="string">"Not found:"</span>, notFoundErr)
+    }
+    
+    <span class="keyword">if</span> errors.<span class="function">Is</span>(err, ErrInvalidInput) {
+        fmt.<span class="function">Println</span>(<span class="string">"Invalid input"</span>)
+    }
+}
+
+<span class="comment">// ✅ 自定义错误类型</span>
+<span class="keyword">type</span> ValidationError <span class="keyword">struct</span> {
+    Field   <span class="keyword">string</span>
+    Message <span class="keyword">string</span>
+}
+
+<span class="function">func</span> (e *ValidationError) <span class="function">Error</span>() <span class="keyword">string</span> {
+    <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"validation error on field %s: %s"</span>, e.Field, e.Message)
+}
+
+<span class="function">func</span> <span class="function">validate</span>(input <span class="keyword">string</span>) <span class="keyword">error</span> {
+    <span class="keyword">if</span> input == <span class="string">""</span> {
+        <span class="keyword">return</span> &ValidationError{
+            Field:   <span class="string">"input"</span>,
+            Message: <span class="string">"cannot be empty"</span>,
+        }
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+
+            <h3>2. 接口设计原则</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// ✅ 好的做法：接口应该小而专注</span>
+<span class="keyword">type</span> Reader <span class="keyword">interface</span> {
+    <span class="function">Read</span>(p []<span class="keyword">byte</span>) (<span class="keyword">n</span> <span class="keyword">int</span>, err <span class="keyword">error</span>)
+}
+
+<span class="keyword">type</span> Writer <span class="keyword">interface</span> {
+    <span class="function">Write</span>(p []<span class="keyword">byte</span>) (<span class="keyword">n</span> <span class="keyword">int</span>, err <span class="keyword">error</span>)
+}
+
+<span class="keyword">type</span> ReadWriter <span class="keyword">interface</span> {
+    Reader
+    Writer
+}
+
+<span class="comment">// ❌ 坏的做法：接口太大</span>
+<span class="keyword">type</span> BadInterface <span class="keyword">interface</span> {
+    <span class="function">Read</span>(p []<span class="keyword">byte</span>) (<span class="keyword">n</span> <span class="keyword">int</span>, err <span class="keyword">error</span>)
+    <span class="function">Write</span>(p []<span class="keyword">byte</span>) (<span class="keyword">n</span> <span class="keyword">int</span>, err <span class="keyword">error</span>)
+    <span class="function">Close</span>() <span class="keyword">error</span>
+    <span class="function">Seek</span>(offset <span class="keyword">int64</span>, whence <span class="keyword">int</span>) (<span class="keyword">int64</span>, <span class="keyword">error</span>)
+    <span class="comment">// ... 更多方法</span>
+}
+
+<span class="comment">// ✅ 接受接口，返回结构体</span>
+<span class="function">func</span> <span class="function">processData</span>(r Reader) {
+    data := <span class="function">make</span>([]<span class="keyword">byte</span>, <span class="number">1024</span>)
+    r.<span class="function">Read</span>(data)
+}
+
+<span class="keyword">type</span> MyReader <span class="keyword">struct</span> {
+    data []<span class="keyword">byte</span>
+}
+
+<span class="function">func</span> (m *MyReader) <span class="function">Read</span>(p []<span class="keyword">byte</span>) (<span class="keyword">n</span> <span class="keyword">int</span>, err <span class="keyword">error</span>) {
+    <span class="comment">// 实现</span>
+    <span class="keyword">return</span> <span class="number">0</span>, <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    reader := &MyReader{}
+    <span class="function">processData</span>(reader)
+}</code></pre>
+
+            <h3>3. 并发模式</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="comment">// ✅ Worker Pool 模式</span>
+<span class="keyword">type</span> WorkerPool <span class="keyword">struct</span> {
+    tasks   <span class="keyword">chan</span> Task
+    workers <span class="keyword">int</span>
+    wg      sync.WaitGroup
+}
+
+<span class="keyword">type</span> Task <span class="keyword">struct</span> {
+    ID   <span class="keyword">int</span>
+    Data <span class="keyword">string</span>
+}
+
+<span class="function">func</span> <span class="function">NewWorkerPool</span>(workers <span class="keyword">int</span>) *WorkerPool {
+    <span class="keyword">return</span> &WorkerPool{
+        tasks:   <span class="function">make</span>(<span class="keyword">chan</span> Task, <span class="number">100</span>),
+        workers: workers,
+    }
+}
+
+<span class="function">func</span> (wp *WorkerPool) <span class="function">Start</span>() {
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < wp.workers; i++ {
+        wp.wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> wp.<span class="function">worker</span>(i)
+    }
+}
+
+<span class="function">func</span> (wp *WorkerPool) <span class="function">worker</span>(id <span class="keyword">int</span>) {
+    <span class="keyword">defer</span> wp.wg.<span class="function">Done</span>()
+    <span class="keyword">for</span> task := <span class="keyword">range</span> wp.tasks {
+        fmt.<span class="function">Printf</span>(<span class="string">"Worker %d processing task %d\n"</span>, id, task.ID)
+    }
+}
+
+<span class="function">func</span> (wp *WorkerPool) <span class="function">Submit</span>(task Task) {
+    wp.tasks <- task
+}
+
+<span class="function">func</span> (wp *WorkerPool) <span class="function">Stop</span>() {
+    <span class="keyword">close</span>(wp.tasks)
+    wp.wg.<span class="function">Wait</span>()
+}
+
+<span class="comment">// ✅ Context 取消模式</span>
+<span class="function">func</span> <span class="function">workerWithContext</span>(ctx context.Context, id <span class="keyword">int</span>) {
+    <span class="keyword">for</span> {
+        <span class="keyword">select</span> {
+        <span class="keyword">case</span> <-ctx.<span class="function">Done</span>():
+            fmt.<span class="function">Printf</span>(<span class="string">"Worker %d stopped\n"</span>, id)
+            <span class="keyword">return</span>
+        <span class="keyword">default</span>
+            fmt.<span class="function">Printf</span>(<span class="string">"Worker %d working\n"</span>, id)
+        }
+    }
+}
+
+<span class="comment">// ✅ Fan-out/Fan-in 模式</span>
+<span class="function">func</span> <span class="function">fanOut</span>(input <-<span class="keyword">chan</span> <span class="keyword">int</span>, workers <span class="keyword">int</span>) []<-<span class="keyword">chan</span> <span class="keyword">int</span> {
+    outputs := <span class="function">make</span>([]<-<span class="keyword">chan</span> <span class="keyword">int</span>, workers)
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < workers; i++ {
+        outputs[i] = <span class="function">worker</span>(input)
+    }
+    <span class="keyword">return</span> outputs
+}
+
+<span class="function">func</span> <span class="function">worker</span>(input <-<span class="keyword">chan</span> <span class="keyword">int</span>) <-<span class="keyword">chan</span> <span class="keyword">int</span> {
+    output := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">defer</span> <span class="function">close</span>(output)
+        <span class="keyword">for</span> v := <span class="keyword">range</span> input {
+            output <- v * <span class="number">2</span>
+        }
+    }()
+    <span class="keyword">return</span> output
+}
+
+<span class="function">func</span> <span class="function">fanIn</span>(inputs ...<-<span class="keyword">chan</span> <span class="keyword">int</span>) <-<span class="keyword">chan</span> <span class="keyword">int</span> {
+    output := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="keyword">for</span> _, input := <span class="keyword">range</span> inputs {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>(ch <-<span class="keyword">chan</span> <span class="keyword">int</span>) {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            <span class="keyword">for</span> v := <span class="keyword">range</span> ch {
+                output <- v
+            }
+        }(input)
+    }
+    
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        wg.<span class="function">Wait</span>()
+        <span class="function">close</span>(output)
+    }()
+    
+    <span class="keyword">return</span> output
+}</code></pre>
+
+            <h3>4. 资源管理</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"database/sql"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="comment">// ✅ 使用 defer 确保资源释放</span>
+<span class="function">func</span> <span class="function">processFile</span>(filename <span class="keyword">string</span>) <span class="keyword">error</span> {
+    file, err := os.<span class="function">Open</span>(filename)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    <span class="comment">// 处理文件</span>
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="comment">// ✅ 使用 defer 处理数据库连接</span>
+<span class="function">func</span> <span class="function">queryDatabase</span>(db *sql.DB) <span class="keyword">error</span> {
+    tx, err := db.<span class="function">Begin</span>()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> <span class="keyword">func</span>() {
+        <span class="keyword">if</span> p := <span class="function">recover</span>(); p != <span class="keyword">nil</span> {
+            tx.<span class="function">Rollback</span>()
+            <span class="function">panic</span>(p)
+        } <span class="keyword">else if</span> err != <span class="keyword">nil</span> {
+        tx.<span class="function">Rollback</span>()
+    } <span class="keyword">else</span> {
+        err = tx.<span class="function">Commit</span>()
+    }
+    }()
+    
+    <span class="comment">// 执行查询</span>
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="comment">// ✅ 使用 context 控制超时</span>
+<span class="function">func</span> <span class="function">fetchWithTimeout</span>(ctx context.Context, url <span class="keyword">string</span>) ([]<span class="keyword">byte</span>, <span class="keyword">error</span>) {
+    <span class="comment">// 使用 ctx 控制请求超时</span>
+    <span class="keyword">return</span> <span class="keyword">nil</span>, <span class="keyword">nil</span>
+}</code></pre>
+
+            <h2 id="performance">性能优化</h2>
+
+            <h3>1. 字符串处理优化</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"strings"</span>
+)
+
+<span class="comment">// ❌ 坏的做法：使用 + 拼接字符串</span>
+<span class="function">func</span> <span class="function">badStringConcat</span>(parts []<span class="keyword">string</span>) <span class="keyword">string</span> {
+    result := <span class="string">""</span>
+    <span class="keyword">for</span> _, part := <span class="keyword">range</span> parts {
+        result += part  <span class="comment">// 每次都创建新字符串</span>
+    }
+    <span class="keyword">return</span> result
+}
+
+<span class="comment">// ✅ 好的做法：使用 strings.Builder</span>
+<span class="function">func</span> <span class="function">goodStringConcat</span>(parts []<span class="keyword">string</span>) <span class="keyword">string</span> {
+    <span class="keyword">var</span> builder strings.Builder
+    builder.<span class="function">Grow</span>(<span class="number">1024</span>)  <span class="comment">// 预分配空间</span>
+    <span class="keyword">for</span> _, part := <span class="keyword">range</span> parts {
+        builder.<span class="function">WriteString</span>(part)
+    }
+    <span class="keyword">return</span> builder.<span class="function">String</span>()
+}
+
+<span class="comment">// ✅ 使用 fmt.Sprintf 格式化</span>
+<span class="function">func</span> <span class="function">formatString</span>(name <span class="keyword">string</span>, age <span class="keyword">int</span>) <span class="keyword">string</span> {
+    <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"Name: %s, Age: %d"</span>, name, age)
+}</code></pre>
+
+            <h3>2. 切片和映射优化</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// ✅ 预分配切片容量</span>
+<span class="function">func</span> <span class="function">preallocateSlice</span>(size <span class="keyword">int</span>) []<span class="keyword">int</span> {
+    slice := <span class="function">make</span>([]<span class="keyword">int</span>, <span class="number">0</span>, size)
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < size; i++ {
+        slice = <span class="function">append</span>(slice, i)
+    }
+    <span class="keyword">return</span> slice
+}
+
+<span class="comment">// ✅ 预分配映射容量</span>
+<span class="function">func</span> <span class="function">preallocateMap</span>(size <span class="keyword">int</span>) <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span> {
+    m := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>, size)
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < size; i++ {
+        m[fmt.<span class="function">Sprintf</span>(<span class="string">"key%d"</span>, i)] = i
+    }
+    <span class="keyword">return</span> m
+}
+
+<span class="comment">// ✅ 重用切片</span>
+<span class="function">func</span> <span class="function">reuseSlice</span>() {
+    buf := <span class="function">make</span>([]<span class="keyword">byte</span>, <span class="number">0</span>, <span class="number">1024</span>)
+    
+    <span class="comment">// 使用 buf</span>
+    data := buf[:<span class="number">100</span>]
+    
+    <span class="comment">// 重用</span>
+    buf = buf[:<span class="number">0</span>]
+    data = buf[:<span class="number">200</span>}
+}</code></pre>
+
+            <h3>3. 内存优化</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="comment">// ✅ 使用 sync.Pool 重用对象</span>
+<span class="keyword">var</span> bufferPool = sync.<span class="function">Pool</span>{
+    New: <span class="keyword">func</span>() <span class="keyword">interface</span>{} {
+        <span class="keyword">return</span> <span class="function">make</span>([]<span class="keyword">byte</span>, <span class="number">0</span>, <span class="number">1024</span>)
+    },
+}
+
+<span class="function">func</span> <span class="function">useBufferFromPool</span>() {
+    buf := bufferPool.<span class="function">Get</span>().([]<span class="keyword">byte</span>)
+    <span class="keyword">defer</span> <span class="keyword">func</span>() {
+        buf = buf[:<span class="number">0</span>]
+        bufferPool.<span class="function">Put</span>(buf)
+    }()
+    
+    <span class="comment">// 使用 buf</span>
+}</code></pre>
+
+            <h3>4. 减少内存分配</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="comment">// ✅ 使用指针避免值拷贝</span>
+<span class="keyword">type</span> LargeStruct <span class="keyword">struct</span> {
+    Data [][<span class="number">1024</span>]<span class="keyword">byte</span>
+}
+
+<span class="function">func</span> <span class="function">processLarge</span>(data *LargeStruct) {
+    <span class="comment">// 处理数据</span>
+}
+
+<span class="comment">// ✅ 重用 JSON 解码器</span>
+<span class="keyword">var</span> jsonDecoder = json.<span class="function">NewDecoder</span>(<span class="keyword">nil</span>)
+
+<span class="function">func</span> <span class="function">decodeJSON</span>(data []<span class="keyword">byte</span>, v <span class="keyword">interface</span>{}) <span class="keyword">error</span> {
+    decoder := json.<span class="function">NewDecoder</span>(bytes.<span class="function">NewReader</span>(data))
+    <span class="keyword">return</span> decoder.<span class="function">Decode</span>(v)
+}</code></pre>
+
+            <h2 id="error">错误处理</h2>
+
+            <h3>1. 错误包装</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+)
+
+<span class="comment">// ✅ 使用 fmt.Errorf 包装错误</span>
+<span class="function">func</span> <span class="function">readConfig</span>() <span class="keyword">error</span> {
+    data, err := os.<span class="function">ReadFile</span>(<span class="string">"config.json"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"failed to read config: %w"</span>, err)
+    }
+    <span class="keyword">return</span> <span class="function">parseConfig</span>(data)
+}
+
+<span class="function">func</span> <span class="function">parseConfig</span>(data []<span class="keyword">byte</span>) <span class="keyword">error</span> {
+    <span class="keyword">if</span> <span class="function">len</span>(data) == <span class="number">0</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"config is empty: %w"</span>, ErrInvalidConfig)
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+
+            <h3>2. 错误值比较</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"errors"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="keyword">var</span> (
+    ErrNotFound = errors.<span class="function">New</span>(<span class="string">"not found"</span>)
+    ErrInvalid = errors.<span class="function">New</span>(<span class="string">"invalid input"</span>)
+)
+
+<span class="function">func</span> <span class="function">handleError</span>(err <span class="keyword">error</span>) {
+    <span class="keyword">if</span> errors.<span class="function">Is</span>(err, ErrNotFound) {
+        fmt.<span class="function">Println</span>(<span class="string">"Resource not found"</span>)
+    } <span class="keyword">else if</span> errors.<span class="function">Is</span>(err, ErrInvalid) {
+        fmt.<span class="function">Println</span>(<span class="string">"Invalid input"</span>)
+    }
+}</code></pre>
+
+            <h2 id="testing">测试技巧</h2>
+
+            <h3>1. 表驱动测试</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"testing"</span>
+)
+
+<span class="keyword">type</span> testCase <span class="keyword">struct</span> {
+    name     <span class="keyword">string</span>
+    input    <span class="keyword">int</span>
+    expected <span class="keyword">int</span>
+}
+
+<span class="keyword">var</span> testCases = []testCase{
+    {<span class="string">"positive"</span>, <span class="number">1</span>, <span class="number">1</span>},
+    {<span class="string">"zero"</span>, <span class="number">0</span>, <span class="number">0</span>},
+    {<span class="string">"negative"</span>, -<span class="number">1</span>, -<span class="number">1</span>},
+}
+
+<span class="function">func</span> <span class="function">TestAbs</span>(t *testing.T) {
+    <span class="keyword">for</span> _, tc := <span class="keyword">range</span> testCases {
+        t.<span class="function">Run</span>(tc.name, <span class="keyword">func</span>(t *testing.T) {
+            result := <span class="function">Abs</span>(tc.input)
+            <span class="keyword">if</span> result != tc.expected {
+                t.<span class="function">Errorf</span>(<span class="string">"expected %d, got %d"</span>, tc.expected, result)
+            }
+        })
+    }
+}</code></pre>
+
+            <h3>2. 测试辅助函数</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"testing"</span>
+)
+
+<span class="comment">// ✅ 使用 setup 和 teardown</span>
+<span class="function">func</span> <span class="function">TestWithSetup</span>(t *testing.T) {
+    <span class="comment">// Setup</span>
+    db := <span class="function">setupTestDB</span>(t)
+    <span class="keyword">defer</span> <span class="function">teardownTestDB</span>(t, db)
+    
+    <span class="comment">// Test</span>
+}
+
+<span class="function">func</span> <span class="function">setupTestDB</span>(t *testing.T) *sql.DB {
+    t.<span class="function">Helper</span>()
+    <span class="comment">// 创建测试数据库</span>
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">teardownTestDB</span>(t *testing.T, db *sql.DB) {
+    t.<span class="function">Helper</span>()
+    <span class="comment">// 清理测试数据库</span>
+}</code></pre>
+
+            <h3>3. 基准测试</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"testing"</span>
+)
+
+<span class="function">func</span> <span class="function">BenchmarkStringConcat</span>(b *testing.B) {
+    b.<span class="function">ResetTimer</span>()
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < b.N; i++ {
+        <span class="function">concatenate</span>()
+    }
+}</code></pre>
+
+            <h2 id="debug">调试技巧</h2>
+
+            <h3>1. 使用 pprof</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"log"</span>
+    <span class="string">"net/http"</span>
+    _ <span class="string">"net/http/pprof"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 启用 pprof</span>
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        log.<span class="function">Println</span>(http.<span class="function">ListenAndServe</span>(<span class="string">":6060"</span>, <span class="keyword">nil</span>))
+    }
+    
+    <span class="comment">// 应用程序代码</span>
+}</code></pre>
+
+            <h3>2. 使用 race detector</h3>
+            <pre><code><span class="comment">// 运行测试时启用 race detector</span>
+<span class="comment">// go test -race ./...</span></code></pre>
+
+            <h3>3. 使用 trace</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"os"</span>
+    <span class="string">"runtime/trace"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    f, _ := os.<span class="function">Create</span>(<span class="string">"trace.out"</span>)
+    <span class="keyword">defer</span> f.<span class="function">Close</span>()
+    
+    trace.<span class="function">Start</span>(f, <span class="string">"trace"</span>)
+    <span class="keyword">defer</span> trace.<span class="function">Stop</span>()
+    
+    <span class="comment">// 应用程序代码</span>
+}</code></pre>
+
+            <div class="note-box">
+                <h3>Go 语言最佳实践总结</h3>
+                <ul>
+                    <li><strong>错误处理</strong>：立即处理错误，使用 errors.Is 和 errors.As</li>
+                    <li><strong>接口设计</strong>：接口应该小而专注，接受接口返回结构体</li>
+                    <li><strong>并发模式</strong>：使用 Worker Pool、Context、Fan-out/Fan-in</li>
+                    <li><strong>资源管理</strong>：使用 defer 确保资源释放</li>
+                    <li><strong>性能优化</strong>：预分配容量、使用 sync.Pool、减少内存分配</li>
+                    <li><strong>测试</strong>：表驱动测试、setup/teardown、基准测试</li>
+                    <li><strong>调试</strong>：使用 pprof、race detector、trace</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <h3>常用工具和命令</h3>
+                <pre><code><span class="comment"># 格式化代码</span>
+<span class="keyword">go</span> fmt ./...
+
+<span class="comment"># 检查代码</span>
+<span class="keyword">go</span> vet ./...
+
+<span class="comment"># 运行测试</span>
+<span class="keyword">go</span> test ./...
+
+<span class="comment"># 运行测试并启用 race detector</span>
+<span class="keyword">go</span> test -race ./...
+
+<span class="comment"># 运行基准测试</span>
+<span class="keyword">go</span> test -bench=. -benchmem ./...
+
+<span class="comment"># 生成覆盖率报告</span>
+<span class="keyword">go</span> test -cover ./...
+
+<span class="comment"># 生成依赖图</span>
+<span class="keyword">go</span> mod graph
+
+<span class="comment"># 查看依赖</span>
+<span class="keyword">go</span> list -m all</span></code></pre>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

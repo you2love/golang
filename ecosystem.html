@@ -1,0 +1,2514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社区库 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="scroll.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h3>📚 学习目录</h3>
+            <ul>
+                <li><a href="index.html">🏠 首页</a></li>
+                
+                <li class="level-1">
+                    <span class="level-badge">阶段一：入门</span>
+                </li>
+                <li>
+                    <a href="introduction.html">📖 1. Go 语言简介</a>
+                    <ul>
+                        <li><a href="introduction.html#history">Go 的历史</a></li>
+                        <li><a href="introduction.html#features">Go 的特点</a></li>
+                        <li><a href="introduction.html#install">安装与配置</a></li>
+                        <li><a href="introduction.html#helloworld">Hello World</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="basics.html">🔤 2. 基础语法</a>
+                    <ul>
+                        <li><a href="basics.html#variables">变量声明</a></li>
+                        <li><a href="basics.html#datatypes">数据类型</a></li>
+                        <li><a href="basics.html#operators">运算符</a></li>
+                        <li><a href="basics.html#arrays">数组与切片</a></li>
+                        <li><a href="basics.html#maps">映射</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="control-flow.html">🔄 3. 控制流</a>
+                    <ul>
+                        <li><a href="control-flow.html#if">if 语句</a></li>
+                        <li><a href="control-flow.html#switch">switch 语句</a></li>
+                        <li><a href="control-flow.html#for">for 循环</a></li>
+                        <li><a href="control-flow.html#defer">defer 语句</a></li>
+                    </ul>
+                </li>
+                
+                <li class="level-1">
+                    <span class="level-badge">阶段二：进阶</span>
+                </li>
+                <li>
+                    <a href="functions.html">⚡ 4. 函数</a>
+                    <ul>
+                        <li><a href="functions.html#basic">基本函数</a></li>
+                        <li><a href="functions.html#multiple">多返回值</a></li>
+                        <li><a href="functions.html#variadic">可变参数</a></li>
+                        <li><a href="functions.html#closure">闭包</a></li>
+                        <li><a href="functions.html#methods">方法</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="structs.html">🏗️ 5. 结构体与接口</a>
+                    <ul>
+                        <li><a href="structs.html#struct">结构体</a></li>
+                        <li><a href="structs.html#nested">嵌套结构体</a></li>
+                        <li><a href="structs.html#methods">结构体方法</a></li>
+                        <li><a href="structs.html#interface">接口</a></li>
+                        <li><a href="structs.html#tags">结构体标签</a></li>
+                    </ul>
+                </li>
+                
+                <li class="level-1">
+                    <span class="level-badge">阶段三：高级</span>
+                </li>
+                <li>
+                    <a href="concurrency.html">🚀 7. 并发编程</a>
+                    <ul>
+                        <li><a href="concurrency.html#goroutine">Goroutine</a></li>
+                        <li><a href="concurrency.html#channel">Channel</a></li>
+                        <li><a href="concurrency.html#select">Select</a></li>
+                        <li><a href="concurrency.html#mutex">互斥锁</a></li>
+                        <li><a href="concurrency.html#context">Context</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="embed.html">📁 8. Embed 标准库</a>
+                    <ul>
+                        <li><a href="embed.html#introduction">Embed 简介</a></li>
+                        <li><a href="embed.html#basics">基础用法</a></li>
+                        <li><a href="embed.html#filesystem">文件系统</a></li>
+                        <li><a href="embed.html#advanced">高级用法</a></li>
+                        <li><a href="embed.html#bestpractices">最佳实践</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="stdlib.html">📚 9. 常用标准库</a>
+                    <ul>
+                        <li><a href="stdlib.html#regexp">regexp 正则表达式</a></li>
+                        <li><a href="stdlib.html#sync">sync 并发原语</a></li>
+                        <li><a href="stdlib.html#json">json 数据编码</a></li>
+                        <li><a href="stdlib.html#time">time 时间处理</a></li>
+                        <li><a href="stdlib.html#io">io 输入输出</a></li>
+                        <li><a href="stdlib.html#bufio">bufio 缓冲 I/O</a></li>
+                        <li><a href="stdlib.html#bestpractices">最佳实践</a></li>
+                        <li><a href="stdlib.html#exp">exp 实验性库</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="tips.html">💡 10. 常用技巧与最佳实践</a>
+                    <ul>
+                        <li><a href="tips.html#idioms">惯用模式</a></li>
+                        <li><a href="tips.html#performance">性能优化</a></li>
+                        <li><a href="tips.html#error">错误处理</a></li>
+                        <li><a href="tips.html#testing">测试技巧</a></li>
+                        <li><a href="tips.html#debug">调试技巧</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="ecosystem.html" class="active">🌐 11. 社区库</a>
+                    <ul>
+                        <li><a href="ecosystem.html#gin">Gin Web 框架</a></li>
+                        <li><a href="ecosystem.html#gorm">GORM ORM</a></li>
+                        <li><a href="ecosystem.html#viper">Viper 配置</a></li>
+                        <li><a href="ecosystem.html#zap">Zap 日志</a></li>
+                        <li><a href="ecosystem.html#bestpractices">最佳实践</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="generics.html">🧩 12. 泛型</a>
+                    <ul>
+                        <li><a href="generics.html#functions">泛型函数</a></li>
+                        <li><a href="generics.html#types">泛型类型</a></li>
+                        <li><a href="generics.html#constraints">类型约束</a></li>
+                        <li><a href="generics.html#inference">类型推断</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="reflection.html">🔍 13. 反射</a>
+                    <ul>
+                        <li><a href="reflection.html#typevalue">Type 和 Value</a></li>
+                        <li><a href="reflection.html#struct">结构体反射</a></li>
+                        <li><a href="reflection.html#modify">修改值</a></li>
+                        <li><a href="reflection.html#methods">调用方法</a></li>
+                        <li><a href="reflection.html#performance">性能考虑</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+        <div class="content">
+            <a href="index.html" class="back-link">← 返回首页</a>
+            <h1>社区库</h1>
+            
+            <p>Go 语言拥有活跃的社区和丰富的第三方库。本章将介绍 Go 生态中最流行的几个库：Gin（Web 框架）、GORM（ORM）、Viper（配置）和 Zap（日志）。</p>
+
+            <h2 id="gin">Gin Web 框架</h2>
+            
+            <h3>简介</h3>
+            <p>Gin 是一个用 Go 语言编写的高性能 HTTP Web 框架，具有类似 Martini 的 API，但性能更好（高达 40 倍）。它提供了路由、中间件、JSON 验证等功能，是 Go 社区最流行的 Web 框架之一。</p>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get -u github.com/gin-gonic/gin</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/gin-gonic/gin"</span>
+    <span class="string">"net/http"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建默认路由</span>
+    r := gin.<span class="function">Default</span>()
+
+    <span class="comment">// 定义路由</span>
+    r.<span class="function">GET</span>(<span class="string">"/ping"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        c.<span class="function">JSON</span>(http.StatusOK, gin.H{
+            <span class="string">"message"</span>: <span class="string">"pong"</span>,
+        })
+    })
+
+    <span class="comment">// 启动服务器</span>
+    r.<span class="function">Run</span>(<span class="string">":8080"</span>)
+}</code></pre>
+            
+            <h3>路由</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/gin-gonic/gin"</span>
+    <span class="string">"net/http"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    r := gin.<span class="function">Default</span>()
+
+    <span class="comment">// GET 请求</span>
+    r.<span class="function">GET</span>(<span class="string">"/users"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        c.<span class="function">JSON</span>(http.StatusOK, gin.H{
+            <span class="string">"users"</span>: []<span class="keyword">string</span>{<span class="string">"Alice"</span>, <span class="string">"Bob"</span>},
+        })
+    })
+
+    <span class="comment">// POST 请求</span>
+    r.<span class="function">POST</span>(<span class="string">"/users"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        <span class="keyword">var</span> user <span class="keyword">struct</span> {
+            Name  <span class="keyword">string</span> <span class="string">`json:"name"`</span>
+            Email <span class="keyword">string</span> <span class="string">`json:"email"`</span>
+        }
+        
+        <span class="keyword">if</span> err := c.<span class="function">ShouldBindJSON</span>(&user); err != <span class="keyword">nil</span> {
+            c.<span class="function">JSON</span>(http.StatusBadRequest, gin.H{<span class="string">"error"</span>: err.<span class="function">Error</span>()})
+            <span class="keyword">return</span>
+        }
+        
+        c.<span class="function">JSON</span>(http.StatusCreated, gin.H{
+            <span class="string">"message"</span>: <span class="string">"User created"</span>,
+            <span class="string">"user"</span>:    user,
+        })
+    })
+
+    <span class="comment">// 路径参数</span>
+    r.<span class="function">GET</span>(<span class="string">"/users/:id"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        id := c.<span class="function">Param</span>(<span class="string">"id"</span>)
+        c.<span class="function">JSON</span>(http.StatusOK, gin.H{<span class="string">"id"</span>: id})
+    })
+
+    <span class="comment">// 查询参数</span>
+    r.<span class="function">GET</span>(<span class="string">"/search"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        query := c.<span class="function">Query</span>(<span class="string">"q"</span>)
+        page := c.<span class="function">DefaultQuery</span>(<span class="string">"page"</span>, <span class="string">"1"</span>)
+        c.<span class="function">JSON</span>(http.StatusOK, gin.H{
+            <span class="string">"query"</span>: query,
+            <span class="string">"page"</span>:  page,
+        })
+    })
+
+    r.<span class="function">Run</span>(<span class="string">":8080"</span>)
+}</code></pre>
+            
+            <h3>中间件</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/gin-gonic/gin"</span>
+    <span class="string">"net/http"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="comment">// 自定义中间件</span>
+<span class="function">func</span> <span class="function">Logger</span>() gin.HandlerFunc {
+    <span class="keyword">return</span> <span class="keyword">func</span>(c *gin.Context) {
+        start := time.<span class="function">Now</span>()
+        
+        c.<span class="function">Next</span>()
+        
+        latency := time.<span class="function">Since</span>(start)
+        fmt.<span class="function">Printf</span>(<span class="string">"%s %s %v\n"</span>, c.<span class="function">Request</span>.Method, c.<span class="function">Request</span>.URL.Path, latency)
+    }
+}
+
+<span class="comment">// 认证中间件</span>
+<span class="function">func</span> <span class="function">AuthMiddleware</span>() gin.HandlerFunc {
+    <span class="keyword">return</span> <span class="keyword">func</span>(c *gin.Context) {
+        token := c.<span class="function">GetHeader</span>(<span class="string">"Authorization"</span>)
+        
+        <span class="keyword">if</span> token == <span class="string">""</span> {
+            c.<span class="function">JSON</span>(http.StatusUnauthorized, gin.H{<span class="string">"error"</span>: <span class="string">"Unauthorized"</span>})
+            c.<span class="function">Abort</span>()
+            <span class="keyword">return</span>
+        }
+        
+        c.<span class="function">Set</span>(<span class="string">"user_id"</span>, <span class="string">"123"</span>)
+        c.<span class="function">Next</span>()
+    }
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    r := gin.<span class="function">Default</span>()
+    
+    <span class="comment">// 全局中间件</span>
+    r.<span class="function">Use</span>(<span class="function">Logger</span>())
+    
+    <span class="comment">// 路由组</span>
+    api := r.<span class="function">Group</span>(<span class="string">"/api"</span>)
+    api.<span class="function">Use</span>(<span class="function">AuthMiddleware</span>())
+    
+    api.<span class="function">GET</span>(<span class="string">"/profile"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        userID := c.<span class="function">GetString</span>(<span class="string">"user_id"</span>)
+        c.<span class="function">JSON</span>(http.StatusOK, gin.H{<span class="string">"user_id"</span>: userID})
+    })
+    
+    r.<span class="function">Run</span>(<span class="string">":8080"</span>)
+}</code></pre>
+            
+            <h3>路由组</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/gin-gonic/gin"</span>
+    <span class="string">"net/http"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    r := gin.<span class="function">Default</span>()
+    
+    <span class="comment">// v1 路由组</span>
+    v1 := r.<span class="function">Group</span>(<span class="string">"/v1"</span>)
+    {
+        v1.<span class="function">GET</span>(<span class="string">"/users"</span>, <span class="keyword">func</span>(c *gin.Context) {
+            c.<span class="function">String</span>(http.StatusOK, <span class="string">"v1 users"</span>)
+        })
+        v1.<span class="function">GET</span>(<span class="string">"/posts"</span>, <span class="keyword">func</span>(c *gin.Context) {
+            c.<span class="function">String</span>(http.StatusOK, <span class="string">"v1 posts"</span>)
+        })
+    }
+    
+    <span class="comment">// v2 路由组</span>
+    v2 := r.<span class="function">Group</span>(<span class="string">"/v2"</span>)
+    {
+        v2.<span class="function">GET</span>(<span class="string">"/users"</span>, <span class="keyword">func</span>(c *gin.Context) {
+            c.<span class="function">String</span>(http.StatusOK, <span class="string">"v2 users"</span>)
+        })
+        v2.<span class="function">GET</span>(<span class="string">"/posts"</span>, <span class="keyword">func</span>(c *gin.Context) {
+            c.<span class="function">String</span>(http.StatusOK, <span class="string">"v2 posts"</span>)
+        })
+    }
+    
+    r.<span class="function">Run</span>(<span class="string">":8080"</span>)
+}</code></pre>
+            
+            <h3>错误处理</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/gin-gonic/gin"</span>
+    <span class="string">"net/http"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    r := gin.<span class="function">Default</span>()
+    
+    <span class="comment">// 自定义错误处理</span>
+    r.<span class="function">NoRoute</span>(<span class="keyword">func</span>(c *gin.Context) {
+        c.<span class="function">JSON</span>(http.StatusNotFound, gin.H{
+            <span class="string">"error"</span>: <span class="string">"Route not found"</span>,
+        })
+    })
+    
+    r.<span class="function">NoMethod</span>(<span class="keyword">func</span>(c *gin.Context) {
+        c.<span class="function">JSON</span>(http.StatusMethodNotAllowed, gin.H{
+            <span class="string">"error"</span>: <span class="string">"Method not allowed"</span>,
+        })
+    })
+    
+    <span class="comment">// Panic 恢复</span>
+    r.<span class="function">Use</span>(gin.<span class="function">Recovery</span>())
+    
+    r.<span class="function">GET</span>(<span class="string">"/panic"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        <span class="function">panic</span>(<span class="string">"Something went wrong"</span>)
+    })
+    
+    r.<span class="function">Run</span>(<span class="string">":8080"</span>)
+}</code></pre>
+            
+            <h2 id="gorm">GORM ORM</h2>
+            
+            <h3>简介</h3>
+            <p>GORM 是 Go 语言中最流行的 ORM（对象关系映射）库，提供了友好的 API，支持多种数据库（MySQL、PostgreSQL、SQLite、SQL Server 等），并包含自动迁移、关联、钩子等功能。</p>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get -u gorm.io/gorm
+<span class="keyword">go</span> get -u gorm.io/driver/mysql</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"gorm.io/driver/mysql"</span>
+    <span class="string">"gorm.io/gorm"</span>
+)
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    ID       <span class="keyword">uint</span>   <span class="string">`gorm:"primaryKey"`</span>
+    Name     <span class="keyword">string</span> <span class="string">`gorm:"size:255;not null"`</span>
+    Email    <span class="keyword">string</span> <span class="string">`gorm:"size:255;uniqueIndex;not null"`</span>
+    Age      <span class="keyword">int</span>    <span class="string">`gorm:"default:0"`</span>
+    CreatedAt time.Time
+    UpdatedAt time.Time
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 连接数据库</span>
+    dsn := <span class="string">"user:password@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"</span>
+    db, err := gorm.<span class="function">Open</span>(mysql.<span class="function">Open</span>(dsn), &gorm.Config{})
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(<span class="string">"Failed to connect database"</span>)
+    }
+    
+    <span class="comment">// 自动迁移</span>
+    db.<span class="function">AutoMigrate</span>(&User{})
+    
+    <span class="comment">// 创建记录</span>
+    user := User{Name: <span class="string">"Alice"</span>, Email: <span class="string">"alice@example.com"</span>, Age: <span class="number">25</span>}
+    result := db.<span class="function">Create</span>(&user)
+    fmt.<span class="function">Println</span>(<span class="string">"Created user ID:"</span>, user.ID)
+    fmt.<span class="function">Println</span>(<span class="string">"Rows affected:"</span>, result.RowsAffected)
+}</code></pre>
+            
+            <h3>创建记录</h3>
+            <pre><code><span class="comment">// 创建单条记录</span>
+user := User{Name: <span class="string">"Bob"</span>, Email: <span class="string">"bob@example.com"</span>, Age: <span class="number">30</span>}
+db.<span class="function">Create</span>(&user)
+
+<span class="comment">// 创建多条记录</span>
+users := []User{
+    {Name: <span class="string">"Charlie"</span>, Email: <span class="string">"charlie@example.com"</span>, Age: <span class="number">28</span>},
+    {Name: <span class="string">"David"</span>, Email: <span class="string">"david@example.com"</span>, Age: <span class="number">32</span>},
+}
+db.<span class="function">Create</span>(&users)
+
+<span class="comment">// 使用 Select 指定字段</span>
+db.<span class="function">Select</span>(<span class="string">"Name"</span>, <span class="string">"Email"</span>).<span class="function">Create</span>(&user)
+
+<span class="comment">// 使用 Omit 忽略字段</span>
+db.<span class="function">Omit</span>(<span class="string">"Age"</span>).<span class="function">Create</span>(&user)</code></pre>
+            
+            <h3>查询记录</h3>
+            <pre><code><span class="comment">// 查询第一条记录</span>
+<span class="keyword">var</span> user User
+db.<span class="function">First</span>(&user)
+<span class="comment">// SELECT * FROM users ORDER BY id LIMIT 1;</span>
+
+<span class="comment">// 根据主键查询</span>
+db.<span class="function">First</span>(&user, <span class="number">1</span>)
+<span class="comment">// SELECT * FROM users WHERE id = 1;</span>
+
+<span class="comment">// 查询所有记录</span>
+<span class="keyword">var</span> users []User
+db.<span class="function">Find</span>(&users)
+<span class="comment">// SELECT * FROM users;</span>
+
+<span class="comment">// 条件查询</span>
+db.<span class="function">Where</span>(<span class="string">"name = ?"</span>, <span class="string">"Alice"</span>).<span class="function">First</span>(&user)
+db.<span class="function">Where</span>(<span class="string">"age > ?"</span>, <span class="number">25</span>).<span class="function">Find</span>(&users)
+db.<span class="function">Where</span>(<span class="string">"name LIKE ?"</span>, <span class="string">"%A%"</span>).<span class="function">Find</span>(&users)
+
+<span class="comment">// 多条件</span>
+db.<span class="function">Where</span>(<span class="string">"name = ? AND age > ?"</span>, <span class="string">"Alice"</span>, <span class="number">20</span>).<span class="function">First</span>(&user)
+
+<span class="comment">// 使用 Map</span>
+db.<span class="function">Where</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}{<span class="string">"name"</span>: <span class="string">"Alice"</span>, <span class="string">"age"</span>: <span class="number">25</span>}).<span class="function">First</span>(&user)
+
+<span class="comment">// 使用 Struct</span>
+db.<span class="function">Where</span>(User{Name: <span class="string">"Alice"</span>, Age: <span class="number">25</span>}).<span class="function">First</span>(&user)
+
+<span class="comment">// Or 条件</span>
+db.<span class="function">Where</span>(<span class="string">"name = ?"</span>, <span class="string">"Alice"</span>).<span class="function">Or</span>(<span class="string">"name = ?"</span>, <span class="string">"Bob"</span>).<span class="function">Find</span>(&users)
+
+<span class="comment">// Not 条件</span>
+db.<span class="function">Not</span>(<span class="string">"name = ?"</span>, <span class="string">"Alice"</span>).<span class="function">Find</span>(&users)
+
+<span class="comment">// 排序</span>
+db.<span class="function">Order</span>(<span class="string">"age desc"</span>).<span class="function">Find</span>(&users)
+
+<span class="comment">// 限制和偏移</span>
+db.<span class="function">Limit</span>(<span class="number">10</span>).<span class="function">Offset</span>(<span class="number">20</span>).<span class="function">Find</span>(&users)
+
+<span class="comment">// 统计</span>
+<span class="keyword">var</span> count <span class="keyword">int64</span>
+db.<span class="function">Model</span>(&User{}).<span class="function">Count</span>(&count)
+
+<span class="comment">// 选择特定字段</span>
+db.<span class="function">Select</span>(<span class="string">"name"</span>, <span class="string">"email"</span>).<span class="function">Find</span>(&users)</code></pre>
+            
+            <h3>更新记录</h3>
+            <pre><code><span class="comment">// 更新单个字段</span>
+db.<span class="function">Model</span>(&user).<span class="function">Update</span>(<span class="string">"age"</span>, <span class="number">26</span>)
+
+<span class="comment">// 更新多个字段</span>
+db.<span class="function">Model</span>(&user).<span class="function">Updates</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}{
+    <span class="string">"name"</span>: <span class="string">"Alice Updated"</span>,
+    <span class="string">"age"</span>:  <span class="number">26</span>,
+})
+
+<span class="comment">// 使用 Struct 更新</span>
+db.<span class="function">Model</span>(&user).<span class="function">Updates</span>(User{Name: <span class="string">"Alice Updated"</span>, Age: <span class="number">26</span>})
+
+<span class="comment">// 只更新非零字段</span>
+db.<span class="function">Model</span>(&user).<span class="function">Updates</span>(User{Name: <span class="string">"Alice"</span>})
+
+<span class="comment">// 更新所有字段（包括零值）</span>
+db.<span class="function">Model</span>(&user).<span class="function">Select</span>(<span class="string">"*"</span>).<span class="function">Updates</span>(User{Name: <span class="string">""</span>, Age: <span class="number">0</span>})
+
+<span class="comment">// 条件更新</span>
+db.<span class="function">Model</span>(&User{}).<span class="function">Where</span>(<span class="string">"age > ?"</span>, <span class="number">20</span>).<span class="function">Update</span>(<span class="string">"status"</span>, <span class="string">"active"</span>)
+
+<span class="comment">// 批量更新</span>
+db.<span class="function">Model</span>(&User{}).<span class="function">Where</span>(<span class="string">"age > ?"</span>, <span class="number">20</span>).<span class="function">Updates</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}{<span class="string">"status"</span>: <span class="string">"active"</span>})</code></pre>
+            
+            <h3>删除记录</h3>
+            <pre><code><span class="comment">// 删除记录</span>
+db.<span class="function">Delete</span>(&user)
+<span class="comment">// DELETE FROM users WHERE id = 1;</span>
+
+<span class="comment">// 根据主键删除</span>
+db.<span class="function">Delete</span>(&User{}, <span class="number">1</span>)
+
+<span class="comment">// 批量删除</span>
+db.<span class="function">Where</span>(<span class="string">"age < ?"</span>, <span class="number">18</span>).<span class="function">Delete</span>(&User{})
+
+<span class="comment">// 软删除</span>
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    ID        <span class="keyword">uint</span>
+    Name      <span class="keyword">string</span>
+    DeletedAt gorm.DeletedAt <span class="string">`gorm:"index"`</span>
+}
+<span class="comment">// 软删除不会真正删除记录，而是设置 deleted_at 字段</span>
+
+<span class="comment">// 永久删除</span>
+db.<span class="function">Unscoped</span>().<span class="function">Delete</span>(&user)</code></pre>
+            
+            <h3>关联</h3>
+            <pre><code><span class="keyword">type</span> User <span class="keyword">struct</span> {
+    gorm.Model
+    Name   <span class="keyword">string</span>
+    Posts  []Post
+}
+
+<span class="keyword">type</span> Post <span class="keyword">struct</span> {
+    gorm.Model
+    Title   <span class="keyword">string</span>
+    UserID  <span class="keyword">uint</span>
+    User    User
+}
+
+<span class="comment">// 预加载关联</span>
+<span class="keyword">var</span> users []User
+db.<span class="function">Preload</span>(<span class="string">"Posts"</span>).<span class="function">Find</span>(&users)
+
+<span class="comment">// 创建关联</span>
+user := User{Name: <span class="string">"Alice"</span>}
+db.<span class="function">Create</span>(&user)
+db.<span class="function">Model</span>(&user).<span class="function">Association</span>(<span class="string">"Posts"</span>).<span class="function">Append</span>([]Post{
+    {Title: <span class="string">"Post 1"</span>},
+    {Title: <span class="string">"Post 2"</span>},
+})
+
+<span class="comment">// 查找关联</span>
+<span class="keyword">var</span> posts []Post
+db.<span class="function">Model</span>(&user).<span class="function">Association</span>(<span class="string">"Posts"</span>).<span class="function">Find</span>(&posts)
+
+<span class="comment">// 替换关联</span>
+db.<span class="function">Model</span>(&user).<span class="function">Association</span>(<span class="string">"Posts"</span>).<span class="function">Replace</span>([]Post{
+    {Title: <span class="string">"New Post 1"</span>},
+})
+
+<span class="comment">// 删除关联</span>
+db.<span class="function">Model</span>(&user).<span class="function">Association</span>(<span class="string">"Posts"</span>).<span class="function">Delete</span>(posts)
+
+<span class="comment">// 清空关联</span>
+db.<span class="function">Model</span>(&user).<span class="function">Association</span>(<span class="string">"Posts"</span>).<span class="function">Clear</span>()</code></pre>
+            
+            <h3>钩子</h3>
+            <pre><code><span class="keyword">type</span> User <span class="keyword">struct</span> {
+    gorm.Model
+    Name  <span class="keyword">string</span>
+    Email <span class="keyword">string</span>
+}
+
+<span class="comment">// 创建前钩子</span>
+<span class="function">func</span> (u *User) <span class="function">BeforeCreate</span>(tx *gorm.DB) <span class="keyword">error</span> {
+    fmt.<span class="function">Println</span>(<span class="string">"Before create:"</span>, u.Name)
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="comment">// 创建后钩子</span>
+<span class="function">func</span> (u *User) <span class="function">AfterCreate</span>(tx *gorm.DB) <span class="keyword">error</span> {
+    fmt.<span class="function">Println</span>(<span class="string">"After create:"</span>, u.ID)
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="comment">// 更新前钩子</span>
+<span class="function">func</span> (u *User) <span class="function">BeforeUpdate</span>(tx *gorm.DB) <span class="keyword">error</span> {
+    fmt.<span class="function">Println</span>(<span class="string">"Before update:"</span>, u.Name)
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="comment">// 查询前钩子</span>
+<span class="function">func</span> (u *User) <span class="function">AfterFind</span>(tx *gorm.DB) <span class="keyword">error</span> {
+    fmt.<span class="function">Println</span>(<span class="string">"After find:"</span>, u.Name)
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            
+            <h3>事务</h3>
+            <pre><code><span class="comment">// 自动事务</span>
+err := db.<span class="function">Transaction</span>(<span class="keyword">func</span>(tx *gorm.DB) <span class="keyword">error</span> {
+    <span class="comment">// 创建用户</span>
+    <span class="keyword">if</span> err := tx.<span class="function">Create</span>(&User{Name: <span class="string">"Alice"</span>}).Error; err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="comment">// 创建订单</span>
+    <span class="keyword">if</span> err := tx.<span class="function">Create</span>(&Order{UserID: <span class="number">1</span>}).Error; err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+})
+
+<span class="comment">// 手动事务</span>
+tx := db.<span class="function">Begin</span>()
+
+<span class="keyword">if</span> err := tx.<span class="function">Create</span>(&User{Name: <span class="string">"Bob"</span>}).Error; err != <span class="keyword">nil</span> {
+    tx.<span class="function">Rollback</span>()
+}
+
+<span class="keyword">if</span> err := tx.<span class="function">Commit</span>().Error; err != <span class="keyword">nil</span> {
+    tx.<span class="function">Rollback</span>()
+}</code></pre>
+            
+            <h2 id="viper">Viper 配置</h2>
+            
+            <h3>简介</h3>
+            <p>Viper 是 Go 语言的配置管理库，支持多种配置格式（JSON、TOML、YAML、HCL、envfile 等），可以从文件、环境变量、命令行参数等多种来源读取配置，并支持配置热重载。</p>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get github.com/spf13/viper</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/spf13/viper"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    v := viper.<span class="function">New</span>()
+    
+    <span class="comment">// 设置配置文件名和路径</span>
+    v.<span class="function">SetConfigName</span>(<span class="string">"config"</span>)
+    v.<span class="function">SetConfigType</span>(<span class="string">"yaml"</span>)
+    v.<span class="function">AddConfigPath</span>(<span class="string">"./"</span>)
+    
+    <span class="comment">// 读取配置文件</span>
+    <span class="keyword">if</span> err := v.<span class="function">ReadInConfig</span>(); err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(fmt.<span class="function">Errorf</span>(<span class="string">"Failed to read config file: %s"</span>, err))
+    }
+    
+    <span class="comment">// 获取配置值</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Server Port:"</span>, v.<span class="function">GetString</span>(<span class="string">"server.port"</span>))
+    fmt.<span class="function">Println</span>(<span class="string">"Database Host:"</span>, v.<span class="function">GetString</span>(<span class="string">"database.host"</span>))
+}</code></pre>
+            
+            <h3>配置文件示例</h3>
+            <pre><code><span class="comment"># config.yaml</span>
+server:
+  port: <span class="number">8080</span>
+  host: localhost
+
+database:
+  host: localhost
+  port: <span class="number">3306</span>
+  name: mydb
+  user: root
+  password: secret
+
+logging:
+  level: info
+  format: json</code></pre>
+            
+            <h3>读取配置</h3>
+            <pre><code><span class="comment">// 获取字符串</span>
+port := v.<span class="function">GetString</span>(<span class="string">"server.port"</span>)
+
+<span class="comment">// 获取整数</span>
+port := v.<span class="function">GetInt</span>(<span class="string">"server.port"</span>)
+
+<span class="comment">// 获取布尔值</span>
+debug := v.<span class="function">GetBool</span>(<span class="string">"debug"</span>)
+
+<span class="comment">// 获取浮点数</span>
+timeout := v.<span class="function">GetFloat64</span>(<span class="string">"timeout"</span>)
+
+<span class="comment">// 获取时间</span>
+duration := v.<span class="function">GetDuration</span>(<span class="string">"timeout"</span>)
+
+<span class="comment">// 获取字符串切片</span>
+hosts := v.<span class="function">GetStringSlice</span>(<span class="string">"servers.hosts"</span>)
+
+<span class="comment">// 获取所有配置</span>
+all := v.<span class="function">AllSettings</span>()
+
+<span class="comment">// 检查键是否存在</span>
+<span class="keyword">if</span> v.<span class="function">IsSet</span>(<span class="string">"server.port"</span>) {
+    port := v.<span class="function">GetString</span>(<span class="string">"server.port"</span>)
+}
+
+<span class="comment">// 获取子配置</span>
+server := v.<span class="function">Sub</span>(<span class="string">"server"</span>)
+port := server.<span class="function">GetString</span>(<span class="string">"port"</span>)</code></pre>
+            
+            <h3>环境变量</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/spf13/viper"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    v := viper.<span class="function">New</span>()
+    
+    <span class="comment">// 绑定环境变量</span>
+    v.<span class="function">BindEnv</span>(<span class="string">"server.port"</span>, <span class="string">"SERVER_PORT"</span>)
+    v.<span class="function">BindEnv</span>(<span class="string">"database.host"</span>, <span class="string">"DB_HOST"</span>)
+    
+    <span class="comment">// 自动绑定环境变量（使用前缀）</span>
+    v.<span class="function">SetEnvPrefix</span>(<span class="string">"APP"</span>)
+    v.<span class="function">AutomaticEnv</span>()
+    <span class="comment">// APP_SERVER_PORT -> server.port</span>
+    
+    <span class="comment">// 设置默认值</span>
+    v.<span class="function">SetDefault</span>(<span class="string">"server.port"</span>, <span class="number">8080</span>)
+    v.<span class="function">SetDefault</span>(<span class="string">"debug"</span>, <span class="keyword">false</span>)
+    
+    <span class="comment">// 读取环境变量</span>
+    port := v.<span class="function">GetString</span>(<span class="string">"server.port"</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Port:"</span>, port)
+}</code></pre>
+            
+            <h3>命令行参数</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/spf13/cobra"</span>
+    <span class="string">"github.com/spf13/viper"</span>
+)
+
+<span class="keyword">var</span> rootCmd = &cobra.Command{
+    <span class="function">Run</span>: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+        port := viper.<span class="function">GetInt</span>(<span class="string">"port"</span>)
+        fmt.<span class="function">Println</span>(<span class="string">"Port:"</span>, port)
+    },
+}
+
+<span class="function">func</span> <span class="function">init</span>() {
+    rootCmd.<span class="function">PersistentFlags</span>().<span class="function">Int</span>(<span class="string">"port"</span>, <span class="number">8080</span>, <span class="string">"Server port"</span>)
+    viper.<span class="function">BindPFlag</span>(<span class="string">"port"</span>, rootCmd.<span class="function">PersistentFlags</span>().<span class="function">Lookup</span>(<span class="string">"port"</span>))
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    cobra.<span class="function">Execute</span>()
+}</code></pre>
+            
+            <h3>配置热重载</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"log"</span>
+    <span class="string">"github.com/fsnotify/fsnotify"</span>
+    <span class="string">"github.com/spf13/viper"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    v := viper.<span class="function">New</span>()
+    v.<span class="function">SetConfigName</span>(<span class="string">"config"</span>)
+    v.<span class="function">SetConfigType</span>(<span class="string">"yaml"</span>)
+    v.<span class="function">AddConfigPath</span>(<span class="string">"./"</span>)
+    
+    <span class="keyword">if</span> err := v.<span class="function">ReadInConfig</span>(); err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
+    
+    <span class="comment">// 监听配置文件变化</span>
+    v.<span class="function">OnConfigChange</span>(<span class="keyword">func</span>(e fsnotify.Event) {
+        fmt.<span class="function">Printf</span>(<span class="string">"Config file changed: %s\n"</span>, e.Name)
+        log.<span class="function">Println</span>(<span class="string">"Reloading config..."</span>)
+    })
+    
+    v.<span class="function">WatchConfig</span>()
+    
+    <span class="comment">// 主循环</span>
+    <span class="keyword">select</span> {}
+}</code></pre>
+            
+            <h3>多配置源</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/spf13/viper"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    v := viper.<span class="function">New</span>()
+    
+    <span class="comment">// 1. 设置默认值</span>
+    v.<span class="function">SetDefault</span>(<span class="string">"server.port"</span>, <span class="number">8080</span>)
+    
+    <span class="comment">// 2. 读取配置文件</span>
+    v.<span class="function">SetConfigName</span>(<span class="string">"config"</span>)
+    v.<span class="function">SetConfigType</span>(<span class="string">"yaml"</span>)
+    v.<span class="function">AddConfigPath</span>(<span class="string">"./"</span>)
+    v.<span class="function">ReadInConfig</span>()
+    
+    <span class="comment">// 3. 读取环境变量</span>
+    v.<span class="function">SetEnvPrefix</span>(<span class="string">"APP"</span>)
+    v.<span class="function">AutomaticEnv</span>()
+    
+    <span class="comment">// 4. 读取命令行参数</span>
+    <span class="comment">// 使用 cobra 绑定</span>
+    
+    <span class="comment">// 优先级：命令行参数 > 环境变量 > 配置文件 > 默认值</span>
+    port := v.<span class="function">GetInt</span>(<span class="string">"server.port"</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Port:"</span>, port)
+}</code></pre>
+            
+            <h2 id="zap">Zap 日志</h2>
+            
+            <h3>简介</h3>
+            <p>Zap 是 Uber 开发的高性能、结构化日志库，专为 Go 语言设计。它提供了零内存分配的日志记录和结构化日志支持，性能远超标准库的 log 包和其他日志库。</p>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get -u go.uber.org/zap
+<span class="keyword">go</span> get -u go.uber.org/zap/zapcore</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"go.uber.org/zap"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建开发环境 logger</span>
+    logger, _ := zap.<span class="function">NewDevelopment</span>()
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    <span class="comment">// 记录日志</span>
+    logger.<span class="function">Info</span>(<span class="string">"Hello, World!"</span>)
+    logger.<span class="function">Debug</span>(<span class="string">"Debug message"</span>)
+    logger.<span class="function">Warn</span>(<span class="string">"Warning message"</span>)
+    logger.<span class="function">Error</span>(<span class="string">"Error message"</span>)
+}</code></pre>
+            
+            <h3>生产环境 Logger</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"go.uber.org/zap"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建生产环境 logger</span>
+    logger, _ := zap.<span class="function">NewProduction</span>()
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    <span class="comment">// 记录日志</span>
+    logger.<span class="function">Info</span>(<span class="string">"Server started"</span>,
+        zap.<span class="function">String</span>(<span class="string">"host"</span>, <span class="string">"localhost"</span>),
+        zap.<span class="function">Int</span>(<span class="string">"port"</span>, <span class="number">8080</span>),
+    )
+}</code></pre>
+            
+            <h3>自定义 Logger</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"os"</span>
+    
+    <span class="string">"go.uber.org/zap"</span>
+    <span class="string">"go.uber.org/zap/zapcore"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 自定义配置</span>
+    config := zap.Config{
+        Level:            zap.NewAtomicLevelAt(zapcore.InfoLevel),
+        Development:      <span class="keyword">false</span>,
+        Encoding:         <span class="string">"json"</span>,
+        EncoderConfig: zapcore.EncoderConfig{
+            TimeKey:        <span class="string">"timestamp"</span>,
+            LevelKey:       <span class="string">"level"</span>,
+            NameKey:        <span class="string">"logger"</span>,
+            CallerKey:      <span class="string">"caller"</span>,
+            MessageKey:     <span class="string">"msg"</span>,
+            StacktraceKey:  <span class="string">"stacktrace"</span>,
+            LineEnding:     zapcore.DefaultLineEnding,
+            EncodeLevel:    zapcore.LowercaseLevelEncoder,
+            EncodeTime:     zapcore.ISO8601TimeEncoder,
+            EncodeDuration: zapcore.SecondsDurationEncoder,
+            EncodeCaller:   zapcore.ShortCallerEncoder,
+        },
+        OutputPaths:      []<span class="keyword">string</span>{<span class="string">"stdout"</span>},
+        ErrorOutputPaths: []<span class="keyword">string</span>{<span class="string">"stderr"</span>},
+    }
+    
+    logger, _ := config.<span class="function">Build</span>()
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    logger.<span class="function">Info</span>(<span class="string">"Custom logger initialized"</span>)
+}</code></pre>
+            
+            <h3>结构化日志</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"go.uber.org/zap"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    logger, _ := zap.<span class="function">NewProduction</span>()
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    <span class="comment">// 添加字段</span>
+    logger.<span class="function">Info</span>(<span class="string">"User logged in"</span>,
+        zap.<span class="function">String</span>(<span class="string">"user_id"</span>, <span class="string">"123"</span>),
+        zap.<span class="function">String</span>(<span class="string">"username"</span>, <span class="string">"alice"</span>),
+        zap.<span class="function">String</span>(<span class="string">"ip"</span>, <span class="string">"192.168.1.1"</span>),
+    )
+    
+    <span class="comment">// 使用结构化对象</span>
+    <span class="keyword">type</span> User <span class="keyword">struct</span> {
+        ID    <span class="keyword">string</span>
+        Name  <span class="keyword">string</span>
+        Email <span class="keyword">string</span>
+    }
+    
+    user := User{ID: <span class="string">"123"</span>, Name: <span class="string">"Alice"</span>, Email: <span class="string">"alice@example.com"</span>}
+    logger.<span class="function">Info</span>(<span class="string">"User created"</span>, zap.<span class="function">Any</span>(<span class="string">"user"</span>, user))
+}</code></pre>
+            
+            <h3>日志级别</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"go.uber.org/zap"</span>
+    <span class="string">"go.uber.org/zap/zapcore"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 设置日志级别</span>
+    config := zap.NewProductionConfig()
+    config.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
+    
+    logger, _ := config.<span class="function">Build</span>(zap.<span class="function">AddCaller</span>())
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    <span class="comment">// 不同级别的日志</span>
+    logger.<span class="function">Debug</span>(<span class="string">"Debug information"</span>)
+    logger.<span class="function">Info</span>(<span class="string">"Information"</span>)
+    logger.<span class="function">Warn</span>(<span class="string">"Warning"</span>)
+    logger.<span class="function">Error</span>(<span class="string">"Error occurred"</span>)
+    
+    <span class="comment">// Fatal 会调用 os.Exit(1)</span>
+    <span class="comment">// logger.Fatal("Fatal error")</span>
+    
+    <span class="comment">// Panic 会调用 panic()</span>
+    <span class="comment">// logger.Panic("Panic situation")</span>
+}</code></pre>
+            
+            <h3>输出到文件</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"go.uber.org/zap"</span>
+    <span class="string">"go.uber.org/zap/zapcore"</span>
+    <span class="string">"gopkg.in/natefinch/lumberjack.v2"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 日志轮转配置</span>
+    writer := &lumberjack.Logger{
+        Filename:   <span class="string">"logs/app.log"</span>,
+        MaxSize:    <span class="number">100</span>, <span class="comment">// MB</span>
+        MaxBackups: <span class="number">3</span>,
+        MaxAge:     <span class="number">28</span>,   <span class="comment">// days</span>
+        Compress:   <span class="keyword">true</span>,
+    }
+    
+    <span class="comment">// 创建 core</span>
+    core := zapcore.<span class="function">NewCore</span>(
+        zapcore.<span class="function">NewJSONEncoder</span>(zap.NewProductionEncoderConfig()),
+        zapcore.<span class="function">AddSync</span>(writer),
+        zapcore.InfoLevel,
+    )
+    
+    logger := zap.<span class="function">New</span>(core, zap.<span class="function">AddCaller</span>())
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    logger.<span class="function">Info</span>(<span class="string">"Logging to file"</span>)
+}</code></pre>
+            
+            <h3>同时输出到多个地方</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"os"</span>
+    <span class="string">"go.uber.org/zap"</span>
+    <span class="string">"go.uber.org/zap/zapcore"</span>
+    <span class="string">"gopkg.in/natefinch/lumberjack.v2"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 文件输出</span>
+    fileWriter := &lumberjack.Logger{
+        Filename:   <span class="string">"logs/app.log"</span>,
+        MaxSize:    <span class="number">100</span>,
+        MaxBackups: <span class="number">3</span>,
+        MaxAge:     <span class="number">28</span>,
+        Compress:   <span class="keyword">true</span>,
+    }
+    
+    <span class="comment">// 控制台输出</span>
+    consoleWriter := zapcore.<span class="function">AddSync</span>(os.Stdout)
+    
+    <span class="comment">// 创建 encoder</span>
+    encoderConfig := zap.NewProductionEncoderConfig()
+    encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+    encoder := zapcore.<span class="function">NewJSONEncoder</span>(encoderConfig)
+    
+    <span class="comment">// 创建 core</span>
+    core := zapcore.<span class="function">NewTee</span>(
+        zapcore.<span class="function">NewCore</span>(encoder, zapcore.<span class="function">AddSync</span>(fileWriter), zapcore.InfoLevel),
+        zapcore.<span class="function">NewCore</span>(encoder, consoleWriter, zapcore.DebugLevel),
+    )
+    
+    logger := zap.<span class="function">New</span>(core, zap.<span class="function">AddCaller</span>())
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    logger.<span class="function">Info</span>(<span class="string">"Logging to both file and console"</span>)
+}</code></pre>
+            
+            <h3>Sugar Logger</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"go.uber.org/zap"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    logger, _ := zap.<span class="function">NewProduction</span>()
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    <span class="comment">// Sugar logger 提供更方便的 API</span>
+    sugar := logger.<span class="function">Sugar</span>()
+    
+    <span class="comment">// Printf 风格</span>
+    sugar.<span class="function">Infof</span>(<span class="string">"User %s logged in from %s"</span>, <span class="string">"alice"</span>, <span class="string">"192.168.1.1"</span>)
+    
+    <span class="comment">// 惯用风格</span>
+    sugar.<span class="function">Infow</span>(<span class="string">"User logged in"</span>,
+        <span class="string">"user"</span>, <span class="string">"alice"</span>,
+        <span class="string">"ip"</span>, <span class="string">"192.168.1.1"</span>,
+    )
+    
+    <span class="comment">// 简单风格</span>
+    sugar.<span class="function">Info</span>(<span class="string">"Simple log message"</span>, <span class="string">"arg1"</span>, <span class="string">"arg2"</span>)
+}</code></pre>
+            
+            <h3>错误处理</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"errors"</span>
+    <span class="string">"go.uber.org/zap"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    logger, _ := zap.<span class="function">NewProduction</span>()
+    <span class="keyword">defer</span> logger.<span class="function">Sync</span>()
+    
+    <span class="comment">// 记录错误</span>
+    err := errors.<span class="function">New</span>(<span class="string">"something went wrong"</span>)
+    logger.<span class="function">Error</span>(<span class="string">"Operation failed"</span>,
+        zap.<span class="function">Error</span>(err),
+        zap.<span class="function">String</span>(<span class="string">"operation"</span>, <span class="string">"create_user"</span>),
+    )
+    
+    <span class="comment">// 记录堆栈</span>
+    logger.<span class="function">Error</span>(<span class="string">"Error with stack"</span>,
+        zap.<span class="function">Error</span>(err),
+        zap.<span class="function">Stack</span>(<span class="string">"stack"</span>),
+    )
+}</code></pre>
+            
+            <h2 id="bestpractices">最佳实践</h2>
+            
+            <h3>Gin 最佳实践</h3>
+            <div class="note-box">
+                <h4>1. 项目结构</h4>
+                <pre><code>project/
+├── cmd/
+│   └── server/
+│       └── main.go
+├── internal/
+│   ├── handler/
+│   ├── service/
+│   ├── repository/
+│   └── model/
+├── pkg/
+├── configs/
+└── go.mod</code></pre>
+                
+                <h4>2. 使用依赖注入</h4>
+                <pre><code><span class="keyword">type</span> Server <span class="keyword">struct</span> {
+    router *gin.Engine
+    userHandler *UserHandler
+}
+
+<span class="function">func</span> <span class="function">NewServer</span>(userHandler *UserHandler) *Server {
+    s := &Server{
+        router: gin.<span class="function">Default</span>(),
+        userHandler: userHandler,
+    }
+    s.<span class="function">setupRoutes</span>()
+    <span class="keyword">return</span> s
+}</code></pre>
+                
+                <h4>3. 统一错误处理</h4>
+                <pre><code><span class="keyword">type</span> ErrorResponse <span class="keyword">struct</span> {
+    Error   <span class="keyword">string</span> <span class="string">`json:"error"`</span>
+    Code    <span class="keyword">int</span>    <span class="string">`json:"code"`</span>
+    Message <span class="keyword">string</span> <span class="string">`json:"message"`</span>
+}
+
+<span class="function">func</span> <span class="function">HandleError</span>(c *gin.Context, err <span class="keyword">error</span>) {
+    <span class="keyword">if</span> errors.<span class="function">Is</span>(err, ErrNotFound) {
+        c.<span class="function">JSON</span>(http.StatusNotFound, ErrorResponse{
+            Error:   <span class="string">"not_found"</span>,
+            Code:    <span class="number">404</span>,
+            Message: err.<span class="function">Error</span>(),
+        })
+        <span class="keyword">return</span>
+    }
+    c.<span class="function">JSON</span>(http.StatusInternalServerError, ErrorResponse{
+        Error:   <span class="string">"internal_error"</span>,
+        Code:    <span class="number">500</span>,
+        Message: <span class="string">"Internal server error"</span>,
+    })
+}</code></pre>
+                
+                <h4>4. 使用 Context 传递请求作用域数据</h4>
+                <pre><code><span class="comment">// 在中间件中设置</span>
+c.<span class="function">Set</span>(<span class="string">"user_id"</span>, userID)
+
+<span class="comment">// 在 handler 中获取</span>
+userID := c.<span class="function">GetString</span>(<span class="string">"user_id"</span>)</code></pre>
+            </div>
+            
+            <h3>GORM 最佳实践</h3>
+            <div class="note-box">
+                <h4>1. 使用模型层抽象</h4>
+                <pre><code><span class="keyword">type</span> Repository <span class="keyword">interface</span> {
+    <span class="function">Create</span>(user *User) <span class="keyword">error</span>
+    <span class="function">FindByID</span>(id <span class="keyword">uint</span>) (*User, <span class="keyword">error</span>)
+    <span class="function">Update</span>(user *User) <span class="keyword">error</span>
+    <span class="function">Delete</span>(id <span class="keyword">uint</span>) <span class="keyword">error</span>
+}
+
+<span class="keyword">type</span> UserRepository <span class="keyword">struct</span> {
+    db *gorm.DB
+}
+
+<span class="function">func</span> (r *UserRepository) <span class="function">FindByID</span>(id <span class="keyword">uint</span>) (*User, <span class="keyword">error</span>) {
+    <span class="keyword">var</span> user User
+    err := r.db.<span class="function">First</span>(&user, id).Error
+    <span class="keyword">return</span> &user, err
+}</code></pre>
+                
+                <h4>2. 使用事务管理</h4>
+                <pre><code><span class="keyword">func</span> (s *UserService) <span class="function">CreateUserWithOrder</span>(user *User, order *Order) <span class="keyword">error</span> {
+    <span class="keyword">return</span> s.db.<span class="function">Transaction</span>(<span class="keyword">func</span>(tx *gorm.DB) <span class="keyword">error</span> {
+        <span class="keyword">if</span> err := tx.<span class="function">Create</span>(user).Error; err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> err
+        }
+        order.UserID = user.ID
+        <span class="keyword">return</span> tx.<span class="function">Create</span>(order).Error
+    })
+}</code></pre>
+                
+                <h4>3. 使用软删除</h4>
+                <pre><code><span class="keyword">type</span> BaseModel <span class="keyword">struct</span> {
+    ID        <span class="keyword">uint</span>
+    CreatedAt time.Time
+    UpdatedAt time.Time
+    DeletedAt gorm.DeletedAt <span class="string">`gorm:"index"`</span>
+}
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    BaseModel
+    Name  <span class="keyword">string</span>
+    Email <span class="keyword">string</span>
+}</code></pre>
+                
+                <h4>4. 使用预加载避免 N+1 查询</h4>
+                <pre><code><span class="comment">// 错误：N+1 查询</span>
+<span class="keyword">var</span> users []User
+db.<span class="function">Find</span>(&users)
+<span class="keyword">for</span> _, user := <span class="keyword">range</span> users {
+    db.<span class="function">Where</span>(<span class="string">"user_id = ?"</span>, user.ID).<span class="function">Find</span>(&user.Posts)
+}
+
+<span class="comment">// 正确：使用预加载</span>
+db.<span class="function">Preload</span>(<span class="string">"Posts"</span>).<span class="function">Find</span>(&users)</code></pre>
+            </div>
+            
+            <h3>Viper 最佳实践</h3>
+            <div class="note-box">
+                <h4>1. 配置优先级</h4>
+                <pre><code><span class="comment">// 优先级从高到低</span>
+<span class="comment">// 1. 命令行参数</span>
+<span class="comment">// 2. 环境变量</span>
+<span class="comment">// 3. 配置文件</span>
+<span class="comment">// 4. 默认值</span></code></pre>
+                
+                <h4>2. 使用配置验证</h4>
+                <pre><code><span class="keyword">func</span> <span class="function">ValidateConfig</span>(v *viper.Viper) <span class="keyword">error</span> {
+    <span class="keyword">if</span> !v.<span class="function">IsSet</span>(<span class="string">"server.port"</span>) {
+        <span class="keyword">return</span> errors.<span class="function">New</span>(<span class="string">"server.port is required"</span>)
+    }
+    <span class="keyword">if</span> !v.<span class="function">IsSet</span>(<span class="string">"database.host"</span>) {
+        <span class="keyword">return</span> errors.<span class="function">New</span>(<span class="string">"database.host is required"</span>)
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+                
+                <h4>3. 敏感信息使用环境变量</h4>
+                <pre><code><span class="comment">// config.yaml</span>
+database:
+  host: localhost
+  port: <span class="number">3306</span>
+  name: mydb
+  user: root
+  password: ${DB_PASSWORD}  <span class="comment">// 从环境变量读取</span></code></pre>
+            </div>
+            
+            <h3>Zap 最佳实践</h3>
+            <div class="note-box">
+                <h4>1. 使用全局 Logger</h4>
+                <pre><code><span class="keyword">var</span> logger *zap.Logger
+
+<span class="function">func</span> <span class="function">InitLogger</span>(config *Config) <span class="keyword">error</span> {
+    <span class="keyword">var</span> err <span class="keyword">error</span>
+    logger, err = config.<span class="function">BuildLogger</span>()
+    <span class="keyword">return</span> err
+}
+
+<span class="function">func</span> <span class="function">GetLogger</span>() *zap.Logger {
+    <span class="keyword">return</span> logger
+}</code></pre>
+                
+                <h4>2. 使用结构化日志</h4>
+                <pre><code><span class="comment">// 好的实践</span>
+logger.<span class="function">Info</span>(<span class="string">"User logged in"</span>,
+    zap.<span class="function">String</span>(<span class="string">"user_id"</span>, userID),
+    zap.<span class="function">String</span>(<span class="string">"ip"</span>, ip),
+)
+
+<span class="comment">// 不好的实践</span>
+logger.<span class="function">Info</span>(fmt.<span class="function">Sprintf</span>(<span class="string">"User %s logged in from %s"</span>, userID, ip))</code></pre>
+                
+                <h4>3. 日志级别控制</h4>
+                <pre><code><span class="comment">// 开发环境</span>
+config.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
+
+<span class="comment">// 生产环境</span>
+config.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)</code></pre>
+                
+                <h4>4. 日志轮转</h4>
+                <pre><code><span class="comment">// 使用 lumberjack 进行日志轮转</span>
+writer := &lumberjack.Logger{
+    Filename:   <span class="string">"logs/app.log"</span>,
+    MaxSize:    <span class="number">100</span>, <span class="comment">// MB</span>
+    MaxBackups: <span class="number">3</span>,
+    MaxAge:     <span class="number">28</span>,   <span class="comment">// days</span>
+    Compress:   <span class="keyword">true</span>,
+}</code></pre>
+            </div>
+            
+            <h3>集成示例</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/gin-gonic/gin"</span>
+    <span class="string">"github.com/spf13/viper"</span>
+    <span class="string">"go.uber.org/zap"</span>
+    <span class="string">"gorm.io/driver/mysql"</span>
+    <span class="string">"gorm.io/gorm"</span>
+)
+
+<span class="keyword">type</span> App <span class="keyword">struct</span> {
+    Router *gin.Engine
+    DB     *gorm.DB
+    Config *viper.Viper
+    Logger *zap.Logger
+}
+
+<span class="function">func</span> <span class="function">NewApp</span>() *App {
+    <span class="comment">// 初始化配置</span>
+    config := viper.<span class="function">New</span>()
+    config.<span class="function">SetConfigName</span>(<span class="string">"config"</span>)
+    config.<span class="function">SetConfigType</span>(<span class="string">"yaml"</span>)
+    config.<span class="function">AddConfigPath</span>(<span class="string">"./"</span>)
+    config.<span class="function">ReadInConfig</span>()
+    
+    <span class="comment">// 初始化日志</span>
+    logger, _ := zap.<span class="function">NewProduction</span>()
+    
+    <span class="comment">// 初始化数据库</span>
+    dsn := config.<span class="function">GetString</span>(<span class="string">"database.dsn"</span>)
+    db, _ := gorm.<span class="function">Open</span>(mysql.<span class="function">Open</span>(dsn), &gorm.Config{})
+    
+    <span class="comment">// 初始化路由</span>
+    router := gin.<span class="function">Default</span>()
+    
+    <span class="keyword">return</span> &App{
+        Router: router,
+        DB:     db,
+        Config: config,
+        Logger: logger,
+    }
+}
+
+<span class="function">func</span> (a *App) <span class="function">Run</span>() {
+    port := a.Config.<span class="function">GetString</span>(<span class="string">"server.port"</span>)
+    a.Logger.<span class="function">Info</span>(<span class="string">"Starting server"</span>, zap.<span class="function">String</span>(<span class="string">"port"</span>, port))
+    a.Router.<span class="function">Run</span>(<span class="string">":"</span> + port)
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    app := <span class="function">NewApp</span>()
+    app.<span class="function">Run</span>()
+}</code></pre>
+            </div>
+            
+            <h2 id="validator">Validator 参数校验</h2>
+            
+            <h3>简介</h3>
+            <p>Validator 是 Go 语言中最流行的参数校验库，基于结构体标签实现，支持多种校验规则，可以轻松集成到 Gin 等 Web 框架中。它支持自定义校验规则、国际化错误消息等功能。</p>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get -u github.com/go-playground/validator/v10</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/go-playground/validator/v10"</span>
+)
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    Name  <span class="keyword">string</span> <span class="string">`validate:"required,min=3,max=32"`</span>
+    Email <span class="keyword">string</span> <span class="string">`validate:"required,email"`</span>
+    Age   <span class="keyword">int</span>    <span class="string">`validate:"required,gte=0,lte=130"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    validate := validator.<span class="function">New</span>()
+    
+    user := User{
+        Name:  <span class="string">"Alice"</span>,
+        Email: <span class="string">"alice@example.com"</span>,
+        Age:   <span class="number">25</span>,
+    }
+    
+    err := validate.<span class="function">Struct</span>(user)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Validation failed:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Validation passed!"</span>)
+}</code></pre>
+            
+            <h3>常用校验规则</h3>
+            <pre><code><span class="keyword">type</span> User <span class="keyword">struct</span> {
+    <span class="comment">// 必填字段</span>
+    Name <span class="keyword">string</span> <span class="string">`validate:"required"`</span>
+    
+    <span class="comment">// 字符串长度</span>
+    Username <span class="keyword">string</span> <span class="string">`validate:"min=3,max=20"`</span>
+    
+    <span class="comment">// 邮箱格式</span>
+    Email <span class="keyword">string</span> <span class="string">`validate:"email"`</span>
+    
+    <span class="comment">// URL 格式</span>
+    Website <span class="keyword">string</span> <span class="string">`validate:"url"`</span>
+    
+    <span class="comment">// 数值范围</span>
+    Age <span class="keyword">int</span> <span class="string">`validate:"gte=0,lte=130"`</span>
+    
+    <span class="comment">// 大于等于 (gte)、大于 (gt)、小于等于 (lte)、小于 (lt)</span>
+    Price <span class="keyword">float64</span> <span class="string">`validate:"gt=0"`</span>
+    
+    <span class="comment">// 正则表达式</span>
+    Phone <span class="keyword">string</span> <span class="string">`validate:"required,^1[3-9]\\d{9}$"`</span>
+    
+    <span class="comment">// 枚举值</span>
+    Gender <span class="keyword">string</span> <span class="string">`validate:"oneof=male female other"`</span>
+    
+    <span class="comment">// 字符串包含</span>
+    Password <span class="keyword">string</span> <span class="string">`validate:"containsany=!@#$%"`</span>
+    
+    <span class="comment">// 唯一性（需要自定义校验）</span>
+    Username <span class="keyword">string</span> <span class="string">`validate:"unique"`</span>
+    
+    <span class="comment">// 可选字段</span>
+    Nickname <span class="keyword">string</span> <span class="string">`validate:"omitempty,min=2"`</span>
+    
+    <span class="comment">// 排除某些值</span>
+    Role <span class="keyword">string</span> <span class="string">`validate:"nefield=Password"`</span>
+    
+    <span class="comment">// 字段相等</span>
+    ConfirmPassword <span class="keyword">string</span> <span class="string">`validate:"eqfield=Password"`</span>
+    
+    <span class="comment">// 字段不等</span>
+    NewEmail <span class="keyword">string</span> <span class="string">`validate:"nefield=OldEmail"`</span>
+}</code></pre>
+            
+            <h3>错误处理</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/go-playground/validator/v10"</span>
+)
+
+<span class="function">func</span> <span class="function">handleValidationError</span>(err <span class="keyword">error</span>) {
+    <span class="comment">// 类型断言</span>
+    validationErrors, ok := err.(validator.ValidationErrors)
+    <span class="keyword">if</span> !ok {
+        fmt.<span class="function">Println</span>(<span class="string">"Unknown error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="comment">// 遍历所有错误</span>
+    <span class="keyword">for</span>, e := <span class="keyword">range</span> validationErrors {
+        fmt.<span class="function">Printf</span>(<span class="string">"Field: %s, Tag: %s, Param: %s\n"</span>, e.<span class="function">Field</span>(), e.<span class="function">Tag</span>(), e.<span class="function">Param</span>())
+    }
+}
+
+<span class="comment">// 自定义错误消息</span>
+<span class="keyword">type</span> ErrorResponse <span class="keyword">struct</span> {
+    Field   <span class="keyword">string</span> <span class="string">`json:"field"`</span>
+    Message <span class="keyword">string</span> <span class="string">`json:"message"`</span>
+}
+
+<span class="function">func</span> <span class="function">getValidationErrors</span>(err <span class="keyword">error</span>) []ErrorResponse {
+    <span class="keyword">var</span> errors []ErrorResponse
+    
+    validationErrors := err.(validator.ValidationErrors)
+    <span class="keyword">for</span>, e := <span class="keyword">range</span> validationErrors {
+        errors = <span class="function">append</span>(errors, ErrorResponse{
+            Field:   e.<span class="function">Field</span>(),
+            Message: <span class="function">getErrorMessage</span>(e),
+        })
+    }
+    
+    <span class="keyword">return</span> errors
+}
+
+<span class="function">func</span> <span class="function">getErrorMessage</span>(e validator.FieldError) <span class="keyword">string</span> {
+    <span class="keyword">switch</span> e.<span class="function">Tag</span>() {
+    <span class="keyword">case</span> <span class="string">"required"</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%s is required"</span>, e.<span class="function">Field</span>())
+    <span class="keyword">case</span> <span class="string">"email"</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%s must be a valid email"</span>, e.<span class="function">Field</span>())
+    <span class="keyword">case</span> <span class="string">"min"</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%s must be at least %s characters"</span>, e.<span class="function">Field</span>(), e.<span class="function">Param</span>())
+    <span class="keyword">case</span> <span class="string">"max"</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%s must be at most %s characters"</span>, e.<span class="function">Field</span>(), e.<span class="function">Param</span>())
+    <span class="keyword">default</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%s is invalid"</span>, e.<span class="function">Field</span>())
+    }
+}</code></pre>
+            
+            <h3>自定义校验规则</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/go-playground/validator/v10"</span>
+    <span class="string">"regexp"</span>
+)
+
+<span class="comment">// 自定义校验：手机号</span>
+<span class="function">func</span> <span class="function">validateMobile</span>(fl validator.FieldLevel) <span class="keyword">bool</span> {
+    mobile := fl.<span class="function">Field</span>().<span class="function">String</span>()
+    matched, _ := regexp.<span class="function">MatchString</span>(<span class="string">`^1[3-9]\d{9}$`</span>, mobile)
+    <span class="keyword">return</span> matched
+}
+
+<span class="comment">// 自定义校验：用户名唯一性</span>
+<span class="function">func</span> <span class="function">validateUsernameUnique</span>(fl validator.FieldLevel) <span class="keyword">bool</span> {
+    username := fl.<span class="function">Field</span>().<span class="function">String</span>()
+    <span class="comment">// 这里应该查询数据库检查用户名是否已存在</span>
+    <span class="comment">// 简化示例：假设用户名不能是 "admin"</span>
+    <span class="keyword">return</span> username != <span class="string">"admin"</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    validate := validator.<span class="function">New</span>()
+    
+    <span class="comment">// 注册自定义校验</span>
+    validate.<span class="function">RegisterValidation</span>(<span class="string">"mobile"</span>, <span class="function">validateMobile</span>)
+    validate.<span class="function">RegisterValidation</span>(<span class="string">"username_unique"</span>, <span class="function">validateUsernameUnique</span>)
+    
+    <span class="keyword">type</span> User <span class="keyword">struct</span> {
+        Username <span class="keyword">string</span> <span class="string">`validate:"required,username_unique"`</span>
+        Mobile   <span class="keyword">string</span> <span class="string">`validate:"required,mobile"`</span>
+    }
+    
+    user := User{
+        Username: <span class="string">"admin"</span>,
+        Mobile:   <span class="string">"13800138000"</span>,
+    }
+    
+    err := validate.<span class="function">Struct</span>(user)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Validation failed:"</span>, err)
+    }
+}</code></pre>
+            
+            <h3>与 Gin 集成</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/gin-gonic/gin"</span>
+    <span class="string">"github.com/go-playground/validator/v10"</span>
+    <span class="string">"net/http"</span>
+)
+
+<span class="keyword">type</span> CreateUserRequest <span class="keyword">struct</span> {
+    Name     <span class="keyword">string</span> <span class="string">`json:"name" validate:"required,min=3,max=32"`</span>
+    Email    <span class="keyword">string</span> <span class="string">`json:"email" validate:"required,email"`</span>
+    Password <span class="keyword">string</span> <span class="string">`json:"password" validate:"required,min=8"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    r := gin.<span class="function">Default</span>()
+    
+    <span class="comment">// 获取 Gin 的 validator</span>
+    <span class="keyword">if</span> v, ok := binding.Validator.<span class="function">Engine</span>().(*validator.Validate); ok {
+        <span class="comment">// 注册自定义校验</span>
+        v.<span class="function">RegisterValidation</span>(<span class="string">"mobile"</span>, <span class="function">validateMobile</span>)
+    }
+    
+    r.<span class="function">POST</span>(<span class="string">"/users"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        <span class="keyword">var</span> req CreateUserRequest
+        
+        <span class="comment">// 绑定和校验</span>
+        <span class="keyword">if</span> err := c.<span class="function">ShouldBindJSON</span>(&req); err != <span class="keyword">nil</span> {
+            c.<span class="function">JSON</span>(http.StatusBadRequest, gin.H{
+                <span class="string">"error"</span>: <span class="function">getValidationErrors</span>(err),
+            })
+            <span class="keyword">return</span>
+        }
+        
+        c.<span class="function">JSON</span>(http.StatusCreated, gin.H{
+            <span class="string">"message"</span>: <span class="string">"User created"</span>,
+            <span class="string">"user"</span>:    req,
+        })
+    })
+    
+    r.<span class="function">Run</span>(<span class="string">":8080"</span>)
+}</code></pre>
+            
+            <h3>结构体嵌套校验</h3>
+            <pre><code><span class="keyword">type</span> Address <span class="keyword">struct</span> {
+    Street  <span class="keyword">string</span> <span class="string">`validate:"required"`</span>
+    City    <span class="keyword">string</span> <span class="string">`validate:"required"`</span>
+    ZipCode <span class="keyword">string</span> <span class="string">`validate:"required,len=6"`</span>
+}
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    Name    <span class="keyword">string</span>  <span class="string">`validate:"required"`</span>
+    Address Address  <span class="string">`validate:"required,dive"`</span>  <span class="comment">// dive 表示校验嵌套结构体</span>
+}</code></pre>
+            
+            <h3>数组/切片校验</h3>
+            <pre><code><span class="keyword">type</span> Order <span class="keyword">struct</span> {
+    Items []Item <span class="string">`validate:"required,min=1,dive"`</span>  <span class="comment">// 校验数组中的每个元素</span>
+}
+
+<span class="keyword">type</span> Item <span class="keyword">struct</span> {
+    Name  <span class="keyword">string</span>  <span class="string">`validate:"required"`</span>
+    Price <span class="keyword">float64</span> <span class="string">`validate:"required,gt=0"`</span>
+}</code></pre>
+            
+            <h2 id="cobra">Cobra 命令行工具</h2>
+            
+            <h3>简介</h3>
+            <p>Cobra 是 Go 语言中最流行的命令行应用框架，被广泛用于许多知名项目（如 Docker、Kubernetes、Hugo 等）。它提供了强大的命令解析、子命令支持、自动生成帮助文档等功能。</p>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get -u github.com/spf13/cobra
+<span class="keyword">go</span> get -u github.com/spf13/pflag</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/spf13/cobra"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> name <span class="keyword">string</span>
+    
+    rootCmd := &cobra.Command{
+        Use:   <span class="string">"myapp"</span>,
+        Short: <span class="string">"My application"</span>,
+        Long:  <span class="string">"A longer description of my application"</span>,
+        Run: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            fmt.<span class="function">Printf</span>(<span class="string">"Hello, %s!\n"</span>, name)
+        },
+    }
+    
+    rootCmd.<span class="function">Flags</span>().<span class="function">StringVarP</span>(&name, <span class="string">"name"</span>, <span class="string">"n"</span>, <span class="string">"World"</span>, <span class="string">"Name to greet"</span>)
+    
+    rootCmd.<span class="function">Execute</span>()
+}</code></pre>
+            
+            <h3>子命令</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/spf13/cobra"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    rootCmd := &cobra.Command{
+        Use:   <span class="string">"myapp"</span>,
+        Short: <span class="string">"My application"</span>,
+    }
+    
+    <span class="comment">// 添加子命令</span>
+    rootCmd.<span class="function">AddCommand</span>(<span class="function">createCommand</span>())
+    rootCmd.<span class="function">AddCommand</span>(<span class="function">listCommand</span>())
+    rootCmd.<span class="function">AddCommand</span>(<span class="function">deleteCommand</span>())
+    
+    rootCmd.<span class="function">Execute</span>()
+}
+
+<span class="function">func</span> <span class="function">createCommand</span>() *cobra.Command {
+    <span class="keyword">return</span> &cobra.Command{
+        Use:   <span class="string">"create"</span>,
+        Short: <span class="string">"Create a new resource"</span>,
+        Run: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            fmt.<span class="function">Println</span>(<span class="string">"Creating resource..."</span>)
+        },
+    }
+}
+
+<span class="function">func</span> <span class="function">listCommand</span>() *cobra.Command {
+    <span class="keyword">return</span> &cobra.Command{
+        Use:   <span class="string">"list"</span>,
+        Short: <span class="string">"List all resources"</span>,
+        Run: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            fmt.<span class="function">Println</span>(<span class="string">"Listing resources..."</span>)
+        },
+    }
+}
+
+<span class="function">func</span> <span class="function">deleteCommand</span>() *cobra.Command {
+    <span class="keyword">return</span> &cobra.Command{
+        Use:   <span class="string">"delete [id]"</span>,
+        Short: <span class="string">"Delete a resource"</span>,
+        Args:  cobra.ExactArgs(<span class="number">1</span>),
+        Run: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            fmt.<span class="function">Printf</span>(<span class="string">"Deleting resource: %s\n"</span>, args[<span class="number">0</span>])
+        },
+    }
+}</code></pre>
+            
+            <h3>参数验证</h3>
+            <pre><code><span class="keyword">func</span> <span class="function">createCommand</span>() *cobra.Command {
+    <span class="keyword">var</span> name <span class="keyword">string</span>
+    <span class="keyword">var</span> age <span class="keyword">int</span>
+    
+    cmd := &cobra.Command{
+        Use:   <span class="string">"create"</span>,
+        Short: <span class="string">"Create a new user"</span>,
+        Run: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            <span class="comment">// 验证参数</span>
+            <span class="keyword">if</span> name == <span class="string">""</span> {
+                fmt.<span class="function">Println</span>(<span class="string">"Error: name is required"</span>)
+                <span class="keyword">return</span>
+            }
+            <span class="keyword">if</span> age <= <span class="number">0</span> {
+                fmt.<span class="function">Println</span>(<span class="string">"Error: age must be positive"</span>)
+                <span class="keyword">return</span>
+            }
+            
+            fmt.<span class="function">Printf</span>(<span class="string">"Creating user: %s, age: %d\n"</span>, name, age)
+        },
+    }
+    
+    cmd.<span class="function">Flags</span>().<span class="function">StringVarP</span>(&name, <span class="string">"name"</span>, <span class="string">"n"</span>, <span class="string">""</span>, <span class="string">"User name"</span>)
+    cmd.<span class="function">Flags</span>().<span class="function">IntVarP</span>(&age, <span class="string">"age"</span>, <span class="string">"a"</span>, <span class="number">0</span>, <span class="string">"User age"</span>)
+    
+    <span class="comment">// 标记为必填</span>
+    cmd.<span class="function">MarkFlagRequired</span>(<span class="string">"name"</span>)
+    
+    <span class="keyword">return</span> cmd
+}</code></pre>
+            
+            <h3>持久化标志</h3>
+            <pre><code><span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> verbose <span class="keyword">bool</span>
+    <span class="keyword">var</span> config <span class="keyword">string</span>
+    
+    rootCmd := &cobra.Command{
+        Use:   <span class="string">"myapp"</span>,
+        Short: <span class="string">"My application"</span>,
+        PersistentPreRun: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            <span class="keyword">if</span> verbose {
+                fmt.<span class="function">Println</span>(<span class="string">"Verbose mode enabled"</span>)
+            }
+            fmt.<span class="function">Printf</span>(<span class="string">"Using config: %s\n"</span>, config)
+        },
+    }
+    
+    <span class="comment">// 持久化标志：所有子命令都可以使用</span>
+    rootCmd.<span class="function">PersistentFlags</span>().<span class="function">BoolVarP</span>(&verbose, <span class="string">"verbose"</span>, <span class="string">"v"</span>, <span class="keyword">false</span>, <span class="string">"Verbose output"</span>)
+    rootCmd.<span class="function">PersistentFlags</span>().<span class="function">StringVarP</span>(&config, <span class="string">"config"</span>, <span class="string">"c"</span>, <span class="string">"config.yaml"</span>, <span class="string">"Config file"</span>)
+    
+    rootCmd.<span class="function">AddCommand</span>(<span class="function">createCommand</span>())
+    rootCmd.<span class="function">Execute</span>()
+}</code></pre>
+            
+            <h3>配置文件集成</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/spf13/cobra"</span>
+    <span class="string">"github.com/spf13/viper"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    rootCmd := &cobra.Command{
+        Use:   <span class="string">"myapp"</span>,
+        Short: <span class="string">"My application"</span>,
+        PersistentPreRun: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            <span class="comment">// 初始化 Viper</span>
+            viper.<span class="function">SetConfigName</span>(<span class="string">"config"</span>)
+            viper.<span class="function">SetConfigType</span>(<span class="string">"yaml"</span>)
+            viper.<span class="function">AddConfigPath</span>(<span class="string">"./"</span>)
+            
+            <span class="keyword">if</span> err := viper.<span class="function">ReadInConfig</span>(); err != <span class="keyword">nil</span> {
+                fmt.<span class="function">Println</span>(<span class="string">"Using default config"</span>)
+            }
+            
+            <span class="comment">// 绑定命令行标志</span>
+            viper.<span class="function">BindPFlag</span>(<span class="string">"port"</span>, cmd.<span class="function">PersistentFlags</span>().<span class="function">Lookup</span>(<span class="string">"port"</span>))
+        },
+    }
+    
+    rootCmd.<span class="function">PersistentFlags</span>().<span class="function">IntP</span>(<span class="string">"port"</span>, <span class="string">"p"</span>, <span class="number">8080</span>, <span class="string">"Server port"</span>)
+    
+    rootCmd.<span class="function">AddCommand</span>(<span class="function">serveCommand</span>())
+    rootCmd.<span class="function">Execute</span>()
+}
+
+<span class="function">func</span> <span class="function">serveCommand</span>() *cobra.Command {
+    <span class="keyword">return</span> &cobra.Command{
+        Use:   <span class="string">"serve"</span>,
+        Short: <span class="string">"Start the server"</span>,
+        Run: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            port := viper.<span class="function">GetInt</span>(<span class="string">"port"</span>)
+            fmt.<span class="function">Printf</span>(<span class="string">"Starting server on port %d\n"</span>, port)
+        },
+    }
+}</code></pre>
+            
+            <h3>自动生成文档</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/spf13/cobra"</span>
+    <span class="string">"github.com/spf13/cobra/doc"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    rootCmd := &cobra.Command{
+        Use:   <span class="string">"myapp"</span>,
+        Short: <span class="string">"My application"</span>,
+        Run: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            fmt.<span class="function">Println</span>(<span class="string">"Hello, World!"</span>)
+        },
+    }
+    
+    rootCmd.<span class="function">AddCommand</span>(&cobra.Command{
+        Use:   <span class="string">"version"</span>,
+        Short: <span class="string">"Print version"</span>,
+        Run: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
+            fmt.<span class="function">Println</span>(<span class="string">"Version 1.0.0"</span>)
+        },
+    })
+    
+    <span class="comment">// 生成 Markdown 文档</span>
+    doc.<span class="function">GenMarkdownTree</span>(rootCmd, <span class="string">"./docs"</span>)
+    
+    <span class="comment">// 生成 Man 页面</span>
+    doc.<span class="function">GenManTree</span>(rootCmd, &doc.GenManHeader{
+        Section: <span class="string">"1"</span>,
+    }, <span class="string">"./man"</span>)
+    
+    <span class="comment">// 生成 ReStructuredText</span>
+    doc.<span class="function">GenReSTTree</span>(rootCmd, <span class="string">"./rst"</span>)
+}</code></pre>
+            
+            <h3>Shell 自动补全</h3>
+            <pre><code><span class="keyword">func</span> <span class="function">main</span>() {
+    rootCmd := &cobra.Command{
+        Use:   <span class="string">"myapp"</span>,
+        Short: <span class="string">"My application"</span>,
+    }
+    
+    <span class="comment">// 生成 Bash 补全</span>
+    rootCmd.<span class="function">GenBashCompletionFile</span>(<span class="string">"/etc/bash_completion.d/myapp"</span>)
+    
+    <span class="comment">// 生成 Zsh 补全</span>
+    rootCmd.<span class="function">GenZshCompletionFile</span>(<span class="string">"/usr/local/share/zsh/site-functions/_myapp"</span>)
+    
+    <span class="comment">// 生成 Fish 补全</span>
+    rootCmd.<span class="function">GenFishCompletionFile</span>(<span class="string">"/usr/share/fish/vendor_completions.d/myapp.fish"</span>)
+    
+    rootCmd.<span class="function">Execute</span>()
+}</code></pre>
+            
+            <h2 id="gomicro">Go-Micro 微服务框架</h2>
+            
+            <h3>简介</h3>
+            <p>Go-Micro 是一个用于构建微服务的 Go 语言框架，提供服务发现、负载均衡、消息编码、RPC 通信等功能。它支持多种传输协议、编码格式和服务发现机制，是构建分布式系统的理想选择。</p>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get -u github.com/micro/go-micro/v2
+<span class="keyword">go</span> get -u github.com/micro/go-micro/v2/api</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"github.com/micro/go-micro/v2"</span>
+    proto <span class="string">"github.com/micro/go-micro/v2/examples/greeter/proto"</span>
+)
+
+<span class="keyword">type</span> Greeter <span class="keyword">struct</span> {}
+
+<span class="function">func</span> (g *Greeter) <span class="function">Hello</span>(ctx context.Context, req *proto.HelloRequest, rsp *proto.HelloResponse) <span class="keyword">error</span> {
+    rsp.Greeting = <span class="string">"Hello "</span> + req.Name
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建服务</span>
+    service := micro.<span class="function">NewService</span>(
+        micro.<span class="function">Name</span>(<span class="string">"greeter"</span>),
+        micro.<span class="function">Version</span>(<span class="string">"latest"</span>),
+    )
+    
+    <span class="comment">// 初始化服务</span>
+    service.<span class="function">Init</span>()
+    
+    <span class="comment">// 注册处理器</span>
+    proto.<span class="function">RegisterGreeterHandler</span>(service.<span class="function">Server</span>(), &Greeter{})
+    
+    <span class="comment">// 运行服务</span>
+    <span class="keyword">if</span> err := service.<span class="function">Run</span>(); err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(err)
+    }
+}</code></pre>
+            
+            <h3>服务发现</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    
+    <span class="string">"github.com/micro/go-micro/v2"</span>
+    <span class="string">"github.com/micro/go-micro/v2/client"</span>
+    <span class="string">"github.com/micro/go-micro/v2/registry"</span>
+    <span class="string">"github.com/micro/go-micro/v2/registry/etcd"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 使用 Etcd 作为注册中心</span>
+    reg := etcd.<span class="function">NewRegistry</span>(registry.<span class="function">Addrs</span>(<span class="string">"127.0.0.1:2379"</span>))
+    
+    <span class="comment">// 创建服务</span>
+    service := micro.<span class="function">NewService</span>(
+        micro.<span class="function">Registry</span>(reg),
+        micro.<span class="function">Name</span>(<span class="string">"greeter"</span>),
+    )
+    
+    service.<span class="function">Init</span>()
+    
+    <span class="comment">// 创建客户端</span>
+    cli := service.<span class="function">Client</span>()
+    
+    <span class="comment">// 调用服务</span>
+    rsp := &HelloResponse{}
+    err := cli.<span class="function">Call</span>(
+        context.<span class="function">Background</span>(),
+        client.NewRequest(<span class="string">"greeter"</span>, <span class="string">"Greeter.Hello"</span>, &HelloRequest{Name: <span class="string">"World"</span>}),
+        rsp,
+        client.<span class="function">WithRetries</span>(<span class="number">3</span>),
+        client.<span class="function">WithRequestTimeout</span>(time.Second * <span class="number">5</span>),
+    )
+    
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Response:"</span>, rsp.Greeting)
+}</code></pre>
+            
+            <h3>服务间通信</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"github.com/micro/go-micro/v2"</span>
+)
+
+<span class="comment">// 定义服务接口</span>
+<span class="keyword">type</span> UserService <span class="keyword">interface</span> {
+    <span class="function">GetUser</span>(ctx context.Context, req *GetUserRequest, rsp *GetUserResponse) <span class="keyword">error</span>
+}
+
+<span class="comment">// 服务 A：用户服务</span>
+<span class="keyword">type</span> UserHandler <span class="keyword">struct</span> {}
+
+<span class="function">func</span> (h *UserHandler) <span class="function">GetUser</span>(ctx context.Context, req *GetUserRequest, rsp *GetUserResponse) <span class="keyword">error</span> {
+    <span class="comment">// 获取用户信息</span>
+    rsp.User = &User{ID: req.Id, Name: <span class="string">"Alice"</span>}
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="comment">// 服务 B：订单服务</span>
+<span class="keyword">type</span> OrderHandler <span class="keyword">struct</span> {
+    userService UserService
+}
+
+<span class="function">func</span> (h *OrderHandler) <span class="function">CreateOrder</span>(ctx context.Context, req *CreateOrderRequest, rsp *CreateOrderResponse) <span class="keyword">error</span> {
+    <span class="comment">// 调用用户服务</span>
+    userReq := &GetUserRequest{Id: req.UserId}
+    userRsp := &GetUserResponse{}
+    err := h.userService.<span class="function">GetUser</span>(ctx, userReq, userRsp)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="comment">// 创建订单</span>
+    rsp.Order = &Order{ID: <span class="string">"1"</span>, User: userRsp.User}
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建服务</span>
+    service := micro.<span class="function">NewService</span>(
+        micro.<span class="function">Name</span>(<span class="string">"order"</span>),
+    )
+    
+    service.<span class="function">Init</span>()
+    
+    <span class="comment">// 创建用户服务客户端</span>
+    userService := micro.<span class="function">NewService</span>(
+        micro.<span class="function">Name</span>(<span class="string">"order"</span>),  <span class="comment">// 使用当前服务的客户端</span>
+    )
+    
+    <span class="comment">// 注册订单服务</span>
+    micro.<span class="function">RegisterHandler</span>(service.<span class="function">Server</span>(), &OrderHandler{
+        userService: userService.<span class="function">Client</span>(),
+    })
+    
+    service.<span class="function">Run</span>()
+}</code></pre>
+            
+            <h3>消息发布订阅</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    
+    <span class="string">"github.com/micro/go-micro/v2"</span>
+    <span class="string">"github.com/micro/go-micro/v2/broker"</span>
+    <span class="string">"github.com/micro/go-micro/v2/broker/nats"</span>
+)
+
+<span class="comment">// 发布者</span>
+<span class="function">func</span> <span class="function">publisher</span>() {
+    <span class="comment">// 创建 Broker</span>
+    b := nats.<span class="function">NewBroker</span>(broker.<span class="function">Addrs</span>(<span class="string">"127.0.0.1:4222"</span>))
+    
+    <span class="keyword">if</span> err := b.<span class="function">Connect</span>(); err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Broker connect error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="comment">// 发布消息</span>
+    msg := &broker.Message{
+        Header: <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>{
+            <span class="string">"Content-Type"</span>: <span class="string">"application/json"</span>,
+        },
+        Body: []<span class="keyword">byte</span>(<span class="string">`{"event":"user.created","user_id":"123"}`</span>),
+    }
+    
+    <span class="keyword">if</span> err := b.<span class="function">Publish</span>(<span class="string">"user.created"</span>, msg); err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Publish error:"</span>, err)
+    }
+}
+
+<span class="comment">// 订阅者</span>
+<span class="function">func</span> <span class="function">subscriber</span>() {
+    <span class="comment">// 创建服务</span>
+    service := micro.<span class="function">NewService</span>(
+        micro.<span class="function">Broker</span>(nats.<span class="function">NewBroker</span>(broker.<span class="function">Addrs</span>(<span class="string">"127.0.0.1:4222"</span>))),
+    )
+    
+    service.<span class="function">Init</span>()
+    
+    <span class="comment">// 订阅消息</span>
+    micro.<span class="function">RegisterSubscriber</span>(<span class="string">"user.created"</span>, service.<span class="function">Server</span>(), <span class="keyword">func</span>(ctx context.Context, msg *broker.Message) <span class="keyword">error</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"Received message: %s\n"</span>, string(msg.Body))
+        <span class="keyword">return</span> <span class="keyword">nil</span>
+    })
+    
+    service.<span class="function">Run</span>()
+}</code></pre>
+            
+            <h3>中间件</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    
+    <span class="string">"github.com/micro/go-micro/v2"</span>
+    <span class="string">"github.com/micro/go-micro/v2/server"</span>
+)
+
+<span class="comment">// 日志中间件</span>
+<span class="function">func</span> <span class="function">logWrapper</span>(fn server.HandlerFunc) server.HandlerFunc {
+    <span class="keyword">return</span> <span class="keyword">func</span>(ctx context.Context, req server.Request, rsp interface{}) <span class="keyword">error</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"[Request] %s %s\n"</span>, req.<span class="function">Method</span>(), req.<span class="function">Endpoint</span>())
+        err := fn(ctx, req, rsp)
+        fmt.<span class="function">Printf</span>(<span class="string">"[Response] %s\n"</span>, err)
+        <span class="keyword">return</span> err
+    }
+}
+
+<span class="comment">// 认证中间件</span>
+<span class="function">func</span> <span class="function">authWrapper</span>(fn server.HandlerFunc) server.HandlerFunc {
+    <span class="keyword">return</span> <span class="keyword">func</span>(ctx context.Context, req server.Request, rsp interface{}) <span class="keyword">error</span> {
+        <span class="comment">// 检查认证令牌</span>
+        token := req.<span class="function">Header</span>().<span class="function">Get</span>(<span class="string">"Authorization"</span>)
+        <span class="keyword">if</span> token == <span class="string">""</span> {
+            <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"Unauthorized"</span>)
+        }
+        
+        <span class="keyword">return</span> fn(ctx, req, rsp)
+    }
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建服务</span>
+    service := micro.<span class="function">NewService</span>(
+        micro.<span class="function">Name</span>(<span class="string">"greeter"</span>),
+        micro.<span class="function">WrapHandler</span>(logWrapper),
+        micro.<span class="function">WrapHandler</span>(authWrapper),
+    )
+    
+    service.<span class="function">Init</span>()
+    service.<span class="function">Run</span>()
+}</code></pre>
+            
+            <h2 id="etcd">Etcd 分布式键值存储</h2>
+            
+            <h3>简介</h3>
+            <p>Etcd 是一个分布式、可靠的键值存储系统，用于配置管理和服务发现。它使用 Raft 算法保证数据一致性，支持强一致性读写、事务、租约等功能，是 Kubernetes 等项目的核心组件。</p>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get -u go.etcd.io/etcd/client/v3</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    
+    <span class="string">"go.etcd.io/etcd/client/v3"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建客户端</span>
+    cli, err := clientv3.<span class="function">New</span>(clientv3.Config{
+        Endpoints:   []<span class="keyword">string</span>{<span class="string">"127.0.0.1:2379"</span>},
+        DialTimeout: <span class="number">5</span> * time.Second,
+    })
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
+    <span class="keyword">defer</span> cli.<span class="function">Close</span>()
+    
+    <span class="comment">// 设置键值</span>
+    ctx, cancel := context.<span class="function">WithTimeout</span>(context.<span class="function">Background</span>(), <span class="number">5</span>*time.Second)
+    resp, err := cli.<span class="function">Put</span>(ctx, <span class="string">"key"</span>, <span class="string">"value"</span>)
+    cancel()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
+    fmt.<span class="function">Println</span>(<span class="string">"Revision:"</span>, resp.Header.Revision)
+    
+    <span class="comment">// 获取键值</span>
+    ctx, cancel = context.<span class="function">WithTimeout</span>(context.<span class="function">Background</span>(), <span class="number">5</span>*time.Second)
+    resp, err = cli.<span class="function">Get</span>(ctx, <span class="string">"key"</span>)
+    cancel()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
+    
+    <span class="keyword">for</span> _, ev := <span class="keyword">range</span> resp.Kvs {
+        fmt.<span class="function">Printf</span>(<span class="string">"%s : %s\n"</span>, ev.Key, ev.Value)
+    }
+}</code></pre>
+            
+            <h3>键值操作</h3>
+            <pre><code><span class="comment">// 设置键值</span>
+resp, err := cli.<span class="function">Put</span>(ctx, <span class="string">"key"</span>, <span class="string">"value"</span>)
+
+<span class="comment">// 获取单个键</span>
+resp, err := cli.<span class="function">Get</span>(ctx, <span class="string">"key"</span>)
+
+<span class="comment">// 获取多个键（前缀匹配）</span>
+resp, err := cli.<span class="function">Get</span>(ctx, <span class="string">"prefix"</span>, clientv3.<span class="function">WithPrefix</span>())
+
+<span class="comment">// 获取所有键</span>
+resp, err := cli.<span class="function">Get</span>(ctx, <span class="string">""</span>, clientv3.<span class="function">WithFromKey</span>(), clientv3.<span class="function">WithLimit</span>(<span class="number">100</span>))
+
+<span class="comment">// 删除键</span>
+resp, err := cli.<span class="function">Delete</span>(ctx, <span class="string">"key"</span>)
+
+<span class="comment">// 删除多个键（前缀匹配）</span>
+resp, err := cli.<span class="function">Delete</span>(ctx, <span class="string">"prefix"</span>, clientv3.<span class="function">WithPrefix</span>())
+
+<span class="comment">// 删除所有键</span>
+resp, err := cli.<span class="function">Delete</span>(ctx, <span class="string">""</span>, clientv3.<span class="function">WithPrefix</span>())</code></pre>
+            
+            <h3>租约（Lease）</h3>
+            <pre><code><span class="comment">// 创建租约（10秒过期）</span>
+lease, err := cli.<span class="function">Grant</span>(ctx, <span class="number">10</span>)
+<span class="keyword">if</span> err != <span class="keyword">nil</span> {
+    <span class="function">panic</span>(err)
+}
+
+<span class="comment">// 绑定租约到键</span>
+resp, err := cli.<span class="function">Put</span>(ctx, <span class="string">"key"</span>, <span class="string">"value"</span>, clientv3.<span class="function">WithLease</span>(lease.ID))
+
+<span class="comment">// 续租</span>
+keepAlive, err := cli.<span class="function">KeepAlive</span>(ctx, lease.ID)
+<span class="keyword">for</span> ka := <span class="keyword">range</span> keepAlive {
+    fmt.<span class="function">Printf</span>(<span class="string">"TTL: %d\n"</span>, ka.TTL)
+}
+
+<span class="comment">// 撤销租约</span>
+_, err = cli.<span class="function">Revoke</span>(ctx, lease.ID)</code></pre>
+            
+            <h3>事务</h3>
+            <pre><code><span class="comment">// 事务操作</span>
+txn := cli.<span class="function">Txn</span>(ctx)
+
+<span class="comment">// If 条件</span>
+txn.<span class="function">If</span>(
+    clientv3.<span class="function">Compare</span>(clientv3.<span class="function">Value</span>(<span class="string">"key"</span>), <span class="string">"="</span>, <span class="string">"value"</span>),
+).
+<span class="function">Then</span>(
+    clientv3.<span class="function">OpPut</span>(<span class="string">"key"</span>, <span class="string">"new_value"</span>),
+).
+<span class="function">Else</span>(
+    clientv3.<span class="function">OpPut</span>(<span class="string">"key"</span>, <span class="string">"default_value"</span>),
+).
+<span class="function">Commit</span>()
+
+<span class="comment">// 事务示例：分布式锁</span>
+<span class="function">func</span> <span class="function">acquireLock</span>(cli *clientv3.Client, key <span class="keyword">string</span>, ttl <span class="keyword">int64</span>) (<span class="keyword">bool</span>, error) {
+    <span class="comment">// 创建租约</span>
+    lease, err := cli.<span class="function">Grant</span>(context.<span class="function">Background</span>(), ttl)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">false</span>, err
+    }
+    
+    <span class="comment">// 事务：如果键不存在，则设置</span>
+    txn := cli.<span class="function">Txn</span>(context.<span class="function">Background</span>())
+    txn.<span class="function">If</span>(
+        clientv3.<span class="function">Compare</span>(clientv3.<span class="function">CreateRevision</span>(key), <span class="string">"="</span>, <span class="number">0</span>),
+    ).
+    <span class="function">Then</span>(
+        clientv3.<span class="function">OpPut</span>(key, <span class="string">"locked"</span>, clientv3.<span class="function">WithLease</span>(lease.ID)),
+    ).
+    <span class="function">Commit</span>()
+    
+    <span class="keyword">return</span> txn.<span class="function">Succeeded</span>(), <span class="keyword">nil</span>
+}</code></pre>
+            
+            <h3>监听变化</h3>
+            <pre><code><span class="comment">// 监听单个键</span>
+watchChan := cli.<span class="function">Watch</span>(ctx, <span class="string">"key"</span>)
+<span class="keyword">for</span> watchResp := <span class="keyword">range</span> watchChan {
+    <span class="keyword">for</span> _, event := <span class="keyword">range</span> watchResp.Events {
+        fmt.<span class="function">Printf</span>(<span class="string">"Type: %s, Key: %s, Value: %s\n"</span>, 
+            event.Type, event.Kv.Key, event.Kv.Value)
+    }
+}
+
+<span class="comment">// 监听前缀</span>
+watchChan = cli.<span class="function">Watch</span>(ctx, <span class="string">"prefix"</span>, clientv3.<span class="function">WithPrefix</span>())
+<span class="keyword">for</span> watchResp := <span class="keyword">range</span> watchChan {
+    <span class="keyword">for</span> _, event := <span class="keyword">range</span> watchResp.Events {
+        fmt.<span class="function">Printf</span>(<span class="string">"Type: %s, Key: %s, Value: %s\n"</span>, 
+            event.Type, event.Kv.Key, event.Kv.Value)
+    }
+}
+
+<span class="comment">// 从指定版本开始监听</span>
+watchChan = cli.<span class="function">Watch</span>(ctx, <span class="string">"key"</span>, clientv3.<span class="function">WithRev</span>(<span class="number">100</span>))</code></pre>
+            
+            <h3>服务发现</h3>
+            <pre><code><span class="comment">// 注册服务</span>
+<span class="function">func</span> <span class="function">registerService</span>(cli *clientv3.Client, serviceID, address <span class="keyword">string</span>, ttl <span class="keyword">int64</span>) (<span class="keyword">string</span>, error) {
+    <span class="comment">// 创建租约</span>
+    lease, err := cli.<span class="function">Grant</span>(context.<span class="function">Background</span>(), ttl)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, err
+    }
+    
+    <span class="comment">// 注册服务</span>
+    key := fmt.<span class="function">Sprintf</span>(<span class="string">"/services/%s"</span>, serviceID)
+    _, err = cli.<span class="function">Put</span>(context.<span class="function">Background</span>(), key, address, clientv3.<span class="function">WithLease</span>(lease.ID))
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, err
+    }
+    
+    <span class="comment">// 续租</span>
+    keepAlive, err := cli.<span class="function">KeepAlive</span>(context.<span class="function">Background</span>(), lease.ID)
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">for</span> <span class="keyword">range</span> keepAlive {
+            <span class="comment">// 保持续租</span>
+        }
+    }()
+    
+    <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d"</span>, lease.ID), <span class="keyword">nil</span>
+}
+
+<span class="comment">// 发现服务</span>
+<span class="function">func</span> <span class="function">discoverService</span>(cli *clientv3.Client, serviceID <span class="keyword">string</span>) (<span class="keyword">string</span>, error) {
+    key := fmt.<span class="function">Sprintf</span>(<span class="string">"/services/%s"</span>, serviceID)
+    resp, err := cli.<span class="function">Get</span>(context.<span class="function">Background</span>(), key)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, err
+    }
+    
+    <span class="keyword">if</span> <span class="function">len</span>(resp.Kvs) == <span class="number">0</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, fmt.<span class="function">Errorf</span>(<span class="string">"service not found"</span>)
+    }
+    
+    <span class="keyword">return</span> string(resp.Kvs[<span class="number">0</span>].Value), <span class="keyword">nil</span>
+}</code></pre>
+            
+            <h3>配置管理</h3>
+            <pre><code><span class="comment">// 监听配置变化</span>
+<span class="function">func</span> <span class="function">watchConfig</span>(cli *clientv3.Client, key <span class="keyword">string</span>) {
+    watchChan := cli.<span class="function">Watch</span>(context.<span class="function">Background</span>(), key)
+    <span class="keyword">for</span> watchResp := <span class="keyword">range</span> watchChan {
+        <span class="keyword">for</span> _, event := <span class="keyword">range</span> watchResp.Events {
+            <span class="keyword">switch</span> event.Type {
+            <span class="keyword">case</span> clientv3.EventTypePut:
+                fmt.<span class="function">Printf</span>(<span class="string">"Config updated: %s\n"</span>, event.Kv.Value)
+                <span class="comment">// 重新加载配置</span>
+            <span class="keyword">case</span> clientv3.EventTypeDelete:
+                fmt.<span class="function">Println</span>(<span class="string">"Config deleted"</span>)
+            }
+        }
+    }
+}
+
+<span class="comment">// 获取配置</span>
+<span class="function">func</span> <span class="function">getConfig</span>(cli *clientv3.Client, key <span class="keyword">string</span>) (<span class="keyword">string</span>, error) {
+    resp, err := cli.<span class="function">Get</span>(context.<span class="function">Background</span>(), key)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, err
+    }
+    
+    <span class="keyword">if</span> <span class="function">len</span>(resp.Kvs) == <span class="number">0</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, fmt.<span class="function">Errorf</span>(<span class="string">"config not found"</span>)
+    }
+    
+    <span class="keyword">return</span> string(resp.Kvs[<span class="number">0</span>].Value), <span class="keyword">nil</span>
+}</code></pre>
+            
+            <h2 id="bestpractices">最佳实践</h2>
+            
+            <h3>Validator 最佳实践</h3>
+            <div class="note-box">
+                <h4>1. 统一错误处理</h4>
+                <pre><code><span class="keyword">type</span> ValidationError <span class="keyword">struct</span> {
+    Field   <span class="keyword">string</span> <span class="string">`json:"field"`</span>
+    Message <span class="keyword">string</span> <span class="string">`json:"message"`</span>
+}
+
+<span class="function">func</span> <span class="function">HandleValidationError</span>(err <span class="keyword">error</span>) []ValidationError {
+    <span class="keyword">var</span> errors []ValidationError
+    validationErrors := err.(validator.ValidationErrors)
+    <span class="keyword">for</span>, e := <span class="keyword">range</span> validationErrors {
+        errors = <span class="function">append</span>(errors, ValidationError{
+            Field:   e.<span class="function">Field</span>(),
+            Message: <span class="function">getErrorMessage</span>(e),
+        })
+    }
+    <span class="keyword">return</span> errors
+}</code></pre>
+                
+                <h4>2. 自定义校验规则</h4>
+                <pre><code><span class="comment">// 业务相关的自定义校验</span>
+<span class="function">func</span> <span class="function">validateBusinessRule</span>(fl validator.FieldLevel) <span class="keyword">bool</span> {
+    <span class="comment">// 实现业务规则校验</span>
+    <span class="keyword">return</span> <span class="keyword">true</span>
+}</code></pre>
+                
+                <h4>3. 分层校验</h4>
+                <pre><code><span class="comment">// Controller 层：格式校验</span>
+<span class="keyword">if</span> err := c.<span class="function">ShouldBindJSON</span>(&req); err != <span class="keyword">nil</span> {
+    <span class="keyword">return</span> err
+}
+
+<span class="comment">// Service 层：业务校验</span>
+<span class="keyword">if</span> err := s.<span class="function">ValidateBusiness</span>(&req); err != <span class="keyword">nil</span> {
+    <span class="keyword">return</span> err
+}</code></pre>
+            </div>
+            
+            <h3>Cobra 最佳实践</h3>
+            <div class="note-box">
+                <h4>1. 结构化命令</h4>
+                <pre><code><span class="comment">// cmd/root.go</span>
+<span class="keyword">package</span> cmd
+
+<span class="keyword">var</span> rootCmd = &cobra.Command{
+    Use:   <span class="string">"myapp"</span>,
+    Short: <span class="string">"My application"</span>,
+}
+
+<span class="function">func</span> <span class="function">Execute</span>() {
+    <span class="keyword">if</span> err := rootCmd.<span class="function">Execute</span>(); err != <span class="keyword">nil</span> {
+        os.<span class="function">Exit</span>(<span class="number">1</span>)
+    }
+}
+
+<span class="comment">// cmd/create.go</span>
+<span class="keyword">package</span> cmd
+
+<span class="keyword">var</span> createCmd = &cobra.Command{
+    Use:   <span class="string">"create"</span>,
+    Short: <span class="string">"Create resource"</span>,
+}
+
+<span class="function">func</span> <span class="function">init</span>() {
+    rootCmd.<span class="function">AddCommand</span>(createCmd)
+}</code></pre>
+                
+                <h4>2. 配置管理</h4>
+                <pre><code><span class="comment">// 使用 Viper 管理配置</span>
+<span class="keyword">var</span> cfgFile <span class="keyword">string</span>
+
+<span class="function">func</span> <span class="function">init</span>() {
+    cobra.<span class="function">OnInitialize</span>(<span class="function">initConfig</span>)
+    rootCmd.<span class="function">PersistentFlags</span>().<span class="function">StringVar</span>(&cfgFile, <span class="string">"config"</span>, <span class="string">""</span>, <span class="string">"config file"</span>)
+}
+
+<span class="function">func</span> <span class="function">initConfig</span>() {
+    <span class="keyword">if</span> cfgFile != <span class="string">""</span> {
+        viper.<span class="function">SetConfigFile</span>(cfgFile)
+    } <span class="keyword">else</span> {
+        home, _ := os.<span class="function">UserHomeDir</span>()
+        viper.<span class="function">AddConfigPath</span>(home)
+        viper.<span class="function">SetConfigName</span>(<span class="string">".myapp"</span>)
+    }
+    
+    viper.<span class="function">ReadInConfig</span>()
+}</code></pre>
+                
+                <h4>3. 生成文档</h4>
+                <pre><code><span class="comment">// 自动生成文档</span>
+<span class="keyword">go</span> run main.go docs</code></pre>
+            </div>
+            
+            <h3>Go-Micro 最佳实践</h3>
+            <div class="note-box">
+                <h4>1. 服务拆分</h4>
+                <pre><code><span class="comment">// 按业务领域拆分服务</span>
+<span class="comment">// - user-service</span>
+<span class="comment">// - order-service</span>
+<span class="comment">// - payment-service</span></code></pre>
+                
+                <h4>2. 接口设计</h4>
+                <pre><code><span class="comment">// 使用 Protobuf 定义接口</span>
+syntax = <span class="string">"proto3"</span>;
+
+<span class="keyword">package</span> user;
+
+<span class="keyword">service</span> UserService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+}</code></pre>
+                
+                <h4>3. 错误处理</h4>
+                <pre><code><span class="comment">// 统一错误处理</span>
+<span class="keyword">type</span> ErrorResponse <span class="keyword">struct</span> {
+    Code    <span class="keyword">string</span> <span class="string">`json:"code"`</span>
+    Message <span class="keyword">string</span> <span class="string">`json:"message"`</span>
+}
+
+<span class="function">func</span> <span class="function">HandleError</span>(err <span class="keyword">error</span>) *ErrorResponse {
+    <span class="keyword">return</span> &ErrorResponse{
+        Code:    <span class="string">"ERROR"</span>,
+        Message: err.<span class="function">Error</span>(),
+    }
+}</code></pre>
+            </div>
+            
+            <h3>Etcd 最佳实践</h3>
+            <div class="note-box">
+                <h4>1. 键命名规范</h4>
+                <pre><code><span class="comment">// 使用层次化的键名</span>
+<span class="comment">// /services/user-service/instances/192.168.1.1:8080</span>
+<span class="comment">// /config/database/host</span>
+<span class="comment">// /locks/resource-123</span></code></pre>
+                
+                <h4>2. 租约管理</h4>
+                <pre><code><span class="comment">// 自动续租</span>
+keepAlive, err := cli.<span class="function">KeepAlive</span>(ctx, lease.ID)
+<span class="keyword">defer</span> cli.<span class="function">Revoke</span>(ctx, lease.ID)</code></pre>
+                
+                <h4>3. 事务使用</h4>
+                <pre><code><span class="comment">// 使用事务实现原子操作</span>
+txn := cli.<span class="function">Txn</span>(ctx)
+<span class="comment">// ...</span>
+txn.<span class="function">Commit</span>()</code></pre>
+                
+                <h4>4. 监听机制</h4>
+                <pre><code><span class="comment">// 使用监听实现配置热更新</span>
+watchChan := cli.<span class="function">Watch</span>(ctx, <span class="string">"/config"</span>, clientv3.<span class="function">WithPrefix</span>())</code></pre>
+            </div>
+            
+            <h3>微服务架构最佳实践</h3>
+            <div class="note-box">
+                <h4>1. 服务注册与发现</h4>
+                <pre><code><span class="comment">// 使用 Etcd 作为注册中心</span>
+registry := etcd.<span class="function">NewRegistry</span>(registry.<span class="function">Addrs</span>(<span class="string">"127.0.0.1:2379"</span>))
+service := micro.<span class="function">NewService</span>(micro.<span class="function">Registry</span>(registry))</code></pre>
+                
+                <h4>2. 配置中心</h4>
+                <pre><code><span class="comment">// 使用 Etcd 存储配置</span>
+cli.<span class="function">Put</span>(ctx, <span class="string">"/config/database/host"</span>, <span class="string">"localhost"</span>)</code></pre>
+                
+                <h4>3. 分布式锁</h4>
+                <pre><code><span class="comment">// 使用 Etcd 实现分布式锁</span>
+<span class="function">func</span> <span class="function">acquireLock</span>(cli *clientv3.Client, key <span class="keyword">string</span>) (<span class="keyword">bool</span>, error) {
+    <span class="comment">// ...</span>
+}</code></pre>
+                
+                <h4>4. 消息队列</h4>
+                <pre><code><span class="comment">// 使用 Go-Micro Broker</span>
+micro.<span class="function">RegisterSubscriber</span>(<span class="string">"topic"</span>, service.<span class="function">Server</span>(), handler)</code></pre>
+            </div>
+            
+            <h3>总结</h3>
+            <div class="example-box">
+                <p>本章介绍了 Go 语言生态中更多重要的社区库：</p>
+                <ul>
+                    <li><strong>Validator</strong>：强大的参数校验库，支持多种校验规则和自定义规则</li>
+                    <li><strong>Cobra</strong>：功能丰富的命令行框架，适合构建 CLI 应用</li>
+                    <li><strong>Go-Micro</strong>：微服务框架，提供服务发现、RPC 通信等功能</li>
+                    <li><strong>Etcd</strong>：分布式键值存储，用于配置管理和服务发现</li>
+                </ul>
+                <p>这些库在构建企业级应用时非常有用，掌握它们可以帮助您构建高性能、可扩展的微服务架构。</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

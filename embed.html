@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embed 标准库 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="scroll.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h3>📚 学习目录</h3>
+            <ul>
+                <li><a href="index.html">🏠 首页</a></li>
+                
+                <li class="level-1">
+                    <span class="level-badge">阶段一：入门</span>
+                </li>
+                <li>
+                    <a href="introduction.html">📖 1. Go 语言简介</a>
+                    <ul>
+                        <li><a href="introduction.html#history">Go 的历史</a></li>
+                        <li><a href="introduction.html#features">Go 的特点</a></li>
+                        <li><a href="introduction.html#install">安装与配置</a></li>
+                        <li><a href="introduction.html#helloworld">Hello World</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="basics.html">🔤 2. 基础语法</a>
+                    <ul>
+                        <li><a href="basics.html#variables">变量声明</a></li>
+                        <li><a href="basics.html#datatypes">数据类型</a></li>
+                        <li><a href="basics.html#operators">运算符</a></li>
+                        <li><a href="basics.html#arrays">数组与切片</a></li>
+                        <li><a href="basics.html#maps">映射</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="control-flow.html">🔄 3. 控制流</a>
+                    <ul>
+                        <li><a href="control-flow.html#if">if 语句</a></li>
+                        <li><a href="control-flow.html#switch">switch 语句</a></li>
+                        <li><a href="control-flow.html#for">for 循环</a></li>
+                        <li><a href="control-flow.html#defer">defer 语句</a></li>
+                    </ul>
+                </li>
+                
+                <li class="level-1">
+                    <span class="level-badge">阶段二：进阶</span>
+                </li>
+                <li>
+                    <a href="functions.html">⚡ 4. 函数</a>
+                    <ul>
+                        <li><a href="functions.html#basic">基本函数</a></li>
+                        <li><a href="functions.html#multiple">多返回值</a></li>
+                        <li><a href="functions.html#variadic">可变参数</a></li>
+                        <li><a href="functions.html#closure">闭包</a></li>
+                        <li><a href="functions.html#methods">方法</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="structs.html">🏗️ 5. 结构体与接口</a>
+                    <ul>
+                        <li><a href="structs.html#struct">结构体</a></li>
+                        <li><a href="structs.html#nested">嵌套结构体</a></li>
+                        <li><a href="structs.html#methods">结构体方法</a></li>
+                        <li><a href="structs.html#interface">接口</a></li>
+                        <li><a href="structs.html#tags">结构体标签</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="modules.html">📦 6. 模块化与 Go Module</a>
+                    <ul>
+                        <li><a href="modules.html#introduction">Go Module 简介</a></li>
+                        <li><a href="modules.html#init">初始化 Module</a></li>
+                        <li><a href="modules.html#dependency">依赖管理</a></li>
+                        <li><a href="modules.html#version">版本控制</a></li>
+                        <li><a href="modules.html#private">私有 Module</a></li>
+                    </ul>
+                </li>
+                
+                <li class="level-1">
+                    <span class="level-badge">阶段三：高级</span>
+                </li>
+                <li>
+                    <a href="concurrency.html">🚀 7. 并发编程</a>
+                    <ul>
+                        <li><a href="concurrency.html#goroutine">Goroutine</a></li>
+                        <li><a href="concurrency.html#channel">Channel</a></li>
+                        <li><a href="concurrency.html#select">Select</a></li>
+                        <li><a href="concurrency.html#mutex">互斥锁</a></li>
+                        <li><a href="concurrency.html#context">Context</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="embed.html" class="active">📁 8. Embed 标准库</a>
+                    <ul>
+                        <li><a href="embed.html#introduction">Embed 简介</a></li>
+                        <li><a href="embed.html#basics">基础用法</a></li>
+                        <li><a href="embed.html#filesystem">文件系统</a></li>
+                        <li><a href="embed.html#advanced">高级用法</a></li>
+                        <li><a href="embed.html#bestpractices">最佳实践</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="generics.html">🧩 9. 泛型</a>
+                    <ul>
+                        <li><a href="generics.html#functions">泛型函数</a></li>
+                        <li><a href="generics.html#types">泛型类型</a></li>
+                        <li><a href="generics.html#constraints">类型约束</a></li>
+                        <li><a href="generics.html#inference">类型推断</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="reflection.html">🔍 10. 反射</a>
+                    <ul>
+                        <li><a href="reflection.html#typevalue">Type 和 Value</a></li>
+                        <li><a href="reflection.html#struct">结构体反射</a></li>
+                        <li><a href="reflection.html#modify">修改值</a></li>
+                        <li><a href="reflection.html#methods">调用方法</a></li>
+                        <li><a href="reflection.html#performance">性能考虑</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+        <div class="content">
+            <a href="index.html" class="back-link">← 返回首页</a>
+            <h1>Embed 标准库</h1>
+
+            <h2 id="introduction">Embed 简介</h2>
+            <p><code>embed</code> 是 Go 1.16 引入的标准库，用于在编译时将文件嵌入到 Go 程序中。它提供了一种简单、类型安全的方式来访问嵌入的文件，无需在运行时读取文件系统。</p>
+
+            <div class="example-box">
+                <h3>Embed 的核心特性</h3>
+                <ul>
+                    <li><strong>编译时嵌入</strong>：文件在编译时被嵌入到二进制文件中</li>
+                    <li><strong>类型安全</strong>：提供 string、[]byte 和 fs.FS 类型</li>
+                    <li><strong>跨平台</strong>：自动处理不同操作系统的路径分隔符</li>
+                    <li><strong>零依赖</strong>：不需要额外的依赖管理</li>
+                    <li><strong>简单易用</strong>：通过 //go:embed 指令声明</li>
+                </ul>
+            </div>
+
+            <h2 id="basics">基础用法</h2>
+
+            <h3>嵌入单个文件为字符串</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="comment">//go:embed hello.txt</span>
+<span class="keyword">var</span> content <span class="keyword">string</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    fmt.<span class="function">Println</span>(content)
+}</code></pre>
+
+            <p><code>hello.txt</code> 文件内容：</p>
+            <pre><code>Hello, World!</code></pre>
+
+            <h3>嵌入单个文件为字节数组</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="comment">//go:embed image.png</span>
+<span class="keyword">var</span> imageData []<span class="keyword">byte</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    fmt.<span class="function">Printf</span>(<span class="string">"Image size: %d bytes\n"</span>, <span class="function">len</span>(imageData))
+}</code></pre>
+
+            <h3>嵌入整个目录</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"io/fs"</span>
+)
+
+<span class="comment">//go:embed static/*</span>
+<span class="keyword">var</span> staticFiles <span class="keyword">embed</span>.FS
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 读取目录中的文件</span>
+    entries, _ := fs.<span class="function">ReadDir</span>(staticFiles, <span class="string">"static"</span>)
+    <span class="keyword">for</span> _, entry := <span class="keyword">range</span> entries {
+        fmt.<span class="function">Println</span>(entry.<span class="function">Name</span>())
+    }
+}</code></pre>
+
+            <h3>嵌入多个文件</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="comment">//go:embed file1.txt file2.txt file3.txt</span>
+<span class="keyword">var</span> files []<span class="keyword">string</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">for</span> i, content := <span class="keyword">range</span> files {
+        fmt.<span class="function">Printf</span>(<span class="string">"File %d: %s\n"</span>, i+<span class="number">1</span>, content)
+    }
+}</code></pre>
+
+            <h2 id="filesystem">文件系统</h2>
+
+            <h3>使用 fs.FS 接口</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"io"</span>
+    <span class="string">"io/fs"</span>
+)
+
+<span class="comment">//go:embed templates</span>
+<span class="keyword">var</span> templatesFS <span class="keyword">embed</span>.FS
+
+<span class="function">func</span> <span class="function">readTemplate</span>(name <span class="keyword">string</span>) (<span class="keyword">string</span>, <span class="keyword">error</span>) {
+    content, err := fs.<span class="function">ReadFile</span>(templatesFS, <span class="string">"templates/"</span>+name)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, err
+    }
+    <span class="keyword">return</span> <span class="keyword">string</span>(content), <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">listTemplates</span>() {
+    fs.<span class="function">WalkDir</span>(templatesFS, <span class="string">"templates"</span>, <span class="keyword">func</span>(path <span class="keyword">string</span>, d fs.DirEntry, err <span class="keyword">error</span>) <span class="keyword">error</span> {
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> err
+        }
+        fmt.<span class="function">Println</span>(path)
+        <span class="keyword">return</span> <span class="keyword">nil</span>
+    })
+}
+
+<span class="function">func</span> <span class="function">openTemplate</span>(name <span class="keyword">string</span>) (fs.File, <span class="keyword">error</span>) {
+    <span class="keyword">return</span> templatesFS.<span class="function">Open</span>(<span class="string">"templates/"</span> + name)
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 列出所有模板</span>
+    <span class="function">listTemplates</span>()
+    
+    <span class="comment">// 读取模板内容</span>
+    content, err := <span class="function">readTemplate</span>(<span class="string">"index.html"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+    } <span class="keyword">else</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Template:"</span>, content)
+    }
+    
+    <span class="comment">// 打开文件流</span>
+    file, err := <span class="function">openTemplate</span>(<span class="string">"index.html"</span>)
+    <span class="keyword">if</span> err == <span class="keyword">nil</span> {
+        <span class="keyword">defer</span> file.<span class="function">Close</span>()
+        data, _ := io.<span class="function">ReadAll</span>(file)
+        fmt.<span class="function">Println</span>(<span class="string">"File size:"</span>, <span class="function">len</span>(data))
+    }
+}</code></pre>
+
+            <h3>HTTP 服务器中使用 Embed</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"net/http"</span>
+)
+
+<span class="comment">//go:embed static</span>
+<span class="keyword">var</span> staticFiles <span class="keyword">embed</span>.FS
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建文件服务器</span>
+    http.<span class="function">Handle</span>(<span class="string">"/static/"</span>, http.<span class="function">FileServer</span>(http.<span class="function">FS</span>(staticFiles)))
+    
+    <span class="comment">// 服务单个文件</span>
+    http.<span class="function">HandleFunc</span>(<span class="string">"/"</span>, <span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) {
+        content, _ := staticFiles.<span class="function">ReadFile</span>(<span class="string">"static/index.html"</span>)
+        w.<span class="function">Write</span>(content)
+    })
+    
+    http.<span class="function">ListenAndServe</span>(<span class="string">":8080"</span>, <span class="keyword">nil</span>)
+}</code></pre>
+
+            <h2 id="advanced">高级用法</h2>
+
+            <h3>嵌套目录结构</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"io/fs"</span>
+)
+
+<span class="comment">//go:embed assets</span>
+<span class="keyword">var</span> assetsFS <span class="keyword">embed</span>.FS
+
+<span class="comment">// 目录结构：</span>
+<span class="comment">// assets/</span>
+<span class="comment">//   ├── images/</span>
+<span class="comment">//   │   ├── logo.png</span>
+<span class="comment">//   │   └── banner.jpg</span>
+<span class="comment">//   ├── css/</span>
+<span class="comment">//   │   └── style.css</span>
+<span class="comment">//   └── js/</span>
+<span class="comment">//       └── app.js</span>
+
+<span class="function">func</span> <span class="function">walkAssets</span>() {
+    fs.<span class="function">WalkDir</span>(assetsFS, <span class="string">"assets"</span>, <span class="keyword">func</span>(path <span class="keyword">string</span>, d fs.DirEntry, err <span class="keyword">error</span>) <span class="keyword">error</span> {
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> err
+        }
+        <span class="keyword">if</span> !d.<span class="function">IsDir</span>() {
+            fmt.<span class="function">Printf</span>(<span class="string">"File: %s\n"</span>, path)
+        }
+        <span class="keyword">return</span> <span class="keyword">nil</span>
+    })
+}
+
+<span class="function">func</span> <span class="function">readSubdirectory</span>(subdir <span class="keyword">string</span>) {
+    entries, err := fs.<span class="function">ReadDir</span>(assetsFS, <span class="string">"assets/"</span>+subdir)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="keyword">for</span> _, entry := <span class="keyword">range</span> entries {
+        fmt.<span class="function">Printf</span>(<span class="string">"%s/%s\n"</span>, subdir, entry.<span class="function">Name</span>())
+    }
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="function">walkAssets</span>()
+    <span class="function">readSubdirectory</span>(<span class="string">"images"</span>)
+    <span class="function">readSubdirectory</span>(<span class="string">"css"</span>)
+}</code></pre>
+
+            <h3>条件嵌入</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="comment">//go:embed config.yaml</span>
+<span class="keyword">var</span> config <span class="keyword">string</span>
+
+<span class="function">func</span> <span class="function">loadConfig</span>() {
+    <span class="comment">// 开发环境：使用外部配置文件</span>
+    <span class="keyword">if</span> os.<span class="function">Getenv</span>(<span class="string">"ENV"</span>) == <span class="string">"dev"</span> {
+        data, err := os.<span class="function">ReadFile</span>(<span class="string">"config.yaml"</span>)
+        <span class="keyword">if</span> err == <span class="keyword">nil</span> {
+            fmt.<span class="function">Println</span>(<span class="string">"Using external config:"</span>, <span class="keyword">string</span>(data))
+            <span class="keyword">return</span>
+        }
+    }
+    
+    <span class="comment">// 生产环境：使用嵌入的配置</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Using embedded config:"</span>, config)
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="function">loadConfig</span>()
+}</code></pre>
+
+            <h3>嵌入 Go 模板</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"html/template"</span>
+    <span class="string">"net/http"</span>
+)
+
+<span class="comment">//go:embed templates/*.html</span>
+<span class="keyword">var</span> templatesFS <span class="keyword">embed</span>.FS
+
+<span class="keyword">type</span> PageData <span class="keyword">struct</span> {
+    Title   <span class="keyword">string</span>
+    Content <span class="keyword">string</span>
+}
+
+<span class="function">func</span> <span class="function">renderTemplate</span>(w http.ResponseWriter, name <span class="keyword">string</span>, data <span class="keyword">interface</span>{}) <span class="keyword">error</span> {
+    tmpl, err := template.<span class="function">ParseFS</span>(templatesFS, <span class="string">"templates/"</span>+name)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">return</span> tmpl.<span class="function">Execute</span>(w, data)
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    http.<span class="function">HandleFunc</span>(<span class="string">"/"</span>, <span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) {
+        data := PageData{
+            Title:   <span class="string">"Hello"</span>,
+            Content: <span class="string">"Welcome to my website!"</span>,
+        }
+        <span class="function">renderTemplate</span>(w, <span class="string">"index.html"</span>, data)
+    })
+    
+    http.<span class="function">ListenAndServe</span>(<span class="string">":8080"</span>, <span class="keyword">nil</span>)
+}</code></pre>
+
+            <h3>嵌入 SQL 文件</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"database/sql"</span>
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">_ "github.com/mattn/go-sqlite3"</span>
+)
+
+<span class="comment">//go:embed migrations/*.sql</span>
+<span class="keyword">var</span> migrationsFS <span class="keyword">embed</span>.FS
+
+<span class="function">func</span> <span class="function">runMigrations</span>(db *sql.DB) <span class="keyword">error</span> {
+    files, err := migrationsFS.<span class="function">ReadDir</span>(<span class="string">"migrations"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="keyword">for</span> _, file := <span class="keyword">range</span> files {
+        <span class="keyword">if</span> file.<span class="function">IsDir</span>() {
+            <span class="keyword">continue</span>
+        }
+        
+        content, err := migrationsFS.<span class="function">ReadFile</span>(<span class="string">"migrations/"</span> + file.<span class="function">Name</span>())
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> err
+        }
+        
+        _, err = db.<span class="function">Exec</span>(<span class="keyword">string</span>(content))
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> err
+        }
+        
+        fmt.<span class="function">Printf</span>(<span class="string">"Executed migration: %s\n"</span>, file.<span class="function">Name</span>())
+    }
+    
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    db, _ := sql.<span class="function">Open</span>(<span class="string">"sqlite3"</span>, <span class="string">":memory:"</span>)
+    <span class="keyword">defer</span> db.<span class="function">Close</span>()
+    
+    <span class="function">runMigrations</span>(db)
+}</code></pre>
+
+            <h2 id="bestpractices">最佳实践</h2>
+
+            <div class="example-box">
+                <h3>1. 文件组织</h3>
+                <pre><code><span class="comment">// 推荐的项目结构</span>
+myapp/
+├── cmd/
+│   └── server/
+│       └── main.go
+├── internal/
+│   ├── config/
+│   └── handlers/
+├── embed/
+│   ├── static/
+│   │   ├── css/
+│   │   ├── js/
+│   │   └── images/
+│   ├── templates/
+│   │   └── *.html
+│   └── config/
+│       └── config.yaml
+├── go.mod
+└── go.sum</code></pre>
+
+                <h3>2. 版本控制</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="comment">//go:embed version.txt</span>
+<span class="keyword">var</span> version <span class="keyword">string</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    fmt.<span class="function">Printf</span>(<span class="string">"Version: %s\n"</span>, version)
+}
+
+<span class="comment">// version.txt 内容：</span>
+<span class="comment">// 1.0.0</span></code></pre>
+
+                <h3>3. 配置管理</h3>
+                <pre><code><span class="keyword">package</span> config
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"gopkg.in/yaml.v3"</span>
+)
+
+<span class="comment">//go:embed config.yaml</span>
+<span class="keyword">var</span> configBytes []<span class="keyword">byte</span>
+
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    Server ServerConfig <span class="string">`yaml:"server"`</span>
+    DB     DBConfig     <span class="string">`yaml:"database"`</span>
+}
+
+<span class="keyword">type</span> ServerConfig <span class="keyword">struct</span> {
+    Port <span class="keyword">int</span> <span class="string">`yaml:"port"`</span>
+}
+
+<span class="keyword">type</span> DBConfig <span class="keyword">struct</span> {
+    Host     <span class="keyword">string</span> <span class="string">`yaml:"host"`</span>
+    Port     <span class="keyword">int</span>    <span class="string">`yaml:"port"`</span>
+    Database <span class="keyword">string</span> <span class="string">`yaml:"database"`</span>
+}
+
+<span class="function">func</span> <span class="function">Load</span>() (*Config, <span class="keyword">error</span>) {
+    <span class="keyword">var</span> cfg Config
+    err := yaml.<span class="function">Unmarshal</span>(configBytes, &cfg)
+    <span class="keyword">return</span> &cfg, err
+}</code></pre>
+
+                <h3>4. HTTP 静态文件服务</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"io/fs"</span>
+    <span class="string">"net/http"</span>
+)
+
+<span class="comment">//go:embed static</span>
+<span class="keyword">var</span> staticFS <span class="keyword">embed</span>.FS
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 去掉 static 前缀</span>
+    strippedFS, err := fs.<span class="function">Sub</span>(staticFS, <span class="string">"static"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    
+    <span class="comment">// 创建文件服务器</span>
+    fileServer := http.<span class="function">FileServer</span>(http.<span class="function">FS</span>(strippedFS))
+    
+    <span class="comment">// 处理 SPA 路由</span>
+    http.<span class="function">Handle</span>(<span class="string">"/"</span>, http.<span class="function">FileServer</span>(http.<span class="function">FS</span>(strippedFS)))
+    
+    http.<span class="function">ListenAndServe</span>(<span class="string">":8080"</span>, <span class="keyword">nil</span>)
+}</code></pre>
+
+                <h3>5. 测试</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"testing"</span>
+)
+
+<span class="comment">//go:embed testdata/*.txt</span>
+<span class="keyword">var</span> testFiles <span class="keyword">embed</span>.FS
+
+<span class="function">func</span> <span class="function">TestEmbed</span>(t *testing.T) {
+    content, err := testFiles.<span class="function">ReadFile</span>(<span class="string">"testdata/test.txt"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        t.<span class="function">Fatal</span>(err)
+    }
+    
+    expected := <span class="string">"test content"</span>
+    <span class="keyword">if</span> <span class="keyword">string</span>(content) != expected {
+        t.<span class="function">Errorf</span>(<span class="string">"expected %s, got %s"</span>, expected, <span class="keyword">string</span>(content))
+    }
+}</code></pre>
+
+                <h3>6. 性能优化</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="comment">//go:embed data.json</span>
+<span class="keyword">var</span> jsonData []<span class="keyword">byte</span>
+
+<span class="keyword">var</span> (
+    parsedData <span class="keyword">interface</span>{},
+    once       sync.Once
+)
+
+<span class="function">func</span> <span class="function">GetData</span>() <span class="keyword">interface</span>{} {
+    once.<span class="function">Do</span>(<span class="keyword">func</span>() {
+        <span class="comment">// 只解析一次</span>
+        parsedData = <span class="function">parseJSON</span>(jsonData)
+    })
+    <span class="keyword">return</span> parsedData
+}
+
+<span class="function">func</span> <span class="function">parseJSON</span>(data []<span class="keyword">byte</span>) <span class="keyword">interface</span>{} {
+    <span class="comment">// 解析逻辑</span>
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+
+                <h3>7. 错误处理</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"log"</span>
+)
+
+<span class="comment">//go:embed config.yaml</span>
+<span class="keyword">var</span> config <span class="keyword">string</span>
+
+<span class="function">func</span> <span class="function">loadConfig</span>() <span class="keyword">error</span> {
+    <span class="keyword">if</span> config == <span class="string">""</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"config is empty"</span>)
+    }
+    
+    <span class="comment">// 解析配置</span>
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">if</span> err := <span class="function">loadConfig</span>(); err != <span class="keyword">nil</span> {
+        log.<span class="function">Fatal</span>(<span class="string">"Failed to load config:"</span>, err)
+    }
+}</code></pre>
+
+                <h3>8. 安全考虑</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"net/http"</span>
+    <span class="string">"path"</span>
+)
+
+<span class="comment">//go:embed static</span>
+<span class="keyword">var</span> staticFS <span class="keyword">embed</span>.FS
+
+<span class="function">func</span> <span class="function">safeFileHandler</span>(w http.ResponseWriter, r *http.Request) {
+    <span class="comment">// 清理路径，防止目录遍历攻击</span>
+    filename := path.<span class="function">Clean</span>(r.URL.Path)
+    
+    <span class="comment">// 验证文件路径</span>
+    <span class="keyword">if</span> path.<span class="function">IsAbs</span>(filename) || path.<span class="function">Contains</span>(filename, <span class="string">".."</span>) {
+        http.<span class="function">Error</span>(w, <span class="string">"Invalid path"</span>, http.StatusBadRequest)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="comment">// 读取文件</span>
+    content, err := staticFS.<span class="function">ReadFile</span>(<span class="string">"static/"</span> + filename)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        http.<span class="function">NotFound</span>(w, r)
+        <span class="keyword">return</span>
+    }
+    
+    w.<span class="function">Write</span>(content)
+}</code></pre>
+
+                <h3>9. 常见陷阱</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="comment">// ❌ 错误：embed 指令必须紧跟在变量声明之后</span>
+<span class="comment">// var content string</span>
+<span class="comment">// //go:embed file.txt</span>
+
+<span class="comment">// ✅ 正确</span>
+<span class="comment">//go:embed file.txt</span>
+<span class="keyword">var</span> content <span class="keyword">string</span>
+
+<span class="comment">// ❌ 错误：不能在函数中使用 embed</span>
+<span class="comment">// func load() {</span>
+<span class="comment">//     //go:embed file.txt</span>
+<span class="comment">//     var content string</span>
+<span class="comment">// }</span>
+
+<span class="comment">// ❌ 错误：不能嵌入符号链接</span>
+<span class="comment">// //go:embed symlink</span>
+
+<span class="comment">// ✅ 正确：只能嵌入文件和目录</span>
+<span class="comment">//go:embed static</span>
+<span class="keyword">var</span> staticFS <span class="keyword">embed</span>.FS
+
+<span class="function">func</span> <span class="function">main</span>() {
+    fmt.<span class="function">Println</span>(content)
+}</code></pre>
+
+                <h3>10. 实际应用示例</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"io/fs"</span>
+    <span class="string">"net/http"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="comment">//go:embed static</span>
+<span class="keyword">var</span> staticFS <span class="keyword">embed</span>.FS
+
+<span class="comment">//go:embed templates/*.html</span>
+<span class="keyword">var</span> templatesFS <span class="keyword">embed</span>.FS
+
+<span class="comment">//go:embed config.yaml</span>
+<span class="keyword">var</span> config <span class="keyword">string</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 设置静态文件服务</span>
+    strippedFS, _ := fs.<span class="function">Sub</span>(staticFS, <span class="string">"static"</span>)
+    http.<span class="function">Handle</span>(<span class="string">"/static/"</span>, http.<span class="function">FileServer</span>(http.<span class="function">FS</span>(strippedFS)))
+    
+    <span class="comment">// 设置 API 路由</span>
+    http.<span class="function">HandleFunc</span>(<span class="string">"/api/config"</span>, <span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) {
+        w.<span class="function">Write</span>([]<span class="keyword">byte</span>(config))
+    })
+    
+    <span class="comment">// 设置主页</span>
+    http.<span class="function">HandleFunc</span>(<span class="string">"/"</span>, <span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) {
+        content, _ := staticFS.<span class="function">ReadFile</span>(<span class="string">"static/index.html"</span>)
+        w.<span class="function">Write</span>(content)
+    })
+    
+    <span class="comment">// 启动服务器</span>
+    server := &http.Server{
+        Addr:         <span class="string">":8080"</span>,
+        ReadTimeout:  <span class="number">10</span> * time.Second,
+        WriteTimeout: <span class="number">10</span> * time.Second,
+    }
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Server starting on :8080"</span>)
+    server.<span class="function">ListenAndServe</span>()
+}</code></pre>
+            </div>
+
+            <div class="note-box">
+                <h3>Embed 内部实现原理</h3>
+                
+                <p><strong>1. 编译时处理</strong></p>
+                <pre><code><span class="comment">// Go 编译器在编译时的处理流程：</span>
+<span class="comment">// 1. 扫描 //go:embed 指令</span>
+<span class="comment">// 2. 读取指定的文件和目录</span>
+<span class="comment">// 3. 将文件内容转换为 Go 代码</span>
+<span class="comment">// 4. 生成一个包含文件数据的变量</span>
+<span class="comment">// 5. 将数据嵌入到最终的二进制文件中</span></code></pre>
+
+                <p><strong>2. 数据存储格式</strong></p>
+                <pre><code><span class="comment">// embed.FS 的内部结构（简化版）</span>
+<span class="keyword">type</span> FS <span class="keyword">struct</span> {
+    files <span class="keyword">map</span>[<span class="keyword">string</span>]*file
+}
+
+<span class="keyword">type</span> file <span class="keyword">struct</span> {
+    name    <span class="keyword">string</span>
+    data    []<span class="keyword">byte</span>
+    isDir   <span class="keyword">bool</span>
+    entries []<span class="keyword">string</span>
+}</code></pre>
+
+                <p><strong>3. 文件系统接口</strong></p>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"io/fs"</span>
+)
+
+<span class="comment">//go:embed static</span>
+<span class="keyword">var</span> staticFS <span class="keyword">embed</span>.FS
+
+<span class="comment">// embed.FS 实现了 fs.FS 接口：</span>
+<span class="comment">// - Open(name string) (fs.File, error)</span>
+<span class="comment">// - ReadFile(name string) ([]byte, error)</span>
+<span class="comment">// - ReadDir(name string) ([]fs.DirEntry, error)</span>
+<span class="comment">// - Glob(pattern string) ([]string, error)</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// embed.FS 是只读的</span>
+    <span class="comment">// 不能修改嵌入的文件</span>
+    <span class="comment">// 不能创建新文件</span>
+}</code></pre>
+
+                <p><strong>4. 性能考虑</strong></p>
+                <pre><code><span class="comment">// 性能优化建议：</span>
+<span class="comment">// 1. 大文件会增加二进制文件大小</span>
+<span class="comment">// 2. 考虑压缩嵌入的文件</span>
+<span class="comment">// 3. 使用 sync.Once 避免重复解析</span>
+<span class="comment">// 4. 考虑按需加载（如果可能）</span>
+
+<span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"compress/gzip"</span>
+    <span class="string">"embed"</span>
+    <span class="string">"io"</span>
+)
+
+<span class="comment">//go:embed data.json.gz</span>
+<span class="keyword">var</span> compressedData []<span class="keyword">byte</span>
+
+<span class="function">func</span> <span class="function">loadData</span>() ([]<span class="keyword">byte</span>, <span class="keyword">error</span>) {
+    reader, err := gzip.<span class="function">NewReader</span>(bytes.<span class="function">NewReader</span>(compressedData))
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    <span class="keyword">defer</span> reader.<span class="function">Close</span>()
+    
+    <span class="keyword">return</span> io.<span class="function">ReadAll</span>(reader)
+}</code></pre>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

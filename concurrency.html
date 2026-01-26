@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>并发 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=1.3">
     <script src="scroll.js"></script>
 </head>
 <body>
@@ -13,21 +13,31 @@
             <h3>📚 学习目录</h3>
             <ul>
                 <li><a href="index.html">🏠 首页</a></li>
-                <li>
-                    <a href="introduction.html">📖 Go 语言简介</a>
+                
+                <li class="level-1">
+                    <span class="level-badge">阶段一：入门</span>
                 </li>
                 <li>
-                    <a href="basics.html">🔤 基础语法</a>
+                    <a href="introduction.html">📖 1. Go 语言简介</a>
                     <ul>
-                        <li><a href="basics.html#variables">变量声明</a></li>
-                        <li><a href="basics.html#datatypes">数据类型</a></li>
-                        <li><a href="basics.html#arrays">数组与切片</a></li>
-                        <li><a href="basics.html#maps">映射</a></li>
-                        <li><a href="basics.html#go125">Go 1.25 新特性</a></li>
+                        <li><a href="introduction.html#history">Go 的历史</a></li>
+                        <li><a href="introduction.html#features">Go 的特点</a></li>
+                        <li><a href="introduction.html#install">安装与配置</a></li>
+                        <li><a href="introduction.html#helloworld">Hello World</a></li>
                     </ul>
                 </li>
                 <li>
-                    <a href="control-flow.html">🔄 控制流</a>
+                    <a href="basics.html">🔤 2. 基础语法</a>
+                    <ul>
+                        <li><a href="basics.html#variables">变量声明</a></li>
+                        <li><a href="basics.html#datatypes">数据类型</a></li>
+                        <li><a href="basics.html#operators">运算符</a></li>
+                        <li><a href="basics.html#arrays">数组与切片</a></li>
+                        <li><a href="basics.html#maps">映射</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="control-flow.html">🔄 3. 控制流</a>
                     <ul>
                         <li><a href="control-flow.html#if">if 语句</a></li>
                         <li><a href="control-flow.html#switch">switch 语句</a></li>
@@ -35,8 +45,12 @@
                         <li><a href="control-flow.html#defer">defer 语句</a></li>
                     </ul>
                 </li>
+                
+                <li class="level-1">
+                    <span class="level-badge">阶段二：进阶</span>
+                </li>
                 <li>
-                    <a href="functions.html">⚡ 函数</a>
+                    <a href="functions.html">⚡ 4. 函数</a>
                     <ul>
                         <li><a href="functions.html#basic">基本函数</a></li>
                         <li><a href="functions.html#multiple">多返回值</a></li>
@@ -46,7 +60,7 @@
                     </ul>
                 </li>
                 <li>
-                    <a href="structs.html">🏗️ 结构体与接口</a>
+                    <a href="structs.html">🏗️ 5. 结构体与接口</a>
                     <ul>
                         <li><a href="structs.html#struct">结构体</a></li>
                         <li><a href="structs.html#nested">嵌套结构体</a></li>
@@ -55,8 +69,43 @@
                         <li><a href="structs.html#tags">结构体标签</a></li>
                     </ul>
                 </li>
+                
+                <li class="level-1">
+                    <span class="level-badge">阶段三：高级</span>
+                </li>
                 <li>
-                    <a href="concurrency.html" class="active">🚀 并发编程</a>
+                    <a href="concurrency.html" class="active">📦 6. 模块化与 Go Module
+                <li>
+                    <a href="modules.html">📦 6. 模块化与 Go Module</a>
+                    <ul>
+                        <li><a href="modules.html#introduction">Go Module 简介</a></li>
+                        <li><a href="modules.html#init">初始化 Module</a></li>
+                        <li><a href="modules.html#dependency">依赖管理</a></li>
+                        <li><a href="modules.html#version">版本控制</a></li>
+                        <li><a href="modules.html#private">私有 Module</a></li>
+                    </ul>
+                </li>
+                
+                <li class="level-1">
+                    <span class="level-badge">阶段三：高级</span>
+                </li>
+                <li>
+                <li>
+                    <a href="embed.html">📁 8. Embed 标准库</a>
+                    <ul>
+                        <li><a href="embed.html#introduction">Embed 简介</a></li>
+                        <li><a href="embed.html#basics">基础用法</a></li>
+                        <li><a href="embed.html#filesystem">文件系统</a></li>
+                        <li><a href="embed.html#advanced">高级用法</a></li>
+                        <li><a href="embed.html#bestpractices">最佳实践</a></li>
+                    </ul>
+                </li>
+                <li class="level-1">
+                    <span class="level-badge">阶段三：高级</span>
+                </li>
+                <li>
+                    <a href="concurrency.html">🚀 9. 并发编程</a>
+                    <a href="concurrency.html">🚀 9. 并发编程</a></a>
                     <ul>
                         <li><a href="concurrency.html#goroutine">Goroutine</a></li>
                         <li><a href="concurrency.html#channel">Channel</a></li>
@@ -66,7 +115,7 @@
                     </ul>
                 </li>
                 <li>
-                    <a href="generics.html">🧩 泛型</a>
+                    <a href="generics.html">🧩 8. 泛型</a>
                     <ul>
                         <li><a href="generics.html#functions">泛型函数</a></li>
                         <li><a href="generics.html#types">泛型类型</a></li>
@@ -75,7 +124,7 @@
                     </ul>
                 </li>
                 <li>
-                    <a href="reflection.html">🔍 反射</a>
+                    <a href="reflection.html">🔍 9. 反射</a>
                     <ul>
                         <li><a href="reflection.html#typevalue">Type 和 Value</a></li>
                         <li><a href="reflection.html#struct">结构体反射</a></li>
@@ -673,6 +722,422 @@
 
     fmt.<span class="function">Println</span>(x, y, x+y)
 }</code></pre>
+
+            <div class="note-box">
+                <h3>Channel 内部实现原理</h3>
+                
+                <p><strong>1. Channel 的核心数据结构：</strong></p>
+                <p>Channel 在 Go 运行时中的核心结构是 <code>hchan</code>：</p>
+                <pre><code><span class="comment">// runtime/chan.go - Channel 的核心结构（简化版）</span>
+<span class="keyword">type</span> hchan <span class="keyword">struct</span> {
+    qcount   uint           <span class="comment">// 当前队列中元素个数</span>
+    dataqsiz uint           <span class="comment">// 环形队列大小（容量）</span>
+    buf      unsafe.Pointer <span class="comment">// 环形队列指针</span>
+    elemsize uint16         <span class="comment">// 元素大小</span>
+    closed   uint32         <span class="comment">// channel 是否关闭</span>
+    elemtype *_type         <span class="comment">// 元素类型</span>
+    sendx    uint           <span class="comment">// 发送索引</span>
+    recvx    uint           <span class="comment">// 接收索引</span>
+    recvq    waitq          <span class="comment">// 接收等待队列</span>
+    sendq    waitq          <span class="comment">// 发送等待队列</span>
+    lock     mutex          <span class="comment">// 互斥锁</span>
+}</code></pre>
+
+                <p><strong>2. 环形队列实现：</strong></p>
+                <p>Channel 使用环形队列来存储数据，这是一个高效的循环缓冲区：</p>
+                <pre><code><span class="comment">// 环形队列的工作原理示例</span>
+<span class="comment">// 假设容量为 5 的 channel</span>
+
+<span class="comment">// 初始状态: []</span>
+<span class="comment">// sendx = 0, recvx = 0</span>
+
+<span class="comment">// 发送 1, 2, 3: [1, 2, 3, _, _]</span>
+<span class="comment">// sendx = 3, recvx = 0</span>
+
+<span class="comment">// 接收 2 个值: [_, _, 3, _, _]</span>
+<span class="comment">// sendx = 3, recvx = 2</span>
+
+<span class="comment">// 继续发送 4, 5: [_, _, 3, 4, 5]</span>
+<span class="comment">// sendx = 0, recvx = 2 (循环回到开头)</span>
+
+<span class="comment">// 接收 3 个值: [_, _, _, _, _]</span>
+<span class="comment">// sendx = 0, recvx = 0 (队列为空)</span></code></pre>
+
+                <p><strong>3. 发送操作流程：</strong></p>
+                <pre><code><span class="comment">// 发送操作: ch &lt;- value</span>
+
+<span class="comment">// 步骤 1: 获取 channel 锁</span>
+<span class="comment">// lock(&amp;c.lock)</span>
+
+<span class="comment">// 步骤 2: 检查是否有接收者在等待</span>
+<span class="keyword">if</span> sg := c.recvq.<span class="function">dequeue</span>(); sg != <span class="keyword">nil</span> {
+    <span class="comment">// 直接传递数据给接收者，不经过缓冲区</span>
+    <span class="function">send</span>(c, sg, ep)
+    <span class="keyword">return</span>
+}
+
+<span class="comment">// 步骤 3: 如果缓冲区有空间，放入缓冲区</span>
+<span class="keyword">if</span> c.qcount &lt; c.dataqsiz {
+    <span class="comment">// 将数据放入环形队列</span>
+    qp := <span class="function">chanbuf</span>(c, c.sendx)
+    <span class="function">typedmemmove</span>(c.elemtype, qp, ep)
+    c.sendx++
+    <span class="keyword">if</span> c.sendx == c.dataqsiz {
+        c.sendx = <span class="number">0</span>
+    }
+    c.qcount++
+    <span class="keyword">return</span>
+}
+
+<span class="comment">// 步骤 4: 缓冲区已满，阻塞当前 goroutine</span>
+<span class="comment">// 将当前 goroutine 加入发送等待队列</span>
+<span class="comment">// gopark() - 让出 CPU，等待被唤醒</span></code></pre>
+
+                <p><strong>4. 接收操作流程：</strong></p>
+                <pre><code><span class="comment">// 接收操作: value := &lt;-ch</span>
+
+<span class="comment">// 步骤 1: 获取 channel 锁</span>
+<span class="comment">// lock(&amp;c.lock)</span>
+
+<span class="comment">// 步骤 2: 检查是否有发送者在等待</span>
+<span class="keyword">if</span> sg := c.sendq.<span class="function">dequeue</span>(); sg != <span class="keyword">nil</span> {
+    <span class="comment">// 直接从发送者获取数据</span>
+    <span class="function">recv</span>(c, sg, ep)
+    <span class="keyword">return</span>
+}
+
+<span class="comment">// 步骤 3: 如果缓冲区有数据，从缓冲区读取</span>
+<span class="keyword">if</span> c.qcount &gt; <span class="number">0</span> {
+    qp := <span class="function">chanbuf</span>(c, c.recvx)
+    <span class="keyword">if</span> ep != <span class="keyword">nil</span> {
+        <span class="function">typedmemmove</span>(c.elemtype, ep, qp)
+    }
+    <span class="function">typedmemclr</span>(c.elemtype, qp)
+    c.recvx++
+    <span class="keyword">if</span> c.recvx == c.dataqsiz {
+        c.recvx = <span class="number">0</span>
+    }
+    c.qcount--
+    <span class="keyword">return</span>
+}
+
+<span class="comment">// 步骤 4: 缓冲区为空且未关闭，阻塞当前 goroutine</span>
+<span class="comment">// 将当前 goroutine 加入接收等待队列</span>
+<span class="comment">// gopark() - 让出 CPU，等待被唤醒</span></code></pre>
+
+                <p><strong>5. 关闭操作流程：</strong></p>
+                <pre><code><span class="comment">// 关闭操作: close(ch)</span>
+
+<span class="comment">// 步骤 1: 获取 channel 锁</span>
+<span class="comment">// lock(&amp;c.lock)</span>
+
+<span class="comment">// 步骤 2: 标记 channel 为已关闭</span>
+c.closed = <span class="number">1</span>
+
+<span class="comment">// 步骤 3: 唤醒所有等待的接收者</span>
+<span class="keyword">for</span> {
+    sg := c.recvq.<span class="function">dequeue</span>()
+    <span class="keyword">if</span> sg == <span class="keyword">nil</span> {
+        <span class="keyword">break</span>
+    }
+    sg.elem = <span class="keyword">nil</span>  <span class="comment">// 接收者获得零值</span>
+    <span class="function">goready</span>(sg.g)  <span class="comment">// 唤醒 goroutine</span>
+}
+
+<span class="comment">// 步骤 4: 唤醒所有等待的发送者（它们会 panic）</span>
+<span class="keyword">for</span> {
+    sg := c.sendq.<span class="function">dequeue</span>()
+    <span class="keyword">if</span> sg == <span class="keyword">nil</span> {
+        <span class="keyword">break</span>
+    }
+    sg.elem = <span class="keyword">nil</span>
+    <span class="function">goready</span>(sg.g)  <span class="comment">// 唤醒后发送者会 panic</span>
+}</code></pre>
+            </div>
+
+            <div class="example-box">
+                <h3>Channel 最佳实践</h3>
+                
+                <p><strong>1. 选择合适的 Channel 类型：</strong></p>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// 无缓冲 Channel（同步）- 适用于需要同步的场景</span>
+<span class="function">func</span> <span class="function">synchronousExample</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        fmt.<span class="function">Println</span>(<span class="string">"发送者: 准备发送"</span>)
+        ch &lt;- <span class="number">42</span>  <span class="comment">// 阻塞直到有消费者接收</span>
+        fmt.<span class="function">Println</span>(<span class="string">"发送者: 数据已发送"</span>)
+    }()
+    
+    fmt.<span class="Function">Println</span>(<span class="string">"接收者: 等待数据"</span>)
+    val := &lt;-ch
+    fmt.<span class="function">Printf</span>(<span class="string">"接收者: 收到 %d\n"</span>, val)
+}
+
+<span class="comment">// 缓冲 Channel（异步）- 适用于生产者和消费者速度不匹配</span>
+<span class="function">func</span> <span class="function">bufferedExample</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">3</span>)  <span class="comment">// 缓冲大小为 3</span>
+    
+    <span class="comment">// 可以发送 3 个数据而不会阻塞</span>
+    ch &lt;- <span class="number">1</span>
+    ch &lt;- <span class="number">2</span>
+    ch &lt;- <span class="number">3</span>
+    fmt.<span class="function">Println</span>(<span class="string">"已发送 3 个数据"</span>)
+    
+    fmt.<span class="function">Println</span>(&lt;-ch)
+    fmt.<span class="function">Println</span>(&lt;-ch)
+    fmt.<span class="function">Println</span>(&lt;-ch)
+}</code></pre>
+
+                <p><strong>2. 避免 Goroutine 泄露：</strong></p>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="comment">// 错误示例：goroutine 泄露</span>
+<span class="function">func</span> <span class="function">leakExample</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        val := &lt;-ch  <span class="comment">// 永远阻塞，goroutine 泄露</span>
+        fmt.<span class="function">Println</span>(val)
+    }()
+    <span class="comment">// 如果 ch 永远不发送数据，goroutine 永不退出</span>
+}
+
+<span class="comment">// 正确示例：使用 context 控制</span>
+<span class="function">func</span> <span class="function">noLeakExample</span>() {
+    ctx, cancel := context.<span class="function">WithTimeout</span>(context.<span class="function">Background</span>(), <span class="number">2</span>*time.Second)
+    <span class="keyword">defer</span> cancel()
+    
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">select</span> {
+        <span class="keyword">case</span> val := &lt;-ch:
+            fmt.<span class="function">Println</span>(val)
+        <span class="keyword">case</span> &lt;-ctx.<span class="function">Done</span>():
+            fmt.<span class="function">Println</span>(<span class="string">"goroutine 被取消"</span>)
+            <span class="keyword">return</span>
+        }
+    }()
+}</code></pre>
+
+                <p><strong>3. 正确关闭 Channel：</strong></p>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// 原则：只在发送方关闭 channel，不要在接收方关闭</span>
+<span class="function">func</span> <span class="function">producer</span>(ch <span class="keyword">chan</span>&lt;- <span class="keyword">int</span>) {
+    <span class="keyword">defer</span> <span class="keyword">close</span>(ch)  <span class="comment">// 发送完成后关闭</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ {
+        ch &lt;- i
+    }
+}
+
+<span class="function">func</span> <span class="function">consumer</span>(ch &lt;-<span class="keyword">chan</span> <span class="keyword">int</span>) {
+    <span class="keyword">for</span> v := <span class="keyword">range</span> ch {  <span class="comment">// 自动检测 channel 关闭</span>
+        fmt.<span class="function">Println</span>(v)
+    }
+    fmt.<span class="function">Println</span>(<span class="string">"channel 已关闭"</span>)
+}
+
+<span class="comment">// 使用方向性 channel</span>
+<span class="function">func</span> <span class="function">directionalExample</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">go</span> <span class="function">producer</span>(ch)
+    <span class="function">consumer</span>(ch)
+}</code></pre>
+
+                <p><strong>4. 处理 Channel 关闭后的零值：</strong></p>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">safeReceive</span>(ch &lt;-<span class="keyword">chan</span> <span class="keyword">int</span>) (int, bool) {
+    v, ok := &lt;-ch
+    <span class="keyword">if</span> !ok {
+        <span class="comment">// channel 已关闭，v 是零值</span>
+        fmt.<span class="function">Println</span>(<span class="string">"channel 已关闭"</span>)
+        <span class="keyword">return</span> <span class="number">0</span>, <span class="keyword">false</span>
+    }
+    <span class="keyword">return</span> v, <span class="keyword">true</span>
+}</code></pre>
+
+                <p><strong>5. 使用 Select 实现超时：</strong></p>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">workerWithTimeout</span>(ch &lt;-<span class="keyword">chan</span> <span class="keyword">int</span>, timeout time.Duration) {
+    <span class="keyword">select</span> {
+    <span class="keyword">case</span> v := &lt;-ch:
+        fmt.<span class="function">Printf</span>(<span class="string">"收到: %d\n"</span>, v)
+    <span class="keyword">case</span> &lt;-time.<span class="function">After</span>(timeout):
+        fmt.<span class="function">Println</span>(<span class="string">"超时"</span>)
+    }
+}</code></pre>
+
+                <p><strong>6. 扇出模式（Fan-out）：</strong></p>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">worker</span>(id <span class="keyword">int</span>, input &lt;-<span class="keyword">chan</span> <span class="keyword">int</span>, output <span class="keyword">chan</span>&lt;- <span class="keyword">int</span>) {
+    <span class="keyword">defer</span> <span class="keyword">close</span>(output)
+    <span class="keyword">for</span> v := <span class="keyword">range</span> input {
+        result := v * <span class="number">2</span>  <span class="comment">// 处理数据</span>
+        output &lt;- result
+        fmt.<span class="function">Printf</span>(<span class="string">"Worker %d 处理: %d -> %d\n"</span>, id, v, result)
+    }
+}
+
+<span class="function">func</span> <span class="function">fanOut</span>(input &lt;-<span class="keyword">chan</span> <span class="keyword">int</span>, numWorkers <span class="keyword">int</span>) []&lt;-<span class="keyword">chan</span> <span class="keyword">int</span> {
+    outputs := <span class="function">make</span>([]&lt;-<span class="keyword">chan</span> <span class="keyword">int</span>, numWorkers)
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; numWorkers; i++ {
+        outputs[i] = <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+        <span class="keyword">go</span> <span class="function">worker</span>(i, input, outputs[i])
+    }
+    <span class="keyword">return</span> outputs
+}</code></pre>
+
+                <p><strong>7. 扇入模式（Fan-in）：</strong></p>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"sync"</span>
+)
+
+<span class="function">func</span> <span class="function">fanIn</span>(inputs ...&lt;-<span class="keyword">chan</span> <span class="keyword">int</span>) &lt;-<span class="keyword">chan</span> <span class="keyword">int</span> {
+    output := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="keyword">for</span> _, input := <span class="keyword">range</span> inputs {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>(ch &lt;-<span class="keyword">chan</span> <span class="keyword">int</span>) {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            <span class="keyword">for</span> v := <span class="keyword">range</span> ch {
+                output &lt;- v
+            }
+        }(input)
+    }
+    
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        wg.<span class="function">Wait</span>()
+        <span class="keyword">close</span>(output)
+    }()
+    
+    <span class="keyword">return</span> output
+}</code></pre>
+
+                <p><strong>8. 使用 Channel 实现信号量：</strong></p>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// 限制并发数</span>
+<span class="function">func</span> <span class="function">semaphore</span>(maxConcurrent <span class="keyword">int</span>) {
+    sem := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>{}, maxConcurrent)
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">100</span>; i++ {
+        sem &lt;- <span class="keyword">struct</span>{}{}  <span class="comment">// 获取信号量</span>
+        <span class="keyword">go</span> <span class="keyword">func</span>(id <span class="keyword">int</span>) {
+            <span class="keyword">defer</span> <span class="keyword">func</span>() { &lt;-sem }()  <span class="comment">// 释放信号量</span>
+            <span class="function">doWork</span>(id)
+        }(i)
+    }
+}
+
+<span class="function">func</span> <span class="function">doWork</span>(id <span class="keyword">int</span>) {
+    fmt.<span class="function">Printf</span>(<span class="string">"Task %d 开始\n"</span>, id)
+}</code></pre>
+
+                <p><strong>9. Channel 性能优化技巧：</strong></p>
+                <ul>
+                    <li><strong>预分配缓冲区</strong>：根据实际情况调整缓冲大小</li>
+                    <li><strong>避免频繁创建和销毁 channel</strong>：重用 channel</li>
+                    <li><strong>使用指针传递大对象</strong>：减少拷贝开销</li>
+                    <li><strong>批量处理数据</strong>：减少 channel 操作次数</li>
+                </ul>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">type</span> LargeData <span class="keyword">struct</span> {
+    <span class="comment">// 大量字段</span>
+}
+
+<span class="comment">// 传递指针而不是值</span>
+<span class="function">func</span> <span class="function">pointerChannel</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> *LargeData, <span class="number">100</span>)
+    
+    data := &amp;LargeData{}
+    ch &lt;- data  <span class="comment">// 只传递指针</span>
+}
+
+<span class="comment">// 批量处理</span>
+<span class="function">func</span> <span class="function">batchProcess</span>(ch &lt;-<span class="keyword">chan</span> <span class="keyword">int</span>, batchSize <span class="keyword">int</span>) {
+    batch := <span class="function">make</span>([]<span class="keyword">int</span>, <span class="number">0</span>, batchSize)
+    <span class="keyword">for</span> v := <span class="keyword">range</span> ch {
+        batch = <span class="function">append</span>(batch, v)
+        <span class="keyword">if</span> <span class="function">len</span>(batch) &gt;= batchSize {
+            <span class="function">processBatch</span>(batch)
+            batch = batch[:<span class="number">0</span>]
+        }
+    }
+    <span class="keyword">if</span> <span class="function">len</span>(batch) &gt; <span class="number">0</span> {
+        <span class="function">processBatch</span>(batch)
+    }
+}</code></pre>
+
+                <p><strong>10. Channel 错误处理：</strong></p>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">safeChannelOperations</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">defer</span> <span class="keyword">close</span>(ch)
+        <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ {
+            ch &lt;- i
+        }
+    }()
+    
+    <span class="keyword">for</span> {
+        <span class="keyword">select</span> {
+        <span class="keyword">case</span> v, ok := &lt;-ch:
+            <span class="keyword">if</span> !ok {
+                fmt.<span class="function">Println</span>(<span class="string">"Channel 已关闭"</span>)
+                <span class="keyword">return</span>
+            }
+            fmt.<span class="function">Printf</span>(<span class="string">"收到: %d\n"</span>, v)
+        <span class="keyword">case</span> &lt;-time.<span class="function">After</span>(<span class="number">1</span> * time.Second):
+            fmt.<span class="function">Println</span>(<span class="string">"超时"</span>)
+            <span class="keyword">return</span>
+        }
+    }
+}</code></pre>
+
+                <p><strong>总结：</strong></p>
+                <ul>
+                    <li><strong>内部原理要点</strong>：环形队列、等待队列、直接传递、锁保护</li>
+                    <li><strong>最佳实践要点</strong>：正确关闭、避免泄露、使用方向性、扇出扇入模式</li>
+                    <li><strong>性能优化</strong>：合理缓冲、批量处理、指针传递、重用 channel</li>
+                </ul>
+            </div>
 
             <h2 id="buffered">Buffered Channel</h2>
             <pre><code><span class="keyword">package</span> main

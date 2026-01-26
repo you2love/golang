@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>常用标准库 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="scroll.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h3>📚 学习目录</h3>
+            <ul>
+                <li><a href="index.html">🏠 首页</a></li>
+                
+                <li class="level-1">
+                    <span class="level-badge">阶段一：入门</span>
+                </li>
+                <li>
+                    <a href="introduction.html">📖 1. Go 语言简介</a>
+                    <ul>
+                        <li><a href="introduction.html#history">Go 的历史</a></li>
+                        <li><a href="introduction.html#features">Go 的特点</a></li>
+                        <li><a href="introduction.html#install">安装与配置</a></li>
+                        <li><a href="introduction.html#helloworld">Hello World</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="basics.html">🔤 2. 基础语法</a>
+                    <ul>
+                        <li><a href="basics.html#variables">变量声明</a></li>
+                        <li><a href="basics.html#datatypes">数据类型</a></li>
+                        <li><a href="basics.html#operators">运算符</a></li>
+                        <li><a href="basics.html#arrays">数组与切片</a></li>
+                        <li><a href="basics.html#maps">映射</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="control-flow.html">🔄 3. 控制流</a>
+                    <ul>
+                        <li><a href="control-flow.html#if">if 语句</a></li>
+                        <li><a href="control-flow.html#switch">switch 语句</a></li>
+                        <li><a href="control-flow.html#for">for 循环</a></li>
+                        <li><a href="control-flow.html#defer">defer 语句</a></li>
+                    </ul>
+                </li>
+                
+                <li class="level-1">
+                    <span class="level-badge">阶段二：进阶</span>
+                </li>
+                <li>
+                    <a href="functions.html">⚡ 4. 函数</a>
+                    <ul>
+                        <li><a href="functions.html#basic">基本函数</a></li>
+                        <li><a href="functions.html#multiple">多返回值</a></li>
+                        <li><a href="functions.html#variadic">可变参数</a></li>
+                        <li><a href="functions.html#closure">闭包</a></li>
+                        <li><a href="functions.html#methods">方法</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="structs.html">🏗️ 5. 结构体与接口</a>
+                    <ul>
+                        <li><a href="structs.html#struct">结构体</a></li>
+                        <li><a href="structs.html#nested">嵌套结构体</a></li>
+                        <li><a href="structs.html#methods">结构体方法</a></li>
+                        <li><a href="structs.html#interface">接口</a></li>
+                        <li><a href="structs.html#tags">结构体标签</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="modules.html">📦 6. 模块化与 Go Module</a>
+                    <ul>
+                        <li><a href="modules.html#introduction">Go Module 简介</a></li>
+                        <li><a href="modules.html#init">初始化 Module</a></li>
+                        <li><a href="modules.html#dependency">依赖管理</a></li>
+                        <li><a href="modules.html#version">版本控制</a></li>
+                        <li><a href="modules.html#private">私有 Module</a></li>
+                    </ul>
+                </li>
+                
+                <li class="level-1">
+                    <span class="level-badge">阶段三：高级</span>
+                </li>
+                <li>
+                    <a href="concurrency.html">🚀 7. 并发编程</a>
+                    <ul>
+                        <li><a href="concurrency.html#goroutine">Goroutine</a></li>
+                        <li><a href="concurrency.html#channel">Channel</a></li>
+                        <li><a href="concurrency.html#select">Select</a></li>
+                        <li><a href="concurrency.html#mutex">互斥锁</a></li>
+                        <li><a href="concurrency.html#context">Context</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="embed.html">📁 8. Embed 标准库</a>
+                    <ul>
+                        <li><a href="embed.html#introduction">Embed 简介</a></li>
+                        <li><a href="embed.html#basics">基础用法</a></li>
+                        <li><a href="embed.html#filesystem">文件系统</a></li>
+                        <li><a href="embed.html#advanced">高级用法</a></li>
+                        <li><a href="embed.html#bestpractices">最佳实践</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="stdlib.html" class="active">📚 9. 常用标准库</a>
+                    <ul>
+                        <li><a href="stdlib.html#regexp">regexp 正则表达式</a></li>
+                        <li><a href="stdlib.html#sync">sync 并发原语</a></li>
+                        <li><a href="stdlib.html#json">json 数据编码</a></li>
+                        <li><a href="stdlib.html#time">time 时间处理</a></li>
+                        <li><a href="stdlib.html#io">io 输入输出</a></li>
+                        <li><a href="stdlib.html#bufio">bufio 缓冲 I/O</a></li>
+                        <li><a href="stdlib.html#bestpractices">最佳实践</a></li>
+                        <li><a href="stdlib.html#exp">exp 实验性库</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="generics.html">🧩 10. 泛型</a>
+                    <ul>
+                        <li><a href="generics.html#functions">泛型函数</a></li>
+                        <li><a href="generics.html#types">泛型类型</a></li>
+                        <li><a href="generics.html#constraints">类型约束</a></li>
+                        <li><a href="generics.html#inference">类型推断</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="reflection.html">🔍 11. 反射</a>
+                    <ul>
+                        <li><a href="reflection.html#typevalue">Type 和 Value</a></li>
+                        <li><a href="reflection.html#struct">结构体反射</a></li>
+                        <li><a href="reflection.html#modify">修改值</a></li>
+                        <li><a href="reflection.html#methods">调用方法</a></li>
+                        <li><a href="reflection.html#performance">性能考虑</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+        <div class="content">
+            <a href="index.html" class="back-link">← 返回首页</a>
+            <h1>常用标准库</h1>
+
+            <h2 id="regexp">regexp 正则表达式</h2>
+            
+            <h3>基础匹配</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"regexp"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 编译正则表达式</span>
+    re := regexp.<span class="function">MustCompile</span>(<span class="string">`Hello`</span>)
+    
+    <span class="comment">// 匹配字符串</span>
+    text := <span class="string">"Hello, World!"</span>
+    matched := re.<span class="function">MatchString</span>(text)
+    fmt.<span class="function">Println</span>(<span class="string">"Matched:"</span>, matched)
+    
+    <span class="comment">// 查找匹配</span>
+    loc := re.<span class="function">FindStringIndex</span>(text)
+    fmt.<span class="function">Println</span>(<span class="string">"Location:"</span>, loc)
+}</code></pre>
+
+            <h3>捕获组</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"regexp"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 使用捕获组</span>
+    re := regexp.<span class="function">MustCompile</span>(<span class="string">`(\w+)\s+(\w+)`</span>)
+    
+    text := <span class="string">"Hello World"</span>
+    matches := re.<span class="function">FindStringSubmatch</span>(text)
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Full match:"</span>, matches[<span class="number">0</span>])
+    fmt.<span class="function">Println</span>(<span class="string">"Group 1:"</span>, matches[<span class="number">1</span>])
+    fmt.<span class="function">Println</span>(<span class="string">"Group 2:"</span>, matches[<span class="number">2</span>])
+}</code></pre>
+
+            <h3>替换</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"regexp"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 简单替换</span>
+    re := regexp.<span class="function">MustCompile</span>(<span class="string">`Hello`</span>)
+    result := re.<span class="function">ReplaceAllString</span>(<span class="string">"Hello World"</span>, <span class="string">"Hi"</span>)
+    fmt.<span class="function">Println</span>(result)
+    
+    <span class="comment">// 使用捕获组替换</span>
+    re2 := regexp.<span class="function">MustCompile</span>(<span class="string">`(\w+)\s+(\w+)`</span>)
+    result2 := re2.<span class="function">ReplaceAllString</span>(<span class="string">"Hello World"</span>, <span class="string">"$2 $1"</span>)
+    fmt.<span class="function">Println</span>(result2)
+    
+    <span class="comment">// 使用函数替换</span>
+    result3 := re2.<span class="function">ReplaceAllStringFunc</span>(<span class="string">"Hello World"</span>, <span class="keyword">func</span>(s <span class="keyword">string</span>) <span class="keyword">string</span> {
+        <span class="keyword">return</span> <span class="string">"REPLACED"</span>
+    })
+    fmt.<span class="Function">Println</span>(result3)
+}</code></pre>
+
+            <h3>查找所有匹配</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"regexp"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 查找所有匹配</span>
+    re := regexp.<span class="function">MustCompile</span>(<span class="string">`\d+`</span>)
+    text := <span class="string">"I have 2 apples and 3 oranges"</span>
+    
+    matches := re.<span class="function">FindAllString</span>(text, -<span class="number">1</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"All matches:"</span>, matches)
+    
+    <span class="comment">// 查找所有匹配及其位置</span>
+    matchesWithPos := re.<span class="function">FindAllStringIndex</span>(text, -<span class="number">1</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Matches with positions:"</span>, matchesWithPos)
+    
+    <span class="comment">// 查找所有子匹配</span>
+    re2 := regexp.<span class="function">MustCompile</span>(<span class="string">`(\w+)\s+(\w+)`</span>)
+    submatches := re2.<span class="function">FindAllStringSubmatch</span>(text, -<span class="number">1</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Submatches:"</span>, submatches)
+}</code></pre>
+
+            <h3>常用正则表达式</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"regexp"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 验证邮箱</span>
+    emailRe := regexp.<span class="function">MustCompile</span>(<span class="string">`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Valid email:"</span>, emailRe.<span class="function">MatchString</span>(<span class="string">"user@example.com"</span>))
+    
+    <span class="comment">// 验证 URL</span>
+    urlRe := regexp.<span class="function">MustCompile</span>(<span class="string">`^https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Valid URL:"</span>, urlRe.<span class="function">MatchString</span>(<span class="string">"https://example.com"</span>))
+    
+    <span class="comment">// 验证手机号（中国）</span>
+    phoneRe := regexp.<span class="function">MustCompile</span>(<span class="string">`^1[3-9]\d{9}$`</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Valid phone:"</span>, phoneRe.<span class="function">MatchString</span>(<span class="string">"13800138000"</span>))
+    
+    <span class="comment">// 提取 HTML 标签内容</span>
+    htmlRe := regexp.<span class="function">MustCompile</span>(<span class="string">`<[^>]+>([^<]+)</[^>]+>`</span>)
+    html := <span class="string">"<p>Hello</p><div>World</div>"</span>
+    tags := htmlRe.<span class="function">FindAllStringSubmatch</span>(html, -<span class="number">1</span>)
+    <span class="keyword">for</span> _, tag := <span class="keyword">range</span> tags {
+        fmt.<span class="function">Println</span>(<span class="string">"Tag content:"</span>, tag[<span class="number">1</span>])
+    }
+}</code></pre>
+
+            <h2 id="sync">sync 并发原语</h2>
+
+            <h3>Mutex 互斥锁</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="keyword">type</span> Counter <span class="keyword">struct</span> {
+    mu    sync.Mutex
+    value <span class="keyword">int</span>
+}
+
+<span class="function">func</span> (c *Counter) <span class="function">Increment</span>() {
+    c.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    c.value++
+}
+
+<span class="function">func</span> (c *Counter) <span class="function">Value</span>() <span class="keyword">int</span> {
+    c.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    <span class="keyword">return</span> c.value
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> counter Counter
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">1000</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>() {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            counter.<span class="function">Increment</span>()
+        }()
+    }
+    
+    wg.<span class="function">Wait</span>()
+    fmt.<span class="function">Println</span>(<span class="string">"Final value:"</span>, counter.<span class="function">Value</span>())
+}</code></pre>
+
+            <h3>RWMutex 读写锁</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="keyword">type</span> Cache <span class="keyword">struct</span> {
+    mu    sync.RWMutex
+    data  <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>
+}
+
+<span class="function">func</span> <span class="function">NewCache</span>() *Cache {
+    <span class="keyword">return</span> &Cache{
+        data: <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>),
+    }
+}
+
+<span class="function">func</span> (c *Cache) <span class="function">Get</span>(key <span class="keyword">string</span>) (<span class="keyword">string</span>, <span class="keyword">bool</span>) {
+    c.mu.<span class="function">RLock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">RUnlock</span>()
+    val, ok := c.data[key]
+    <span class="keyword">return</span> val, ok
+}
+
+<span class="function">func</span> (c *Cache) <span class="function">Set</span>(key, value <span class="keyword">string</span>) {
+    c.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    c.data[key] = value
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    cache := <span class="function">NewCache</span>()
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="comment">// 写入</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">10</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>(i <span class="keyword">int</span>) {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            key := fmt.<span class="function">Sprintf</span>(<span class="string">"key%d"</span>, i)
+            value := fmt.<span class="function">Sprintf</span>(<span class="string">"value%d"</span>, i)
+            cache.<span class="function">Set</span>(key, value)
+        }(i)
+    }
+    
+    <span class="comment">// 读取</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">10</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>(i <span class="keyword">int</span>) {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            key := fmt.<span class="function">Sprintf</span>(<span class="string">"key%d"</span>, i)
+            time.<span class="function">Sleep</span>(time.Millisecond)
+            val, ok := cache.<span class="function">Get</span>(key)
+            fmt.<span class="function">Printf</span>(<span class="string">"Get %s: %v, %v\n"</span>, key, val, ok)
+        }(i)
+    }
+    
+    wg.<span class="function">Wait</span>()
+}</code></pre>
+
+            <h3>WaitGroup 等待组</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="function">func</span> <span class="function">worker</span>(id <span class="keyword">int</span>, wg *sync.WaitGroup) {
+    <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+    fmt.<span class="function">Printf</span>(<span class="string">"Worker %d started\n"</span>, id)
+    fmt.<span class="function">Printf</span>(<span class="string">"Worker %d finished\n"</span>, id)
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="keyword">for</span> i := <span class="number">1</span>; i <= <span class="number">5</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="function">worker</span>(i, &wg)
+    }
+    
+    wg.<span class="function">Wait</span>()
+    fmt.<span class="function">Println</span>(<span class="string">"All workers finished"</span>)
+}</code></pre>
+
+            <h3>Once 单次执行</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="keyword">var</span> (
+    once     sync.Once
+    instance *Singleton
+)
+
+<span class="keyword">type</span> Singleton <span class="keyword">struct</span> {
+    value <span class="keyword">string</span>
+}
+
+<span class="function">func</span> <span class="function">GetInstance</span>() *Singleton {
+    once.<span class="function">Do</span>(<span class="keyword">func</span>() {
+        instance = &Singleton{value: <span class="string">"initialized"</span>}
+        fmt.<span class="function">Println</span>(<span class="string">"Singleton initialized"</span>)
+    })
+    <span class="keyword">return</span> instance
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 多次调用只会初始化一次</span>
+    <span class="function">GetInstance</span>()
+    <span class="function">GetInstance</span>()
+    <span class="function">GetInstance</span>()
+}</code></pre>
+
+            <h3>Cond 条件变量</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> mu sync.Mutex
+    cond := sync.<span class="function">NewCond</span>(&mu)
+    ready := <span class="keyword">false</span>
+    
+    <span class="comment">// 等待者</span>
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        mu.<span class="function">Lock</span>()
+        <span class="keyword">for</span> !ready {
+            fmt.<span class="function">Println</span>(<span class="string">"Waiting..."</span>)
+            cond.<span class="function">Wait</span>()
+        }
+        fmt.<span class="function">Println</span>(<span class="string">"Ready!"</span>)
+        mu.<span class="function">Unlock</span>()
+    }()
+    
+    time.<span class="function">Sleep</span>(time.Second)
+    
+    <span class="comment">// 通知者</span>
+    mu.<span class="function">Lock</span>()
+    ready = <span class="keyword">true</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Signaling..."</span>)
+    cond.<span class="function">Signal</span>()
+    mu.<span class="function">Unlock</span>()
+    
+    time.<span class="function">Sleep</span>(time.Second)
+}</code></pre>
+
+            <h3>Pool 对象池</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"bytes"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="keyword">var</span> bufferPool = sync.<span class="function">Pool</span>{
+    New: <span class="keyword">func</span>() <span class="keyword">interface</span>{} {
+        fmt.<span class="function">Println</span>(<span class="string">"Creating new buffer"</span>)
+        <span class="keyword">return</span> &bytes.Buffer{}
+    },
+}
+
+<span class="function">func</span> <span class="function">process</span>() {
+    <span class="comment">// 从池中获取</span>
+    buf := bufferPool.<span class="function">Get</span>().(*bytes.Buffer)
+    <span class="keyword">defer</span> <span class="keyword">func</span>() {
+        <span class="comment">// 重置并放回池中</span>
+        buf.<span class="function">Reset</span>()
+        bufferPool.<span class="function">Put</span>(buf)
+    }()
+    
+    buf.<span class="function">WriteString</span>(<span class="string">"Hello, World!"</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Buffer:"</span>, buf.<span class="function">String</span>())
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">5</span>; i++ {
+        <span class="function">process</span>()
+    }
+}</code></pre>
+
+            <h3>Map 并发安全映射</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> m sync.Map
+    
+    <span class="comment">// 存储</span>
+    m.<span class="function">Store</span>(<span class="string">"key1"</span>, <span class="string">"value1"</span>)
+    m.<span class="function">Store</span>(<span class="string">"key2"</span>, <span class="string">"value2"</span>)
+    
+    <span class="comment">// 加载</span>
+    <span class="keyword">if</span> val, ok := m.<span class="function">Load</span>(<span class="string">"key1"</span>); ok {
+        fmt.<span class="function">Println</span>(<span class="string">"key1:"</span>, val)
+    }
+    
+    <span class="comment">// 加载或存储</span>
+    actual, loaded := m.<span class="function">LoadOrStore</span>(<span class="string">"key3"</span>, <span class="string">"value3"</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"key3: %v, loaded: %v\n"</span>, actual, loaded)
+    
+    <span class="comment">// 遍历</span>
+    m.<span class="function">Range</span>(<span class="keyword">func</span>(key, value <span class="keyword">interface</span>{}) <span class="keyword">bool</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"%s: %s\n"</span>, key, value)
+        <span class="keyword">return</span> <span class="keyword">true</span>
+    })
+    
+    <span class="comment">// 删除</span>
+    m.<span class="function">Delete</span>(<span class="string">"key1"</span>)
+}</code></pre>
+
+            <h3>Atomic 原子操作</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync/atomic"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> counter int64
+    
+    <span class="comment">// 原子增加</span>
+    atomic.<span class="function">AddInt64</span>(&counter, <span class="number">1</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Counter:"</span>, counter)
+    
+    <span class="comment">// 原子加载</span>
+    value := atomic.<span class="function">LoadInt64</span>(&counter)
+    fmt.<span class="function">Println</span>(<span class="string">"Loaded:"</span>, value)
+    
+    <span class="comment">// 原子存储</span>
+    atomic.<span class="function">StoreInt64</span>(&counter, <span class="number">100</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Stored:"</span>, atomic.<span class="function">LoadInt64</span>(&counter))
+    
+    <span class="comment">// 原子比较并交换</span>
+    swapped := atomic.<span class="function">CompareAndSwapInt64</span>(&counter, <span class="number">100</span>, <span class="number">200</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"Swapped: %v, Value: %d\n"</span>, swapped, atomic.<span class="function">LoadInt64</span>(&counter))
+}</code></pre>
+
+            <h2 id="json">json 数据编码</h2>
+
+            <h3>基本编码和解码</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="keyword">type</span> Person <span class="keyword">struct</span> {
+    Name  <span class="keyword">string</span> <span class="string">`json:"name"`</span>
+    Age   <span class="keyword">int</span>    <span class="string">`json:"age"`</span>
+    Email <span class="keyword">string</span> <span class="string">`json:"email,omitempty"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 编码</span>
+    person := Person{
+        Name: <span class="string">"Alice"</span>,
+        Age:  <span class="number">30</span>,
+    }
+    
+    jsonData, err := json.<span class="function">Marshal</span>(person)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    fmt.<span class="function">Println</span>(<span class="string">"JSON:"</span>, <span class="keyword">string</span>(jsonData))
+    
+    <span class="comment">// 解码</span>
+    <span class="keyword">var</span> decoded Person
+    err = json.<span class="function">Unmarshal</span>(jsonData, &decoded)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    fmt.<span class="function">Printf</span>(<span class="string">"Decoded: %+v\n"</span>, decoded)
+}</code></pre>
+
+            <h3>处理嵌套结构</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="keyword">type</span> Address <span class="keyword">struct</span> {
+    City    <span class="keyword">string</span> <span class="string">`json:"city"`</span>
+    Country <span class="keyword">string</span> <span class="string">`json:"country"`</span>
+}
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    Name    <span class="keyword">string</span>  <span class="string">`json:"name"`</span>
+    Age     <span class="keyword">int</span>     <span class="string">`json:"age"`</span>
+    Address Address  <span class="string">`json:"address"`</span>
+    Tags    []<span class="keyword">string</span> <span class="string">`json:"tags"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    jsonData := []<span class="keyword">byte</span>(<span class="string">`{
+        "name": "Bob",
+        "age": 25,
+        "address": {
+            "city": "Beijing",
+            "country": "China"
+        },
+        "tags": ["developer", "golang"]
+    }`</span>)
+    
+    <span class="keyword">var</span> user User
+    err := json.<span class="function">Unmarshal</span>(jsonData, &user)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"User: %+v\n"</span>, user)
+    fmt.<span class="function">Printf</span>(<span class="string">"Address: %+v\n"</span>, user.Address)
+    fmt.<span class="function">Printf</span>(<span class="string">"Tags: %v\n"</span>, user.Tags)
+}</code></pre>
+
+            <h3>使用 map 和 interface</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 解码到 map</span>
+    jsonData := []<span class="keyword">byte</span>(<span class="string">`{"name": "Charlie", "age": 35}`</span>)
+    <span class="keyword">var</span> data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}, ok := m.data[key]
+    <span class="keyword">return</span> val, ok
+}
+
+<span class="function">func</span> (c *Cache) <span class="function">Set</span>(key, value <span class="keyword">string</span>) {
+    c.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    c.data[key] = value
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    cache := <span class="function">NewCache</span>()
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="comment">// 写入</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">10</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>(i <span class="keyword">int</span>) {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            key := fmt.<span class="function">Sprintf</span>(<span class="string">"key%d"</span>, i)
+            value := fmt.<span class="function">Sprintf</span>(<span class="string">"value%d"</span>, i)
+            cache.<span class="function">Set</span>(key, value)
+        }(i)
+    }
+    
+    <span class="comment">// 读取</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">10</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>(i <span class="keyword">int</span>) {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            key := fmt.<span class="function">Sprintf</span>(<span class="string">"key%d"</span>, i)
+            time.<span class="function">Sleep</span>(time.Millisecond)
+            val, ok := cache.<span class="function">Get</span>(key)
+            fmt.<span class="function">Printf</span>(<span class="string">"Get %s: %v, %v\n"</span>, key, val, ok)
+        }(i)
+    }
+    
+    wg.<span class="function">Wait</span>()
+}</code></pre>
+
+            <h3>WaitGroup 等待组</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="function">func</span> <span class="function">worker</span>(id <span class="keyword">int</span>, wg *sync.WaitGroup) {
+    <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+    fmt.<span class="function">Printf</span>(<span class="string">"Worker %d started\n"</span>, id)
+    fmt.<span class="function">Printf</span>(<span class="string">"Worker %d finished\n"</span>, id)
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="keyword">for</span> i := <span class="number">1</span>; i <= <span class="number">5</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="function">worker</span>(i, &wg)
+    }
+    
+    wg.<span class="function">Wait</span>()
+    fmt.<span class="function">Println</span>(<span class="string">"All workers finished"</span>)
+}</code></pre>
+
+            <h3>Once 单次执行</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="keyword">var</span> (
+    once     sync.Once
+    instance *Singleton
+)
+
+<span class="keyword">type</span> Singleton <span class="keyword">struct</span> {
+    value <span class="keyword">string</span>
+}
+
+<span class="function">func</span> <span class="function">GetInstance</span>() *Singleton {
+    once.<span class="function">Do</span>(<span class="keyword">func</span>() {
+        instance = &Singleton{value: <span class="string">"initialized"</span>}
+        fmt.<span class="function">Println</span>(<span class="string">"Singleton initialized"</span>)
+    })
+    <span class="keyword">return</span> instance
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 多次调用只会初始化一次</span>
+    <span class="function">GetInstance</span>()
+    <span class="function">GetInstance</span>()
+    <span class="function">GetInstance</span>()
+}</code></pre>
+
+            <h3>Cond 条件变量</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> mu sync.Mutex
+    cond := sync.<span class="function">NewCond</span>(&mu)
+    ready := <span class="keyword">false</span>
+    
+    <span class="comment">// 等待者</span>
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        mu.<span class="function">Lock</span>()
+        <span class="keyword">for</span> !ready {
+            fmt.<span class="function">Println</span>(<span class="string">"Waiting..."</span>)
+            cond.<span class="function">Wait</span>()
+        }
+        fmt.<span class="function">Println</span>(<span class="string">"Ready!"</span>)
+        mu.<span class="function">Unlock</span>()
+    }()
+    
+    time.<span class="function">Sleep</span>(time.Second)
+    
+    <span class="comment">// 通知者</span>
+    mu.<span class="function">Lock</span>()
+    ready = <span class="keyword">true</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Signaling..."</span>)
+    cond.<span class="function">Signal</span>()
+    mu.<span class="function">Unlock</span>()
+    
+    time.<span class="function">Sleep</span>(time.Second)
+}</code></pre>
+
+            <h3>Pool 对象池</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"bytes"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="keyword">var</span> bufferPool = sync.<span class="function">Pool</span>{
+    New: <span class="keyword">func</span>() <span class="keyword">interface</span>{} {
+        fmt.<span class="function">Println</span>(<span class="string">"Creating new buffer"</span>)
+        <span class="keyword">return</span> &bytes.Buffer{}
+    },
+}
+
+<span class="function">func</span> <span class="function">process</span>() {
+    <span class="comment">// 从池中获取</span>
+    buf := bufferPool.<span class="function">Get</span>().(*bytes.Buffer)
+    <span class="keyword">defer</span> <span class="keyword">func</span>() {
+        <span class="comment">// 重置并放回池中</span>
+        buf.<span class="function">Reset</span>()
+        bufferPool.<span class="function">Put</span>(buf)
+    }()
+    
+    buf.<span class="function">WriteString</span>(<span class="string">"Hello, World!"</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Buffer:"</span>, buf.<span class="function">String</span>())
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">5</span>; i++ {
+        <span class="function">process</span>()
+    }
+}</code></pre>
+
+            <h3>Map 并发安全映射</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> m sync.Map
+    
+    <span class="comment">// 存储</span>
+    m.<span class="function">Store</span>(<span class="string">"key1"</span>, <span class="string">"value1"</span>)
+    m.<span class="function">Store</span>(<span class="string">"key2"</span>, <span class="string">"value2"</span>)
+    
+    <span class="comment">// 加载</span>
+    <span class="keyword">if</span> val, ok := m.<span class="function">Load</span>(<span class="string">"key1"</span>); ok {
+        fmt.<span class="function">Println</span>(<span class="string">"key1:"</span>, val)
+    }
+    
+    <span class="comment">// 加载或存储</span>
+    actual, loaded := m.<span class="function">LoadOrStore</span>(<span class="string">"key3"</span>, <span class="string">"value3"</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"key3: %v, loaded: %v\n"</span>, actual, loaded)
+    
+    <span class="comment">// 遍历</span>
+    m.<span class="function">Range</span>(<span class="keyword">func</span>(key, value <span class="keyword">interface</span>{}) <span class="keyword">bool</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"%s: %s\n"</span>, key, value)
+        <span class="keyword">return</span> <span class="keyword">true</span>
+    })
+    
+    <span class="comment">// 删除</span>
+    m.<span class="function">Delete</span>(<span class="string">"key1"</span>)
+}</code></pre>
+
+            <h3>Atomic 原子操作</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync/atomic"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> counter int64
+    
+    <span class="comment">// 原子增加</span>
+    atomic.<span class="function">AddInt64</span>(&counter, <span class="number">1</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Counter:"</span>, counter)
+    
+    <span class="comment">// 原子加载</span>
+    value := atomic.<span class="function">LoadInt64</span>(&counter)
+    fmt.<span class="function">Println</span>(<span class="string">"Loaded:"</span>, value)
+    
+    <span class="comment">// 原子存储</span>
+    atomic.<span class="function">StoreInt64</span>(&counter, <span class="number">100</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Stored:"</span>, atomic.<span class="function">LoadInt64</span>(&counter))
+    
+    <span class="comment">// 原子比较并交换</span>
+    swapped := atomic.<span class="function">CompareAndSwapInt64</span>(&counter, <span class="number">100</span>, <span class="number">200</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"Swapped: %v, Value: %d\n"</span>, swapped, atomic.<span class="function">LoadInt64</span>(&counter))
+}</code></pre>
+
+            <h2 id="json">json 数据编码</h2>
+
+            <h3>基本编码和解码</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="keyword">type</span> Person <span class="keyword">struct</span> {
+    Name  <span class="keyword">string</span> <span class="string">`json:"name"`</span>
+    Age   <span class="keyword">int</span>    <span class="string">`json:"age"`</span>
+    Email <span class="keyword">string</span> <span class="string">`json:"email,omitempty"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 编码</span>
+    person := Person{
+        Name: <span class="string">"Alice"</span>,
+        Age:  <span class="number">30</span>,
+    }
+    
+    jsonData, err := json.<span class="function">Marshal</span>(person)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    fmt.<span class="function">Println</span>(<span class="string">"JSON:"</span>, <span class="keyword">string</span>(jsonData))
+    
+    <span class="comment">// 解码</span>
+    <span class="keyword">var</span> decoded Person
+    err = json.<span class="function">Unmarshal</span>(jsonData, &decoded)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    fmt.<span class="function">Printf</span>(<span class="string">"Decoded: %+v\n"</span>, decoded)
+}</code></pre>
+
+            <h3>处理嵌套结构</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="keyword">type</span> Address <span class="keyword">struct</span> {
+    City    <span class="keyword">string</span> <span class="string">`json:"city"`</span>
+    Country <span class="keyword">string</span> <span class="string">`json:"country"`</span>
+}
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    Name    <span class="keyword">string</span>  <span class="string">`json:"name"`</span>
+    Age     <span class="keyword">int</span>     <span class="string">`json:"age"`</span>
+    Address Address  <span class="string">`json:"address"`</span>
+    Tags    []<span class="keyword">string</span> <span class="string">`json:"tags"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    jsonData := []<span class="keyword">byte</span>(<span class="string">`{
+        "name": "Bob",
+        "age": 25,
+        "address": {
+            "city": "Beijing",
+            "country": "China"
+        },
+        "tags": ["developer", "golang"]
+    }`</span>)
+    
+    <span class="keyword">var</span> user User
+    err := json.<span class="function">Unmarshal</span>(jsonData, &user)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"User: %+v\n"</span>, user)
+    fmt.<span class="function">Printf</span>(<span class="string">"Address: %+v\n"</span>, user.Address)
+    fmt.<span class="function">Printf</span>(<span class="string">"Tags: %v\n"</span>, user.Tags)
+}</code></pre>
+
+            <h3>使用 map 和 interface</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 解码到 map</span>
+    jsonData := []<span class="keyword">byte</span>(<span class="string">`{"name": "Charlie", "age": 35}`</span>)
+    <span class="keyword">var</span> data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{
+    
+    err := json.<span class="function">Unmarshal</span>(jsonData, &data)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Name: %v\n"</span>, data[<span class="string">"name"</span>])
+    fmt.<span class="function">Printf</span>(<span class="string">"Age: %v\n"</span>, data[<span class="string">"age"</span>])
+    
+    <span class="comment">// 编码 map</span>
+    newMap := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{
+        <span class="string">"key1"</span>: <span class="string">"value1"</span>,
+        <span class="string">"key2"</span>: <span class="number">123</span>,
+        <span class="string">"key3"</span>: <span class="keyword">true</span>,
+    }
+    
+    result, err := json.<span class="function">Marshal</span>(newMap)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    fmt.<span class="function">Println</span>(<span class="string">"Map JSON:"</span>, <span class="keyword">string</span>(result))
+}</code></pre>
+
+            <h3>JSON 流式处理</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"strings"</span>
+)
+
+<span class="keyword">type</span> Item <span class="keyword">struct</span> {
+    ID   <span class="keyword">int</span>    <span class="string">`json:"id"`</span>
+    Name <span class="keyword">string</span> <span class="string">`json:"name"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// JSON 数组流</span>
+    jsonStream := <span class="string">`[{"id":1,"name":"Item1"},{"id":2,"name":"Item2"}]`</span>
+    
+    decoder := json.<span class="function">NewDecoder</span>(strings.<span class="function">NewReader</span>(jsonStream))
+    
+    <span class="comment">// 读取开始数组标记</span>
+    t, err := decoder.<span class="function">Token</span>()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    fmt.<span class="function">Println</span>(<span class="string">"Start token:"</span>, t)
+    
+    <span class="comment">// 读取数组元素</span>
+    <span class="keyword">for</span> decoder.<span class="function">More</span>() {
+        <span class="keyword">var</span> item Item
+        err := decoder.<span class="function">Decode</span>(&item)
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+            <span class="keyword">return</span>
+        }
+        fmt.<span class="function">Printf</span>(<span class="string">"Item: %+v\n"</span>, item)
+    }
+    
+    <span class="comment">// 读取结束数组标记</span>
+    t, err = decoder.<span class="function">Token</span>()
+    fmt.<span class="function">Println</span>(<span class="string">"End token:"</span>, t)
+}</code></pre>
+
+            <h3>自定义 JSON 编码</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="keyword">type</span> CustomTime <span class="keyword">struct</span> {
+    time.Time
+}
+
+<span class="keyword">const</span> customTimeFormat = <span class="string">"2006-01-02 15:04:05"</span>
+
+<span class="function">func</span> (ct *CustomTime) <span class="function">UnmarshalJSON</span>(data []<span class="keyword">byte</span>) <span class="keyword">error</span> {
+    <span class="keyword">var</span> s <span class="keyword">string</span>
+    <span class="keyword">if</span> err := json.<span class="function">Unmarshal</span>(data, &s); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    t, err := time.<span class="function">Parse</span>(customTimeFormat, s)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    ct.Time = t
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> (ct CustomTime) <span class="function">MarshalJSON</span>() ([]<span class="keyword">byte</span>, <span class="keyword">error</span>) {
+    <span class="keyword">return</span> json.<span class="function">Marshal</span>(ct.<span class="function">Format</span>(customTimeFormat))
+}
+
+<span class="keyword">type</span> Event <span class="keyword">struct</span> {
+    Name <span class="keyword">string</span>     <span class="string">`json:"name"`</span>
+    Time CustomTime <span class="string">`json:"time"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    event := Event{
+        Name: <span class="string">"Meeting"</span>,
+        Time: CustomTime{time.<span class="function">Now</span>()},
+    }
+    
+    jsonData, _ := json.<span class="function">Marshal</span>(event)
+    fmt.<span class="function">Println</span>(<span class="string">"Custom JSON:"</span>, <span class="keyword">string</span>(jsonData))
+    
+    <span class="keyword">var</span> decoded Event
+    json.<span class="function">Unmarshal</span>(jsonData, &decoded)
+    fmt.<span class="function">Printf</span>(<span class="string">"Decoded: %+v\n"</span>, decoded)
+}</code></pre>
+
+            <h3>错误处理</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"errors"</span>
+)
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    Name <span class="keyword">string</span> <span class="string">`json:"name"`</span>
+    Age  <span class="keyword">int</span>    <span class="string">json:"age,required"</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 无效 JSON</span>
+    jsonData := []<span class="keyword">byte</span>(<span class="string">`{"name": "Test"}`</span>)
+    
+    <span class="keyword">var</span> user User
+    err := json.<span class="function">Unmarshal</span>(jsonData, &user)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Unmarshal error:"</span>, err)
+        
+        <span class="keyword">var</span> syntaxErr *json.SyntaxError
+        <span class="keyword">if</span> errors.<span class="function">As</span>(err, &syntaxErr) {
+            fmt.<span class="function">Printf</span>(<span class="string">"Syntax error at offset %d\n"</span>, syntaxErr.Offset)
+        }
+        
+        <span class="keyword">var</span> unmarshalErr *json.UnmarshalTypeError
+        <span class="keyword">if</span> errors.<span class="function">As</span>(err, &unmarshalErr) {
+            fmt.<span class="function">Printf</span>(<span class="string">"Type error: expected %s, got %s\n"</span>, 
+                unmarshalErr.Type, unmarshalErr.Value)
+        }
+    }
+}</code></pre>
+
+            <h2 id="time">time 时间处理</h2>
+
+            <h3>获取当前时间</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 获取当前时间</span>
+    now := time.<span class="function">Now</span>()
+    fmt.<span class="function">Println</span>(<span class="string">"Current time:"</span>, now)
+    
+    <span class="comment">// 获取 UTC 时间</span>
+    utc := time.<span class="function">Now</span>().<span class="function">UTC</span>()
+    fmt.<span class="function">Println</span>(<span class="string">"UTC time:"</span>, utc)
+}</code></pre>
+
+            <h3>时间格式化</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    now := time.<span class="function">Now</span>()
+    
+    <span class="comment">// 使用预定义格式</span>
+    fmt.<span class="function">Println</span>(<span class="string">"RFC3339:"</span>, now.<span class="function">Format</span>(time.RFC3339))
+    fmt.<span class="function">Println</span>(<span class="string">"RFC1123:"</span>, now.<span class="function">Format</span>(time.RFC1123))
+    
+    <span class="comment">// 自定义格式（参考 2006-01-02 15:04:05）</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Custom:"</span>, now.<span class="function">Format</span>(<span class="string">"2006-01-02 15:04:05"</span>))
+    fmt.<span class="function">Println</span>(<span class="string">"Date only:"</span>, now.<span class="function">Format</span>(<span class="string">"2006-01-02"</span>))
+    fmt.<span class="function">Println</span>(<span class="string">"Time only:"</span>, now.<span class="function">Format</span>(<span class="string">"15:04:05"</span>))
+}</code></pre>
+
+            <h3>时间解析</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 解析时间字符串</span>
+    timeStr := <span class="string">"2024-01-26 15:30:45"</span>
+    parsedTime, err := time.<span class="function">Parse</span>(<span class="string">"2006-01-02 15:04:05"</span>, timeStr)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    fmt.<span class="function">Println</span>(<span class="string">"Parsed time:"</span>, parsedTime)
+    
+    <span class="comment">// 解析 RFC3339 格式</span>
+    rfcTime, err := time.<span class="function">Parse</span>(time.RFC3339, <span class="string">"2024-01-26T15:30:45Z"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    fmt.<span class="function">Println</span>(<span class="string">"RFC3339 time:"</span>, rfcTime)
+}</code></pre>
+
+            <h3>时间计算</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    now := time.<span class="function">Now</span>()
+    
+    <span class="comment">// 添加时间</span>
+    future := now.<span class="function">Add</span>(<span class="number">24</span> * time.Hour)
+    fmt.<span class="function">Println</span>(<span class="string">"24 hours later:"</span>, future)
+    
+    <span class="comment">// 减去时间</span>
+    past := now.<span class="function">Add</span>(-<span class="number">24</span> * time.Hour)
+    fmt.<span class="function">Println</span>(<span class="string">"24 hours ago:"</span>, past)
+    
+    <span class="comment">// 计算时间差</span>
+    duration := future.<span class="function">Sub</span>(now)
+    fmt.<span class="function">Println</span>(<span class="string">"Duration:"</span>, duration)
+    fmt.<span class="function">Println</span>(<span class="string">"Hours:"</span>, duration.<span class="function">Hours</span>())
+    fmt.<span class="function">Println</span>(<span class="string">"Minutes:"</span>, duration.<span class="function">Minutes</span>())
+    
+    <span class="comment">// 计算两个时间之间的天数</span>
+    days := duration.<span class="function">Hours</span>() / <span class="number">24</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Days:"</span>, days)
+}</code></pre>
+
+            <h3>定时器和 Ticker</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// Timer：一次性定时器</span>
+    timer := time.<span class="function">NewTimer</span>(<span class="number">2</span> * time.Second)
+    <-timer.C
+    fmt.<span class="function">Println</span>(<span class="string">"Timer expired"</span>)
+    
+    <span class="comment">// Ticker：周期性定时器</span>
+    ticker := time.<span class="function">NewTicker</span>(<span class="number">1</span> * time.Second)
+    <span class="keyword">defer</span> ticker.<span class="function">Stop</span>()
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">3</span>; i++ {
+        <-ticker.C
+        fmt.<span class="function">Printf</span>(<span class="string">"Tick %d\n"</span>, i)
+    }
+}</code></pre>
+
+            <h3>时区处理</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 加载时区</span>
+    loc, err := time.<span class="function">LoadLocation</span>(<span class="string">"Asia/Shanghai"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="comment">// 在指定时区创建时间</span>
+    now := time.<span class="function">Now</span>().<span class="function">In</span>(loc)
+    fmt.<span class="function">Println</span>(<span class="string">"Shanghai time:"</span>, now)
+    
+    <span class="comment">// 转换时区</span>
+    nyLoc, _ := time.<span class="function">LoadLocation</span>(<span class="string">"America/New_York"</span>)
+    nyTime := now.<span class="function">In</span>(nyLoc)
+    fmt.<span class="function">Println</span>(<span class="string">"New York time:"</span>, nyTime)
+}</code></pre>
+
+            <h2 id="io">io 输入输出</h2>
+
+            <h3>读取文件</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"io"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 打开文件</span>
+    file, err := os.<span class="function">Open</span>(<span class="string">"test.txt"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    <span class="comment">// 读取整个文件</span>
+    data, err := io.<span class="function">ReadAll</span>(file)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    fmt.<span class="function">Println</span>(<span class="string">"File content:"</span>, <span class="keyword">string</span>(data))
+}</code></pre>
+
+            <h3>写入文件</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 写入文件（覆盖）</span>
+    err := os.<span class="function">WriteFile</span>(<span class="string">"output.txt"</span>, []<span class="keyword">byte</span>(<span class="string">"Hello, World!"</span>), <span class="number">0644</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="comment">// 追加写入</span>
+    f, err := os.<span class="function">OpenFile</span>(<span class="string">"output.txt"</span>, os.O_APPEND|os.O_WRONLY, <span class="number">0644</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    <span class="keyword">defer</span> f.<span class="function">Close</span>()
+    
+    _, err = f.<span class="function">WriteString</span>(<span class="string">"\nAppended text"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+    }
+}</code></pre>
+
+            <h3>读取目录</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 读取目录内容</span>
+    entries, err := os.<span class="function">ReadDir</span>(<span class="string">"."</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="keyword">for</span> _, entry := <span class="keyword">range</span> entries {
+        fmt.<span class="function">Printf</span>(<span class="string">"%s (%v)\n"</span>, entry.<span class="function">Name</span>(), entry.<span class="function">IsDir</span>())
+    }
+}</code></pre>
+
+            <h3>创建和删除文件/目录</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建目录</span>
+    err := os.<span class="function">MkdirAll</span>(<span class="string">"testdir/subdir"</span>, <span class="number">0755</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+    }
+    
+    <span class="comment">// 创建文件</span>
+    file, err := os.<span class="function">Create</span>(<span class="string">"testdir/test.txt"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+    }
+    file.<span class="function">Close</span>()
+    
+    <span class="comment">// 删除文件</span>
+    os.<span class="function">Remove</span>(<span class="string">"testdir/test.txt"</span>)
+    
+    <span class="comment">// 删除目录</span>
+    os.<span class="function">RemoveAll</span>(<span class="string">"testdir"</span>)
+}</code></pre>
+
+            <h3>使用 io.Copy</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"io"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">copyFile</span>(src, dst <span class="keyword">string</span>) <span class="keyword">error</span> {
+    source, err := os.<span class="function">Open</span>(src)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> source.<span class="function">Close</span>()
+    
+    destination, err := os.<span class="function">Create</span>(dst)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> destination.<span class="function">Close</span>()
+    
+    _, err = io.<span class="function">Copy</span>(destination, source)
+    <span class="keyword">return</span> err
+}</code></pre>
+
+            <h3>使用 io.LimitReader</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"io"</span>
+    <span class="string">"strings"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    reader := strings.<span class="function">NewReader</span>(<span class="string">"Hello, World! This is a long string."</span>)
+    
+    <span class="comment">// 限制读取 5 个字节</span>
+    limitedReader := io.<span class="function">LimitReader</span>(reader, <span class="number">5</span>)
+    
+    data, _ := io.<span class="function">ReadAll</span>(limitedReader)
+    fmt.<span class="function">Println</span>(<span class="string">"Limited read:"</span>, <span class="keyword">string</span>(data))
+}</code></pre>
+
+            <h2 id="bufio">bufio 缓冲 I/O</h2>
+
+            <h3>缓冲读取</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"bufio"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    file, _ := os.<span class="function">Open</span>(<span class="string">"test.txt"</span>)
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    scanner := bufio.<span class="function">NewScanner</span>(file)
+    
+    <span class="comment">// 逐行读取</span>
+    <span class="keyword">for</span> scanner.<span class="function">Scan</span>() {
+        fmt.<span class="function">Println</span>(scanner.<span class="function">Text</span>())
+    }
+}</code></pre>
+
+            <h3>缓冲写入</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"bufio"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    file, _ := os.<span class="function">Create</span>(<span class="string">"output.txt"</span>)
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    writer := bufio.<span class="function">NewWriter</span>(file)
+    <span class="keyword">defer</span> writer.<span class="function">Flush</span>()
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">10</span>; i++ {
+        fmt.<span class="function">Fprintln</span>(writer, <span class="string">"Line"</span>, i)
+    }
+}</code></pre>
+
+            <h3>从标准输入读取</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"bufio"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    scanner := bufio.<span class="function">NewScanner</span>(os.Stdin)
+    
+    fmt.<span class="function">Print</span>(<span class="string">"Enter your name: "</span>)
+    scanner.<span class="function">Scan</span>()
+    name := scanner.<span class="function">Text</span>()
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Hello, %s!\n"</span>, name)
+}</code></pre>
+
+            <h3>读取分隔符</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"bufio"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"strings"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    reader := strings.<span class="function">NewReader</span>(<span class="string">"apple,banana,cherry"</span>)
+    scanner := bufio.<span class="function">NewScanner</span>(reader)
+    
+    <span class="comment">// 设置分隔符</span>
+    scanner.<span class="function">Split</span>(bufio.<span class="function">ScanWords</span>)
+    
+    <span class="keyword">for</span> scanner.<span class="function">Scan</span>() {
+        fmt.<span class="function">Println</span>(scanner.<span class="function">Text</span>())
+    }
+}</code></pre>
+
+            <h3>使用 bufio.Reader</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"bufio"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    file, _ := os.<span class="function">Open</span>(<span class="string">"test.txt"</span>)
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    reader := bufio.<span class="function">NewReader</span>(file)
+    
+    <span class="comment">// 读取到分隔符</span>
+    line, _ := reader.<span class="function">ReadString</span>(<span class="string">'\n'</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Line:"</span>, line)
+    
+    <span class="comment">// 读取字节</span>
+    data := <span class="function">make</span>([]<span class="keyword">byte</span>, <span class="number">10</span>)
+    n, _ := reader.<span class="function">Read</span>(data)
+    fmt.<span class="function">Printf</span>(<span class="string">"Read %d bytes: %s\n"</span>, n, data)
+}</code></pre>
+
+            <h3>使用 bufio.Writer</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"bufio"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    file, _ := os.<span class="function">Create</span>(<span class="string">"output.txt"</span>)
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    writer := bufio.<span class="function">NewWriter</span>(file)
+    
+    <span class="comment">// 写入字节</span>
+    writer.<span class="function">Write</span>([]<span class="keyword">byte</span>(<span class="string">"Hello"</span>))
+    
+    <span class="comment">// 写入字符串</span>
+    writer.<span class="function">WriteString</span>(<span class="string">", World!"</span>)
+    
+    <span class="comment">// 刷新缓冲区</span>
+    writer.<span class="function">Flush</span>()
+}</code></pre>
+
+            <h2 id="bestpractices">最佳实践</h2>
+
+            <div class="example-box">
+                <h3>regexp 最佳实践</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"regexp"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="comment">// 1. 预编译正则表达式</span>
+<span class="keyword">var</span> (
+    emailRe     = regexp.<span class="function">MustCompile</span>(<span class="string">`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`</span>)
+    phoneRe     = regexp.<span class="function">MustCompile</span>(<span class="string">`^1[3-9]\d{9}$`</span>)
+    reCache     = <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]*regexp.Regexp)
+    reCacheMu   sync.RWMutex
+)
+
+<span class="comment">// 2. 缓存正则表达式</span>
+<span class="function">func</span> <span class="function">GetRegex</span>(pattern <span class="keyword">string</span>) (*regexp.Regexp, <span class="keyword">error</span>) {
+    reCacheMu.<span class="function">RLock</span>()
+    re, ok := reCache[pattern]
+    reCacheMu.<span class="function">RUnlock</span>()
+    
+    <span class="keyword">if</span> ok {
+        <span class="keyword">return</span> re, <span class="keyword">nil</span>
+    }
+    
+    re, err := regexp.<span class="function">Compile</span>(pattern)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    reCacheMu.<span class="function">Lock</span>()
+    reCache[pattern] = re
+    reCacheMu.<span class="function">Unlock</span>()
+    
+    <span class="keyword">return</span> re, <span class="keyword">nil</span>
+}
+
+<span class="comment">// 3. 使用原始字符串避免转义</span>
+<span class="comment">// 好：`\d+`</span>
+<span class="comment">// 坏："\d+"</span>
+
+<span class="comment">// 4. 避免贪婪匹配</span>
+<span class="comment">// 好：`<.*?>`</span>
+<span class="comment">// 坏：`<.*>`</span>
+
+<span class="comment">// 5. 使用非捕获组</span>
+<span class="comment">// 好：`(?:a|b)c`</span>
+<span class="comment">// 坏：`(a|b)c`</span></code></pre>
+
+                <h3>sync 最佳实践</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"sync"</span>
+)
+
+<span class="comment">// 1. 避免锁的嵌套</span>
+<span class="keyword">type</span> SafeCounter <span class="keyword">struct</span> {
+    mu    sync.Mutex
+    value <span class="keyword">int</span>
+}
+
+<span class="function">func</span> (c *SafeCounter) <span class="function">Increment</span>() {
+    c.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    c.value++
+}
+
+<span class="comment">// 2. 使用 defer 确保锁释放</span>
+<span class="function">func</span> (c *SafeCounter) <span class="function">Get</span>() <span class="keyword">int</span> {
+    c.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    <span class="keyword">return</span> c.value
+}
+
+<span class="comment">// 3. 读写锁用于读多写少场景</span>
+<span class="keyword">type</span> SafeMap <span class="keyword">struct</span> {
+    mu   sync.RWMutex
+    data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>
+}
+
+<span class="function">func</span> (m *SafeMap) <span class="function">Get</span>(key <span class="keyword">string</span>) (<span class="keyword">string</span>, <span class="keyword">bool</span>) {
+    m.mu.<span class="function">RLock</span>()
+    <span class="keyword">defer</span> m.mu.<span class="function">RUnlock</span>()
+    val, ok := m.data[key]
+    <span class="keyword">return</span> val, ok
+}
+
+<span class="function">func</span> (m *SafeMap) <span class="function">Set</span>(key, value <span class="keyword">string</span>) {
+    m.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> m.mu.<span class="function">Unlock</span>()
+    m.data[key] = value
+}
+
+<span class="comment">// 4. 使用 sync.Pool 重用对象</span>
+<span class="keyword">var</span> bufferPool = sync.<span class="function">Pool</span>{
+    New: <span class="keyword">func</span>() <span class="keyword">interface</span>{} {
+        <span class="keyword">return</span> <span class="function">make</span>([]<span class="keyword">byte</span>, <span class="number">0</span>, <span class="number">1024</span>)
+    },
+}
+
+<span class="function">func</span> <span class="function">getBuffer</span>() []<span class="keyword">byte</span> {
+    <span class="keyword">return</span> bufferPool.<span class="function">Get</span>().([]<span class="keyword">byte</span>)
+}
+
+<span class="function">func</span> <span class="function">putBuffer</span>(buf []<span class="keyword">byte</span>) {
+    bufferPool.<span class="function">Put</span>(buf[:<span class="number">0</span>])
+}
+
+<span class="comment">// 5. 使用 sync.Map 替代 map+Mutex（特定场景）</span>
+<span class="comment">// 适用于：读多写少、键值对稳定</span></code></pre>
+
+                <h3>json 最佳实践</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json"</span>
+)
+
+<span class="comment">// 1. 使用结构体标签</span>
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    Name     <span class="keyword">string</span> <span class="string">`json:"name"`</span>
+    Age      <span class="keyword">int</span>    <span class="string">`json:"age"`</span>
+    Password <span class="keyword">string</span> <span class="string">json:"-"`</span>           <span class="comment">// 忽略</span>
+    Email    <span class="keyword">string</span> <span class="string">`json:"email,omitempty"`</span> <span class="comment">// 空值忽略</span>
+}
+
+<span class="comment">// 2. 使用指针处理可选字段</span>
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    Timeout *<span class="keyword">int</span>  <span class="string">`json:"timeout,omitempty"`</span>
+    Enabled *<span class="keyword">bool</span> <span class="string">`json:"enabled,omitempty"`</span>
+}
+
+<span class="comment">// 3. 使用 json.RawMessage 延迟解析</span>
+<span class="keyword">type</span> Message <span class="keyword">struct</span> {
+    Type    <span class="keyword">string</span>          <span class="string">`json:"type"`</span>
+    Payload json.RawMessage <span class="string">`json:"payload"`</span>
+}
+
+<span class="comment">// 4. 使用 json.Number 处理大数字</span>
+<span class="keyword">type</span> Data <span class="keyword">struct</span> {
+    ID json.Number <span class="string">`json:"id"`</span>
+}
+
+<span class="comment">// 5. 验证 JSON 结构</span>
+<span class="function">func</span> <span class="function">validateJSON</span>(data []<span class="keyword">byte</span>) <span class="keyword">bool</span> {
+    <span class="keyword">var</span> v <span class="keyword">interface</span>{
+    <span class="keyword">return</span> json.<span class="function">Valid</span>(data)
+}
+
+<span class="comment">// 6. 使用 json.Encoder/Decoder 处理流</span>
+<span class="comment">// 适用于大文件或网络流</span>
+
+<span class="comment">// 7. 处理自定义时间格式</span>
+<span class="keyword">type</span> CustomTime <span class="keyword">struct</span> {
+    time.Time
+}
+
+<span class="function">func</span> (ct *CustomTime) <span class="function">UnmarshalJSON</span>(b []<span class="keyword">byte</span>) <span class="keyword">error</span> {
+    s := <span class="keyword">string</span>(b)
+    t, err := time.<span class="function">Parse</span>(<span class="string">"2006-01-02"</span>, s)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    ct.Time = t
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+
+            <h2 id="exp">exp 实验性标准库</h2>
+            
+            <h3>简介</h3>
+            <p>exp（experimental）是 Go 语言的实验性标准库，包含了一些新功能和实验性的实现。这些库可能会在未来成为标准库的一部分，也可能被移除或修改。常用的 exp 库包括 expvar（变量监控）、slog（结构化日志）等。</p>
+            
+            <h3>expvar 变量监控</h3>
+            <p>expvar 提供了一种标准化的方式来发布和监控运行时的变量，特别适合用于监控和调试。</p>
+            
+            <h4>基本使用</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"expvar"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"net/http"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="keyword">var</span> (
+    requests    = expvar.<span class="function">NewInt</span>(<span class="string">"requests"</span>)
+    errors      = expvar.<span class="function">NewInt</span>(<span class="string">"errors"</span>)
+    connections = expvar.<span class="function">NewInt</span>(<span class="string">"connections"</span>)
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 注册 HTTP 处理器</span>
+    http.<span class="function">Handle</span>(<span class="string">"/debug/vars"</span>, expvar.<span class="function">Handler</span>())
+    
+    <span class="comment">// 模拟请求处理</span>
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">for</span> {
+            requests.<span class="function">Add</span>(<span class="number">1</span>)
+            time.<span class="function">Sleep</span>(time.Second)
+        }
+    }()
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Server started on :8080"</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Visit http://localhost:8080/debug/vars to see metrics"</span>)
+    http.<span class="function">ListenAndServe</span>(<span class="string">":8080"</span>, <span class="keyword">nil</span>)
+}</code></pre>
+            
+            <h4>自定义变量</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"expvar"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="comment">// 自定义计数器</span>
+<span class="keyword">type</span> Counter <span class="keyword">struct</span> {
+    mu    sync.Mutex
+    count <span class="keyword">int</span>
+}
+
+<span class="function">func</span> (c *Counter) <span class="function">String</span>() <span class="keyword">string</span> {
+    c.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d"</span>, c.count)
+}
+
+<span class="function">func</span> (c *Counter) <span class="function">Add</span>(n <span class="keyword">int</span>) {
+    c.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    c.count += n
+}
+
+<span class="keyword">var</span> customCounter = &Counter{}
+
+<span class="function">func</span> <span class="function">init</span>() {
+    expvar.<span class="function">Publish</span>(<span class="string">"custom_counter"</span>, customCounter)
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    customCounter.<span class="function">Add</span>(<span class="number">1</span>)
+    customCounter.<span class="function">Add</span>(<span class="number">2</span>)
+    
+    <span class="comment">// 获取变量值</span>
+    val := expvar.<span class="function">Get</span>(<span class="string">"custom_counter"</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Custom counter:"</span>, val.<span class="function">String</span>())
+}</code></pre>
+            
+            <h4>Map 类型</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"expvar"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="keyword">var</span> (
+    <span class="comment">// 创建 Map</span>
+    stats = expvar.<span class="function">NewMap</span>(<span class="string">"stats"</span>)
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 添加键值对</span>
+    stats.<span class="function">Add</span>(<span class="string">"requests"</span>, <span class="number">100</span>)
+    stats.<span class="function">Add</span>(<span class="string">"errors"</span>, <span class="number">5</span>)
+    
+    <span class="comment">// 设置值</span>
+    stats.<span class="function">Set</span>(<span class="string">"version"</span>, expvar.<span class="function">String</span>(<span class="string">"1.0.0"</span>))
+    
+    <span class="comment">// 获取值</span>
+    requests := stats.<span class="function">Get</span>(<span class="string">"requests"</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Requests:"</span>, requests.<span class="function">String</span>())
+    
+    <span class="comment">// 遍历所有键</span>
+    stats.<span class="function">Do</span>(<span class="keyword">func</span>(kv expvar.KeyValue) <span class="keyword">bool</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"%s: %s\n"</span>, kv.Key, kv.Value.<span class="function">String</span>())
+        <span class="keyword">return</span> <span class="keyword">true</span>
+    })
+}</code></pre>
+            
+            <h4>Float 类型</h4>
+            <pre><code><span class="keyword">var</span> (
+    cpuUsage = expvar.<span class="function">NewFloat</span>(<span class="string">"cpu_usage"</span>)
+    memory   = expvar.<span class="function">NewFloat</span>(<span class="string">"memory_usage"</span>)
+)
+
+<span class="function">func</span> <span class="function">updateMetrics</span>() {
+    cpuUsage.<span class="function">Set</span>(<span class="number">45.5</span>)
+    memory.<span class="function">Set</span>(<span class="number">1024.5</span>)
+}</code></pre>
+            
+            <h4>String 类型</h4>
+            <pre><code><span class="keyword">var</span> (
+    version   = expvar.<span class="function">NewString</span>(<span class="string">"version"</span>)
+    buildTime = expvar.<span class="function">NewString</span>(<span class="string">"build_time"</span>)
+)
+
+<span class="function">func</span> <span class="function">init</span>() {
+    version.<span class="function">Set</span>(<span class="string">"1.0.0"</span>)
+    buildTime.<span class="function">Set</span>(<span class="string">"2024-01-01 00:00:00"</span>)
+}</code></pre>
+            
+            <h4>在 Web 服务器中使用</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"expvar"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"net/http"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="keyword">var</span> (
+    requestCount = expvar.<span class="function">NewInt</span>(<span class="string">"request_count"</span>)
+    errors       = expvar.<span class="function">NewInt</span>(<span class="string">"errors"</span>)
+    avgTime      = expvar.<span class="function">NewFloat</span>(<span class="string">"avg_time_ms"</span>)
+)
+
+<span class="function">func</span> <span class="function">handler</span>(w http.ResponseWriter, r *http.Request) {
+    start := time.<span class="function">Now</span>()
+    
+    requestCount.<span class="function">Add</span>(<span class="number">1</span>)
+    
+    <span class="comment">// 模拟处理</span>
+    time.<span class="function">Sleep</span>(time.Millisecond * <span class="number">10</span>)
+    
+    <span class="comment">// 计算平均时间</span>
+    elapsed := time.<span class="function">Since</span>(start).<span class="function">Milliseconds</span>()
+    avgTime.<span class="function">Set</span>(<span class="function">float64</span>(elapsed))
+    
+    fmt.<span class="function">Fprintln</span>(w, <span class="string">"Hello, World!"</span>)
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 注册 expvar 处理器</span>
+    http.<span class="function">Handle</span>(<span class="string">"/debug/vars"</span>, expvar.<span class="function">Handler</span>())
+    
+    <span class="comment">// 注册业务处理器</span>
+    http.<span class="function">HandleFunc</span>(<span class="string">"/"</span>, handler)
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Server started on :8080"</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Metrics: http://localhost:8080/debug/vars"</span>)
+    http.<span class="function">ListenAndServe</span>(<span class="string">":8080"</span>, <span class="keyword">nil</span>)
+}</code></pre>
+            
+            <h3>slog 结构化日志</h3>
+            <p>slog 是 Go 1.21+ 引入的结构化日志库，提供了结构化的日志记录功能，比传统的 log 包更强大和灵活。</p>
+            
+            <h4>基本使用</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"log/slog"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建默认 logger</span>
+    logger := slog.<span class="function">New</span>(slog.<span class="function">NewTextHandler</span>(os.Stdout, <span class="keyword">nil</span>))
+    
+    <span class="comment">// 记录不同级别的日志</span>
+    logger.<span class="function">Debug</span>(<span class="string">"Debug message"</span>)
+    logger.<span class="function">Info</span>(<span class="string">"Info message"</span>)
+    logger.<span class="function">Warn</span>(<span class="string">"Warning message"</span>)
+    logger.<span class="function">Error</span>(<span class="string">"Error message"</span>)
+}</code></pre>
+            
+            <h4>结构化字段</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"log/slog"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    logger := slog.<span class="function">New</span>(slog.<span class="function">NewJSONHandler</span>(os.Stdout, <span class="keyword">nil</span>))
+    
+    <span class="comment">// 添加结构化字段</span>
+    logger.<span class="function">Info</span>(<span class="string">"User logged in"</span>,
+        slog.<span class="function">String</span>(<span class="string">"user_id"</span>, <span class="string">"123"</span>),
+        slog.<span class="function">String</span>(<span class="string">"username"</span>, <span class="string">"alice"</span>),
+        slog.<span class="function">String</span>(<span class="string">"ip"</span>, <span class="string">"192.168.1.1"</span>),
+    )
+    
+    logger.<span class="function">Error</span>(<span class="string">"Request failed"</span>,
+        slog.<span class="function">String</span>(<span class="string">"path"</span>, <span class="string">"/api/users"</span>),
+        slog.<span class="function">Int</span>(<span class="string">"status"</span>, <span class="number">500</span>),
+        slog.<span class="function">Duration</span>(<span class="string">"duration_ms"</span>, <span class="number">150</span>),
+    )
+}</code></pre>
+            
+            <h4>自定义 Handler</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"encoding/json"</span>
+    <span class="string">"log/slog"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="comment">// 自定义 Handler</span>
+<span class="keyword">type</span> CustomHandler <span class="keyword">struct</span> {
+    slog.Handler
+}
+
+<span class="function">func</span> (h *CustomHandler) <span class="function">Handle</span>(ctx context.Context, r slog.Record) <span class="keyword">error</span> {
+    <span class="comment">// 添加自定义字段</span>
+    r.<span class="function">AddAttrs</span>(slog.<span class="function">String</span>(<span class="string">"service"</span>, <span class="string">"myapp"</span>))
+    <span class="keyword">return</span> h.Handler.<span class="function">Handle</span>(ctx, r)
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    handler := &CustomHandler{
+        Handler: slog.<span class="function">NewJSONHandler</span>(os.Stdout, <span class="keyword">nil</span>),
+    }
+    
+    logger := slog.<span class="function">New</span>(handler)
+    logger.<span class="function">Info</span>(<span class="string">"Test message"</span>)
+}</code></pre>
+            
+            <h4>日志级别控制</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"log/slog"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 设置日志级别</span>
+    opts := &slog.HandlerOptions{
+        Level: slog.LevelInfo,
+    }
+    
+    logger := slog.<span class="function">New</span>(slog.<span class="function">NewJSONHandler</span>(os.Stdout, opts))
+    
+    <span class="comment">// Debug 级别的日志不会输出</span>
+    logger.<span class="function">Debug</span>(<span class="string">"Debug message"</span>)
+    logger.<span class="function">Info</span>(<span class="string">"Info message"</span>)
+}</code></pre>
+            
+            <h4>上下文支持</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"log/slog"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="keyword">type</span> contextKey <span class="keyword">struct</span>{}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    logger := slog.<span class="function">New</span>(slog.<span class="function">NewJSONHandler</span>(os.Stdout, <span class="keyword">nil</span>))
+    
+    <span class="comment">// 在上下文中添加值</span>
+    ctx := context.<span class="function">WithValue</span>(context.<span class="function">Background</span>(), contextKey{}, <span class="string">"request-123"</span>)
+    
+    <span class="comment">// 使用上下文记录日志</span>
+    logger.<span class="function">InfoContext</span>(ctx, <span class="string">"Processing request"</span>)
+}</code></pre>
+            
+            <h4>分组日志</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"log/slog"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    logger := slog.<span class="function">New</span>(slog.<span class="function">NewJSONHandler</span>(os.Stdout, <span class="keyword">nil</span>))
+    
+    <span class="comment">// 使用分组</span>
+    logger.<span class="function">Info</span>(<span class="string">"User action"</span>,
+        slog.<span class="function">Group</span>(<span class="string">"user"</span>,
+            slog.<span class="function">String</span>(<span class="string">"id"</span>, <span class="string">"123"</span>),
+            slog.<span class="function">String</span>(<span class="string">"name"</span>, <span class="string">"alice"</span>),
+        ),
+        slog.<span class="function">Group</span>(<span class="string">"request"</span>,
+            slog.<span class="function">String</span>(<span class="string">"path"</span>, <span class="string">"/api/users"</span>),
+            slog.<span class="function">String</span>(<span class="string">"method"</span>, <span class="string">"GET"</span>),
+        ),
+    )
+}</code></pre>
+            
+            <h4>与 Gin 集成</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"log/slog"</span>
+    <span class="string">"net/http"</span>
+    
+    <span class="string">"github.com/gin-gonic/gin"</span>
+)
+
+<span class="keyword">var</span> logger = slog.<span class="function">New</span>(slog.<span class="function">NewJSONHandler</span>(os.Stdout, <span class="keyword">nil</span>))
+
+<span class="function">func</span> <span class="function">main</span>() {
+    r := gin.<span class="function">Default</span>()
+    
+    <span class="comment">// 自定义中间件</span>
+    r.<span class="function">Use</span>(<span class="keyword">func</span>(c *gin.Context) {
+        start := time.<span class="function">Now</span>()
+        path := c.<span class="function">Request</span>.URL.Path
+        
+        c.<span class="function">Next</span>()
+        
+        logger.<span class="function">Info</span>(<span class="string">"Request"</span>,
+            slog.<span class="function">String</span>(<span class="string">"method"</span>, c.<span class="function">Request</span>.Method),
+            slog.<span class="function">String</span>(<span class="string">"path"</span>, path),
+            slog.<span class="function">Int</span>(<span class="string">"status"</span>, c.<span class="function">Writer</span>().<span class="function">Status</span>()),
+            slog.<span class="function">Duration</span>(<span class="string">"duration"</span>, time.<span class="function">Since</span>(start)),
+        )
+    })
+    
+    r.<span class="function">GET</span>(<span class="string">"/"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        c.<span class="function">String</span>(<span class="number">200</span>, <span class="string">"Hello, World!"</span>)
+    })
+    
+    r.<span class="function">Run</span>(<span class="string">":8080"</span>)
+}</code></pre>
+            
+            <h3>exp 最佳实践</h3>
+            <div class="note-box">
+                <h4>1. expvar 使用建议</h4>
+                <ul>
+                    <li><strong>监控关键指标</strong>：监控请求计数、错误计数、连接数等关键指标</li>
+                    <li><strong>原子操作</strong>：使用 expvar.Int 和 expvar.Float 确保线程安全</li>
+                    <li><strong>合理命名</strong>：使用有意义的变量名，便于理解</li>
+                    <li><strong>定期清理</strong>：避免积累过多的监控数据</li>
+                    <li><strong>安全考虑</strong>：在生产环境中限制 /debug/vars 的访问权限</li>
+                </ul>
+                
+                <h4>2. slog 使用建议</h4>
+                <ul>
+                    <li><strong>结构化字段</strong>：使用结构化字段而不是字符串拼接</li>
+                    <li><strong>日志级别</strong>：合理使用不同级别的日志</li>
+                    <li><strong>上下文传递</strong>：使用上下文传递请求相关信息</li>
+                    <li><strong>性能考虑</strong>：避免在高频路径中记录过多日志</li>
+                    <li><strong>日志轮转</strong>：配合日志轮转工具管理日志文件</li>
+                </ul>
+                
+                <h4>3. 集成建议</h4>
+                <pre><code><span class="comment">// 在应用启动时初始化</span>
+<span class="function">func</span> <span class="function">InitMonitoring</span>() {
+    <span class="comment">// 注册 expvar</span>
+    expvar.<span class="function">Publish</span>(<span class="string">"version"</span>, expvar.<span class="function">String</span>(Version))
+    expvar.<span class="function">Publish</span>(<span class="string">"build_time"</span>, expvar.<span class="function">String</span>(BuildTime))
+    
+    <span class="comment">// 初始化 logger</span>
+    opts := &slog.HandlerOptions{
+        Level: slog.LevelInfo,
+    }
+    logger = slog.<span class="function">New</span>(slog.<span class="function">NewJSONHandler</span>(os.Stdout, opts))
+}</code></pre>
+            </div>
+
+            <div class="note-box">
+                <h3>性能优化建议</h3>
+                <ul>
+                    <li><strong>regexp</strong>：预编译正则表达式，避免重复编译</li>
+                    <li><strong>sync</strong>：根据场景选择合适的锁类型，避免锁竞争</li>
+                    <li><strong>json</strong>：使用流式处理大文件，避免内存溢出</li>
+                    <li><strong>sync.Pool</strong>：重用大对象，减少 GC 压力</li>
+                    <li><strong>atomic</strong>：对简单类型使用原子操作，避免锁开销</li>
+                    <li><strong>expvar</strong>：使用原子操作更新指标，避免锁竞争</li>
+                    <li><strong>slog</strong>：在生产环境中使用 JSON 格式，便于日志分析</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

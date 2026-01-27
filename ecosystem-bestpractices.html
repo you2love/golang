@@ -765,6 +765,601 @@ writer := &lumberjack.Logger{
     rootCmd.<span class="function">Execute</span>()
 }</code></pre>
             
+            <h2 id="grpc-bestpractices">gRPC 最佳实践</h2>
+            
+            <h3>1. 项目结构规范</h3>
+            <div class="note-box">
+                <pre><code>grpc-project/
+├── proto/
+│   ├── user/
+│   │   └── user.proto
+│   └── order/
+│       └── order.proto
+├── api/
+│   ├── user/
+│   │   └── v1/
+│   └── order/
+│       └── v1/
+├── server/
+│   ├── main.go
+│   ├── config/
+│   ├── handler/
+│   ├── service/
+│   └── repository/
+├── client/
+│   └── main.go
+├── pkg/
+│   ├── middleware/
+│   ├── interceptor/
+│   ├── errors/
+│   └── utils/
+└── scripts/
+    └── gen-proto.sh</code></pre>
+            </div>
+            
+            <h3>2. Proto 文件管理</h3>
+            <div class="note-box">
+                <pre><code><span class="comment">// scripts/gen-proto.sh</span>
+<span class="keyword">#!/bin/bash</span>
+
+PROTO_DIR=<span class="string">"./proto"</span>
+OUTPUT_DIR=<span class="string">"./api"</span>
+
+<span class="comment"># 生成 Go 代码</span>
+protoc \
+  --proto_path=$PROTO_DIR \
+  --go_out=$OUTPUT_DIR \
+  --go_opt=paths=source_relative \
+  --go-grpc_out=$OUTPUT_DIR \
+  --go-grpc_opt=paths=source_relative \
+  $PROTO_DIR/**/*.proto
+
+<span class="comment"># 生成验证代码（如果使用 protoc-gen-validate）</span>
+protoc \
+  --proto_path=$PROTO_DIR \
+  --validate_out=lang=go:$OUTPUT_DIR \
+  --validate_opt=paths=source_relative \
+  $PROTO_DIR/**/*.proto</code></pre>
+            </div>
+            
+            <h3>3. 使用拦截器实现横切关注点</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> interceptor
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"time"</span>
+    <span class="string">"google.golang.org/grpc"</span>
+    <span class="string">"google.golang.org/grpc/codes"</span>
+    <span class="string">"google.golang.org/grpc/status"</span>
+)
+
+<span class="comment">// 日志拦截器</span>
+<span class="function">func</span> <span class="function">LoggingInterceptor</span>(logger *zap.Logger) grpc.UnaryServerInterceptor {
+    <span class="keyword">return</span> <span class="keyword">func</span>(ctx context.Context, req <span class="keyword">interface</span>{}, 
+        info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
+        
+        start := time.<span class="function">Now</span>()
+        logger.<span class="function">Info</span>(<span class="string">"gRPC request started"</span>,
+            zap.<span class="function">String</span>(<span class="string">"method"</span>, info.FullMethod),
+            zap.<span class="function">Any</span>(<span class="string">"request"</span>, req),
+        )
+        
+        resp, err := <span class="function">handler</span>(ctx, req)
+        
+        duration := time.<span class="function">Since</span>(start)
+        fields := []zap.Field{
+            zap.<span class="function">String</span>(<span class="string">"method"</span>, info.FullMethod),
+            zap.<span class="function">Duration</span>(<span class="string">"duration"</span>, duration),
+        }
+        
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            st, _ := status.<span class="function">FromError</span>(err)
+            fields = <span class="function">append</span>(fields,
+                zap.<span class="function">String</span>(<span class="string">"error"</span>, err.<span class="function">Error</span>()),
+                zap.<span class="function">String</span>(<span class="string">"code"</span>, st.<span class="function">Code</span>().<span class="function">String</span>()),
+            )
+            logger.<span class="function">Error</span>(<span class="string">"gRPC request failed"</span>, fields...)
+        } <span class="keyword">else</span> {
+            logger.<span class="function">Info</span>(<span class="string">"gRPC request completed"</span>, fields...)
+        }
+        
+        <span class="keyword">return</span> resp, err
+    }
+}
+
+<span class="comment">// 链路追踪拦截器</span>
+<span class="function">func</span> <span class="function">TracingInterceptor</span>() grpc.UnaryServerInterceptor {
+    <span class="keyword">return</span> <span class="keyword">func</span>(ctx context.Context, req <span class="keyword">interface</span>{},
+        info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
+        
+        tracer := otel.<span class="function">Tracer</span>(<span class="string">"grpc-server"</span>)
+        ctx, span := tracer.<span class="function">Start</span>(ctx, info.FullMethod)
+        <span class="keyword">defer</span> span.<span class="function">End</span>()
+        
+        <span class="keyword">return</span> <span class="function">handler</span>(ctx, req)
+    }
+}
+
+<span class="comment">// 错误转换拦截器</span>
+<span class="function">func</span> <span class="function">ErrorInterceptor</span>() grpc.UnaryServerInterceptor {
+    <span class="keyword">return</span> <span class="keyword">func</span>(ctx context.Context, req <span class="keyword">interface</span>{},
+        info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
+        
+        resp, err := <span class="function">handler</span>(ctx, req)
+        
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="comment">// 将应用错误转换为 gRPC 错误</span>
+            <span class="keyword">return</span> <span class="keyword">nil</span>, apperrors.<span class="function">ToGRPCError</span>(err)
+        }
+        
+        <span class="keyword">return</span> resp, <span class="keyword">nil</span>
+    }
+}</code></pre>
+            </div>
+            
+            <h3>4. 统一错误处理</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> apperrors
+
+<span class="keyword">import</span> <span class="string">"google.golang.org/grpc/codes"</span>
+<span class="keyword">import</span> <span class="string">"google.golang.org/grpc/status"</span>
+
+<span class="keyword">type</span> ErrorCode <span class="keyword">int</span>
+
+<span class="keyword">const</span> (
+    <span class="comment">// 业务错误码</span>
+    ErrUserNotFound ErrorCode = <span class="number">10001</span>
+    ErrInvalidInput  ErrorCode = <span class="number">10002</span>
+    ErrDuplicateKey  ErrorCode = <span class="number">10003</span>
+)
+
+<span class="keyword">type</span> AppError <span class="keyword">struct</span> {
+    Code    ErrorCode
+    Message <span class="keyword">string</span>
+    Err     <span class="keyword">error</span>
+}
+
+<span class="function">func</span> (e *AppError) <span class="function">Error</span>() <span class="keyword">string</span> {
+    <span class="keyword">if</span> e.Err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> e.Err.<span class="function">Error</span>()
+    }
+    <span class="keyword">return</span> e.Message
+}
+
+<span class="function">func</span> <span class="function">NewUserNotFoundError</span>(msg <span class="keyword">string</span>) *AppError {
+    <span class="keyword">return</span> &AppError{
+        Code:    ErrUserNotFound,
+        Message: msg,
+    }
+}
+
+<span class="function">func</span> <span class="function">ToGRPCError</span>(err <span class="keyword">error</span>) <span class="keyword">error</span> {
+    <span class="keyword">if</span> appErr, ok := err.(*AppError); ok {
+        <span class="keyword">switch</span> appErr.Code {
+        <span class="keyword">case</span> ErrUserNotFound:
+            <span class="keyword">return</span> status.<span class="function">Error</span>(codes.NotFound, appErr.Message)
+        <span class="keyword">case</span> ErrInvalidInput:
+            <span class="keyword">return</span> status.<span class="function">Error</span>(codes.InvalidArgument, appErr.Message)
+        <span class="keyword">case</span> ErrDuplicateKey:
+            <span class="keyword">return</span> status.<span class="function">Error</span>(codes.AlreadyExists, appErr.Message)
+        <span class="keyword">default</span>:
+            <span class="keyword">return</span> status.<span class="function">Error</span>(codes.Internal, <span class="string">"internal error"</span>)
+        }
+    }
+    <span class="keyword">return</span> status.<span class="function">Error</span>(codes.Internal, err.<span class="function">Error</span>())
+}</code></pre>
+            </div>
+            
+            <h3>5. 连接管理最佳实践</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> grpcclient
+
+<span class="keyword">import</span> (
+    <span class="string">"sync"</span>
+    <span class="string">"time"</span>
+    <span class="string">"google.golang.org/grpc"</span>
+    <span class="string">"google.golang.org/grpc/credentials/insecure"</span>
+    <span class="string">"google.golang.org/grpc/keepalive"</span>
+)
+
+<span class="keyword">type</span> ClientManager <span class="keyword">struct</span> {
+    mu      sync.RWMutex
+    clients map[<span class="keyword">string</span>>*grpc.ClientConn
+}
+
+<span class="keyword">var</span> (
+    instance *ClientManager
+    once     sync.Once
+)
+
+<span class="function">func</span> <span class="function">GetInstance</span>() *ClientManager {
+    once.<span class="function">Do</span>(<span class="keyword">func</span>() {
+        instance = &ClientManager{
+            clients: <span class="function">make</span>(map[<span class="keyword">string</span>]*grpc.ClientConn),
+        }
+    })
+    <span class="keyword">return</span> instance
+}
+
+<span class="function">func</span> (m *ClientManager) <span class="function">GetConnection</span>(address <span class="keyword">string</span>) (*grpc.ClientConn, <span class="keyword">error</span>) {
+    m.mu.RLock()
+    conn, ok := m.clients[address]
+    m.mu.RUnlock()
+    
+    <span class="keyword">if</span> ok {
+        <span class="keyword">return</span> conn, <span class="keyword">nil</span>
+    }
+    
+    m.mu.Lock()
+    <span class="keyword">defer</span> m.mu.Unlock()
+    
+    <span class="comment">// Double-check locking</span>
+    <span class="keyword">if</span> conn, ok := m.clients[address]; ok {
+        <span class="keyword">return</span> conn, <span class="keyword">nil</span>
+    }
+    
+    conn, err := m.<span class="function">createConnection</span>(address)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    m.clients[address] = conn
+    <span class="keyword">return</span> conn, <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> (m *ClientManager) <span class="function">createConnection</span>(address <span class="keyword">string</span>) (*grpc.ClientConn, <span class="keyword">error</span>) {
+    <span class="keyword">return</span> grpc.<span class="function">Dial</span>(address,
+        grpc.<span class="function">WithTransportCredentials</span>(insecure.<span class="function">NewCredentials</span>()),
+        grpc.<span class="function">WithKeepaliveParams</span>(keepalive.ClientParameters{
+            Time:                <span class="number">10</span> * time.Second,
+            Timeout:             time.Second,
+            PermitWithoutStream: <span class="keyword">true</span>,
+        }),
+        grpc.<span class="function">WithDefaultCallOptions</span>(
+            grpc.<span class="function">MaxCallRecvMsgSize</span>(<span class="number">1024</span>*<span class="number">1024</span>*<span class="number">10</span>),
+            grpc.<span class="function">MaxCallSendMsgSize</span>(<span class="number">1024</span>*<span class="number">1024</span>*<span class="number">10</span>),
+        ),
+    )
+}
+
+<span class="function">func</span> (m *ClientManager) <span class="function">Close</span>(address <span class="keyword">string</span>) <span class="keyword">error</span> {
+    m.mu.Lock()
+    <span class="keyword">defer</span> m.mu.Unlock()
+    
+    <span class="keyword">if</span> conn, ok := m.clients[address]; ok {
+        <span class="function">delete</span>(m.clients, address)
+        <span class="keyword">return</span> conn.<span class="function">Close</span>()
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+            
+            <h3>6. 优雅关闭</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"log"</span>
+    <span class="string">"os"</span>
+    <span class="string">"os/signal"</span>
+    <span class="string">"syscall"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建 gRPC 服务器</span>
+    s := grpc.<span class="function">NewServer</span>()
+    
+    <span class="comment">// 注册服务</span>
+    pb.<span class="function">RegisterGreeterServer</span>(s, &server{})
+    
+    <span class="comment">// 启动服务器</span>
+    lis, err := net.<span class="function">Listen</span>(<span class="string">"tcp"</span>, <span class="string">":50051"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        log.<span class="function">Fatalf</span>(<span class="string">"failed to listen: %v"</span>, err)
+    }
+    
+    <span class="keyword">go</span> <span class="function">func</span>() {
+        log.<span class="function">Printf</span>(<span class="string">"server listening at %v"</span>, lis.<span class="function">Addr</span>())
+        <span class="keyword">if</span> err := s.<span class="function">Serve</span>(lis); err != <span class="keyword">nil</span> {
+            log.<span class="function">Fatalf</span>(<span class="string">"failed to serve: %v"</span>, err)
+        }
+    }()
+    
+    <span class="comment">// 等待中断信号</span>
+    quit := <span class="function">make</span>(<span class="keyword">chan</span> os.Signal, <span class="number">1</span>)
+    signal.<span class="function">Notify</span>(quit, syscall.SIGINT, syscall.SIGTERM)
+    <-quit
+    
+    log.<span class="function">Println</span>(<span class="string">"Shutting down server..."</span>)
+    
+    <span class="comment">// 优雅关闭</span>
+    ctx, cancel := context.<span class="function">WithTimeout</span>(context.<span class="function">Background</span>(), <span class="number">10</span>*time.Second)
+    <span class="keyword">defer</span> cancel()
+    
+    done := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>{})
+    <span class="keyword">go</span> <span class="function">func</span>() {
+        s.<span class="function">GracefulStop</span>()
+        <span class="function">close</span>(done)
+    }()
+    
+    <span class="function">select</span> {
+    <span class="keyword">case</span> <-done:
+        log.<span class="function">Println</span>(<span class="string">"Server stopped gracefully"</span>)
+    <span class="keyword">case</span> <-ctx.<span class="function">Done</span>():
+        log.<span class="function">Println</span>(<span class="string">"Server shutdown timeout, forcing..."</span>)
+        s.<span class="function">Stop</span>()
+    }
+}</code></pre>
+            </div>
+            
+            <h3>7. 配置管理</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> config
+
+<span class="keyword">type</span> GRPCConfig <span class="keyword">struct</span> {
+    Port         <span class="keyword">int</span>           <span class="string">`mapstructure:"port"`</span>
+    MaxRecvSize  <span class="keyword">int</span>           <span class="string">`mapstructure:"max_recv_size"`</span>
+    MaxSendSize  <span class="keyword">int</span>           <span class="string">`mapstructure:"max_send_size"`</span>
+    Timeout      time.Duration <span class="string">`mapstructure:"timeout"`</span>
+    Keepalive    KeepaliveConfig <span class="string">`mapstructure:"keepalive"`</span>
+}
+
+<span class="keyword">type</span> KeepaliveConfig <span class="keyword">struct</span> {
+    MaxConnectionIdle <span class="keyword">int</span> <span class="string">`mapstructure:"max_connection_idle"`</span>
+    MaxConnectionAge  <span class="keyword">int</span> <span class="string">`mapstructure:"max_connection_age"`</span>
+    Time              <span class="keyword">int</span> <span class="string">`mapstructure:"time"`</span>
+    Timeout           <span class="keyword">int</span> <span class="string">`mapstructure:"timeout"`</span>
+}
+
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    Server  GRPCConfig <span class="string">`mapstructure:"server"`</span>
+    Clients map[<span class="keyword">string</span>><span class="keyword">string</span> <span class="string">`mapstructure:"clients"`</span>
+}
+
+<span class="keyword">func</span> <span class="function">LoadConfig</span>(path <span class="keyword">string</span>) (*Config, <span class="keyword">error</span>) {
+    viper.<span class="function">SetConfigFile</span>(path)
+    viper.<span class="function">SetConfigType</span>(<span class="string">"yaml"</span>)
+    
+    <span class="keyword">if</span> err := viper.<span class="function">ReadInConfig</span>(); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    <span class="keyword">var</span> config Config
+    <span class="keyword">if</span> err := viper.<span class="function">Unmarshal</span>(&config); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    <span class="keyword">return</span> &config, <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+            
+            <h3>8. 监控和指标</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> metrics
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/prometheus/client_golang/prometheus"</span>
+    <span class="string">"github.com/prometheus/client_golang/prometheus/promauto"</span>
+)
+
+<span class="keyword">var</span> (
+    <span class="comment">// 请求计数器</span>
+    RequestsTotal = promauto.<span class="function">NewCounterVec</span>(
+        prometheus.CounterOpts{
+            Name: <span class="string">"grpc_requests_total"</span>,
+            Help: <span class="string">"Total number of gRPC requests"</span>,
+        },
+        []<span class="keyword">string</span>{<span class="string">"method"</span>, <span class="string">"status"</span>},
+    )
+    
+    <span class="comment">// 请求延迟直方图</span>
+    RequestDuration = promauto.<span class="function">NewHistogramVec</span>(
+        prometheus.HistogramOpts{
+            Name:    <span class="string">"grpc_request_duration_seconds"</span>,
+            Help:    <span class="string">"gRPC request latency in seconds"</span>,
+            Buckets: prometheus.<span class="function">DefBuckets</span>(),
+        },
+        []<span class="keyword">string</span>{<span class="string">"method"</span>},
+    )
+    
+    <span class="comment">// 活跃连接数</span>
+    ActiveConnections = promauto.<span class="function">NewGauge</span>(
+        prometheus.GaugeOpts{
+            Name: <span class="string">"grpc_active_connections"</span>,
+            Help: <span class="string">"Number of active gRPC connections"</span>,
+        },
+    )
+)</code></pre>
+            </div>
+            
+            <h3>9. 测试最佳实践</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> handler_test
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"testing"</span>
+    <span class="string">"github.com/stretchr/testify/assert"</span>
+    <span class="string">"github.com/stretchr/testify/mock"</span>
+    <span class="string">"google.golang.org/grpc/test/bufconn"</span>
+)
+
+<span class="comment">// Mock 服务</span>
+<span class="keyword">type</span> MockUserService <span class="keyword">struct</span> {
+    mock.Mock
+}
+
+<span class="function">func</span> (m *MockUserService) <span class="function">GetUser</span>(ctx context.Context, id <span class="keyword">string</span>) (*User, <span class="keyword">error</span>) {
+    args := m.<span class="function">Called</span>(ctx, id)
+    <span class="keyword">if</span> args.<span class="function">Get</span>(<span class="number">0</span>) == <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, args.<span class="function">Error</span>(<span class="number">1</span>)
+    }
+    <span class="keyword">return</span> args.<span class="function">Get</span>(<span class="number">0</span>).(*User), args.<span class="function">Error</span>(<span class="number">1</span>)
+}
+
+<span class="function">func</span> <span class="function">TestGetUser</span>(t *testing.T) {
+    <span class="comment">// 创建 mock 服务</span>
+    mockService := <span class="keyword">new</span>(MockUserService)
+    
+    <span class="comment">// 设置期望</span>
+    expectedUser := &User{ID: <span class="string">"123"</span>, Name: <span class="string">"Alice"</span>}
+    mockService.<span class="function">On</span>(<span class="string">"GetUser"</span>, mock.Anything, <span class="string">"123"</span>).<span class="function">Return</span>(expectedUser, <span class="keyword">nil</span>)
+    
+    <span class="comment">// 创建 handler</span>
+    handler := &UserHandler{service: mockService}
+    
+    <span class="comment">// 调用方法</span>
+    resp, err := handler.<span class="function">GetUser</span>(context.<span class="function">Background</span>(), &pb.GetUserRequest{Id: <span class="string">"123"</span>})
+    
+    <span class="comment">// 验证结果</span>
+    <span class="keyword">assert</span>.<span class="function">NoError</span>(t, err)
+    <span class="keyword">assert</span>.<span class="function">Equal</span>(t, <span class="string">"123"</span>, resp.User.Id)
+    <span class="keyword">assert</span>.<span class="function">Equal</span>(t, <span class="string">"Alice"</span>, resp.User.Name)
+    
+    <span class="comment">// 验证 mock 调用</span>
+    mockService.<span class="function">AssertExpectations</span>(t)
+}
+
+<span class="comment">// 集成测试</span>
+<span class="function">func</span> <span class="function">TestIntegration</span>(t *testing.T) {
+    <span class="comment">// 使用 bufconn 进行集成测试</span>
+    lis := bufconn.<span class="function">Listen</span>(<span class="number">1024</span> * <span class="number">1024</span>)
+    
+    s := grpc.<span class="function">NewServer</span>()
+    pb.<span class="function">RegisterUserServiceServer</span>(s, &UserHandler{})
+    
+    <span class="keyword">go</span> <span class="function">func</span>() {
+        <span class="keyword">if</span> err := s.<span class="function">Serve</span>(lis); err != <span class="keyword">nil</span> {
+            t.<span class="function">Fatal</span>(err)
+        }
+    }()
+    <span class="keyword">defer</span> s.<span class="function">Stop</span>()
+    
+    <span class="comment">// 创建客户端连接</span>
+    conn, err := grpc.<span class="function">DialContext</span>(
+        context.<span class="function">Background</span>(),
+        <span class="string">"bufnet"</span>,
+        grpc.<span class="function">WithContextDialer</span>(<span class="keyword">func</span>(ctx context.Context, s <span class="keyword">string</span>) (net.Conn, <span class="keyword">error</span>) {
+            <span class="keyword">return</span> lis.<span class="function">Dial</span>()
+        }),
+        grpc.<span class="function">WithTransportCredentials</span>(insecure.<span class="function">NewCredentials</span>()),
+    )
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        t.<span class="function">Fatal</span>(err)
+    }
+    <span class="keyword">defer</span> conn.<span class="function">Close</span>()
+    
+    <span class="comment">// 测试客户端</span>
+    client := pb.<span class="function">NewUserServiceClient</span>(conn)
+    resp, err := client.<span class="function">GetUser</span>(context.<span class="function">Background</span>(), &pb.GetUserRequest{Id: <span class="string">"123"</span>})
+    
+    <span class="keyword">assert</span>.<span class="function">NoError</span>(t, err)
+    <span class="keyword">assert</span>.<span class="function">Equal</span>(t, <span class="string">"123"</span>, resp.User.Id)
+}</code></pre>
+            </div>
+            
+            <h3>10. 性能优化建议</h3>
+            <div class="note-box">
+                <pre><code><span class="comment">// 1. 使用连接池</span>
+<span class="comment">// 不要为每个请求创建新连接，复用客户端连接</span>
+
+<span class="comment">// 2. 启用压缩</span>
+<span class="keyword">import</span> <span class="string">"google.golang.org/grpc/encoding/gzip"</span>
+
+conn, err := grpc.<span class="function">Dial</span>(address,
+    grpc.<span class="function">WithDefaultCallOptions</span>(
+        grpc.<span class="function">UseCompressor</span>(gzip.<span class="function">Name</span>),
+    ),
+)
+
+<span class="comment">// 3. 调整消息大小限制</span>
+conn, err := grpc.<span class="function">Dial</span>(address,
+    grpc.<span class="function">WithDefaultCallOptions</span>(
+        grpc.<span class="function">MaxCallRecvMsgSize</span>(<span class="number">1024</span>*<span class="number">1024</span>*<span class="number">10</span>), <span class="comment">// 10MB</span>
+        grpc.<span class="function">MaxCallSendMsgSize</span>(<span class="number">1024</span>*<span class="number">1024</span>*<span class="number">10</span>),
+    ),
+)
+
+<span class="comment">// 4. 使用流式调用处理大量数据</span>
+<span class="comment">// 避免一次性传输大量数据</span>
+
+<span class="comment">// 5. 合理设置超时</span>
+ctx, cancel := context.<span class="function">WithTimeout</span>(context.<span class="function">Background</span>(), <span class="number">3</span>*time.Second)
+<span class="keyword">defer</span> cancel()
+
+<span class="comment">// 6. 使用 Keepalive 保持连接</span>
+conn, err := grpc.<span class="function">Dial</span>(address,
+    grpc.<span class="function">WithKeepaliveParams</span>(keepalive.ClientParameters{
+        Time:                <span class="number">10</span> * time.Second,
+        Timeout:             time.Second,
+        PermitWithoutStream: <span class="keyword">true</span>,
+    }),
+)</code></pre>
+            </div>
+            
+            <h3>11. 安全最佳实践</h3>
+            <div class="note-box">
+                <pre><code><span class="comment">// 1. 始终使用 TLS</span>
+<span class="comment">// 生产环境不要使用 insecure.NewCredentials()</span>
+
+<span class="comment">// 2. 实现认证机制</span>
+<span class="function">func</span> <span class="function">authInterceptor</span>(ctx context.Context, req <span class="keyword">interface</span>{},
+    info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
+    
+    <span class="comment">// 从元数据获取 token</span>
+    md, ok := metadata.<span class="function">FromIncomingContext</span>(ctx)
+    <span class="keyword">if</span> !ok {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, status.<span class="function">Error</span>(codes.Unauthenticated, <span class="string">"missing metadata"</span>)
+    }
+    
+    token := md.<span class="function">Get</span>(<span class="string">"authorization"</span>)
+    <span class="keyword">if</span> <span class="function">len</span>(token) == <span class="number">0</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, status.<span class="function">Error</span>(codes.Unauthenticated, <span class="string">"missing authorization token"</span>)
+    }
+    
+    <span class="comment">// 验证 token</span>
+    <span class="keyword">if</span> !<span class="function">validateToken</span>(token[<span class="number">0</span>]) {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, status.<span class="function">Error</span>(codes.Unauthenticated, <span class="string">"invalid token"</span>)
+    }
+    
+    <span class="keyword">return</span> <span class="function">handler</span>(ctx, req)
+}
+
+<span class="comment">// 3. 限制消息大小防止 DoS 攻击</span>
+s := grpc.<span class="function">NewServer</span>(
+    grpc.<span class="function">MaxRecvMsgSize</span>(<span class="number">1024</span>*<span class="number">1024</span>*<span class="number">10</span>),
+    grpc.<span class="function">MaxSendMsgSize</span>(<span class="number">1024</span>*<span class="number">1024</span>*<span class="number">10</span>),
+)
+
+<span class="comment">// 4. 实现速率限制</span>
+<span class="keyword">import</span> <span class="string">"golang.org/x/time/rate"</span>
+
+<span class="keyword">type</span> RateLimiter <span class="keyword">struct</span> {
+    limiters map[<span class="keyword">string</span>]*rate.Limiter
+    mu       sync.RWMutex
+    r        rate.Limit
+    b        <span class="keyword">int</span>
+}
+
+<span class="function">func</span> (rl *RateLimiter) <span class="function">Allow</span>(ip <span class="keyword">string</span>) <span class="keyword">bool</span> {
+    rl.mu.RLock()
+    limiter, ok := rl.limiters[ip]
+    rl.mu.RUnlock()
+    
+    <span class="keyword">if</span> !ok {
+        rl.mu.Lock()
+        limiter = rate.<span class="function">NewLimiter</span>(rl.r, rl.b)
+        rl.limiters[ip] = limiter
+        rl.mu.Unlock()
+    }
+    
+    <span class="keyword">return</span> limiter.<span class="function">Allow</span>()
+}</code></pre>
+            </div>
+            
             <h2 id="gomicro">Go-Micro 微服务框架</h2>
             
             <h3>简介</h3>

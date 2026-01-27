@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>jinzhu/now 时间工具库 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+        <div class="content">
+            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
+            <h2 id="now">jinzhu/now 时间工具库</h2>
+            
+            <h3>简介</h3>
+            <p>jinzhu/now 是一个轻量级、易用的 Go 时间工具库，提供了丰富的时间处理功能，包括时间格式化、时间计算、时区处理等。它比标准库的 time 包更简洁、更符合人类直觉，特别适合在 Web 应用和数据库操作中使用。</p>
+            
+            <h3>核心特性</h3>
+            <ul>
+                <li><strong>简洁的 API</strong>：提供直观的链式调用 API</li>
+                <li><strong>丰富的时间格式</strong>：支持多种时间格式和自定义格式</li>
+                <li><strong>时区支持</strong>：内置时区处理，轻松转换不同时区的时间</li>
+                <li><strong>时间计算</strong>：方便的加减操作，支持年、月、日、时、分、秒等</li>
+                <li><strong>数据库友好</strong>：支持数据库常用的时间格式</li>
+                <li><strong>中文化支持</strong>：内置中文格式，适合中文应用</li>
+            </ul>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get -u github.com/jinzhu/now</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 初始化 now（设置时区）</span>
+    t := now.<span class="function">New</span>(time.Date(<span class="number">2013</span>, <span class="number">11</span>, <span class="number">18</span>, <span class="number">17</span>, <span class="number">51</span>, <span class="number">49</span>, <span class="number">123456789</span>, time.UTC))
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Current time:"</span>, t)  <span class="comment">// 2013-11-18 17:51:49.123456789 UTC</span>
+    
+    <span class="comment">// 时间格式化</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Format:"</span>, t.<span class="function">Format</span>(<span class="string">"2006-01-02 15:04:05"</span>))  <span class="comment">// 2013-11-18 17:51:49</span>
+}</code></pre>
+            
+            <h3>时间格式化</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    t := now.<span class="function">New</span>(time.Now())
+    
+    <span class="comment">// 常用格式</span>
+    fmt.<span class="function">Println</span>(<span class="string">"YYYY-MM-DD:"</span>, t.<span class="function">Format</span>(<span class="string">"2006-01-02"</span>))           <span class="comment">// 2024-01-27</span>
+    fmt.<span class="function">Println</span>(<span class="string">"YYYY-MM-DD HH:mm:ss:"</span>, t.<span class="function">Format</span>(<span class="string">"2006-01-02 15:04:05"</span>))  <span class="comment">// 2024-01-27 14:30:45</span>
+    fmt.<span class="function">Println</span>(<span class="string">"MM/DD/YYYY:"</span>, t.<span class="function">Format</span>(<span class="string">"01/02/2006"</span>))              <span class="comment">// 01/27/2024</span>
+    fmt.<span class="function">Println</span>(<span class="string">"DD-MM-YYYY:"</span>, t.<span class="function">Format</span>(<span class="string">"02-01-2006"</span>))              <span class="comment">// 27-01-2024</span>
+    
+    <span class="comment">// 带星期</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Monday:"</span>, t.<span class="function">Format</span>(<span class="string">"2006-01-02 Monday"</span>))         <span class="comment">// 2024-01-27 Saturday</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Mon:"</span>, t.<span class="function">Format</span>(<span class="string">"2006-01-02 Mon"</span>))                <span class="comment">// 2024-01-27 Sat</span>
+    
+    <span class="comment">// 中文格式</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Chinese:"</span>, t.<span class="function">Format</span>(<span class="string">"2006年01月02日 15时04分"</span>))    <span class="comment">// 2024年01月27日 14时30分</span>
+    
+    <span class="comment">// 数据库格式</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Date:"</span>, t.<span class="function">Format</span>(<span class="string">"2006-01-02"</span>))                      <span class="comment">// 2024-01-27</span>
+    fmt.<span class="function">Println</span>(<span class="string">"DateTime:"</span>, t.<span class="function">Format</span>(<span class="string">"2006-01-02 15:04:05"</span>))        <span class="comment">// 2024-01-27 14:30:45</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Time:"</span>, t.<span class="function">Format</span>(<span class="string">"15:04:05"</span>))                          <span class="comment">// 14:30:45</span>
+}</code></pre>
+            </div>
+            
+            <h3>时间边界操作</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    t := now.<span class="function">New</span>(time.Date(<span class="number">2013</span>, <span class="number">11</span>, <span class="number">18</span>, <span class="number">17</span>, <span class="number">51</span>, <span class="number">49</span>, <span class="number">123</span>, time.UTC))
+    
+    <span class="comment">// 时间边界</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Beginning of minute:"</span>, t.<span class="function">BeginningOfMinute</span>())  <span class="comment">// 2013-11-18 17:51:00 UTC</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Beginning of hour:"</span>, t.<span class="function">BeginningOfHour</span>())      <span class="comment">// 2013-11-18 17:00:00 UTC</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Beginning of day:"</span>, t.<span class="function">BeginningOfDay</span>())        <span class="comment">// 2013-11-18 00:00:00 UTC</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Beginning of week:"</span>, t.<span class="function">BeginningOfWeek</span>())       <span class="comment">// 2013-11-17 00:00:00 UTC</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Beginning of month:"</span>, t.<span class="function">BeginningOfMonth</span>())    <span class="comment">// 2013-11-01 00:00:00 UTC</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Beginning of quarter:"</span>, t.<span class="function">BeginningOfQuarter</span>()) <span class="comment">// 2013-10-01 00:00:00 UTC</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Beginning of year:"</span>, t.<span class="function">BeginningOfYear</span>())      <span class="comment">// 2013-01-01 00:00:00 UTC</span>
+    
+    <span class="comment">// 时间结束</span>
+    fmt.<span class="function">Println</span>(<span class="string">"End of minute:"</span>, t.<span class="function">EndOfMinute</span>())          <span class="string">// 2013-11-18 17:51:59.999999999 UTC</span>
+    fmt.<span class="function">Println</span>(<span class="string">"End of hour:"</span>, t.<span class="function">EndOfHour</span>())              <span class="string">// 2013-11-18 17:59:59.999999999 UTC</span>
+    fmt.<span class="function">Println</span>(<span class="string">"End of day:"</span>, t.<span class="function">EndOfDay</span>())                <span class="string">// 2013-11-18 23:59:59.999999999 UTC</span>
+    fmt.<span class="function">Println</span>(<span class="string">"End of week:"</span>, t.<span class="function">EndOfWeek</span>())               <span class="string">// 2013-11-23 23:59:59.999999999 UTC</span>
+    fmt.<span class="function">Println</span>(<span class="string">"End of month:"</span>, t.<span class="function">EndOfMonth</span>())            <span class="string">// 2013-11-30 23:59:59.999999999 UTC</span>
+    fmt.<span class="function">Println</span>(<span class="string">"End of quarter:"</span>, t.<span class="function">EndOfQuarter</span>())         <span class="string">// 2013-12-31 23:59:59.999999999 UTC</span>
+    fmt.<span class="function">Println</span>(<span class="string">"End of year:"</span>, t.<span class="function">EndOfYear</span>())               <span class="string">// 2013-12-31 23:59:59.999999999 UTC</span>
+}</code></pre>
+            </div>
+            
+            <h3>时间计算</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    t := now.<span class="function">New</span>(time.Date(<span class="number">2013</span>, <span class="number">11</span>, <span class="number">18</span>, <span class="number">17</span>, <span class="number">51</span>, <span class="number">49</span>, <span class="number">0</span>, time.UTC))
+    
+    <span class="comment">// 时间加减</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Add 1 hour:"</span>, t.<span class="function">Add</span>(time.Hour))                     <span class="comment">// 2013-11-18 18:51:49 UTC</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Add 1 day:"</span>, t.<span class="function">AddDate</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>))                  <span class="comment">// 2013-11-19 17:51:49 UTC</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Add 1 month:"</span>, t.<span class="function">AddDate</span>(<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>))                 <span class="comment">// 2013-12-18 17:51:49 UTC</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Add 1 year:"</span>, t.<span class="function">AddDate</span>(<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>))                  <span class="comment">// 2014-11-18 17:51:49 UTC</span>
+    
+    <span class="comment">// 链式调用</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Add 2 hours and 30 minutes:"</span>, 
+        t.<span class="function">Add</span>(<span class="number">2</span>*time.Hour + <span class="number">30</span>*time.Minute))  <span class="comment">// 2013-11-18 20:21:49 UTC</span>
+    
+    <span class="comment">// 减去时间</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Subtract 1 day:"</span>, t.<span class="function">Add</span>(-<span class="number">24</span>*time.Hour))            <span class="comment">// 2013-11-17 17:51:49 UTC</span>
+    
+    <span class="comment">// 自定义月份计算</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Add 2 months:"</span>, t.<span class="function">AddMonth</span>(<span class="number">2</span>))               <span class="comment">// 2014-01-18 17:51:49 UTC</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Add 2 years:"</span>, t.<span class="function">AddYear</span>(<span class="number">2</span>))                <span class="comment">// 2015-11-18 17:51:49 UTC</span>
+}</code></pre>
+            </div>
+            
+            <h3>时间比较</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    t := now.<span class="function">New</span>(time.Date(<span class="number">2013</span>, <span class="number">11</span>, <span class="number">18</span>, <span class="number">17</span>, <span class="number">51</span>, <span class="number">49</span>, <span class="number">0</span>, time.UTC))
+    t2 := now.<span class="function">New</span>(time.Date(<span class="number">2013</span>, <span class="number">11</span>, <span class="number">19</span>, <span class="number">18</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, time.UTC))
+    
+    <span class="comment">// 时间比较</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Before:"</span>, t.<span class="function">Before</span>(t2))        <span class="comment">// true</span>
+    fmt.<span class="function">Println</span>(<span class="string">"After:"</span>, t.<span class="function">After</span>(t2))         <span class="comment">// false</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Equal:"</span>, t.<span class="function">Equal</span>(t2))         <span class="comment">// false</span>
+    
+    <span class="comment">// 时间差</span>
+    duration := t2.<span class="function">Sub</span>(t)
+    fmt.<span class="function">Println</span>(<span class="string">"Duration:"</span>, duration)      <span class="comment">// 24h8m11s</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Hours:"</span>, duration.<span class="function">Hours</span>())  <span class="comment">// 24.13638888888889</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Minutes:"</span>, duration.<span class="function">Minutes</span>()) <span class="comment">// 1448.1833333333332</span>
+    
+    <span class="comment">// 特定比较</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Is today:"</span>, t.<span class="function">IsToday</span>())       <span class="comment">// 取决于当前日期</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Is this week:"</span>, t.<span class="function">IsThisWeek</span>())  <span class="comment">// 取决于当前周</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Is this month:"</span>, t.<span class="function">IsThisMonth</span>()) <span class="comment">// 取决于当前月</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Is this year:"</span>, t.<span class="function">IsThisYear</span>())   <span class="comment">// 取决于当前年</span>
+}</code></pre>
+            </div>
+            
+            <h3>时区处理</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 设置本地时区</span>
+    now.<span class="function">TimeFormats</span> = []<span class="keyword">string</span>{
+        <span class="string">"2006-01-02 15:04:05"</span>,
+        <span class="string">"2006/01/02 15:04:05"</span>,
+        <span class="string">"2006-01-02"</span>,
+        <span class="string">"2006/01/02"</span>,
+    }
+    
+    <span class="comment">// 设置默认时区</span>
+    loc, err := time.<span class="function">LoadLocation</span>(<span class="string">"Asia/Shanghai"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    
+    <span class="comment">// 使用本地时区创建时间</span>
+    t := now.<span class="function">New</span>(time.Now()).<span class="function">In</span>(loc)
+    fmt.<span class="function">Println</span>(<span class="string">"Local time:"</span>, t)
+    
+    <span class="comment">// 转换时区</span>
+    utcTime := t.<span class="function">In</span>(time.UTC)
+    fmt.<span class="function">Println</span>(<span class="string">"UTC time:"</span>, utcTime)
+    
+    <span class="comment">// 纽约时间</span>
+    nyLoc, _ := time.<span class="function">LoadLocation</span>(<span class="string">"America/New_York"</span>)
+    nyTime := t.<span class="function">In</span>(nyLoc)
+    fmt.<span class="function">Println</span>(<span class="string">"New York time:"</span>, nyTime)
+}</code></pre>
+            </div>
+            
+            <h3>字符串解析</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 自定义时间格式</span>
+    now.<span class="function">TimeFormats</span> = []<span class="keyword">string</span>{
+        <span class="string">"2006-01-02 15:04:05"</span>,
+        <span class="string">"2006/01/02 15:04:05"</span>,
+        <span class="string">"2006-01-02"</span>,
+        <span class="string">"2006/01/02"</span>,
+        <span class="string">"20060102"</span>,
+        <span class="string">"2006.01.02"</span>,
+    }
+    
+    <span class="comment">// 解析时间字符串</span>
+    t, err := now.<span class="function">Parse</span>(<span class="string">"2013-11-18 17:51:49"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    fmt.<span class="function">Println</span>(<span class="string">"Parsed time:"</span>, t)  <span class="comment">// 2013-11-18 17:51:49 +0000 UTC</span>
+    
+    <span class="comment">// 不同格式的解析</span>
+    t2, _ := now.<span class="function">Parse</span>(<span class="string">"2013/11/18"</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Parsed time 2:"</span>, t2)
+    
+    t3, _ := now.<span class="function">Parse</span>(<span class="string">"20131118"</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Parsed time 3:"</span>, t3)
+}</code></pre>
+            </div>
+            
+            <h3>与 GORM 集成</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    <span class="string">"gorm.io/driver/mysql"</span>
+    <span class="string">"gorm.io/gorm"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    ID        <span class="keyword">uint</span>
+    Name      <span class="keyword">string</span>
+    CreatedAt time.Time
+    UpdatedAt time.Time
+    DeletedAt gorm.DeletedAt
+}
+
+<span class="function">func</span> <span class="function">GetUsersByDate</span>(db *gorm.DB, date time.Time) ([]User, <span class="keyword">error</span>) {
+    <span class="keyword">var</span> users []User
+    
+    <span class="comment">// 查询某一天创建的用户</span>
+    n := now.<span class="function">New</span>(date)
+    startDate := n.<span class="function">BeginningOfDay</span>()
+    endDate := n.<span class="function">EndOfDay</span>()
+    
+    err := db.<span class="function">Where</span>(<span class="string">"created_at >= ? AND created_at <= ?"</span>, startDate, endDate).
+        <span class="function">Find</span>(&users).<span class="function">Error</span>
+    
+    <span class="keyword">return</span> users, err
+}
+
+<span class="function">func</span> <span class="function">GetUsersByWeek</span>(db *gorm.DB, date time.Time) ([]User, <span class="keyword">error</span>) {
+    <span class="keyword">var</span> users []User
+    
+    <span class="comment">// 查询某一周创建的用户</span>
+    n := now.<span class="function">New</span>(date)
+    startDate := n.<span class="function">BeginningOfWeek</span>()
+    endDate := n.<span class="function">EndOfWeek</span>()
+    
+    err := db.<span class="function">Where</span>(<span class="string">"created_at >= ? AND created_at <= ?"</span>, startDate, endDate).
+        <span class="function">Find</span>(&users).<span class="function">Error</span>
+    
+    <span class="keyword">return</span> users, err
+}
+
+<span class="function">func</span> <span class="function">GetUsersByMonth</span>(db *gorm.DB, date time.Time) ([]User, <span class="keyword">error</span>) {
+    <span class="keyword">var</span> users []User
+    
+    <span class="comment">// 查询某月创建的用户</span>
+    n := now.<span class="function">New</span>(date)
+    startDate := n.<span class="function">BeginningOfMonth</span>()
+    endDate := n.<span class="function">EndOfMonth</span>()
+    
+    err := db.<span class="function">Where</span>(<span class="string">"created_at >= ? AND created_at <= ?"</span>, startDate, endDate).
+        <span class="function">Find</span>(&users).<span class="function">Error</span>
+    
+    <span class="keyword">return</span> users, err
+}</code></pre>
+            </div>
+            
+            <h3>工作日处理</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="function">func</span> <span class="function">IsWeekend</span>(t time.Time) <span class="keyword">bool</span> {
+    n := now.<span class="function">New</span>(t)
+    day := n.<span class="function">Weekday</span>()
+    <span class="keyword">return</span> day == time.Saturday || day == time.Sunday
+}
+
+<span class="function">func</span> <span class="function">IsWeekday</span>(t time.Time) <span class="keyword">bool</span> {
+    <span class="keyword">return</span> !<span class="function">IsWeekend</span>(t)
+}
+
+<span class="function">func</span> <span class="function">GetNextWeekday</span>(t time.Time) time.Time {
+    n := now.<span class="function">New</span>(t)
+    <span class="keyword">for</span> {
+        n = n.<span class="function">Add</span>(time.Hour * <span class="number">24</span>)
+        <span class="keyword">if</span> <span class="function">IsWeekday</span>(n.Time) {
+            <span class="keyword">return</span> n.Time
+        }
+    }
+}
+
+<span class="function">func</span> <span class="function">AddWorkdays</span>(t time.Time, days <span class="keyword">int</span>) time.Time {
+    n := now.<span class="function">New</span>(t)
+    added := <span class="number">0</span>
+    
+    <span class="keyword">for</span> added < days {
+        n = n.<span class="function">Add</span>(time.Hour * <span class="number">24</span>)
+        <span class="keyword">if</span> <span class="function">IsWeekday</span>(n.Time) {
+            added++
+        }
+    }
+    
+    <span class="keyword">return</span> n.Time
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    t := now.<span class="function">New</span>(time.Now())
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Is weekend:"</span>, <span class="function">IsWeekend</span>(t.Time))
+    fmt.<span class="function">Println</span>(<span class="string">"Is weekday:"</span>, <span class="function">IsWeekday</span>(t.Time))
+    fmt.<span class="function">Println</span>(<span class="string">"Next weekday:"</span>, <span class="function">GetNextWeekday</span>(t.Time))
+    fmt.<span class="function">Println</span>(<span class="string">"Add 5 workdays:"</span>, <span class="function">AddWorkdays</span>(t.Time, <span class="number">5</span>))
+}</code></pre>
+            </div>
+            
+            <h3>年龄计算</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="keyword">type</span> Person <span class="keyword">struct</span> {
+    Name      <span class="keyword">string</span>
+    BirthDate time.Time
+}
+
+<span class="function">func</span> (p *Person) <span class="function">Age</span>() <span class="keyword">int</span> {
+    n := now.<span class="function">New</span>(time.Now())
+    birthN := now.<span class="function">New</span>(p.BirthDate)
+    
+    age := n.<span class="function">Year</span>() - birthN.<span class="function">Year</span>()
+    
+    <span class="comment">// 如果今年生日还没过，年龄减 1</span>
+    <span class="keyword">if</span> n.<span class="function">Month</span>() < birthN.<span class="function">Month</span>() || 
+       (n.<span class="function">Month</span>() == birthN.<span class="function">Month</span>() && n.<span class="function">Day</span>() < birthN.<span class="function">Day</span>()) {
+        age--
+    }
+    
+    <span class="keyword">return</span> age
+}
+
+<span class="function">func</span> (p *Person) <span class="function">NextBirthday</span>() time.Time {
+    n := now.<span class="function">New</span>(time.Now())
+    birthN := now.<span class="function">New</span>(p.BirthDate)
+    
+    <span class="comment">// 今年的生日</span>
+    thisYearBirthday := time.<span class="function">Date</span>(n.<span class="function">Year</span>(), birthN.<span class="function">Month</span>(), birthN.<span class="function">Day</span>(), <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, time.UTC)
+    
+    <span class="comment">// 如果今年的生日已经过了，明年的生日</span>
+    <span class="keyword">if</span> thisYearBirthday.<span class="function">Before</span>(n.Time) {
+        thisYearBirthday = time.<span class="function">Date</span>(n.<span class="function">Year</span>()+<span class="number">1</span>, birthN.<span class="function">Month</span>(), birthN.<span class="function">Day</span>(), <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, time.UTC)
+    }
+    
+    <span class="keyword">return</span> thisYearBirthday
+}
+
+<span class="function">func</span> (p *Person) <span class="function">DaysUntilBirthday</span>() <span class="keyword">int</span> {
+    nextBirthday := p.<span class="function">NextBirthday</span>()
+    n := now.<span class="function">New</span>(time.Now())
+    
+    duration := nextBirthday.<span class="function">Sub</span>(n.Time)
+    <span class="keyword">return</span> <span class="function">int</span>(duration.<span class="function">Hours</span>() / <span class="number">24</span>)
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    person := Person{
+        Name:      <span class="string">"Alice"</span>,
+        BirthDate: time.Date(<span class="number">1990</span>, <span class="number">5</span>, <span class="number">15</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, time.UTC),
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Name: %s\n"</span>, person.Name)
+    fmt.<span class="function">Printf</span>(<span class="string">"Age: %d\n"</span>, person.<span class="function">Age</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"Next birthday: %s\n"</span>, person.<span class="function">NextBirthday</span>().<span class="function">Format</span>(<span class="string">"2006-01-02"</span>))
+    fmt.<span class="function">Printf</span>(<span class="string">"Days until birthday: %d\n"</span>, person.<span class="function">DaysUntilBirthday</span>())
+}</code></pre>
+            </div>
+            
+            <h3>时间范围生成</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="function">func</span> <span class="function">GenerateDateRange</span>(start, end time.Time) []time.Time {
+    <span class="keyword">var</span> dates []time.Time
+    
+    n := now.<span class="function">New</span>(start)
+    endN := now.<span class="function">New</span>(end)
+    
+    <span class="keyword">for</span> !n.<span class="function">After</span>(endN.Time) {
+        dates = <span class="function">append</span>(dates, n.Time)
+        n = n.<span class="function">Add</span>(<span class="number">24</span> * time.Hour)
+    }
+    
+    <span class="keyword">return</span> dates
+}
+
+<span class="function">func</span> <span class="function">GenerateMonthRange</span>(start, end time.Time) []time.Time {
+    <span class="keyword">var</span> months []time.Time
+    
+    n := now.<span class="function">New</span>(start).<span class="function">BeginningOfMonth</span>()
+    endN := now.<span class="function">New</span>(end).<span class="function">EndOfMonth</span>()
+    
+    <span class="keyword">for</span> !n.<span class="function">After</span>(endN.Time) {
+        months = <span class="function">append</span>(months, n.Time)
+        n = n.<span class="function">AddDate</span>(<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>)
+    }
+    
+    <span class="keyword">return</span> months
+}
+
+<span class="function">func</span> <span class="function">GenerateYearRange</span>(start, end time.Time) []time.Time {
+    <span class="keyword">var</span> years []time.Time
+    
+    n := now.<span class="function">New</span>(start).<span class="function">BeginningOfYear</span>()
+    endN := now.<span class="function">New</span>(end).<span class="function">EndOfYear</span>()
+    
+    <span class="keyword">for</span> !n.<span class="function">After</span>(endN.Time) {
+        years = <span class="function">append</span>(years, n.Time)
+        n = n.<span class="function">AddDate</span>(<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>)
+    }
+    
+    <span class="keyword">return</span> years
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    start := time.Date(<span class="number">2024</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, time.UTC)
+    end := time.Date(<span class="number">2024</span>, <span class="number">1</span>, <span class="number">7</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, time.UTC)
+    
+    dates := <span class="function">GenerateDateRange</span>(start, end)
+    fmt.<span class="function">Printf</span>(<span class="string">"Date range (%d days):\n"</span>, <span class="function">len</span>(dates))
+    <span class="keyword">for</span>, date := <span class="keyword">range</span> dates {
+        fmt.<span class="function">Printf</span>(<span class="string">"  %s\n"</span>, date.<span class="function">Format</span>(<span class="string">"2006-01-02"</span>))
+    }
+}</code></pre>
+            </div>
+            
+            <h3>相对时间描述</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="function">func</span> <span class="function">TimeAgo</span>(t time.Time) <span class="keyword">string</span> {
+    n := now.<span class="function">New</span>(time.Now())
+    duration := n.<span class="function">Sub</span>(t)
+    
+    seconds := <span class="function">int</span>(duration.<span class="function">Seconds</span>())
+    minutes := seconds / <span class="number">60</span>
+    hours := minutes / <span class="number">60</span>
+    days := hours / <span class="number">24</span>
+    months := days / <span class="number">30</span>
+    years := days / <span class="number">365</span>
+    
+    <span class="keyword">switch</span> {
+    <span class="keyword">case</span> seconds < <span class="number">60</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d 秒前"</span>, seconds)
+    <span class="keyword">case</span> minutes < <span class="number">60</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d 分钟前"</span>, minutes)
+    <span class="keyword">case</span> hours < <span class="number">24</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d 小时前"</span>, hours)
+    <span class="keyword">case</span> days < <span class="number">30</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d 天前"</span>, days)
+    <span class="keyword">case</span> months < <span class="number">12</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d 个月前"</span>, months)
+    <span class="keyword">default</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d 年前"</span>, years)
+    }
+}
+
+<span class="function">func</span> <span class="function">TimeIn</span>(t time.Time) <span class="keyword">string</span> {
+    n := now.<span class="function">New</span>(time.Now())
+    duration := t.<span class="function">Sub</span>(n.Time)
+    
+    seconds := <span class="function">int</span>(duration.<span class="function">Seconds</span>())
+    minutes := seconds / <span class="number">60</span>
+    hours := minutes / <span class="number">60</span>
+    days := hours / <span class="number">24</span>
+    months := days / <span class="number">30</span>
+    years := days / <span class="number">365</span>
+    
+    <span class="keyword">switch</span> {
+    <span class="keyword">case</span> seconds < <span class="number">0</span>:
+        <span class="keyword">return</span> <span class="string">"已过期"</span>
+    <span class="keyword">case</span> seconds < <span class="number">60</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d 秒后"</span>, seconds)
+    <span class="keyword">case</span> minutes < <span class="number">60</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d 分钟后"</span>, minutes)
+    <span class="keyword">case</span> hours < <span class="number">24</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d 小时后"</span>, hours)
+    <span class="keyword">case</span> days < <span class="number">30</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d 天后"</span>, days)
+    <span class="keyword">case</span> months < <span class="number">12</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d 个月后"</span>, months)
+    <span class="keyword">default</span>:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d 年后"</span>, years)
+    }
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    now := time.Now()
+    
+    fmt.<span class="function">Println</span>(<span class="string">"1 minute ago:"</span>, <span class="function">TimeAgo</span>(now.<span class="function">Add</span>(-time.Minute)))
+    fmt.<span class="function">Println</span>(<span class="string">"1 hour ago:"</span>, <span class="function">TimeAgo</span>(now.<span class="function">Add</span>(-time.Hour)))
+    fmt.<span class="function">Println</span>(<span class="string">"1 day ago:"</span>, <span class="function">TimeAgo</span>(now.<span class="function">Add</span>(-<span class="number">24</span>*time.Hour)))
+    fmt.<span class="function">Println</span>(<span class="string">"1 month ago:"</span>, <span class="function">TimeAgo</span>(now.<span class="function">AddDate</span>(<span class="number">0</span>, -<span class="number">1</span>, <span class="number">0</span>)))
+    
+    fmt.<span class="function">Println</span>(<span class="string">"In 1 minute:"</span>, <span class="function">TimeIn</span>(now.<span class="function">Add</span>(time.Minute)))
+    fmt.<span class="function">Println</span>(<span class="string">"In 1 hour:"</span>, <span class="function">TimeIn</span>(now.<span class="function">Add</span>(time.Hour)))
+    fmt.<span class="function">Println</span>(<span class="string">"In 1 day:"</span>, <span class="function">TimeIn</span>(now.<span class="function">Add</span>(<span class="number">24</span>*time.Hour)))
+    fmt.<span class="function">Println</span>(<span class="string">"In 1 month:"</span>, <span class="function">TimeIn</span>(now.<span class="function">AddDate</span>(<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>)))
+}</code></pre>
+            </div>
+            
+            <h3>时间验证</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="function">func</span> <span class="function">IsValidTime</span>(t time.Time) <span class="keyword">bool</span> {
+    <span class="keyword">return</span> !t.<span class="function">IsZero</span>() && t.<span class="function">Year</span>() > <span class="number">1970</span>
+}
+
+<span class="function">func</span> <span class="function">IsValidDate</span>(year, month, day <span class="keyword">int</span>) <span class="keyword">bool</span> {
+    <span class="keyword">if</span> year < <span class="number">1</span> || year > <span class="number">9999</span> {
+        <span class="keyword">return</span> <span class="keyword">false</span>
+    }
+    <span class="keyword">if</span> month < <span class="number">1</span> || month > <span class="number">12</span> {
+        <span class="keyword">return</span> <span class="keyword">false</span>
+    }
+    <span class="keyword">if</span> day < <span class="number">1</span> || day > <span class="number">31</span> {
+        <span class="keyword">return</span> <span class="keyword">false</span>
+    }
+    
+    <span class="comment">// 检查日期是否有效</span>
+    t := time.<span class="function">Date</span>(year, time.Month(month), day, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, time.UTC)
+    <span class="keyword">return</span> t.<span class="function">Day</span>() == day
+}
+
+<span class="function">func</span> <span class="function">IsFuture</span>(t time.Time) <span class="keyword">bool</span> {
+    <span class="keyword">return</span> t.<span class="function">After</span>(time.Now())
+}
+
+<span class="function">func</span> <span class="function">IsPast</span>(t time.Time) <span class="keyword">bool</span> {
+    <span class="keyword">return</span> t.<span class="function">Before</span>(time.Now())
+}
+
+<span class="function">func</span> <span class="function">IsWithinRange</span>(t, start, end time.Time) <span class="keyword">bool</span> {
+    <span class="keyword">return</span> (t.<span class="function">Equal</span>(start) || t.<span class="function">After</span>(start)) && (t.<span class="function">Equal</span>(end) || t.<span class="function">Before</span>(end))
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 时间验证</span>
+    t1 := time.Date(<span class="number">2024</span>, <span class="number">1</span>, <span class="number">27</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, time.UTC)
+    t2 := time.Time{}
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Is valid time:"</span>, <span class="function">IsValidTime</span>(t1))     <span class="comment">// true</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Is valid time:"</span>, <span class="function">IsValidTime</span>(t2))     <span class="comment">// false</span>
+    
+    <span class="comment">// 日期验证</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Is valid date:"</span>, <span class="function">IsValidDate</span>(<span class="number">2024</span>, <span class="number">2</span>, <span class="number">29</span>))  <span class="comment">// false (2024 is not a leap year)</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Is valid date:"</span>, <span class="function">IsValidDate</span>(<span class="number">2024</span>, <span class="number">4</span>, <span class="number">31</span>))  <span class="comment">// true</span>
+    
+    <span class="comment">// 相对时间验证</span>
+    future := time.Now().<span class="function">Add</span>(time.Hour)
+    past := time.Now().<span class="function">Add</span>(-time.Hour)
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Is future:"</span>, <span class="function">IsFuture</span>(future))      <span class="comment">// true</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Is past:"</span>, <span class="function">IsPast</span>(past))            <span class="comment">// true</span>
+    
+    <span class="comment">// 范围验证</span>
+    start := time.Date(<span class="number">2024</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, time.UTC)
+    end := time.Date(<span class="number">2024</span>, <span class="number">12</span>, <span class="number">31</span>, <span class="number">23</span>, <span class="number">59</span>, <span class="number">59</span>, <span class="number">0</span>, time.UTC)
+    test := time.Date(<span class="number">2024</span>, <span class="number">6</span>, <span class="number">15</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, time.UTC)
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Within range:"</span>, <span class="function">IsWithinRange</span>(test, start, end))  <span class="comment">// true</span>
+}</code></pre>
+            </div>
+            
+            <h2 id="now-bestpractices">jinzhu/now 最佳实践</h2>
+            
+            <h3>1. 统一时间配置</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> timeutil
+
+<span class="keyword">import</span> (
+    <span class="string">"time"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="comment">// 配置时间格式</span>
+<span class="keyword">func</span> <span class="function">InitTimeFormats</span>() {
+    now.<span class="function">TimeFormats</span> = []<span class="keyword">string</span>{
+        <span class="string">"2006-01-02 15:04:05"</span>,
+        <span class="string">"2006/01/02 15:04:05"</span>,
+        <span class="string">"2006-01-02"</span>,
+        <span class="string">"2006/01/02"</span>,
+        <span class="string">"20060102"</span>,
+        <span class="string">"20060102 15:04:05"</span>,
+        <span class="string">"2006.01.02"</span>,
+        <span class="string">"2006.01.02 15:04:05"</span>,
+        <span class="string">"01-02-2006"</span>,
+        <span class="string">"01/02/2006"</span>,
+    }
+}
+
+<span class="comment">// 设置默认时区</span>
+<span class="keyword">func</span> <span class="function">InitTimeZone</span>(timezone <span class="keyword">string</span>) (*time.Location, <span class="keyword">error</span>) {
+    loc, err := time.<span class="function">LoadLocation</span>(timezone)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    now.<span class="function">Begin</span>(now.<span class="function">New</span>(time.Now()).<span class="function">In</span>(loc))
+    <span class="keyword">return</span> loc, <span class="keyword">nil</span>
+}
+
+<span class="comment">// 初始化</span>
+<span class="keyword">func</span> <span class="function">Init</span>(timezone <span class="keyword">string</span>) (*time.Location, <span class="keyword">error</span>) {
+    <span class="function">InitTimeFormats</span>()
+    <span class="keyword">return</span> <span class="function">InitTimeZone</span>(timezone)
+}</code></pre>
+            </div>
+            
+            <h3>2. 数据库时间处理</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> repository
+
+<span class="keyword">import</span> (
+    <span class="string">"time"</span>
+    <span class="string">"gorm.io/gorm"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="keyword">type</span> TimeFilter <span class="keyword">struct</span> {
+    StartDate <span class="keyword">string</span> <span class="string">`json:"start_date"`</span>
+    EndDate   <span class="keyword">string</span> <span class="string">`json:"end_date"`</span>
+    StartTime <span class="keyword">string</span> <span class="string">`json:"start_time"`</span>
+    EndTime   <span class="keyword">string</span> <span class="string">`json:"end_time"`</span>
+}
+
+<span class="function">func</span> <span class="function">ApplyTimeFilter</span>(query *gorm.DB, filter TimeFilter) *gorm.DB {
+    <span class="keyword">if</span> filter.StartDate != <span class="string">""</span> {
+        startDate, err := now.<span class="function">Parse</span>(filter.StartDate)
+        <span class="keyword">if</span> err == <span class="keyword">nil</span> {
+            query = query.<span class="function">Where</span>(<span class="string">"created_at >= ?"</span>, startDate)
+        }
+    }
+    
+    <span class="keyword">if</span> filter.EndDate != <span class="string">""</span> {
+        endDate, err := now.<span class="function">Parse</span>(filter.EndDate)
+        <span class="keyword">if</span> err == <span class="keyword">nil</span> {
+            <span class="comment">// 包含当天的所有时间</span>
+            endDate = now.<span class="function">New</span>(endDate).<span class="function">EndOfDay</span>()
+            query = query.<span class="function">Where</span>(<span class="string">"created_at <= ?"</span>, endDate)
+        }
+    }
+    
+    <span class="keyword">return</span> query
+}
+
+<span class="function">func</span> <span class="function">GetTodayRecords</span>(db *gorm.DB, model <span class="keyword">interface</span>{}) <span class="keyword">error</span> {
+    n := now.<span class="function">New</span>(time.Now())
+    startDate := n.<span class="function">BeginningOfDay</span>()
+    endDate := n.<span class="function">EndOfDay</span>()
+    
+    <span class="keyword">return</span> db.<span class="function">Where</span>(<span class="string">"created_at >= ? AND created_at <= ?"</span>, startDate, endDate).
+        <span class="function">Find</span>(model).<span class="function">Error</span>
+}
+
+<span class="function">func</span> <span class="function">GetThisWeekRecords</span>(db *gorm.DB, model <span class="keyword">interface</span>{}) <span class="keyword">error</span> {
+    n := now.<span class="function">New</span>(time.Now())
+    startDate := n.<span class="function">BeginningOfWeek</span>()
+    endDate := n.<span class="function">EndOfWeek</span>()
+    
+    <span class="keyword">return</span> db.<span class="function">Where</span>(<span class="string">"created_at >= ? AND created_at <= ?"</span>, startDate, endDate).
+        <span class="function">Find</span>(model).<span class="function">Error</span>
+}
+
+<span class="function">func</span> <span class="function">GetThisMonthRecords</span>(db *gorm.DB, model <span class="keyword">interface</span>{}) <span class="keyword">error</span> {
+    n := now.<span class="function">New</span>(time.Now())
+    startDate := n.<span class="function">BeginningOfMonth</span>()
+    endDate := n.<span class="function">EndOfMonth</span>()
+    
+    <span class="keyword">return</span> db.<span class="function">Where</span>(<span class="string">"created_at >= ? AND created_at <= ?"</span>, startDate, endDate).
+        <span class="function">Find</span>(model).<span class="function">Error</span>
+}</code></pre>
+            </div>
+            
+            <h3>3. 时间缓存策略</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> cache
+
+<span class="keyword">import</span> (
+    <span class="string">"sync"</span>
+    <span class="string">"time"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="keyword">type</span> TimeCache <span class="keyword">struct</span> {
+    mu   sync.RWMutex
+    cache <span class="keyword">map</span>[<span class="keyword">string</span>]time.Time
+}
+
+<span class="function">func</span> <span class="function">NewTimeCache</span>() *TimeCache {
+    <span class="keyword">return</span> &TimeCache{
+        cache: <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]time.Time),
+    }
+}
+
+<span class="function">func</span> (tc *TimeCache) <span class="function">Get</span>(key <span class="keyword">string</span>) (time.Time, <span class="keyword">bool</span>) {
+    tc.mu.RLock()
+    <span class="keyword">defer</span> tc.mu.RUnlock()
+    
+    t, ok := tc.cache[key]
+    <span class="keyword">return</span> t, ok
+}
+
+<span class="function">func</span> (tc *TimeCache) <span class="function">Set</span>(key <span class="keyword">string</span>, t time.Time) {
+    tc.mu.Lock()
+    <span class="keyword">defer</span> tc.mu.Unlock()
+    
+    tc.cache[key] = t
+}
+
+<span class="function">func</span> (tc *TimeCache) <span class="function">GetOrSet</span>(key <span class="keyword">string</span>, date time.Time) time.Time {
+    <span class="keyword">if</span> t, ok := tc.<span class="function">Get</span>(key); ok {
+        <span class="keyword">return</span> t
+    }
+    
+    n := now.<span class="function">New</span>(date)
+    t := n.<span class="function">BeginningOfDay</span>()
+    tc.<span class="function">Set</span>(key, t)
+    
+    <span class="keyword">return</span> t
+}
+
+<span class="function">func</span> (tc *TimeCache) <span class="function">GetBeginningOfDay</span>(date time.Time) time.Time {
+    key := date.<span class="function">Format</span>(<span class="string">"2006-01-02"</span>)
+    <span class="keyword">return</span> tc.<span class="function">GetOrSet</span>(key+<span class="string">"_begin"</span>, date)
+}
+
+<span class="function">func</span> (tc *TimeCache) <span class="function">GetEndOfDay</span>(date time.Time) time.Time {
+    key := date.<span class="function">Format</span>(<span class="string">"2006-01-02"</span>)
+    <span class="keyword">return</span> tc.<span class="function">GetOrSet</span>(key+<span class="string">"_end"</span>, date)
+}</code></pre>
+            </div>
+            
+            <h3>4. 国际化支持</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> i18n
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="keyword">type</span> Locale <span class="keyword">string</span>
+
+<span class="keyword">const</span> (
+    LocaleZhCN Locale = <span class="string">"zh-CN"</span>
+    LocaleEnUS Locale = <span class="string">"en-US"</span>
+    LocaleJaJP Locale = <span class="string">"ja-JP"</span>
+)
+
+<span class="function">func</span> <span class="function">FormatDate</span>(t time.Time, locale Locale) <span class="keyword">string</span> {
+    n := now.<span class="function">New</span>(t)
+    
+    <span class="keyword">switch</span> locale {
+    <span class="keyword">case</span> LocaleZhCN:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d年%d月%d日"</span>, n.<span class="function">Year</span>(), n.<span class="function">Month</span>(), n.<span class="function">Day</span>())
+    <span class="keyword">case</span> LocaleEnUS:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d/%d/%d"</span>, n.<span class="function">Month</span>(), n.<span class="function">Day</span>(), n.<span class="function">Year</span>())
+    <span class="keyword">case</span> LocaleJaJP:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d年%d月%d日"</span>, n.<span class="function">Year</span>(), n.<span class="function">Month</span>(), n.<span class="function">Day</span>())
+    <span class="keyword">default</span>:
+        <span class="keyword">return</span> n.<span class="function">Format</span>(<span class="string">"2006-01-02"</span>)
+    }
+}
+
+<span class="function">func</span> <span class="function">FormatDateTime</span>(t time.Time, locale Locale) <span class="keyword">string</span> {
+    n := now.<span class="function">New</span>(t)
+    
+    <span class="keyword">switch</span> locale {
+    <span class="keyword">case</span> LocaleZhCN:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d年%d月%d日 %d时%d分"</span>, 
+            n.<span class="function">Year</span>(), n.<span class="function">Month</span>(), n.<span class="function">Day</span>(), n.<span class="function">Hour</span>(), n.<span class="function">Minute</span>())
+    <span class="keyword">case</span> LocaleEnUS:
+        <span class="keyword">return</span> n.<span class="function">Format</span>(<span class="string">"2006-01-02 15:04:05"</span>)
+    <span class="keyword">case</span> LocaleJaJP:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%d年%d月%d日 %d時%d分"</span>, 
+            n.<span class="function">Year</span>(), n.<span class="function">Month</span>(), n.<span class="function">Day</span>(), n.<span class="function">Hour</span>(), n.<span class="function">Minute</span>())
+    <span class="keyword">default</span>:
+        <span class="keyword">return</span> n.<span class="function">Format</span>(<span class="string">"2006-01-02 15:04:05"</span>)
+    }
+}
+
+<span class="function">func</span> <span class="function">GetWeekdayName</span>(t time.Time, locale Locale) <span class="keyword">string</span> {
+    n := now.<span class="function">New</span>(t)
+    weekday := n.<span class="function">Weekday</span>()
+    
+    <span class="keyword">var</span> names []<span class="keyword">string</span>
+    
+    <span class="keyword">switch</span> locale {
+    <span class="keyword">case</span> LocaleZhCN:
+        names = []<span class="keyword">string</span>{<span class="string">"周日"</span>, <span class="string">"周一"</span>, <span class="string">"周二"</span>, <span class="string">"周三"</span>, <span class="string">"周四"</span>, <span class="string">"周五"</span>, <span class="string">"周六"</span>}
+    <span class="keyword">case</span> LocaleEnUS:
+        names = []<span class="keyword">string</span>{<span class="string">"Sunday"</span>, <span class="string">"Monday"</span>, <span class="string">"Tuesday"</span>, <span class="string">"Wednesday"</span>, <span class="string">"Thursday"</span>, <span class="string">"Friday"</span>, <span class="string">"Saturday"</span>}
+    <span class="keyword">case</span> LocaleJaJP:
+        names = []<span class="keyword">string</span>{<span class="string">"日曜日"</span>, <span class="string">"月曜日"</span>, <span class="string">"火曜日"</span>, <span class="string">"水曜日"</span>, <span class="string">"木曜日"</span>, <span class="string">"金曜日"</span>, <span class="string">"土曜日"</span>}
+    <span class="keyword">default</span>:
+        names = []<span class="keyword">string</span>{<span class="string">"Sunday"</span>, <span class="string">"Monday"</span>, <span class="string">"Tuesday"</span>, <span class="string">"Wednesday"</span>, <span class="string">"Thursday"</span>, <span class="string">"Friday"</span>, <span class="string">"Saturday"</span>}
+    }
+    
+    <span class="keyword">return</span> names[weekday]
+}</code></pre>
+            </div>
+            
+            <h3>5. 时间序列生成</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> timeseries
+
+<span class="keyword">import</span> (
+    <span class="string">"time"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="function">func</span> <span class="function">GenerateTimeSeries</span>(interval time.Duration, count <span class="keyword">int</span>) []time.Time {
+    series := <span class="function">make</span>([]time.Time, count)
+    n := now.<span class="function">New</span>(time.Now())
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < count; i++ {
+        series[i] = n.Time
+        n = n.<span class="function">Add</span>(interval)
+    }
+    
+    <span class="keyword">return</span> series
+}
+
+<span class="function">func</span> <span class="function">GenerateHourlySeries</span>(hours <span class="keyword">int</span>) []time.Time {
+    <span class="keyword">return</span> <span class="function">GenerateTimeSeries</span>(time.Hour, hours)
+}
+
+<span class="function">func</span> <span class="function">GenerateDailySeries</span>(days <span class="keyword">int</span>) []time.Time {
+    <span class="keyword">return</span> <span class="function">GenerateTimeSeries</span>(<span class="number">24</span>*time.Hour, days)
+}
+
+<span class="function">func</span> <span class="function">GenerateWeeklySeries</span>(weeks <span class="keyword">int</span>) []time.Time {
+    <span class="keyword">return</span> <span class="function">GenerateTimeSeries</span>(<span class="number">7</span>*<span class="number">24</span>*time.Hour, weeks)
+}
+
+<span class="function">func</span> <span class="function">GenerateMonthlySeries</span>(months <span class="keyword">int</span>) []time.Time {
+    series := <span class="function">make</span>([]time.Time, months)
+    n := now.<span class="function">New</span>(time.Now()).<span class="function">BeginningOfMonth</span>()
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i < months; i++ {
+        series[i] = n.Time
+        n = n.<span class="function">AddMonth</span>(<span class="number">1</span>)
+    }
+    
+    <span class="keyword">return</span> series
+}</code></pre>
+            </div>
+            
+            <h3>6. 时区转换工具</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> timezone
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="keyword">type</span> TimeZoneConverter <span class="keyword">struct</span> {
+    sourceLoc *time.Location
+    targetLoc *time.Location
+}
+
+<span class="function">func</span> <span class="function">NewTimeZoneConverter</span>(source, target <span class="keyword">string</span>) (*TimeZoneConverter, <span class="keyword">error</span>) {
+    sourceLoc, err := time.<span class="function">LoadLocation</span>(source)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    targetLoc, err := time.<span class="function">LoadLocation</span>(target)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    <span class="keyword">return</span> &TimeZoneConverter{
+        sourceLoc: sourceLoc,
+        targetLoc: targetLoc,
+    }, <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> (c *TimeZoneConverter) <span class="function">Convert</span>(t time.Time) time.Time {
+    <span class="keyword">return</span> t.<span class="function">In</span>(c.sourceLoc).<span class="function">In</span>(c.targetLoc)
+}
+
+<span class="function">func</span> (c *TimeZoneConverter) <span class="function">GetOffset</span>() time.Duration {
+    _, offset1 := time.Now().<span class="function">In</span>(c.sourceLoc).<span class="function">Zone</span>()
+    _, offset2 := time.Now().<span class="function">In</span>(c.targetLoc).<span class="function">Zone</span>()
+    <span class="keyword">return</span> time.Duration(offset2 - offset1)
+}
+
+<span class="function">func</span> (c *TimeZoneConverter) <span class="function">IsDST</span>(t time.Time) <span class="keyword">bool</span> {
+    _, offset := t.<span class="function">In</span>(c.targetLoc).<span class="function">Zone</span>()
+    <span class="keyword">return</span> offset != <span class="number">0</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 北京时间转纽约时间</span>
+    converter, err := <span class="function">NewTimeZoneConverter</span>(<span class="string">"Asia/Shanghai"</span>, <span class="string">"America/New_York"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    
+    beijingTime := time.Now()
+    nyTime := converter.<span class="function">Convert</span>(beijingTime)
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Beijing: %s\n"</span>, beijingTime.<span class="function">Format</span>(<span class="string">"2006-01-02 15:04:05 MST"</span>))
+    fmt.<span class="function">Printf</span>(<span class="string">"New York: %s\n"</span>, nyTime.<span class="function">Format</span>(<span class="string">"2006-01-02 15:04:05 MST"</span>))
+    fmt.<span class="function">Printf</span>(<span class="string">"Offset: %v\n"</span>, converter.<span class="function">GetOffset</span>())
+}</code></pre>
+            </div>
+            
+            <h3>7. 时间统计工具</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> stats
+
+<span class="keyword">import</span> (
+    <span class="string">"time"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="keyword">type</span> TimeStats <span class="keyword">struct</span> {
+    times []time.Time
+}
+
+<span class="function">func</span> <span class="function">NewTimeStats</span>() *TimeStats {
+    <span class="keyword">return</span> &TimeStats{
+        times: <span class="function">make</span>([]time.Time, <span class="number">0</span>),
+    }
+}
+
+<span class="function">func</span> (ts *TimeStats) <span class="function">Add</span>(t time.Time) {
+    ts.times = <span class="function">append</span>(ts.times, t)
+}
+
+<span class="function">func</span> (ts *TimeStats) <span class="function">Earliest</span>() time.Time {
+    <span class="keyword">if</span> <span class="function">len</span>(ts.times) == <span class="number">0</span> {
+        <span class="keyword">return</span> time.Time{}
+    }
+    
+    earliest := ts.times[<span class="number">0</span>]
+    <span class="keyword">for</span>, t := <span class="keyword">range</span> ts.times {
+        <span class="keyword">if</span> t.<span class="function">Before</span>(earliest) {
+            earliest = t
+        }
+    }
+    <span class="keyword">return</span> earliest
+}
+
+<span class="function">func</span> (ts *TimeStats) <span class="function">Latest</span>() time.Time {
+    <span class="keyword">if</span> <span class="function">len</span>(ts.times) == <span class="number">0</span> {
+        <span class="keyword">return</span> time.Time{}
+    }
+    
+    latest := ts.times[<span class="number">0</span>]
+    <span class="keyword">for</span>, t := <span class="keyword">range</span> ts.times {
+        <span class="keyword">if</span> t.<span class="function">After</span>(latest) {
+            latest = t
+        }
+    }
+    <span class="keyword">return</span> latest
+}
+
+<span class="function">func</span> (ts *TimeStats) <span class="function">Average</span>() time.Time {
+    <span class="keyword">if</span> <span class="function">len</span>(ts.times) == <span class="number">0</span> {
+        <span class="keyword">return</span> time.Time{}
+    }
+    
+    <span class="keyword">var</span> sum <span class="keyword">int64</span>
+    <span class="keyword">for</span>, t := <span class="keyword">range</span> ts.times {
+        sum += t.<span class="function">Unix</span>()
+    }
+    
+    avgUnix := sum / int64(<span class="function">len</span>(ts.times))
+    <span class="keyword">return</span> time.<span class="function">Unix</span>(avgUnix, <span class="number">0</span>)
+}
+
+<span class="function">func</span> (ts *TimeStats) <span class="function">Range</span>() time.Duration {
+    <span class="keyword">return</span> ts.<span class="function">Latest</span>().<span class="function">Sub</span>(ts.<span class="function">Earliest</span>())
+}
+
+<span class="function">func</span> (ts *TimeStats) <span class="function">CountByDay</span>() <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span> {
+    counts := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>)
+    
+    <span class="keyword">for</span>, t := <span class="keyword">range</span> ts.times {
+        n := now.<span class="function">New</span>(t)
+        key := n.<span class="function">Format</span>(<span class="string">"2006-01-02"</span>)
+        counts[key]++
+    }
+    
+    <span class="keyword">return</span> counts
+}
+
+<span class="function">func</span> (ts *TimeStats) <span class="function">CountByHour</span>() <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span> {
+    counts := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>)
+    
+    <span class="keyword">for</span>, t := <span class="keyword">range</span> ts.times {
+        n := now.<span class="function">New</span>(t)
+        key := fmt.<span class="function">Sprintf</span>(<span class="string">"%s %02d:00"</span>, n.<span class="function">Format</span>(<span class="string">"2006-01-02"</span>), n.<span class="function">Hour</span>())
+        counts[key]++
+    }
+    
+    <span class="keyword">return</span> counts
+}</code></pre>
+            </div>
+            
+            <h3>8. 时间格式验证</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> validator
+
+<span class="keyword">import</span> (
+    <span class="string">"errors"</span>
+    <span class="string">"github.com/jinzhu/now"</span>
+)
+
+<span class="keyword">var</span> ErrInvalidTimeFormat = errors.<span class="function">New</span>(<span class="string">"invalid time format"</span>)
+<span class="keyword">var</span> ErrInvalidTimeValue = errors.<span class="function">New</span>(<span class="string">"invalid time value"</span>)
+
+<span class="keyword">type</span> TimeValidator <span class="keyword">struct</span> {
+    formats []<span class="keyword">string</span>
+}
+
+<span class="function">func</span> <span class="function">NewTimeValidator</span>() *TimeValidator {
+    <span class="keyword">return</span> &TimeValidator{
+        formats: []<span class="keyword">string</span>{
+            <span class="string">"2006-01-02 15:04:05"</span>,
+            <span class="string">"2006/01/02 15:04:05"</span>,
+            <span class="string">"2006-01-02"</span>,
+            <span class="string">"2006/01/02"</span>,
+            <span class="string">"20060102"</span>,
+        },
+    }
+}
+
+<span class="function">func</span> (tv *TimeValidator) <span class="function">Validate</span>(timeStr <span class="keyword">string</span>) (time.Time, <span class="keyword">error</span>) {
+    <span class="keyword">if</span> timeStr == <span class="string">""</span> {
+        <span class="keyword">return</span> time.Time{}, ErrInvalidTimeFormat
+    }
+    
+    <span class="comment">// 尝试使用预定义格式解析</span>
+    t, err := now.<span class="function">Parse</span>(timeStr)
+    <span class="keyword">if</span> err == <span class="keyword">nil</span> {
+        <span class="keyword">if</span> t.<span class="function">IsZero</span>() || t.<span class="function">Year</span>() < <span class="number">1970</span> {
+            <span class="keyword">return</span> time.Time{}, ErrInvalidTimeValue
+        }
+        <span class="keyword">return</span> t, <span class="keyword">nil</span>
+    }
+    
+    <span class="comment">// 尝试使用标准格式解析</span>
+    <span class="keyword">for</span>, format := <span class="keyword">range</span> tv.formats {
+        t, err := time.<span class="function">Parse</span>(format, timeStr)
+        <span class="keyword">if</span> err == <span class="keyword">nil</span> {
+            <span class="keyword">if</span> t.<span class="function">IsZero</span>() || t.<span class="function">Year</span>() < <span class="number">1970</span> {
+                <span class="keyword">continue</span>
+            }
+            <span class="keyword">return</span> t, <span class="keyword">nil</span>
+        }
+    }
+    
+    <span class="keyword">return</span> time.Time{}, ErrInvalidTimeFormat
+}
+
+<span class="function">func</span> (tv *TimeValidator) <span class="function">ValidateRange</span>(start, end <span class="keyword">string</span>) (time.Time, time.Time, <span class="keyword">error</span>) {
+    startTime, err := tv.<span class="function">Validate</span>(start)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> time.Time{}, time.Time{}, err
+    }
+    
+    endTime, err := tv.<span class="function">Validate</span>(end)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> time.Time{}, time.Time{}, err
+    }
+    
+    <span class="keyword">if</span> endTime.<span class="function">Before</span>(startTime) {
+        <span class="keyword">return</span> time.Time{}, time.Time{}, errors.<span class="function">New</span>(<span class="string">"end time must be after start time"</span>)
+    }
+    
+    <span class="keyword">return</span> startTime, endTime, <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+            
+            <h3>使用场景</h3>
+            <ul>
+                <li><strong>Web 应用</strong>：处理用户输入的时间格式化</li>
+                <li><strong>数据库操作</strong>：查询特定时间范围的数据</li>
+                <li><strong>报表生成</strong>：生成日报、周报、月报的时间范围</li>
+                <li><strong>日志系统</strong>：按时间范围查询日志</li>
+                <li><strong>定时任务</strong>：计算任务执行时间</li>
+                <li><strong>数据分析</strong>：时间序列分析和统计</li>
+            </ul>
+            
+            <h3>注意事项</h3>
+            <ul>
+                <li>使用前建议统一配置时间格式和时区</li>
+                <li>在分布式系统中，确保所有服务器时间同步</li>
+                <li>处理用户输入时，要进行充分的时间格式验证</li>
+                <li>注意时区转换可能产生的边界问题</li>
+                <li>数据库存储时，建议使用 UTC 时间</li>
+                <li>对于大量时间操作，考虑使用缓存提高性能</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

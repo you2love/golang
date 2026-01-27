@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YAML 库 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+        <div class="content">
+            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
+            <h2 id="yaml">YAML 库</h2>
+            
+            <h3>简介</h3>
+            <p>YAML (YAML Ain't Markup Language) 是一种人类可读的数据序列化语言，常用于配置文件。Go 语言标准库提供了 gopkg.in/yaml.v3 包来处理 YAML 文件，支持读取、写入和序列化 YAML 数据。</p>
+            
+            <h3>核心特性</h3>
+            <ul>
+                <li><strong>人类可读</strong>：简洁、易读、易写</li>
+                <li><strong>类型支持</strong>：支持字符串、数字、布尔值、数组、对象等</li>
+                <li><strong>注释支持</strong>：允许在配置中添加注释</li>
+                <li><strong>引用和锚点</strong>：支持数据复用和引用</li>
+                <li><strong>多文档支持</strong>：单个文件可以包含多个 YAML 文档</li>
+            </ul>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get gopkg.in/yaml.v3</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"gopkg.in/yaml.v3"</span>
+)
+
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    Server   ServerConfig   <span class="string">`yaml:"server"`</span>
+    Database DatabaseConfig <span class="string">`yaml:"database"`</span>
+}
+
+<span class="keyword">type</span> ServerConfig <span class="keyword">struct</span> {
+    Port <span class="keyword">int</span>    <span class="string">`yaml:"port"`</span>
+    Host <span class="keyword">string</span> <span class="string">`yaml:"host"`</span>
+}
+
+<span class="keyword">type</span> DatabaseConfig <span class="keyword">struct</span> {
+    Host     <span class="keyword">string</span> <span class="string">`yaml:"host"`</span>
+    Port     <span class="keyword">int</span>    <span class="string">`yaml:"port"`</span>
+    Username <span class="keyword">string</span> <span class="string">`yaml:"username"`</span>
+    Password <span class="keyword">string</span> <span class="string">yaml:"password"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    yamlData := `
+server:
+  port: 8080
+  host: localhost
+
+database:
+  host: localhost
+  port: 3306
+  username: root
+  password: secret
+`
+    
+    <span class="keyword">var</span> config Config
+    err := yaml.<span class="function">Unmarshal</span>([]<span class="keyword">byte</span>(yamlData), &config)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Server: %s:%d\n"</span>, config.Server.Host, config.Server.Port)
+    fmt.<span class="function">Printf</span>(<span class="string">"Database: %s@%s:%d\n"</span>, config.Database.Username, 
+        config.Database.Host, config.Database.Port)
+}</code></pre>
+            
+            <h3>读取 YAML 文件</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+    <span class="string">"gopkg.in/yaml.v3"</span>
+)
+
+<span class="function">func</span> <span class="function">loadConfig</span>(filename <span class="keyword">string</span>) (*Config, <span class="keyword">error</span>) {
+    data, err := os.<span class="function">ReadFile</span>(filename)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    <span class="keyword">var</span> config Config
+    err = yaml.<span class="function">Unmarshal</span>(data, &config)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    <span class="keyword">return</span> &config, <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    config, err := <span class="function">loadConfig</span>(<span class="string">"config.yaml"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Config loaded: %+v\n"</span>, config)
+}</code></pre>
+            
+            <h3>写入 YAML 文件</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+    <span class="string">"gopkg.in/yaml.v3"</span>
+)
+
+<span class="function">func</span> <span class="function">saveConfig</span>(filename <span class="keyword">string</span>, config *Config) <span class="keyword">error</span> {
+    data, err := yaml.<span class="function">Marshal</span>(config)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="keyword">return</span> os.<span class="function">WriteFile</span>(filename, data, <span class="number">0644</span>)
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    config := &Config{
+        Server: ServerConfig{
+            Port: <span class="number">8080</span>,
+            Host: <span class="string">"localhost"</span>,
+        },
+        Database: DatabaseConfig{
+            Host:     <span class="string">"localhost"</span>,
+            Port:     <span class="number">3306</span>,
+            Username: <span class="string">"root"</span>,
+            Password: <span class="string">"secret"</span>,
+        },
+    }
+    
+    err := <span class="function">saveConfig</span>(<span class="string">"config.yaml"</span>, config)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Config saved successfully"</span>)
+}</code></pre>
+            
+            <h3>处理数组和切片</h3>
+            <div class="note-box">
+                <pre><code><span class="comment">// config.yaml</span>
+servers:
+  - name: server1
+    host: 192.168.1.1
+    port: 8080
+  - name: server2
+    host: 192.168.1.2
+    port: 8081
+
+<span class="comment">// Go 代码</span>
+<span class="keyword">type</span> Server <span class="keyword">struct</span> {
+    Name <span class="keyword">string</span> <span class="string">`yaml:"name"`</span>
+    Host <span class="keyword">string</span> <span class="string">`yaml:"host"`</span>
+    Port <span class="keyword">int</span>    <span class="string">`yaml:"port"`</span>
+}
+
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    Servers []Server <span class="string">`yaml:"servers"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> config Config
+    yaml.<span class="function">Unmarshal</span>([]<span class="keyword">byte</span>(yamlData), &config)
+    
+    <span class="keyword">for</span> _, server := <span class="keyword">range</span> config.Servers {
+        fmt.<span class="function">Printf</span>(<span class="string">"Server: %s at %s:%d\n"</span>, server.Name, server.Host, server.Port)
+    }
+}</code></pre>
+            </div>
+            
+            <h3>处理嵌套结构</h3>
+            <div class="note-box">
+                <pre><code><span class="comment">// config.yaml</span>
+app:
+  name: MyApp
+  version: 1.0.0
+  settings:
+    debug: true
+    log_level: info
+    features:
+      - auth
+      - cache
+      - analytics
+
+<span class="comment">// Go 代码</span>
+<span class="keyword">type</span> Settings <span class="keyword">struct</span> {
+    Debug    <span class="keyword">bool</span>     <span class="string">`yaml:"debug"`</span>
+    LogLevel <span class="keyword">string</span>   <span class="string">`yaml:"log_level"`</span>
+    Features []<span class="keyword">string</span> <span class="string">`yaml:"features"`</span>
+}
+
+<span class="keyword">type</span> App <span class="keyword">struct</span> {
+    Name     <span class="keyword">string</span>   <span class="string">`yaml:"name"`</span>
+    Version  <span class="keyword">string</span>   <span class="string">`yaml:"version"`</span>
+    Settings Settings  <span class="string">`yaml:"settings"`</span>
+}
+
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    App App <span class="string">`yaml:"app"`</span>
+}</code></pre>
+            </div>
+            
+            <h3>使用 map 解析动态配置</h3>
+            <div class="note-box">
+                <pre><code><span class="comment">// config.yaml</span>
+dynamic:
+  key1: value1
+  key2: 123
+  key3: true
+  nested:
+    subkey: subvalue
+
+<span class="comment">// Go 代码</span>
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    Dynamic <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{} <span class="string">`yaml:"dynamic"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> config Config
+    yaml.<span class="function">Unmarshal</span>([]<span class="keyword">byte</span>(yamlData), &config)
+    
+    <span class="comment">// 访问动态值</span>
+    fmt.<span class="function">Println</span>(config.Dynamic[<span class="string">"key1"</span>])  <span class="comment">// value1</span>
+    fmt.<span class="function">Println</span>(config.Dynamic[<span class="string">"key2"</span>])  <span class="comment">// 123</span>
+    
+    <span class="comment">// 类型断言</span>
+    <span class="keyword">if</span> value, ok := config.Dynamic[<span class="string">"key2"</span>].(<span class="keyword">int</span>); ok {
+        fmt.<span class="function">Printf</span>(<span class="string">"Key2 as int: %d\n"</span>, value)
+    }
+}</code></pre>
+            </div>
+            
+            <h3>处理空值和默认值</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    Port     <span class="keyword">int</span>    <span class="string">`yaml:"port"`</span>
+    Host     <span class="keyword">string</span> <span class="string">`yaml:"host"`</span>
+    Timeout  <span class="keyword">int</span>    <span class="string">`yaml:"timeout,omitempty"`</span>
+    Debug    <span class="keyword">bool</span>   <span class="string">`yaml:"debug"`</span>
+}
+
+<span class="function">func</span> <span class="function">loadConfig</span>(filename <span class="keyword">string</span>) (*Config, <span class="keyword">error</span>) {
+    <span class="keyword">var</span> config Config
+    
+    <span class="comment">// 设置默认值</span>
+    config.Port = <span class="number">8080</span>
+    config.Host = <span class="string">"localhost"</span>
+    config.Timeout = <span class="number">30</span>
+    config.Debug = <span class="keyword">false</span>
+    
+    data, err := os.<span class="function">ReadFile</span>(filename)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    <span class="comment">// 只覆盖非零值</span>
+    err = yaml.<span class="function">Unmarshal</span>(data, &config)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    <span class="keyword">return</span> &config, <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+            
+            <h3>多文档 YAML</h3>
+            <div class="note-box">
+                <pre><code><span class="comment">// config.yaml</span>
+---
+server:
+  port: 8080
+---
+database:
+  host: localhost
+  port: 3306
+---
+logging:
+  level: info
+
+<span class="comment">// Go 代码</span>
+<span class="function">func</span> <span class="function">loadMultiDocument</span>(filename <span class="keyword">string</span>) (<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
+    data, err := os.<span class="function">ReadFile</span>(filename)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    decoder := yaml.<span class="function">NewDecoder</span>(bytes.<span class="function">NewReader</span>(data))
+    result := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{})
+    
+    <span class="keyword">for</span> {
+        <span class="keyword">var</span> doc <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}
+        err := decoder.<span class="function">Decode</span>(&doc)
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">if</span> err == io.EOF {
+                <span class="keyword">break</span>
+            }
+            <span class="keyword">return</span> <span class="keyword">nil</span>, err
+        }
+        
+        <span class="comment">// 合并文档</span>
+        <span class="keyword">for</span> k, v := <span class="keyword">range</span> doc {
+            result[k] = v
+        }
+    }
+    
+    <span class="keyword">return</span> result, <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+            
+            <h3>自定义标签</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    <span class="comment">// 使用不同的 YAML 键名</span>
+    ServerPort <span class="keyword">int</span>    <span class="string">`yaml:"server_port"`</span>
+    ServerHost <span class="keyword">string</span> <span class="string">`yaml:"server_host"`</span>
+    
+    <span class="comment">// 必填字段</span>
+    DatabaseName <span class="keyword">string</span> <span class="string">`yaml:"database_name"`</span>
+    
+    <span class="comment">// 可选字段</span>
+    MaxConnections <span class="keyword">int</span> <span class="string">`yaml:"max_connections,omitempty"`</span>
+    
+    <span class="comment">// 忽略字段</span>
+    InternalField <span class="keyword">string</span> <span class="string">`yaml:"-"`</span>
+}
+
+<span class="comment">// 验证必填字段</span>
+<span class="function">func</span> (c *Config) <span class="function">Validate</span>() <span class="keyword">error</span> {
+    <span class="keyword">if</span> c.DatabaseName == <span class="string">""</span> {
+        <span class="keyword">return</span> errors.<span class="function">New</span>(<span class="string">"database_name is required"</span>)
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+            
+            <h3>自定义 Unmarshal</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    <span class="string">"gopkg.in/yaml.v3"</span>
+)
+
+<span class="keyword">type</span> Duration <span class="keyword">struct</span> {
+    time.Duration
+}
+
+<span class="function">func</span> (d *Duration) <span class="function">UnmarshalYAML</span>(value *yaml.Node) <span class="keyword">error</span> {
+    <span class="keyword">var</span> s <span class="keyword">string</span>
+    <span class="keyword">if</span> err := value.<span class="function">Decode</span>(&s); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    duration, err := time.<span class="function">ParseDuration</span>(s)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    d.Duration = duration
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> (d Duration) <span class="function">MarshalYAML</span>() (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
+    <span class="keyword">return</span> d.Duration.<span class="function">String</span>(), <span class="keyword">nil</span>
+}
+
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    Timeout Duration <span class="string">`yaml:"timeout"`</span>
+    Interval Duration <span class="string">`yaml:"interval"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    yamlData := `
+timeout: 30s
+interval: 5m
+`
+    
+    <span class="keyword">var</span> config Config
+    yaml.<span class="function">Unmarshal</span>([]<span class="keyword">byte</span>(yamlData), &config)
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Timeout:"</span>, config.Timeout.Duration)
+    fmt.<span class="function">Println</span>(<span class="string">"Interval:"</span>, config.Interval.Duration)
+}</code></pre>
+            </div>
+            
+            <h3>配置验证</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"errors"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"net"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    Server   ServerConfig   <span class="string">`yaml:"server"`</span>
+    Database DatabaseConfig <span class="string">`yaml:"database"`</span>
+}
+
+<span class="keyword">type</span> ServerConfig <span class="keyword">struct</span> {
+    Port <span class="keyword">int</span>    <span class="string">`yaml:"port"`</span>
+    Host <span class="keyword">string</span> <span class="string">`yaml:"host"`</span>
+}
+
+<span class="keyword">type</span> DatabaseConfig <span class="keyword">struct</span> {
+    Host     <span class="keyword">string</span> <span class="string">`yaml:"host"`</span>
+    Port     <span class="keyword">int</span>    <span class="string">`yaml:"port"`</span>
+    Username <span class="keyword">string</span> <span class="string">yaml:"password"`</span>
+}
+
+<span class="function">func</span> (c *ServerConfig) <span class="function">Validate</span>() <span class="keyword">error</span> {
+    <span class="keyword">if</span> c.Port <= <span class="number">0</span> || c.Port > <span class="number">65535</span> {
+        <span class="keyword">return</span> errors.<span class="function">New</span>(<span class="string">"invalid server port"</span>)
+    }
+    <span class="keyword">if</span> c.Host == <span class="string">""</span> {
+        <span class="keyword">return</span> errors.<span class="function">New</span>(<span class="string">"server host is required"</span>)
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> (c *DatabaseConfig) <span class="function">Validate</span>() <span class="keyword">error</span> {
+    <span class="keyword">if</span> c.Host == <span class="string">""</span> {
+        <span class="keyword">return</span> errors.<span class="function">New</span>(<span class="string">"database host is required"</span>)
+    }
+    <span class="keyword">if</span> c.Port <= <span class="number">0</span> || c.Port > <span class="number">65535</span> {
+        <span class="keyword">return</span> errors.<span class="function">New</span>(<span class="string">"invalid database port"</span>)
+    }
+    <span class="keyword">if</span> c.Username == <span class="string">""</span> {
+        <span class="keyword">return</span> errors.<span class="function">New</span>(<span class="string">"database username is required"</span>)
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> (c *Config) <span class="function">Validate</span>() <span class="keyword">error</span> {
+    <span class="keyword">if</span> err := c.Server.<span class="function">Validate</span>(); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"server config error: %w"</span>, err)
+    }
+    <span class="keyword">if</span> err := c.Database.<span class="function">Validate</span>(); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"database config error: %w"</span>, err)
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">loadAndValidateConfig</span>(filename <span class="keyword">string</span>) (*Config, <span class="keyword">error</span>) {
+    data, err := os.<span class="function">ReadFile</span>(filename)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    <span class="keyword">var</span> config Config
+    <span class="keyword">if</span> err := yaml.<span class="function">Unmarshal</span>(data, &config); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, fmt.<span class="function">Errorf</span>(<span class="string">"yaml unmarshal error: %w"</span>, err)
+    }
+    
+    <span class="keyword">if</span> err := config.<span class="function">Validate</span>(); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, fmt.<span class="function">Errorf</span>(<span class="string">"config validation error: %w"</span>, err)
+    }
+    
+    <span class="keyword">return</span> &config, <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+            
+            <h3>环境变量替换</h3>
+            <div class="note-box">
+                <pre><code><span class="comment">// config.yaml</span>
+database:
+  host: ${DB_HOST}
+  port: ${DB_PORT}
+  username: ${DB_USER}
+  password: ${DB_PASSWORD}
+
+<span class="comment">// Go 代码</span>
+<span class="keyword">import</span> (
+    <span class="string">"os"</span>
+    <span class="string">"regexp"</span>
+    <span class="string">"strings"</span>
+)
+
+<span class="function">func</span> <span class="function">expandEnvVars</span>(data []<span class="keyword">byte</span>) []<span class="keyword">byte</span> {
+    <span class="comment">// 匹配 ${VAR_NAME} 格式</span>
+    re := regexp.<span class="function">MustCompile</span>(`\$\{([^}]+)\}`)
+    
+    <span class="keyword">return</span> re.<span class="function">ReplaceAllFunc</span>(data, <span class="keyword">func</span>(match []<span class="keyword">byte</span>) []<span class="keyword">byte</span> {
+        varName := strings.<span class="function">TrimPrefix</span>(<span class="function">string</span>(match), <span class="string">"${"</span>)
+        varName = strings.<span class="function">TrimSuffix</span>(varName, <span class="string">"}"</span>)
+        
+        <span class="keyword">if</span> value, exists := os.<span class="function">LookupEnv</span>(varName); exists {
+            <span class="keyword">return</span> []<span class="keyword">byte</span>(value)
+        }
+        <span class="keyword">return</span> match
+    })
+}
+
+<span class="function">func</span> <span class="function">loadConfig</span>(filename <span class="keyword">string</span>) (*Config, <span class="keyword">error</span>) {
+    data, err := os.<span class="function">ReadFile</span>(filename)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    <span class="comment">// 展开环境变量</span>
+    data = <span class="function">expandEnvVars</span>(data)
+    
+    <span class="keyword">var</span> config Config
+    err = yaml.<span class="function">Unmarshal</span>(data, &config)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    <span class="keyword">return</span> &config, <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+            
+            <h3>配置热重载</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"log"</span>
+    <span class="string">"os"</span>
+    <span class="string">"sync"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="keyword">type</span> ConfigManager <span class="keyword">struct</span> {
+    mu     sync.RWMutex
+    config *Config
+    path   <span class="keyword">string</span>
+}
+
+<span class="function">func</span> <span class="function">NewConfigManager</span>(path <span class="keyword">string</span>) *ConfigManager {
+    cm := &ConfigManager{path: path}
+    cm.<span class="function">load</span>()
+    <span class="keyword">go</span> cm.<span class="function">watch</span>()
+    <span class="keyword">return</span> cm
+}
+
+<span class="function">func</span> (cm *ConfigManager) <span class="function">load</span>() {
+    data, err := os.<span class="function">ReadFile</span>(cm.path)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        log.<span class="function">Println</span>(<span class="string">"Failed to load config:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="keyword">var</span> config Config
+    <span class="keyword">if</span> err := yaml.<span class="function">Unmarshal</span>(data, &config); err != <span class="keyword">nil</span> {
+        log.<span class="function">Println</span>(<span class="string">"Failed to unmarshal config:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    cm.mu.Lock()
+    cm.config = &config
+    cm.mu.Unlock()
+    
+    log.<span class="function">Println</span>(<span class="string">"Config reloaded"</span>)
+}
+
+<span class="function">func</span> (cm *ConfigManager) <span class="function">watch</span>() {
+    lastModTime := cm.<span class="function">getModTime</span>()
+    
+    <span class="keyword">for</span> {
+        time.<span class="function">Sleep</span>(time.Second * <span class="number">5</span>)
+        
+        modTime := cm.<span class="function">getModTime</span>()
+        <span class="keyword">if</span> modTime.<span class="function">After</span>(lastModTime) {
+            cm.<span class="function">load</span>()
+            lastModTime = modTime
+        }
+    }
+}
+
+<span class="function">func</span> (cm *ConfigManager) <span class="function">getModTime</span>() time.Time {
+    info, err := os.<span class="function">Stat</span>(cm.path)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> time.Time{}
+    }
+    <span class="keyword">return</span> info.<span class="function">ModTime</span>()
+}
+
+<span class="function">func</span> (cm *ConfigManager) <span class="function">GetConfig</span>() *Config {
+    cm.mu.RLock()
+    <span class="keyword">defer</span> cm.mu.RUnlock()
+    <span class="keyword">return</span> cm.config
+}</code></pre>
+            </div>
+            
+            <h3>格式化输出</h3>
+            <div class="note-box">
+                <pre><code><span class="function">func</span> <span class="function">writeFormattedConfig</span>(filename <span class="keyword">string</span>, config *Config) <span class="keyword">error</span> {
+    data, err := yaml.<span class="function">Marshal</span>(config)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="comment">// 写入文件</span>
+    <span class="keyword">return</span> os.<span class="function">WriteFile</span>(filename, data, <span class="number">0644</span>)
+}
+
+<span class="comment">// 自定义缩进</span>
+<span class="function">func</span> <span class="function">writeIndentedConfig</span>(filename <span class="keyword">string</span>, config *Config) <span class="keyword">error</span> {
+    data, err := yaml.<span class="function">Marshal</span>(config)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="comment">// 使用 2 空格缩进</span>
+    <span class="keyword">var</span> buf bytes.Buffer
+    encoder := yaml.<span class="function">NewEncoder</span>(&buf)
+    encoder.<span class="function">SetIndent</span>(<span class="number">2</span>)
+    err = encoder.<span class="function">Encode</span>(config)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="keyword">return</span> os.<span class="function">WriteFile</span>(filename, buf.<span class="function">Bytes</span>(), <span class="number">0644</span>)
+}</code></pre>
+            </div>
+            
+            <h3>错误处理</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"gopkg.in/yaml.v3"</span>
+)
+
+<span class="function">func</span> <span class="function">safeUnmarshal</span>(data []<span class="keyword">byte</span>, v <span class="keyword">interface</span>{}) <span class="keyword">error</span> {
+    err := yaml.<span class="function">Unmarshal</span>(data, v)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="comment">// 获取详细的错误信息</span>
+        <span class="keyword">if</span> typeErr, ok := err.(*yaml.TypeError); ok {
+            fmt.<span class="function">Println</span>(<span class="string">"YAML type errors:"</span>)
+            <span class="keyword">for</span> _, e := <span class="keyword">range</span> typeErr.Errors {
+                fmt.<span class="function">Printf</span>(<span class="string">"  %s\n"</span>, e)
+            }
+        } <span class="keyword">else</span> <span class="keyword">if</span> parserErr, ok := err.(yaml.ParserError); ok {
+            fmt.<span class="function">Println</span>(<span class="string">"YAML parser error at line:"</span>, parserErr.Line)
+        }
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="comment">// 使用位置信息</span>
+<span class="function">func</span> <span class="function">unmarshalWithContext</span>(data []<span class="keyword">byte</span>, v <span class="keyword">interface</span>{}) <span class="keyword">error</span> {
+    <span class="keyword">var</span> node yaml.Node
+    <span class="keyword">if</span> err := yaml.<span class="function">Unmarshal</span>(data, &node); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="comment">// 检查节点位置</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"Node at line %d, column %d\n"</span>, node.Line, node.Column)
+    
+    <span class="keyword">return</span> node.<span class="function">Decode</span>(v)
+}</code></pre>
+            </div>
+            
+            <h2 id="yaml-bestpractices">YAML 最佳实践</h2>
+            
+            <h3>1. 配置文件结构</h3>
+            <div class="note-box">
+                <pre><code><span class="comment"># 推荐的配置文件结构</span>
+<span class="comment"># config.yaml</span>
+
+<span class="comment"># 应用信息</span>
+app:
+  name: MyApp
+  version: 1.0.0
+  environment: production
+
+<span class="comment"># 服务器配置</span>
+server:
+  host: 0.0.0.0
+  port: 8080
+  read_timeout: 30s
+  write_timeout: 30s
+  idle_timeout: 60s
+
+<span class="comment"># 数据库配置</span>
+database:
+  driver: mysql
+  host: localhost
+  port: 3306
+  name: myapp
+  username: root
+  password: ${DB_PASSWORD}
+  max_open_conns: 100
+  max_idle_conns: 10
+  conn_max_lifetime: 1h
+
+<span class="comment"># 日志配置</span>
+logging:
+  level: info
+  format: json
+  output: stdout
+  file:
+    path: /var/log/myapp/app.log
+    max_size: 100
+    max_backups: 3
+    max_age: 28
+    compress: true
+
+<span class="comment"># 缓存配置</span>
+cache:
+  provider: redis
+  host: localhost
+  port: 6379
+  password: ${CACHE_PASSWORD}
+  db: 0
+  ttl: 300s
+
+<span class="comment"># 功能开关</span>
+features:
+  auth: true
+  cache: true
+  rate_limit: true
+  metrics: true
+
+<span class="comment"># 性能配置</span>
+performance:
+  workers: 10
+  queue_size: 1000
+  batch_size: 100</code></pre>
+            </div>
+            
+            <h3>2. 使用配置结构体</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> config
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+    <span class="string">"time"</span>
+    <span class="string">"gopkg.in/yaml.v3"</span>
+)
+
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    App        AppConfig        <span class="string">`yaml:"app"`</span>
+    Server     ServerConfig     <span class="string">`yaml:"server"`</span>
+    Database   DatabaseConfig   <span class="string">`yaml:"database"`</span>
+    Logging    LoggingConfig    <span class="string">`yaml:"logging"`</span>
+    Cache      CacheConfig      <span class="string">`yaml:"cache"`</span>
+    Features   FeaturesConfig   <span class="string">`yaml:"features"`</span>
+    Performance PerformanceConfig <span class="string">`yaml:"performance"`</span>
+}
+
+<span class="keyword">type</span> AppConfig <span class="keyword">struct</span> {
+    Name        <span class="keyword">string</span> <span class="string">`yaml:"name"`</span>
+    Version     <span class="keyword">string</span> <span class="string">`yaml:"version"`</span>
+    Environment <span class="keyword">string</span> <span class="string">`yaml:"environment"`</span>
+}
+
+<span class="keyword">type</span> ServerConfig <span class="keyword">struct</span> {
+    Host         <span class="keyword">string</span>        <span class="string">`yaml:"host"`</span>
+    Port         <span class="keyword">int</span>           <span class="string">`yaml:"port"`</span>
+    ReadTimeout  time.Duration <span class="string">`yaml:"read_timeout"`</span>
+    WriteTimeout time.Duration <span class="string">`yaml:"write_timeout"`</span>
+    IdleTimeout  time.Duration <span class="string">`yaml:"idle_timeout"`</span>
+}
+
+<span class="keyword">type</span> DatabaseConfig <span class="keyword">struct</span> {
+    Driver          <span class="keyword">string</span>        <span class="string">`yaml:"driver"`</span>
+    Host            <span class="keyword">string</span>        <span class="string">`yaml:"host"`</span>
+    Port            <span class="keyword">int</span>           <span class="string">`yaml:"port"`</span>
+    Name            <span class="keyword">string</span>        <span class="string">`yaml:"name"`</span>
+    Username        <span class="keyword">string</span>        <span class="string">yaml:"password"`</span>
+    MaxOpenConns    <span class="keyword">int</span>           <span class="string">`yaml:"max_open_conns"`</span>
+    MaxIdleConns    <span class="keyword">int</span>           <span class="string">`yaml:"max_idle_conns"`</span>
+    ConnMaxLifetime time.Duration <span class="string">`yaml:"conn_max_lifetime"`</span>
+}
+
+<span class="keyword">type</span> LoggingConfig <span class="keyword">struct</span> {
+    Level  <span class="keyword">string</span>       <span class="string">`yaml:"level"`</span>
+    Format <span class="keyword">string</span>       <span class="string">`yaml:"format"`</span>
+    Output <span class="keyword">string</span>       <span class="string">`yaml:"output"`</span>
+    File   FileLogConfig <span class="string">`yaml:"file"`</span>
+}
+
+<span class="keyword">type</span> FileLogConfig <span class="keyword">struct</span> {
+    Path       <span class="keyword">string</span> <span class="string">`yaml:"path"`</span>
+    MaxSize    <span class="keyword">int</span>    <span class="string">`yaml:"max_size"`</span>
+    MaxBackups <span class="keyword">int</span>    <span class="string">`yaml:"max_backups"`</span>
+    MaxAge     <span class="keyword">int</span>    <span class="string">`yaml:"max_age"`</span>
+    Compress   <span class="keyword">bool</span>   <span class="string">`yaml:"compress"`</span>
+}
+
+<span class="keyword">type</span> CacheConfig <span class="keyword">struct</span> {
+    Provider <span class="keyword">string</span>        <span class="string">`yaml:"provider"`</span>
+    Host     <span class="keyword">string</span>        <span class="string">`yaml:"host"`</span>
+    Port     <span class="keyword">int</span>           <span class="string">`yaml:"port"`</span>
+    Password <span class="keyword">string</span>        <span class="string">yaml:"password"`</span>
+    DB       <span class="keyword">int</span>           <span class="string">`yaml:"db"`</span>
+    TTL      time.Duration <span class="string">`yaml:"ttl"`</span>
+}
+
+<span class="keyword">type</span> FeaturesConfig <span class="keyword">struct</span> {
+    Auth      <span class="keyword">bool</span> <span class="string">`yaml:"auth"`</span>
+    Cache     <span class="keyword">bool</span> <span class="string">`yaml:"cache"`</span>
+    RateLimit <span class="keyword">bool</span> <span class="string">`yaml:"rate_limit"`</span>
+    Metrics   <span class="keyword">bool</span> <span class="string">`yaml:"metrics"`</span>
+}
+
+<span class="keyword">type</span> PerformanceConfig <span class="keyword">struct</span> {
+    Workers   <span class="keyword">int</span> <span class="string">`yaml:"workers"`</span>
+    QueueSize <span class="keyword">int</span> <span class="string">`yaml:"queue_size"`</span>
+    BatchSize <span class="keyword">int</span> <span class="string">`yaml:"batch_size"`</span>
+}
+
+<span class="comment">// 全局配置实例</span>
+<span class="keyword">var</span> GlobalConfig *Config
+
+<span class="function">func</span> <span class="function">Load</span>(path <span class="keyword">string</span>) (*Config, <span class="keyword">error</span>) {
+    data, err := os.<span class="function">ReadFile</span>(path)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, fmt.<span class="function">Errorf</span>(<span class="string">"failed to read config file: %w"</span>, err)
+    }
+    
+    <span class="comment">// 展开环境变量</span>
+    data = <span class="function">expandEnvVars</span>(data)
+    
+    <span class="keyword">var</span> config Config
+    <span class="keyword">if</span> err := yaml.<span class="function">Unmarshal</span>(data, &config); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, fmt.<span class="function">Errorf</span>(<span class="string">"failed to unmarshal config: %w"</span>, err)
+    }
+    
+    <span class="comment">// 设置默认值</span>
+    <span class="function">setDefaults</span>(&config)
+    
+    <span class="comment">// 验证配置</span>
+    <span class="keyword">if</span> err := config.<span class="function">Validate</span>(); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, fmt.<span class="function">Errorf</span>(<span class="string">"config validation failed: %w"</span>, err)
+    }
+    
+    GlobalConfig = &config
+    <span class="keyword">return</span> &config, <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">setDefaults</span>(c *Config) {
+    <span class="keyword">if</span> c.Server.Host == <span class="string">""</span> {
+        c.Server.Host = <span class="string">"0.0.0.0"</span>
+    }
+    <span class="keyword">if</span> c.Server.Port == <span class="number">0</span> {
+        c.Server.Port = <span class="number">8080</span>
+    }
+    <span class="keyword">if</span> c.Logging.Level == <span class="string">""</span> {
+        c.Logging.Level = <span class="string">"info"</span>
+    }
+    <span class="keyword">if</span> c.Logging.Format == <span class="string">""</span> {
+        c.Logging.Format = <span class="string">"json"</span>
+    }
+}
+
+<span class="function">func</span> (c *Config) <span class="function">Validate</span>() <span class="keyword">error</span> {
+    <span class="keyword">if</span> c.App.Name == <span class="string">""</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"app name is required"</span>)
+    }
+    <span class="keyword">if</span> c.Server.Port < <span class="number">1</span> || c.Server.Port > <span class="number">65535</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"invalid server port: %d"</span>, c.Server.Port)
+    }
+    <span class="keyword">if</span> c.Database.Host == <span class="string">""</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"database host is required"</span>)
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+            
+            <h3>3. 环境变量管理</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> config
+
+<span class="keyword">import</span> (
+    <span class="string">"os"</span>
+    <span class="string">"regexp"</span>
+    <span class="string">"strings"</span>
+)
+
+<span class="comment">// 支持多种环境变量格式</span>
+<span class="comment">// ${VAR_NAME} - 必需</span>
+<span class="comment">// ${VAR_NAME:-default} - 带默认值</span>
+<span class="comment">// ${VAR_NAME:+value} - 如果设置则使用值</span>
+
+<span class="function">func</span> <span class="function">expandEnvVars</span>(data []<span class="keyword">byte</span>) []<span class="keyword">byte</span> {
+    <span class="comment">// 匹配 ${VAR_NAME} 或 ${VAR_NAME:-default}</span>
+    re := regexp.<span class="function">MustCompile</span>(`\$\{([^}:]+)(?::-([^}]+))?\}`)
+    
+    <span class="keyword">return</span> re.<span class="function">ReplaceAllFunc</span>(data, <span class="keyword">func</span>(match []<span class="keyword">byte</span>) []<span class="keyword">byte</span> {
+        fullMatch := <span class="function">string</span>(match)
+        inner := strings.<span class="function">TrimPrefix</span>(fullMatch, <span class="string">"${"</span>)
+        inner = strings.<span class="function">TrimSuffix</span>(inner, <span class="string">"}"</span>)
+        
+        parts := strings.<span class="function">Split</span>(inner, <span class="string">":-"</span>)
+        varName := parts[<span class="number">0</span>]
+        defaultValue := <span class="string">""</span>
+        
+        <span class="keyword">if</span> <span class="function">len</span>(parts) > <span class="number">1</span> {
+            defaultValue = parts[<span class="number">1</span>]
+        }
+        
+        <span class="keyword">if</span> value, exists := os.<span class="function">LookupEnv</span>(varName); exists {
+            <span class="keyword">return</span> []<span class="keyword">byte</span>(value)
+        }
+        
+        <span class="keyword">if</span> defaultValue != <span class="string">""</span> {
+            <span class="keyword">return</span> []<span class="keyword">byte</span>(defaultValue)
+        }
+        
+        <span class="keyword">return</span> match
+    })
+}</code></pre>
+            </div>
+            
+            <h3>4. 配置验证</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> config
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"net"</span>
+    <span class="string">"strconv"</span>
+)
+
+<span class="keyword">type</span> ValidationError <span class="keyword">struct</span> {
+    Field   <span class="keyword">string</span>
+    Message <span class="keyword">string</span>
+}
+
+<span class="function">func</span> (e *ValidationError) <span class="function">Error</span>() <span class="keyword">string</span> {
+    <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%s: %s"</span>, e.Field, e.Message)
+}
+
+<span class="function">func</span> <span class="function">validatePort</span>(port <span class="keyword">int</span>, fieldName <span class="keyword">string</span>) <span class="keyword">error</span> {
+    <span class="keyword">if</span> port < <span class="number">1</span> || port > <span class="number">65535</span> {
+        <span class="keyword">return</span> &ValidationError{
+            Field:   fieldName,
+            Message: fmt.<span class="function">Sprintf</span>(<span class="string">"must be between 1 and 65535, got %d"</span>, port),
+        }
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">validateHost</span>(host, fieldName <span class="keyword">string</span>) <span class="keyword">error</span> {
+    <span class="keyword">if</span> host == <span class="string">""</span> {
+        <span class="keyword">return</span> &ValidationError{
+            Field:   fieldName,
+            Message: <span class="string">"cannot be empty"</span>,
+        }
+    }
+    
+    <span class="comment">// 检查是否是有效的 IP 地址或主机名</span>
+    <span class="keyword">if</span> net.<span class="function">ParseIP</span>(host) == <span class="keyword">nil</span> && !<span class="function">isValidHostname</span>(host) {
+        <span class="keyword">return</span> &ValidationError{
+            Field:   fieldName,
+            Message: fmt.<span class="function">Sprintf</span>(<span class="string">"invalid host: %s"</span>, host),
+        }
+    }
+    
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">isValidHostname</span>(host <span class="keyword">string</span>) <span class="keyword">bool</span> {
+    <span class="comment">// 简化的主机名验证</span>
+    <span class="keyword">return</span> <span class="keyword">true</span>
+}
+
+<span class="function">func</span> <span class="function">validateLogLevel</span>(level, fieldName <span class="keyword">string</span>) <span class="keyword">error</span> {
+    validLevels := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">bool</span>{
+        <span class="string">"debug"</span>: <span class="keyword">true</span>,
+        <span class="string">"info"</span>:  <span class="keyword">true</span>,
+        <span class="string">"warn"</span>:  <span class="keyword">true</span>,
+        <span class="string">"error"</span>: <span class="keyword">true</span>,
+        <span class="string">"fatal"</span>: <span class="keyword">true</span>,
+    }
+    
+    <span class="keyword">if</span> !validLevels[level] {
+        <span class="keyword">return</span> &ValidationError{
+            Field:   fieldName,
+            Message: fmt.<span class="function">Sprintf</span>(<span class="string">"must be one of debug, info, warn, error, fatal, got %s"</span>, level),
+        }
+    }
+    
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+            
+            <h3>5. 配置测试</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> config_test
+
+<span class="keyword">import</span> (
+    <span class="string">"os"</span>
+    <span class="string">"testing"</span>
+    <span class="string">"time"</span>
+    
+    <span class="string">"github.com/stretchr/testify/assert"</span>
+    <span class="string">"github.com/stretchr/testify/require"</span>
+)
+
+<span class="function">func</span> <span class="function">TestLoadConfig</span>(t *testing.T) {
+    <span class="comment">// 创建临时配置文件</span>
+    tmpFile, err := os.<span class="function">CreateTemp</span>(<span class="string">""</span>, <span class="string">"config-*.yaml"</span>)
+    <span class="keyword">require</span>.<span class="function">NoError</span>(t, err)
+    <span class="keyword">defer</span> os.<span class="function">Remove</span>(tmpFile.<span class="function">Name</span>())
+    
+    yamlData := `
+app:
+  name: TestApp
+  version: 1.0.0
+
+server:
+  host: localhost
+  port: 8080
+
+database:
+  driver: mysql
+  host: localhost
+  port: 3306
+  name: testdb
+  username: root
+  password: secret
+`
+    
+    _, err = tmpFile.<span class="function">WriteString</span>(yamlData)
+    <span class="keyword">require</span>.<span class="function">NoError</span>(t, err)
+    tmpFile.<span class="function">Close</span>()
+    
+    <span class="comment">// 加载配置</span>
+    config, err := config.<span class="function">Load</span>(tmpFile.<span class="function">Name</span>())
+    <span class="keyword">require</span>.<span class="function">NoError</span>(t, err)
+    
+    <span class="comment">// 验证配置</span>
+    <span class="keyword">assert</span>.<span class="function">Equal</span>(t, <span class="string">"TestApp"</span>, config.App.Name)
+    <span class="keyword">assert</span>.<span class="function">Equal</span>(t, <span class="string">"1.0.0"</span>, config.App.Version)
+    <span class="keyword">assert</span>.<span class="function">Equal</span>(t, <span class="string">"localhost"</span>, config.Server.Host)
+    <span class="keyword">assert</span>.<span class="function">Equal</span>(t, <span class="number">8080</span>, config.Server.Port)
+}
+
+<span class="function">func</span> <span class="function">TestConfigValidation</span>(t *testing.T) {
+    tests := []<span class="keyword">struct</span> {
+        name    <span class="keyword">string</span>
+        yaml    <span class="keyword">string</span>
+        wantErr <span class="keyword">bool</span>
+    }{
+        {
+            name: <span class="string">"valid config"</span>,
+            yaml: `
+app:
+  name: TestApp
+server:
+  host: localhost
+  port: 8080
+database:
+  host: localhost
+  port: 3306
+  name: testdb
+  username: root
+`,
+            wantErr: <span class="keyword">false</span>,
+        },
+        {
+            name: <span class="string">"missing app name"</span>,
+            yaml: `
+app:
+  name: ""
+server:
+  host: localhost
+  port: 8080
+`,
+            wantErr: <span class="keyword">true</span>,
+        },
+        {
+            name: <span class="string">"invalid port"</span>,
+            yaml: `
+app:
+  name: TestApp
+server:
+  host: localhost
+  port: 99999
+`,
+            wantErr: <span class="keyword">true</span>,
+        },
+    }
+    
+    <span class="keyword">for</span> _, tt := <span class="keyword">range</span> tests {
+        t.<span class="function">Run</span>(tt.name, <span class="keyword">func</span>(t *testing.T) {
+            tmpFile, err := os.<span class="function">CreateTemp</span>(<span class="string">""</span>, <span class="string">"config-*.yaml"</span>)
+            <span class="keyword">require</span>.<span class="function">NoError</span>(t, err)
+            <span class="keyword">defer</span> os.<span class="function">Remove</span>(tmpFile.<span class="function">Name</span>())
+            
+            _, err = tmpFile.<span class="function">WriteString</span>(tt.yaml)
+            <span class="keyword">require</span>.<span class="function">NoError</span>(t, err)
+            tmpFile.<span class="function">Close</span>()
+            
+            _, err = config.<span class="function">Load</span>(tmpFile.<span class="function">Name</span>())
+            <span class="keyword">if</span> tt.wantErr {
+                <span class="keyword">assert</span>.<span class="function">Error</span>(t, err)
+            } <span class="keyword">else</span> {
+                <span class="keyword">assert</span>.<span class="function">NoError</span>(t, err)
+            }
+        })
+    }
+}
+
+<span class="function">func</span> <span class="function">TestEnvVarExpansion</span>(t *testing.T) {
+    <span class="comment">// 设置环境变量</span>
+    os.<span class="function">Setenv</span>(<span class="string">"TEST_DB_PASSWORD"</span>, <span class="string">"test_secret"</span>)
+    <span class="keyword">defer</span> os.<span class="function">Unsetenv</span>(<span class="string">"TEST_DB_PASSWORD"</span>)
+    
+    tmpFile, err := os.<span class="function">CreateTemp</span>(<span class="string">""</span>, <span class="string">"config-*.yaml"</span>)
+    <span class="keyword">require</span>.<span class="function">NoError</span>(t, err)
+    <span class="keyword">defer</span> os.<span class="function">Remove</span>(tmpFile.<span class="function">Name</span>())
+    
+    yamlData := `
+database:
+  password: ${TEST_DB_PASSWORD}
+`
+    
+    _, err = tmpFile.<span class="function">WriteString</span>(yamlData)
+    <span class="keyword">require</span>.<span class="function">NoError</span>(t, err)
+    tmpFile.<span class="function">Close</span>()
+    
+    config, err := config.<span class="function">Load</span>(tmpFile.<span class="function">Name</span>())
+    <span class="keyword">require</span>.<span class="function">NoError</span>(t, err)
+    
+    <span class="keyword">assert</span>.<span class="function">Equal</span>(t, <span class="string">"test_secret"</span>, config.Database.Password)
+}</code></pre>
+            </div>
+            
+            <h3>6. 多环境配置</h3>
+            <div class="note-box">
+                <pre><code><span class="comment"># 目录结构</span>
+config/
+├── base.yaml
+├── development.yaml
+├── production.yaml
+└── test.yaml
+
+<span class="comment">// 加载多环境配置</span>
+<span class="keyword">package</span> config
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+    <span class="string">"path/filepath"</span>
+)
+
+<span class="function">func</span> <span class="function">LoadWithEnvironment</span>(configDir, env <span class="keyword">string</span>) (*Config, <span class="keyword">error</span>) {
+    <span class="comment">// 加载基础配置</span>
+    baseConfig, err := <span class="function">loadSingleConfig</span>(filepath.<span class="function">Join</span>(configDir, <span class="string">"base.yaml"</span>))
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    <span class="comment">// 加载环境特定配置</span>
+    envConfig, err := <span class="function">loadSingleConfig</span>(filepath.<span class="function">Join</span>(configDir, fmt.<span class="function">Sprintf</span>(<span class="string">"%s.yaml"</span>, env)))
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    <span class="comment">// 合并配置（环境配置覆盖基础配置）</span>
+    <span class="function">mergeConfigs</span>(baseConfig, envConfig)
+    
+    <span class="keyword">return</span> baseConfig, <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">loadSingleConfig</span>(path <span class="keyword">string</span>) (*Config, <span class="keyword">error</span>) {
+    data, err := os.<span class="function">ReadFile</span>(path)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    data = <span class="function">expandEnvVars</span>(data)
+    
+    <span class="keyword">var</span> config Config
+    <span class="keyword">if</span> err := yaml.<span class="function">Unmarshal</span>(data, &config); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    <span class="keyword">return</span> &config, <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">mergeConfigs</span>(base, env *Config) {
+    <span class="comment">// 合并各个配置段</span>
+    <span class="keyword">if</span> env.Server.Host != <span class="string">""</span> {
+        base.Server.Host = env.Server.Host
+    }
+    <span class="keyword">if</span> env.Server.Port != <span class="number">0</span> {
+        base.Server.Port = env.Server.Port
+    }
+    <span class="comment">// ... 其他字段的合并</span>
+}</code></pre>
+            </div>
+            
+            <h3>7. 配置版本管理</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> config
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="keyword">type</span> ConfigVersion <span class="keyword">struct</span> {
+    Version   <span class="keyword">string</span>
+    Timestamp time.Time
+    Config    *Config
+}
+
+<span class="keyword">type</span> ConfigHistory <span class="keyword">struct</span> {
+    mu       sync.RWMutex
+    history  []*ConfigVersion
+    maxSize  <span class="keyword">int</span>
+    current  *ConfigVersion
+}
+
+<span class="function">func</span> <span class="function">NewConfigHistory</span>(maxSize <span class="keyword">int</span>) *ConfigHistory {
+    <span class="keyword">return</span> &ConfigHistory{
+        history: <span class="function">make</span>([]*ConfigVersion, <span class="number">0</span>),
+        maxSize: maxSize,
+    }
+}
+
+<span class="function">func</span> (ch *ConfigHistory) <span class="function">Add</span>(config *Config) {
+    ch.mu.Lock()
+    <span class="keyword">defer</span> ch.mu.Unlock()
+    
+    version := &ConfigVersion{
+        Version:   fmt.<span class="function">Sprintf</span>(<span class="string">"%d"</span>, <span class="function">len</span>(ch.history)+<span class="number">1</span>),
+        Timestamp: time.<span class="function">Now</span>(),
+        Config:    config,
+    }
+    
+    ch.history = <span class="function">append</span>(ch.history, version)
+    ch.current = version
+    
+    <span class="comment">// 限制历史大小</span>
+    <span class="keyword">if</span> <span class="function">len</span>(ch.history) > ch.maxSize {
+        ch.history = ch.history[<span class="number">1</span>:]
+    }
+}
+
+<span class="function">func</span> (ch *ConfigHistory) <span class="function">GetCurrent</span>() *Config {
+    ch.mu.RLock()
+    <span class="keyword">defer</span> ch.mu.RUnlock()
+    
+    <span class="keyword">if</span> ch.current == <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>
+    }
+    <span class="keyword">return</span> ch.current.Config
+}
+
+<span class="function">func</span> (ch *ConfigHistory) <span class="function">GetVersion</span>(version <span class="keyword">string</span>) *Config {
+    ch.mu.RLock()
+    <span class="keyword">defer</span> ch.mu.RUnlock()
+    
+    <span class="keyword">for</span> _, v := <span class="keyword">range</span> ch.history {
+        <span class="keyword">if</span> v.Version == version {
+            <span class="keyword">return</span> v.Config
+        }
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> (ch *ConfigHistory) <span class="function">ListVersions</span>() []<span class="keyword">string</span> {
+    ch.mu.RLock()
+    <span class="keyword">defer</span> ch.mu.RUnlock()
+    
+    versions := <span class="function">make</span>([]<span class="keyword">string</span>, <span class="function">len</span>(ch.history))
+    <span class="keyword">for</span> i, v := <span class="keyword">range</span> ch.history {
+        versions[i] = fmt.<span class="function">Sprintf</span>(<span class="string">"%s (at %s)"</span>, v.Version, v.Timestamp.<span class="function">Format</span>(time.RFC3339))
+    }
+    <span class="keyword">return</span> versions
+}</code></pre>
+            </div>
+            
+            <h3>8. 配置加密</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> config
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/base64"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"strings"</span>
+)
+
+<span class="keyword">type</span> Encryptor <span class="keyword">interface</span> {
+    <span class="function">Encrypt</span>(plaintext <span class="keyword">string</span>) (<span class="keyword">string</span>, <span class="keyword">error</span>)
+    <span class="function">Decrypt</span>(ciphertext <span class="keyword">string</span>) (<span class="keyword">string</span>, <span class="keyword">error</span>)
+}
+
+<span class="keyword">type</span> Base64Encryptor <span class="keyword">struct</span> {}
+
+<span class="function">func</span> (e *Base64Encryptor) <span class="function">Encrypt</span>(plaintext <span class="keyword">string</span>) (<span class="keyword">string</span>, <span class="keyword">error</span>) {
+    <span class="keyword">return</span> base64.<span class="function">StdEncoding</span>.<span class="function">EncodeToString</span>([]<span class="keyword">byte</span>(plaintext)), <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> (e *Base64Encryptor) <span class="function">Decrypt</span>(ciphertext <span class="keyword">string</span>) (<span class="keyword">string</span>, <span class="keyword">error</span>) {
+    decoded, err := base64.<span class="function">StdEncoding</span>.<span class="function">DecodeString</span>(ciphertext)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, err
+    }
+    <span class="keyword">return</span> <span class="function">string</span>(decoded), <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">decryptConfig</span>(data []<span class="keyword">byte</span>, encryptor Encryptor) ([]<span class="keyword">byte</span>, <span class="keyword">error</span>) {
+    <span class="comment">// 匹配加密的值格式: ENC(base64_encoded_value)</span>
+    re := regexp.<span class="function">MustCompile</span>(`ENC\(([^)]+)\)`)
+    
+    <span class="keyword">return</span> re.<span class="function">ReplaceAllFunc</span>(data, <span class="keyword">func</span>(match []<span class="keyword">byte</span>) []<span class="keyword">byte</span> {
+        fullMatch := <span class="function">string</span>(match)
+        inner := strings.<span class="function">TrimPrefix</span>(fullMatch, <span class="string">"ENC("</span>)
+        inner = strings.<span class="function">TrimSuffix</span>(inner, <span class="string">")"</span>)
+        
+        decrypted, err := encryptor.<span class="function">Decrypt</span>(inner)
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            fmt.<span class="function">Printf</span>(<span class="string">"Failed to decrypt: %v\n"</span>, err)
+            <span class="keyword">return</span> match
+        }
+        
+        <span class="keyword">return</span> []<span class="keyword">byte</span>(decrypted)
+    }), <span class="keyword">nil</span>
+}
+
+<span class="comment">// 使用示例</span>
+<span class="comment">// config.yaml</span>
+<span class="comment">// database:</span>
+<span class="comment">//   password: ENC(c2VjcmV0)  // base64 of "secret"</span></code></pre>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonyflake ID 生成器 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.3">
+    <script src="navigation.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+        <div class="content">
+            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
+            <h2 id="sonyflake">Sonyflake ID 生成器</h2>
+            
+            <h3>简介</h3>
+            <p>Sonyflake 是 Sony 公司开源的分布式唯一 ID 生成器，灵感来源于 Twitter 的 Snowflake 算法。它能够生成按时间大致排序的、唯一的 64 位整数 ID，适用于分布式系统中的 ID 生成场景。</p>
+            
+            <h3>核心特性</h3>
+            <ul>
+                <li><strong>高性能</strong>：单机每秒可生成超过 400 万个 ID</li>
+                <li><strong>分布式</strong>：支持多台机器同时生成唯一 ID</li>
+                <li><strong>时间有序</strong>：ID 按时间大致递增</li>
+                <li><strong>无需网络同步</strong>：不依赖网络或数据库</li>
+                <li><strong>短 ID</strong>：生成 64 位整数 ID，存储紧凑</li>
+                <li><strong>机器 ID 分配</strong>：支持自定义机器 ID</li>
+            </ul>
+            
+            <h3>ID 结构</h3>
+            <div class="note-box">
+                <p>Sonyflake 生成的 64 位 ID 由以下部分组成：</p>
+                <pre><code>| 63  | 62...12 | 11...7 | 6...0 |
+|----|---------|--------|-------|
+| 0  | 时间戳  | 机器ID | 序列号 |
+
+- 时间戳：51 位，约 89 年范围
+- 机器 ID：5 位，支持 0-31（32 台机器）
+- 序列号：7 位，每毫秒最多 128 个 ID</code></pre>
+            </div>
+            
+            <h3>与 Snowflake 的区别</h3>
+            <div class="note-box">
+                <table>
+                    <tr>
+                        <th>特性</th>
+                        <th>Snowflake</th>
+                        <th>Sonyflake</th>
+                    </tr>
+                    <tr>
+                        <td>时间精度</td>
+                        <td>1 毫秒</td>
+                        <td>10 毫秒</td>
+                    </tr>
+                    <tr>
+                        <td>机器 ID 位数</td>
+                        <td>10 位</td>
+                        <td>5 位</td>
+                    </tr>
+                    <tr>
+                        <td>序列号位数</td>
+                        <td>12 位</td>
+                        <td>7 位</td>
+                    </tr>
+                    <tr>
+                        <td>支持机器数</td>
+                        <td>1024 台</td>
+                        <td>32 台</td>
+                    </tr>
+                    <tr>
+                        <td>每毫秒 ID 数</td>
+                        <td>4096 个</td>
+                        <td>128 个</td>
+                    </tr>
+                    <tr>
+                        <td>时间范围</td>
+                        <td>69 年</td>
+                        <td>89 年</td>
+                    </tr>
+                    <tr>
+                        <td>epoch</td>
+                        <td>自定义</td>
+                        <td>2014-09-01</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <h3>安装</h3>
+            <pre><code><span class="keyword">go</span> get -u github.com/sony/sonyflake</code></pre>
+            
+            <h3>快速开始</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/sony/sonyflake"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建 Sonyflake 实例</span>
+    sf := sonyflake.<span class="function">New</span>(sonyflake.Settings{})
+    
+    <span class="comment">// 生成 ID</span>
+    id, err := sf.<span class="function">NextID</span>()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Generated ID: %d\n"</span>, id)
+}</code></pre>
+            
+            <h3>配置 Sonyflake</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/sony/sonyflake"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 使用自定义配置</span>
+    sf := sonyflake.<span class="function">New</span>(sonyflake.Settings{
+        <span class="comment">// 机器 ID（0-31）</span>
+        MachineID: <span class="keyword">func</span>() (<span class="keyword">uint16</span>, <span class="keyword">error</span>) {
+            <span class="keyword">return</span> <span class="number">1</span>, <span class="keyword">nil</span>
+        },
+        
+        <span class="comment">// 检查机器 ID 是否可用</span>
+        CheckMachineID: <span class="keyword">func</span>(<span class="keyword">uint16</span>) <span class="keyword">bool</span> {
+            <span class="keyword">return</span> <span class="keyword">true</span>
+        },
+        
+        <span class="comment">// 自定义起始时间</span>
+        StartTime: time.<span class="function">Date</span>(<span class="number">2024</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, time.UTC),
+    })
+    
+    id, err := sf.<span class="function">NextID</span>()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Generated ID: %d\n"</span>, id)
+}</code></pre>
+            </div>
+            
+            <h3>自动分配机器 ID</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"net"</span>
+    <span class="string">"github.com/sony/sonyflake"</span>
+)
+
+<span class="function">func</span> <span class="function">getMachineID</span>() (<span class="keyword">uint16</span>, <span class="keyword">error</span>) {
+    <span class="comment">// 使用 IP 地址的最后两个字节作为机器 ID</span>
+    addrs, err := net.<span class="function">InterfaceAddrs</span>()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="number">0</span>, err
+    }
+    
+    <span class="keyword">for</span>, addr := <span class="keyword">range</span> addrs {
+        <span class="keyword">if</span> ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+            <span class="keyword">if</span> ipnet.IP.To4() != <span class="keyword">nil</span> {
+                ip := ipnet.IP.To4()
+                <span class="keyword">return</span> <span class="keyword">uint16</span>(ip[<span class="number">2</span>])&lt;&lt;<span class="number">8</span> | <span class="keyword">uint16</span>(ip[<span class="number">3</span>]), <span class="keyword">nil</span>
+            }
+        }
+    }
+    
+    <span class="keyword">return</span> <span class="number">0</span>, fmt.<span class="function">Errorf</span>(<span class="string">"no valid IP address found"</span>)
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    sf := sonyflake.<span class="function">New</span>(sonyflake.Settings{
+        MachineID: getMachineID,
+    })
+    
+    id, err := sf.<span class="function">NextID</span>()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Generated ID: %d\n"</span>, id)
+}</code></pre>
+            </div>
+            
+            <h3>解析 ID</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    <span class="string">"github.com/sony/sonyflake"</span>
+)
+
+<span class="function">func</span> <span class="function">parseSonyflakeID</span>(id <span class="keyword">uint64</span>) {
+    <span class="comment">// Sonyflake 不直接提供解析 API，需要手动解析</span>
+    <span class="comment">// ID 结构: | 0 | 时间戳(51位) | 机器ID(5位) | 序列号(7位) |</span>
+    
+    <span class="comment">// 提取序列号（低 7 位）</span>
+    sequence := id &amp; <span class="number">0x7F</span>
+    
+    <span class="comment">// 提取机器 ID（8-12 位）</span>
+    machineID := (id &gt;&gt; <span class="number">7</span>) &amp; <span class="number">0x1F</span>
+    
+    <span class="comment">// 提取时间戳（13-63 位）</span>
+    timestamp := (id &gt;&gt; <span class="number">12</span>) &amp; <span class="number">0x7FFFFFFFFFFFF</span>
+    
+    <span class="comment">// Sonyflake 的 epoch 是 2014-09-01 00:00:00 UTC</span>
+    epoch := time.<span class="function">Date</span>(<span class="number">2014</span>, <span class="number">9</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, time.UTC)
+    
+    <span class="comment">// 计算实际时间（单位：10 毫秒）</span>
+    actualTime := epoch.<span class="function">Add</span>(time.Duration(timestamp) * <span class="number">10</span> * time.Millisecond)
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"ID: %d\n"</span>, id)
+    fmt.<span class="function">Printf</span>(<span class="string">"Machine ID: %d\n"</span>, machineID)
+    fmt.<span class="function">Printf</span>(<span class="string">"Sequence: %d\n"</span>, sequence)
+    fmt.<span class="function">Printf</span>(<span class="string">"Timestamp: %s\n"</span>, actualTime.<span class="function">Format</span>(time.RFC3339))
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    sf := sonyflake.<span class="function">New</span>(sonyflake.Settings{
+        MachineID: <span class="keyword">func</span>() (<span class="keyword">uint16</span>, <span class="keyword">error</span>) {
+            <span class="keyword">return</span> <span class="number">1</span>, <span class="keyword">nil</span>
+        },
+    })
+    
+    id, err := sf.<span class="function">NextID</span>()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    
+    <span class="function">parseSonyflakeID</span>(id)
+}</code></pre>
+            </div>
+            
+            <h3>与 Web 框架集成</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/gin-gonic/gin"</span>
+    <span class="string">"github.com/sony/sonyflake"</span>
+)
+
+<span class="keyword">var</span> sf = sonyflake.<span class="function">New</span>(sonyflake.Settings{})
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    ID       <span class="keyword">uint64</span> <span class="string">`json:"id"`</span>
+    Name     <span class="keyword">string</span> <span class="string">`json:"name"`</span>
+    Email    <span class="keyword">string</span> <span class="string">`json:"email"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    r := gin.<span class="function">Default</span>()
+    
+    <span class="comment">// 创建用户</span>
+    r.<span class="function">POST</span>(<span class="string">"/users"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        <span class="keyword">var</span> req <span class="keyword">struct</span> {
+            Name  <span class="keyword">string</span> <span class="string">`json:"name"`</span>
+            Email <span class="keyword">string</span> <span class="string">`json:"email"`</span>
+        }
+        
+        <span class="keyword">if</span> err := c.<span class="function">ShouldBindJSON</span>(&amp;req); err != <span class="keyword">nil</span> {
+            c.<span class="function">JSON</span>(<span class="number">400</span>, gin.H{<span class="string">"error"</span>: err.<span class="function">Error</span>()})
+            <span class="keyword">return</span>
+        }
+        
+        <span class="comment">// 生成用户 ID</span>
+        id, err := sf.<span class="function">NextID</span>()
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            c.<span class="function">JSON</span>(<span class="number">500</span>, gin.H{<span class="string">"error"</span>: <span class="string">"failed to generate ID"</span>})
+            <span class="keyword">return</span>
+        }
+        
+        user := User{
+            ID:    id,
+            Name:  req.Name,
+            Email: req.Email,
+        }
+        
+        c.<span class="function">JSON</span>(<span class="number">201</span>, user)
+    })
+    
+    r.<span class="function">Run</span>(<span class="string">":8080"</span>)
+}</code></pre>
+            </div>
+            
+            <h3>与 GORM 集成</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/sony/sonyflake"</span>
+    <span class="string">"gorm.io/gorm"</span>
+)
+
+<span class="keyword">var</span> sf = sonyflake.<span class="function">New</span>(sonyflake.Settings{})
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    ID    <span class="keyword">uint64</span> <span class="string">`gorm:"primaryKey"`</span>
+    Name  <span class="keyword">string</span> <span class="string">`gorm:"size:255;not null"`</span>
+    Email <span class="keyword">string</span> <span class="string">`gorm:"size:255;uniqueIndex;not null"`</span>
+}
+
+<span class="comment">// BeforeCreate 钩子：在创建前自动生成 ID</span>
+<span class="function">func</span> (u *User) <span class="function">BeforeCreate</span>(tx *gorm.DB) <span class="keyword">error</span> {
+    <span class="keyword">if</span> u.ID == <span class="number">0</span> {
+        id, err := sf.<span class="function">NextID</span>()
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> err
+        }
+        u.ID = id
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">CreateUser</span>(db *gorm.DB, name, email <span class="keyword">string</span>) (*User, <span class="keyword">error</span>) {
+    user := User{
+        Name:  name,
+        Email: email,
+    }
+    
+    <span class="keyword">if</span> err := db.<span class="function">Create</span>(&amp;user).Error; err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    <span class="keyword">return</span> &amp;user, <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+            
+            <h3>使用 Redis 存储机器 ID</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/go-redis/redis/v8"</span>
+    <span class="string">"github.com/sony/sonyflake"</span>
+)
+
+<span class="keyword">var</span> ctx = context.<span class="function">Background</span>()
+
+<span class="function">func</span> <span class="function">allocateMachineID</span>(client *redis.Client) (<span class="keyword">uint16</span>, <span class="keyword">error</span>) {
+    <span class="comment">// 尝试分配 0-31 范围内的机器 ID</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">32</span>; i++ {
+        key := fmt.<span class="function">Sprintf</span>(<span class="string">"sonyflake:machine:%d"</span>, i)
+        
+        <span class="comment">// 尝试设置键，带过期时间</span>
+        ok, err := client.<span class="function">SetNX</span>(ctx, key, <span class="string">"1"</span>, <span class="number">24</span>*time.Hour).<span class="function">Result</span>()
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> <span class="number">0</span>, err
+        }
+        
+        <span class="keyword">if</span> ok {
+            <span class="keyword">return</span> <span class="keyword">uint16</span>(i), <span class="keyword">nil</span>
+        }
+    }
+    
+    <span class="keyword">return</span> <span class="number">0</span>, fmt.<span class="function">Errorf</span>(<span class="string">"no available machine ID"</span>)
+}
+
+<span class="function">func</span> <span class="function">NewSonyflakeWithRedis</span>(client *redis.Client) (*sonyflake.Sonyflake, <span class="keyword">error</span>) {
+    machineID, err := <span class="function">allocateMachineID</span>(client)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    sf := sonyflake.<span class="function">New</span>(sonyflake.Settings{
+        MachineID: <span class="keyword">func</span>() (<span class="keyword">uint16</span>, <span class="keyword">error</span>) {
+            <span class="keyword">return</span> machineID, <span class="keyword">nil</span>
+        },
+    })
+    
+    <span class="keyword">return</span> sf, <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+            
+            <h3>使用 Etcd 存储机器 ID</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    <span class="string">"go.etcd.io/etcd/client/v3"</span>
+    <span class="string">"github.com/sony/sonyflake"</span>
+)
+
+<span class="function">func</span> <span class="function">allocateMachineIDFromEtcd</span>(client *clientv3.Client) (<span class="keyword">uint16</span>, <span class="keyword">error</span>) {
+    ctx, cancel := context.<span class="function">WithTimeout</span>(context.<span class="function">Background</span>(), <span class="number">5</span>*time.Second)
+    <span class="keyword">defer</span> cancel()
+    
+    <span class="comment">// 尝试分配 0-31 范围内的机器 ID</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">32</span>; i++ {
+        key := fmt.<span class="function">Sprintf</span>(<span class="string">"/sonyflake/machine/%d"</span>, i)
+        
+        <span class="comment">// 尝试创建租约</span>
+        lease, err := client.<span class="function">Grant</span>(ctx, <span class="number">86400</span>) <span class="comment">// 24 小时</span>
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> <span class="number">0</span>, err
+        }
+        
+        <span class="comment">// 尝试设置键（事务）</span>
+        txn := client.<span class="function">Txn</span>(ctx)
+        txn.<span class="function">If</span>(
+            clientv3.<span class="function">Compare</span>(clientv3.<span class="function">CreateRevision</span>(key), <span class="string">"="</span>, <span class="number">0</span>),
+        ).
+        <span class="function">Then</span>(
+            clientv3.<span class="function">OpPut</span>(key, <span class="string">"1"</span>, clientv3.<span class="function">WithLease</span>(lease.ID)),
+        ).
+        <span class="function">Commit</span>()
+        
+        <span class="keyword">if</span> txn.<span class="function">Succeeded</span>() {
+            <span class="keyword">return</span> <span class="keyword">uint16</span>(i), <span class="keyword">nil</span>
+        }
+    }
+    
+    <span class="keyword">return</span> <span class="number">0</span>, fmt.<span class="function">Errorf</span>(<span class="string">"no available machine ID"</span>)
+}
+
+<span class="function">func</span> <span class="function">NewSonyflakeWithEtcd</span>(client *clientv3.Client) (*sonyflake.Sonyflake, <span class="keyword">error</span>) {
+    machineID, err := <span class="function">allocateMachineIDFromEtcd</span>(client)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    sf := sonyflake.<span class="function">New</span>(sonyflake.Settings{
+        MachineID: <span class="keyword">func</span>() (<span class="keyword">uint16</span>, <span class="keyword">error</span>) {
+            <span class="keyword">return</span> machineID, <span class="keyword">nil</span>
+        },
+    })
+    
+    <span class="keyword">return</span> sf, <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+            
+            <h3>批量生成 ID</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/sony/sonyflake"</span>
+)
+
+<span class="function">func</span> <span class="function">BatchGenerateIDs</span>(sf *sonyflake.Sonyflake, count <span class="keyword">int</span>) ([]<span class="keyword">uint64</span>, <span class="keyword">error</span>) {
+    ids := <span class="function">make</span>([]<span class="keyword">uint64</span>, count)
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; count; i++ {
+        id, err := sf.<span class="function">NextID</span>()
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> <span class="keyword">nil</span>, err
+        }
+        ids[i] = id
+    }
+    <span class="keyword">return</span> ids, <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    sf := sonyflake.<span class="function">New</span>(sonyflake.Settings{})
+    
+    <span class="comment">// 批量生成 100 个 ID</span>
+    ids, err := <span class="function">BatchGenerateIDs</span>(sf, <span class="number">100</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Generated %d IDs\n"</span>, <span class="function">len</span>(ids))
+    fmt.<span class="function">Printf</span>(<span class="string">"First ID: %d\n"</span>, ids[<span class="number">0</span>])
+    fmt.<span class="function">Printf</span>(<span class="string">"Last ID: %d\n"</span>, ids[<span class="function">len</span>(ids)-<span class="number">1</span>])
+}</code></pre>
+            </div>
+            
+            <h3>ID 转换工具</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> sonyflakeutil
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="keyword">const</span> (
+    sonyflakeEpoch = <span class="number">1409414400000</span> <span class="comment">// 2014-09-01 00:00:00 UTC in milliseconds</span>
+)
+
+<span class="keyword">type</span> SonyflakeID <span class="keyword">struct</span> {
+    ID        <span class="keyword">uint64</span>
+    Timestamp time.Time
+    MachineID <span class="keyword">uint16</span>
+    Sequence  <span class="keyword">uint8</span>
+}
+
+<span class="function">func</span> <span class="function">Parse</span>(id <span class="keyword">uint64</span>) *SonyflakeID {
+    <span class="comment">// 提取序列号（低 7 位）</span>
+    sequence := <span class="keyword">uint8</span>(id &amp; <span class="number">0x7F</span>)
+    
+    <span class="comment">// 提取机器 ID（8-12 位）</span>
+    machineID := <span class="keyword">uint16</span>((id &gt;&gt; <span class="number">7</span>) &amp; <span class="number">0x1F</span>)
+    
+    <span class="comment">// 提取时间戳（13-63 位，单位：10 毫秒）</span>
+    timestampMs := (id &gt;&gt; <span class="number">12</span>) * <span class="number">10</span>
+    
+    <span class="comment">// 计算实际时间</span>
+    timestamp := time.<span class="function">UnixMilli</span>(sonyflakeEpoch + int64(timestampMs))
+    
+    <span class="keyword">return</span> &amp;SonyflakeID{
+        ID:        id,
+        Timestamp: timestamp,
+        MachineID: machineID,
+        Sequence:  sequence,
+    }
+}
+
+<span class="function">func</span> (s *SonyflakeID) <span class="function">String</span>() <span class="keyword">string</span> {
+    <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"ID: %d, Time: %s, MachineID: %d, Sequence: %d"</span>,
+        s.ID,
+        s.Timestamp.<span class="function">Format</span>(time.RFC3339),
+        s.MachineID,
+        s.Sequence,
+    )
+}
+
+<span class="function">func</span> <span class="function">GetTimestamp</span>(id <span class="keyword">uint64</span>) time.Time {
+    <span class="keyword">return</span> <span class="function">Parse</span>(id).Timestamp
+}
+
+<span class="function">func</span> <span class="function">GetMachineID</span>(id <span class="keyword">uint64</span>) <span class="keyword">uint16</span> {
+    <span class="keyword">return</span> <span class="function">Parse</span>(id).MachineID
+}
+
+<span class="function">func</span> <span class="function">GetSequence</span>(id <span class="keyword">uint64</span>) <span class="keyword">uint8</span> {
+    <span class="keyword">return</span> <span class="function">Parse</span>(id).Sequence
+}</code></pre>
+            </div>
+            
+            <h3>错误处理</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    <span class="string">"github.com/sony/sonyflake"</span>
+)
+
+<span class="function">func</span> <span class="function">generateIDWithRetry</span>(sf *sonyflake.Sonyflake, maxRetries <span class="keyword">int</span>) (<span class="keyword">uint64</span>, <span class="keyword">error</span>) {
+    <span class="keyword">var</span> id <span class="keyword">uint64</span>
+    <span class="keyword">var</span> err <span class="keyword">error</span>
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; maxRetries; i++ {
+        id, err = sf.<span class="function">NextID</span>()
+        <span class="keyword">if</span> err == <span class="keyword">nil</span> {
+            <span class="keyword">return</span> id, <span class="keyword">nil</span>
+        }
+        
+        <span class="comment">// 如果是时间回退错误，等待一段时间后重试</span>
+        <span class="keyword">if</span> err == sonyflake.ErrTimeOver {
+            time.<span class="function">Sleep</span>(time.Millisecond * <span class="number">10</span>)
+            <span class="keyword">continue</span>
+        }
+        
+        <span class="comment">// 其他错误直接返回</span>
+        <span class="keyword">return</span> <span class="number">0</span>, err
+    }
+    
+    <span class="keyword">return</span> <span class="number">0</span>, fmt.<span class="function">Errorf</span>(<span class="string">"failed to generate ID after %d retries: %w"</span>, maxRetries, err)
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    sf := sonyflake.<span class="function">New</span>(sonyflake.Settings{})
+    
+    id, err := <span class="function">generateIDWithRetry</span>(sf, <span class="number">3</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(err)
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Generated ID: %d\n"</span>, id)
+}</code></pre>
+            </div>
+            
+            <h2 id="sonyflake-bestpractices">Sonyflake 最佳实践</h2>
+            
+            <h3>1. 全局单例模式</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> idgenerator
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/sony/sonyflake"</span>
+)
+
+<span class="comment">// 全局单例</span>
+<span class="keyword">var</span> (
+    globalSonyflake *sonyflake.Sonyflake
+    once           sync.Once
+)
+
+<span class="function">func</span> <span class="function">Init</span>(machineID <span class="keyword">uint16</span>) {
+    once.<span class="function">Do</span>(<span class="keyword">func</span>() {
+        globalSonyflake = sonyflake.<span class="function">New</span>(sonyflake.Settings{
+            MachineID: <span class="keyword">func</span>() (<span class="keyword">uint16</span>, <span class="keyword">error</span>) {
+                <span class="keyword">return</span> machineID, <span class="keyword">nil</span>
+            },
+        })
+    })
+}
+
+<span class="function">func</span> <span class="function">GenerateID</span>() (<span class="keyword">uint64</span>, <span class="keyword">error</span>) {
+    <span class="keyword">if</span> globalSonyflake == <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="number">0</span>, sonyflake.ErrMachineIDNotSet
+    }
+    <span class="keyword">return</span> globalSonyflake.<span class="function">NextID</span>()
+}
+
+<span class="function">func</span> <span class="function">MustGenerateID</span>() <span class="keyword">uint64</span> {
+    id, err := <span class="function">GenerateID</span>()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
+    <span class="keyword">return</span> id
+}</code></pre>
+            </div>
+            
+            <h3>2. 机器 ID 管理</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> idgenerator
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+    <span class="string">"github.com/go-redis/redis/v8"</span>
+)
+
+<span class="keyword">type</span> MachineIDAllocator <span class="keyword">struct</span> {
+    client    *redis.Client
+    keyPrefix <span class="keyword">string</span>
+    ttl       time.Duration
+}
+
+<span class="function">func</span> <span class="function">NewMachineIDAllocator</span>(client *redis.Client) *MachineIDAllocator {
+    <span class="keyword">return</span> &amp;MachineIDAllocator{
+        client:    client,
+        keyPrefix: <span class="string">"sonyflake:machine:"</span>,
+        ttl:       <span class="number">24</span> * time.Hour,
+    }
+}
+
+<span class="function">func</span> (a *MachineIDAllocator) <span class="function">Allocate</span>(ctx context.Context) (<span class="keyword">uint16</span>, <span class="keyword">error</span>) {
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">32</span>; i++ {
+        key := fmt.<span class="function">Sprintf</span>(<span class="string">"%s%d"</span>, a.keyPrefix, i)
+        
+        <span class="comment">// 尝试获取锁</span>
+        ok, err := a.client.<span class="function">SetNX</span>(ctx, key, <span class="string">"1"</span>, a.ttl).<span class="function">Result</span>()
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> <span class="number">0</span>, err
+        }
+        
+        <span class="keyword">if</span> ok {
+            <span class="keyword">return</span> <span class="keyword">uint16</span>(i), <span class="keyword">nil</span>
+        }
+    }
+    
+    <span class="keyword">return</span> <span class="number">0</span>, fmt.<span class="function">Errorf</span>(<span class="string">"no available machine ID (0-31)"</span>)
+}
+
+<span class="function">func</span> (a *MachineIDAllocator) <span class="function">Renew</span>(ctx context.Context, machineID <span class="keyword">uint16</span>) <span class="keyword">error</span> {
+    key := fmt.<span class="function">Sprintf</span>(<span class="string">"%s%d"</span>, a.keyPrefix, machineID)
+    <span class="keyword">return</span> a.client.<span class="function">Expire</span>(ctx, key, a.ttl).<span class="function">Err</span>()
+}
+
+<span class="function">func</span> (a *MachineIDAllocator) <span class="function">Release</span>(ctx context.Context, machineID <span class="keyword">uint16</span>) <span class="keyword">error</span> {
+    key := fmt.<span class="function">Sprintf</span>(<span class="string">"%s%d"</span>, a.keyPrefix, machineID)
+    <span class="keyword">return</span> a.client.<span class="function">Del</span>(ctx, key).<span class="function">Err</span>()
+}</code></pre>
+            </div>
+            
+            <h3>3. 性能监控</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> idgenerator
+
+<span class="keyword">import</span> (
+    <span class="string">"sync/atomic"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="keyword">type</span> SonyflakeStats <span class="keyword">struct</span> {
+    generatedCount <span class="keyword">uint64</span>
+    errorCount     <span class="keyword">uint64</span>
+    startTime      time.Time
+}
+
+<span class="keyword">type</span> MonitoredSonyflake <span class="keyword">struct</span> {
+    sf    *sonyflake.Sonyflake
+    stats *SonyflakeStats
+}
+
+<span class="function">func</span> <span class="function">NewMonitoredSonyflake</span>(sf *sonyflake.Sonyflake) *MonitoredSonyflake {
+    <span class="keyword">return</span> &amp;MonitoredSonyflake{
+        sf: sf,
+        stats: &amp;SonyflakeStats{
+            startTime: time.<span class="function">Now</span>(),
+        },
+    }
+}
+
+<span class="function">func</span> (m *MonitoredSonyflake) <span class="function">NextID</span>() (<span class="keyword">uint64</span>, <span class="keyword">error</span>) {
+    id, err := m.sf.<span class="function">NextID</span>()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        atomic.<span class="function">AddUint64</span>(&amp;m.stats.errorCount, <span class="number">1</span>)
+        <span class="keyword">return</span> <span class="number">0</span>, err
+    }
+    
+    atomic.<span class="function">AddUint64</span>(&amp;m.stats.generatedCount, <span class="number">1</span>)
+    <span class="keyword">return</span> id, <span class="keyword">nil</span>
+}
+
+<span class="function">func</span> (m *MonitoredSonyflake) <span class="function">GetStats</span>() *SonyflakeStats {
+    <span class="keyword">return</span> &amp;SonyflakeStats{
+        generatedCount: atomic.<span class="function">LoadUint64</span>(&amp;m.stats.generatedCount),
+        errorCount:     atomic.<span class="function">LoadUint64</span>(&amp;m.stats.errorCount),
+        startTime:      m.stats.startTime,
+    }
+}
+
+<span class="function">func</span> (m *MonitoredSonyflake) <span class="function">GetRate</span>() <span class="keyword">float64</span> {
+    elapsed := time.<span class="function">Since</span>(m.stats.startTime).<span class="function">Seconds</span>()
+    <span class="keyword">if</span> elapsed == <span class="number">0</span> {
+        <span class="keyword">return</span> <span class="number">0</span>
+    }
+    count := atomic.<span class="function">LoadUint64</span>(&amp;m.stats.generatedCount)
+    <span class="keyword">return</span> <span class="keyword">float64</span>(count) / elapsed
+}</code></pre>
+            </div>
+            
+            <h3>4. 测试支持</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> idgenerator_test
+
+<span class="keyword">import</span> (
+    <span class="string">"testing"</span>
+    <span class="string">"github.com/stretchr/testify/assert"</span>
+    <span class="string">"github.com/stretchr/testify/require"</span>
+)
+
+<span class="function">func</span> <span class="function">TestGenerateID</span>(t *testing.T) {
+    sf := sonyflake.<span class="function">New</span>(sonyflake.Settings{
+        MachineID: <span class="keyword">func</span>() (<span class="keyword">uint16</span>, <span class="keyword">error</span>) {
+            <span class="keyword">return</span> <span class="number">1</span>, <span class="keyword">nil</span>
+        },
+    })
+    
+    id, err := sf.<span class="function">NextID</span>()
+    <span class="keyword">require</span>.<span class="function">NoError</span>(t, err)
+    <span class="keyword">assert</span>.<span class="function">NotZero</span>(t, id)
+}
+
+<span class="function">func</span> <span class="function">TestGenerateIDsUniqueness</span>(t *testing.T) {
+    sf := sonyflake.<span class="function">New</span>(sonyflake.Settings{
+        MachineID: <span class="keyword">func</span>() (<span class="keyword">uint16</span>, <span class="keyword">error</span>) {
+            <span class="keyword">return</span> <span class="number">1</span>, <span class="keyword">nil</span>
+        },
+    })
+    
+    <span class="comment">// 生成 1000 个 ID</span>
+    ids := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">uint64</span>]<span class="keyword">bool</span>)
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++ {
+        id, err := sf.<span class="function">NextID</span>()
+        <span class="keyword">require</span>.<span class="function">NoError</span>(t, err)
+        
+        <span class="comment">// 检查唯一性</span>
+        <span class="keyword">assert</span>.<span class="function">False</span>(t, ids[id], <span class="string">"duplicate ID generated"</span>)
+        ids[id] = <span class="keyword">true</span>
+    }
+    
+    <span class="keyword">assert</span>.<span class="function">Equal</span>(t, <span class="number">1000</span>, <span class="function">len</span>(ids))
+}
+
+<span class="function">func</span> <span class="function">TestIDsOrdering</span>(t *testing.T) {
+    sf := sonyflake.<span class="function">New</span>(sonyflake.Settings{
+        MachineID: <span class="keyword">func</span>() (<span class="keyword">uint16</span>, <span class="keyword">error</span>) {
+            <span class="keyword">return</span> <span class="number">1</span>, <span class="keyword">nil</span>
+        },
+    })
+    
+    ids := <span class="function">make</span>([]<span class="keyword">uint64</span>, <span class="number">100</span>)
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">100</span>; i++ {
+        id, err := sf.<span class="function">NextID</span>()
+        <span class="keyword">require</span>.<span class="function">NoError</span>(t, err)
+        ids[i] = id
+    }
+    
+    <span class="comment">// 检查顺序性</span>
+    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt; <span class="function">len</span>(ids); i++ {
+        <span class="keyword">assert</span>.<span class="function">Greater</span>(t, ids[i], ids[i-<span class="number">1</span>], <span class="string">"IDs should be monotonically increasing"</span>)
+    }
+}</code></pre>
+            </div>
+            
+            <h3>5. 分布式锁保护</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> idgenerator
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"github.com/go-redsync/redsync/v4"</span>
+    <span class="string">"github.com/go-redsync/redsync/v4/redis/goredis/v8"</span>
+)
+
+<span class="keyword">type</span> DistributedSonyflake <span class="keyword">struct</span> {
+    sf       *sonyflake.Sonyflake
+    redsync  *redsync.Redsync
+    lockName <span class="keyword">string</span>
+}
+
+<span class="function">func</span> <span class="function">NewDistributedSonyflake</span>(sf *sonyflake.Sonyflake, client *redis.Client) *DistributedSonyflake {
+    pool := goredis.<span class="function">NewPool</span>(client)
+    redsync := redsync.<span class="function">New</span>(pool)
+    
+    <span class="keyword">return</span> &amp;DistributedSonyflake{
+        sf:       sf,
+        redsync:  redsync,
+        lockName: <span class="string">"sonyflake:lock"</span>,
+    }
+}
+
+<span class="function">func</span> (d *DistributedSonyflake) <span class="function">NextID</span>() (<span class="keyword">uint64</span>, <span class="keyword">error</span>) {
+    <span class="comment">// 获取分布式锁</span>
+    mutex := d.redsync.<span class="function">NewMutex</span>(d.lockName)
+    
+    <span class="keyword">if</span> err := mutex.<span class="function">Lock</span>(); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="number">0</span>, err
+    }
+    <span class="keyword">defer</span> mutex.<span class="function">Unlock</span>()
+    
+    <span class="comment">// 生成 ID</span>
+    <span class="keyword">return</span> d.sf.<span class="function">NextID</span>()
+}</code></pre>
+            </div>
+            
+            <h3>6. 容器化环境支持</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> idgenerator
+
+<span class="keyword">import</span> (
+    <span class="string">"os"</span>
+    <span class="string">"strconv"</span>
+    <span class="string">"strings"</span>
+)
+
+<span class="comment">// 从环境变量获取机器 ID</span>
+<span class="function">func</span> <span class="function">GetMachineIDFromEnv</span>() (<span class="keyword">uint16</span>, <span class="keyword">error</span>) {
+    <span class="comment">// 1. 尝试从 MACHINE_ID 环境变量获取</span>
+    <span class="keyword">if</span> machineIDStr := os.<span class="function">Getenv</span>(<span class="string">"MACHINE_ID"</span>); machineIDStr != <span class="string">""</span> {
+        machineID, err := strconv.<span class="function">ParseUint</span>(machineIDStr, <span class="number">10</span>, <span class="number">16</span>)
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> <span class="number">0</span>, err
+        }
+        <span class="keyword">if</span> machineID &gt; <span class="number">31</span> {
+            <span class="keyword">return</span> <span class="number">0</span>, fmt.<span class="function">Errorf</span>(<span class="string">"machine ID must be between 0 and 31"</span>)
+        }
+        <span class="keyword">return</span> <span class="keyword">uint16</span>(machineID), <span class="keyword">nil</span>
+    }
+    
+    <span class="comment">// 2. 尝试从 HOSTNAME 环境变量获取（Kubernetes）</span>
+    <span class="keyword">if</span> hostname := os.<span class="function">Getenv</span>(<span class="string">"HOSTNAME"</span>); hostname != <span class="string">""</span> {
+        <span class="comment">// 从 hostname 提取数字部分</span>
+        parts := strings.<span class="function">Split</span>(hostname, <span class="string">"-"</span>)
+        <span class="keyword">if</span> <span class="function">len</span>(parts) &gt; <span class="number">0</span> {
+            lastPart := parts[<span class="function">len</span>(parts)-<span class="number">1</span>]
+            machineID, err := strconv.<span class="function">ParseUint</span>(lastPart, <span class="number">10</span>, <span class="number">16</span>)
+            <span class="keyword">if</span> err == <span class="keyword">nil</span> &amp;&amp; machineID &lt;= <span class="number">31</span> {
+                <span class="keyword">return</span> <span class="keyword">uint16</span>(machineID), <span class="keyword">nil</span>
+            }
+        }
+    }
+    
+    <span class="comment">// 3. 尝试从 POD_NAME 环境变量获取</span>
+    <span class="keyword">if</span> podName := os.<span class="function">Getenv</span>(<span class="string">"POD_NAME"</span>); podName != <span class="string">""</span> {
+        <span class="comment">// 从 pod name 提取数字部分</span>
+        parts := strings.<span class="function">Split</span>(podName, <span class="string">"-"</span>)
+        <span class="keyword">if</span> <span class="function">len</span>(parts) &gt; <span class="number">0</span> {
+            lastPart := parts[<span class="function">len</span>(parts)-<span class="number">1</span>]
+            machineID, err := strconv.<span class="function">ParseUint</span>(lastPart, <span class="number">10</span>, <span class="number">16</span>)
+            <span class="keyword">if</span> err == <span class="keyword">nil</span> &amp;&amp; machineID &lt;= <span class="number">31</span> {
+                <span class="keyword">return</span> <span class="keyword">uint16</span>(machineID), <span class="keyword">nil</span>
+            }
+        }
+    }
+    
+    <span class="keyword">return</span> <span class="number">0</span>, fmt.<span class="function">Errorf</span>(<span class="string">"unable to determine machine ID from environment"</span>)
+}</code></pre>
+            </div>
+            
+            <h3>7. 多实例支持</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> idgenerator
+
+<span class="keyword">type</span> MultiSonyflake <span class="keyword">struct</span> {
+    instances []*sonyflake.Sonyflake
+    current   <span class="keyword">uint64</span>
+}
+
+<span class="function">func</span> <span class="function">NewMultiSonyflake</span>(count <span class="keyword">int</span>) *MultiSonyflake {
+    instances := <span class="function">make</span>([]*sonyflake.Sonyflake, count)
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; count; i++ {
+        machineID := <span class="keyword">uint16</span>(i % <span class="number">32</span>)
+        instances[i] = sonyflake.<span class="function">New</span>(sonyflake.Settings{
+            MachineID: <span class="keyword">func</span>() (<span class="keyword">uint16</span>, <span class="keyword">error</span>) {
+                <span class="keyword">return</span> machineID, <span class="keyword">nil</span>
+            },
+        })
+    }
+    
+    <span class="keyword">return</span> &amp;MultiSonyflake{
+        instances: instances,
+        current:   <span class="number">0</span>,
+    }
+}
+
+<span class="function">func</span> (m *MultiSonyflake) <span class="function">NextID</span>() (<span class="keyword">uint64</span>, <span class="keyword">error</span>) {
+    <span class="comment">// 轮询使用不同的实例</span>
+    index := atomic.<span class="function">AddUint64</span>(&amp;m.current, <span class="number">1</span>) % <span class="keyword">uint64</span>(<span class="function">len</span>(m.instances))
+    <span class="keyword">return</span> m.instances[index].<span class="function">NextID</span>()
+}
+
+<span class="function">func</span> (m *MultiSonyflake) <span class="function">NextIDFromInstance</span>(instanceIndex <span class="keyword">int</span>) (<span class="keyword">uint64</span>, <span class="keyword">error</span>) {
+    <span class="keyword">if</span> instanceIndex &lt; <span class="number">0</span> || instanceIndex &gt;= <span class="function">len</span>(m.instances) {
+        <span class="keyword">return</span> <span class="number">0</span>, fmt.<span class="function">Errorf</span>(<span class="string">"invalid instance index: %d"</span>, instanceIndex)
+    }
+    <span class="keyword">return</span> m.instances[instanceIndex].<span class="function">NextID</span>()
+}</code></pre>
+            </div>
+            
+            <h3>8. 日志记录</h3>
+            <div class="note-box">
+                <pre><code><span class="keyword">package</span> idgenerator
+
+<span class="keyword">import</span> (
+    <span class="string">"log/slog"</span>
+)
+
+<span class="keyword">type</span> LoggedSonyflake <span class="keyword">struct</span> {
+    sf    *sonyflake.Sonyflake
+    logger *slog.Logger
+}
+
+<span class="function">func</span> <span class="function">NewLoggedSonyflake</span>(sf *sonyflake.Sonyflake, logger *slog.Logger) *LoggedSonyflake {
+    <span class="keyword">return</span> &amp;LoggedSonyflake{
+        sf:     sf,
+        logger: logger,
+    }
+}
+
+<span class="function">func</span> (l *LoggedSonyflake) <span class="function">NextID</span>() (<span class="keyword">uint64</span>, <span class="keyword">error</span>) {
+    id, err := l.sf.<span class="function">NextID</span>()
+    
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        l.logger.<span class="function">Error</span>(<span class="string">"failed to generate ID"</span>,
+            slog.<span class="function">String</span>(<span class="string">"error"</span>, err.<span class="function">Error</span>()),
+        )
+        <span class="keyword">return</span> <span class="number">0</span>, err
+    }
+    
+    l.logger.<span class="function">Debug</span>(<span class="string">"generated ID"</span>,
+        slog.<span class="function">Uint64</span>(<span class="string">"id"</span>, id),
+    )
+    
+    <span class="keyword">return</span> id, <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+            
+            <h3>使用场景</h3>
+            <ul>
+                <li><strong>订单 ID 生成</strong>：电商平台订单号生成</li>
+                <li><strong>用户 ID 生成</strong>：社交平台用户 ID 分配</li>
+                <li><strong>消息 ID 生成</strong>：消息队列消息 ID</li>
+                <li><strong>日志追踪</strong>：分布式系统请求追踪 ID</li>
+                <li><strong>数据库主键</strong>：分布式数据库的主键生成</li>
+                <li><strong>文件命名</strong>：云存储文件唯一命名</li>
+            </ul>
+            
+            <h3>注意事项</h3>
+            <ul>
+                <li>Sonyflake 依赖系统时间，确保所有机器时间同步</li>
+                <li>机器 ID 范围为 0-31，最多支持 32 台机器</li>
+                <li>如果时间回退，会返回错误，需要处理</li>
+                <li>在高并发场景下，单机每秒最多生成 128,000 个 ID</li>
+                <li>建议使用集中式服务（如 Redis、Etcd）管理机器 ID</li>
+                <li>在生产环境使用前，进行充分的压力测试</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

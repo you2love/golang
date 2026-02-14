@@ -16,6 +16,324 @@
             <a href="stdlib.html" class="back-link">← 返回 stdlib</a>
             <h2 id="io">io 输入输出</h2>
 
+            <h3>io.Reader 接口</h3>
+            <p><code>io.Reader</code> 是 Go 语言中最基础的读取接口，定义了从数据源读取数据的规范。</p>
+            
+            <pre><code><span class="keyword">type</span> Reader <span class="keyword">interface</span> {
+    <span class="function">Read</span>(p []<span class="keyword">byte</span>) (n <span class="keyword">int</span>, err <span class="keyword">error</span>)
+}</code></pre>
+
+            <div class="info-box">
+                <h3>💡 Reader 接口说明</h3>
+                <ul>
+                    <li><strong>参数 p</strong>：用于存储读取数据的字节切片</li>
+                    <li><strong>返回值 n</strong>：实际读取的字节数（0 ≤ n ≤ len(p)）</li>
+                    <li><strong>返回值 err</strong>：错误信息，io.EOF 表示读取结束</li>
+                    <li><strong>调用契约</strong>：即使读取到错误，也可能返回部分数据</li>
+                </ul>
+            </div>
+
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"io"</span>
+    <span class="string">"strings"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// strings.Reader 实现了 io.Reader 接口</span>
+    reader := strings.<span class="function">NewReader</span>(<span class="string">"Hello, Go!"</span>)
+    
+    <span class="comment">// 创建缓冲区</span>
+    buf := <span class="function">make</span>([]<span class="keyword">byte</span>, <span class="number">4</span>)
+    
+    <span class="comment">// 循环读取</span>
+    <span class="keyword">for</span> {
+        n, err := reader.<span class="function">Read</span>(buf)
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">if</span> err == io.EOF {
+                fmt.<span class="function">Println</span>(<span class="string">"读取完成"</span>)
+            } <span class="keyword">else</span> {
+                fmt.<span class="function">Println</span>(<span class="string">"错误:"</span>, err)
+            }
+            <span class="keyword">break</span>
+        }
+        fmt.<span class="function">Printf</span>(<span class="string">"读取了 %d 字节: %s\n"</span>, n, <span class="keyword">string</span>(buf[:n]))
+    }
+}</code></pre>
+
+            <h3>io.Writer 接口</h3>
+            <p><code>io.Writer</code> 是 Go 语言中最基础的写入接口，定义了向数据目标写入数据的规范。</p>
+            
+            <pre><code><span class="keyword">type</span> Writer <span class="keyword">interface</span> {
+    <span class="function">Write</span>(p []<span class="keyword">byte</span>) (n <span class="keyword">int</span>, err <span class="keyword">error</span>)
+}</code></pre>
+
+            <div class="info-box">
+                <h3>💡 Writer 接口说明</h3>
+                <ul>
+                    <li><strong>参数 p</strong>：要写入的数据字节切片</li>
+                    <li><strong>返回值 n</strong>：实际写入的字节数（0 ≤ n ≤ len(p)）</li>
+                    <li><strong>返回值 err</strong>：错误信息，nil 表示成功</li>
+                    <li><strong>调用契约</strong>：即使返回错误，也可能写入部分数据</li>
+                </ul>
+            </div>
+
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"io"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// os.Stdout 实现了 io.Writer 接口</span>
+    writer := os.Stdout
+    
+    <span class="comment">// 写入数据</span>
+    data := []<span class="keyword">byte</span>(<span class="string">"Hello, Go!\n"</span>)
+    n, err := writer.<span class="function">Write</span>(data)
+    
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"写入错误:"</span>, err)
+    } <span class="keyword">else</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"成功写入 %d 字节\n"</span>, n)
+    }
+}</code></pre>
+
+            <h3>接口组合（Interface Composition）</h3>
+            <p>Go 语言通过接口组合来创建更强大的接口。io 包定义了多个组合接口，将 Reader 和 Writer 与其他接口组合。</p>
+
+            <table>
+                <caption>io 包中的组合接口</caption>
+                <thead>
+                    <tr>
+                        <th>接口</th>
+                        <th>组合方式</th>
+                        <th>说明</th>
+                        <th>典型实现</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>io.ReadWriter</strong></td>
+                        <td>Reader + Writer</td>
+                        <td>可读可写</td>
+                        <td>net.Conn, os.File</td>
+                    </tr>
+                    <tr>
+                        <td><strong>io.ReadCloser</strong></td>
+                        <td>Reader + Closer</td>
+                        <td>可读可关闭</td>
+                        <td>os.File, http.Response.Body</td>
+                    </tr>
+                    <tr>
+                        <td><strong>io.WriteCloser</strong></td>
+                        <td>Writer + Closer</td>
+                        <td>可写可关闭</td>
+                        <td>os.File, http.Request.Body</td>
+                    </tr>
+                    <tr>
+                        <td><strong>io.ReadWriteCloser</strong></td>
+                        <td>Reader + Writer + Closer</td>
+                        <td>可读可写可关闭</td>
+                        <td>net.Conn, os.File</td>
+                    </tr>
+                    <tr>
+                        <td><strong>io.Seeker</strong></td>
+                        <td>独立接口</td>
+                        <td>可定位读写位置</td>
+                        <td>os.File, bytes.Reader</td>
+                    </tr>
+                    <tr>
+                        <td><strong>io.ReadSeeker</strong></td>
+                        <td>Reader + Seeker</td>
+                        <td>可读可定位</td>
+                        <td>os.File, bytes.Reader</td>
+                    </tr>
+                    <tr>
+                        <td><strong>io.WriteSeeker</strong></td>
+                        <td>Writer + Seeker</td>
+                        <td>可写可定位</td>
+                        <td>os.File</td>
+                    </tr>
+                    <tr>
+                        <td><strong>io.ReadWriteSeeker</strong></td>
+                        <td>Reader + Writer + Seeker</td>
+                        <td>可读可写可定位</td>
+                        <td>os.File</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="flowchart">
+                <div class="flowchart-node">Reader</div>
+                <span class="flowchart-arrow">+</span>
+                <div class="flowchart-node">Writer</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">ReadWriter</div>
+                <br><br>
+                <div class="flowchart-node">Reader</div>
+                <span class="flowchart-arrow">+</span>
+                <div class="flowchart-node">Closer</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">ReadCloser</div>
+                <br><br>
+                <div class="flowchart-node">Reader</div>
+                <span class="flowchart-arrow">+</span>
+                <div class="flowchart-node">Writer</div>
+                <span class="flowchart-arrow">+</span>
+                <div class="flowchart-node">Closer</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">ReadWriteCloser</div>
+            </div>
+
+            <div class="success-box">
+                <h3>✅ 接口组合的优势</h3>
+                <ul>
+                    <li><strong>灵活性</strong>：可以根据需要组合不同的接口</li>
+                    <li><strong>类型安全</strong>：编译时检查接口实现</li>
+                    <li><strong>代码复用</strong>：避免重复定义相似的功能</li>
+                    <li><strong>向后兼容</strong>：可以轻松扩展现有接口</li>
+                </ul>
+            </div>
+
+            <h3>自定义组合接口</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"io"</span>
+)
+
+<span class="comment">// 自定义组合接口</span>
+<span class="keyword">type</span> FileHandler <span class="keyword">interface</span> {
+    io.Reader
+    io.Writer
+    io.Closer
+    <span class="function">Name</span>() <span class="keyword">string</span>
+}
+
+<span class="keyword">type</span> MyFile <span class="keyword">struct</span> {
+    name <span class="keyword">string</span>
+    data []<span class="keyword">byte</span>
+    pos  <span class="keyword">int</span>
+}
+
+<span class="keyword">func</span> (f *MyFile) <span class="function">Read</span>(p []<span class="keyword">byte</span>) (n <span class="keyword">int</span>, err <span class="keyword">error</span>) {
+    <span class="keyword">if</span> f.pos >= <span class="function">len</span>(f.data) {
+        <span class="keyword">return</span> <span class="number">0</span>, io.EOF
+    }
+    n = <span class="function">copy</span>(p, f.data[f.pos:])
+    f.pos += n
+    <span class="keyword">return</span> n, <span class="keyword">nil</span>
+}
+
+<span class="keyword">func</span> (f *MyFile) <span class="function">Write</span>(p []<span class="keyword">byte</span>) (n <span class="keyword">int</span>, err <span class="keyword">error</span>) {
+    f.data = <span class="function">append</span>(f.data, p...)
+    <span class="keyword">return</span> <span class="function">len</span>(p), <span class="keyword">nil</span>
+}
+
+<span class="keyword">func</span> (f *MyFile) <span class="function">Close</span>() <span class="keyword">error</span> {
+    fmt.<span class="function">Printf</span>(<span class="string">"File %s closed\n"</span>, f.name)
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="keyword">func</span> (f *MyFile) <span class="function">Name</span>() <span class="keyword">string</span> {
+    <span class="keyword">return</span> f.name
+}
+
+<span class="function">func</span> <span class="function">processFile</span>(handler FileHandler) <span class="keyword">error</span> {
+    fmt.<span class="function">Printf</span>(<span class="string">"Processing file: %s\n"</span>, handler.<span class="function">Name</span>())
+    
+    <span class="comment">// 写入数据</span>
+    _, err := handler.<span class="function">Write</span>([]<span class="keyword">byte</span>(<span class="string">"Hello, World!"</span>))
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="comment">// 读取数据</span>
+    buf := <span class="function">make</span>([]<span class="keyword">byte</span>, <span class="number">100</span>)
+    n, err := handler.<span class="function">Read</span>(buf)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> && err != io.EOF {
+        <span class="keyword">return</span> err
+    }
+    fmt.<span class="function">Printf</span>(<span class="string">"Read: %s\n"</span>, <span class="keyword">string</span>(buf[:n]))
+    
+    <span class="comment">// 关闭文件</span>
+    <span class="keyword">return</span> handler.<span class="function">Close</span>()
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    file := &MyFile{
+        name: <span class="string">"test.txt"</span>,
+        data: []<span class="keyword">byte</span>(<span class="string">"Initial content"</span>),
+    }
+    
+    err := <span class="function">processFile</span>(file)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+    }
+}</code></pre>
+
+            <h3>接口组合的实际应用</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"bytes"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"io"</span>
+)
+
+<span class="comment">// 通用的数据处理器</span>
+<span class="function">func</span> <span class="function">processData</span>(r io.Reader, w io.Writer) <span class="keyword">error</span> {
+    <span class="comment">// 从 Reader 读取数据</span>
+    data, err := io.<span class="function">ReadAll</span>(r)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="comment">// 处理数据（转换为大写）</span>
+    <span class="keyword">for</span> i := <span class="keyword">range</span> data {
+        <span class="keyword">if</span> data[i] >= <span class="string">'a'</span> && data[i] <= <span class="string">'z'</span> {
+            data[i] -= <span class="number">32</span>
+        }
+    }
+    
+    <span class="comment">// 写入到 Writer</span>
+    _, err = w.<span class="function">Write</span>(data)
+    <span class="keyword">return</span> err
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 使用 bytes.Buffer 作为 Reader 和 Writer</span>
+    input := bytes.<span class="function">NewBufferString</span>(<span class="string">"hello, world!"</span>)
+    output := &bytes.Buffer{}
+    
+    <span class="comment">// 处理数据</span>
+    err := <span class="function">processData</span>(input, output)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Input:"</span>, input.<span class="function">String</span>())
+    fmt.<span class="function">Println</span>(<span class="string">"Output:"</span>, output.<span class="function">String</span>())
+}</code></pre>
+
+            <div class="warning-box">
+                <h3>⚠️ 接口使用注意事项</h3>
+                <ul>
+                    <li><strong>接口是隐式实现的</strong>：不需要显式声明实现某个接口</li>
+                    <li><strong>接口值是 nil 安全的</strong>：调用 nil 接口的方法会 panic</li>
+                    <li><strong>接口组合是类型安全的</strong>：编译时会检查所有方法是否实现</li>
+                    <li><strong>避免过度组合</strong>：接口应该小而专注，遵循最小接口原则</li>
+                    <li><strong>文档化接口契约</strong>：清晰说明接口的行为和约束</li>
+                </ul>
+            </div>
+
             <h3>读取文件</h3>
             <pre><code><span class="keyword">package</span> main
 
@@ -170,6 +488,8 @@
             
         </div>
     </div>
+<script src="code-collapse.js"></script>
+
 </body>
     <script src="navigation.js"></script>
 </html>

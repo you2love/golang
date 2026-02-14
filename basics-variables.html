@@ -4,46 +4,299 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>变量声明 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.3">
-    </head>
+    <title>变量 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+    <script src="code-collapse.js"></script>
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="basics.html" class="back-link">← 返回 basics</a>
-            <h2 id="variables">变量声明</h2>
-            <p>Go 语言有多种声明变量的方式：</p>
+            <!-- 导航栏将通过JavaScript动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="index.html" class="back-link">← 返回首页</a>
+            
+            <h1>变量</h1>
+            
+            <p>变量是程序中用于存储数据的基本单位。Go 语言提供了多种声明变量的方式，让我们学习如何高效地使用它们。</p>
 
+            <div class="info-box">
+                <h3>📌 变量定义的四种方式</h3>
+                <p>Go 语言提供了四种声明变量的方式，选择合适的方式可以让代码更简洁、更易读。</p>
+            </div>
+
+            <h2 id="methods">变量声明方式</h2>
+
+            <table>
+                <caption>变量声明方式对比</caption>
+                <thead>
+                    <tr>
+                        <th>方式</th>
+                        <th>语法</th>
+                        <th>示例</th>
+                        <th>适用场景</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>var</code> 关键字</td>
+                        <td><code>var name type</code></td>
+                        <td><code>var name string</code></td>
+                        <td>需要明确类型或零值初始化</td>
+                    </tr>
+                    <tr>
+                        <td>短变量声明</td>
+                        <td><code>name := value</code></td>
+                        <td><code>name := "Go"</code></td>
+                        <td>函数内部，类型可推断</td>
+                    </tr>
+                    <tr>
+                        <td>批量声明</td>
+                        <td><code>var (name1, name2 type)</code></td>
+                        <td><code>var (x, y int)</code></td>
+                        <td>声明多个同类型变量</td>
+                    </tr>
+                    <tr>
+                        <td>零值初始化</td>
+                        <td><code>var name type = value</code></td>
+                        <td><code>var name string = ""</code></td>
+                        <td>明确初始化值</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 id="examples">代码示例</h2>
+
+            <h3>1. 基础变量声明</h3>
             <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
 <span class="function">func</span> <span class="function">main</span>() {
     <span class="comment">// 方式1：使用 var 关键字</span>
-    <span class="keyword">var</span> name <span class="keyword">string</span> = <span class="string">"Go"</span>
-    <span class="keyword">var</span> age <span class="keyword">int</span> = <span class="number">10</span>
+    <span class="keyword">var</span> name <span class="keyword">string</span> = <span class="string">"Go 语言"</span>
+    fmt.<span class="function">Println</span>(<span class="string">"名字:"</span>, name)
 
-    <span class="comment">// 方式2：类型推断</span>
-    <span class="keyword">var</span> language = <span class="string">"Golang"</span>
+    <span class="comment">// 方式2：短变量声明（函数内）</span>
+    age := <span class="number">10</span>
+    fmt.<span class="function">Println</span>(<span class="string">"年龄:"</span>, age)
 
-    <span class="comment">// 方式3：短变量声明（最常用）</span>
-    version := <span class="string">"1.21"</span>
-
-    <span class="comment">// 方式4：声明多个变量</span>
-    <span class="keyword">var</span> (
-        x <span class="keyword">int</span> = <span class="number">1</span>
-        y <span class="keyword">int</span> = <span class="number">2</span>
-    )
-
-    fmt.<span class="function">Println</span>(name, age, language, version, x, y)
+    <span class="comment">// 方式3：类型推断</span>
+    <span class="keyword">var</span> height = <span class="number">1.75</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"身高: %.2f 米\n"</span>, height)
 }</code></pre>
 
-            
+            <h3>2. 批量声明变量</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 批量声明不同类型</span>
+    <span class="keyword">var</span> (
+        name   <span class="keyword">string</span>  = <span class="string">"张三"</span>
+        age    <span class="keyword">int</span>     = <span class="number">25</span>
+        height <span class="keyword">float64</span> = <span class="number">1.75</span>
+        isMale <span class="keyword">bool</span>    = <span class="keyword">true</span>
+    )
+
+    fmt.<span class="function">Printf</span>(<span class="string">"姓名: %s, 年龄: %d, 身高: %.2f, 性别: %t\n"</span>, 
+        name, age, height, isMale)
+}</code></pre>
+
+            <h3>3. 多变量赋值</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 交换两个变量的值</span>
+    a, b := <span class="number">1</span>, <span class="number">2</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"交换前: a=%d, b=%d\n"</span>, a, b)
+    
+    a, b = b, a
+    fmt.<span class="function">Printf</span>(<span class="string">"交换后: a=%d, b=%d\n"</span>, a, b)
+
+    <span class="comment">// 函数返回多值</span>
+    sum, diff := <span class="function">calculate</span>(<span class="number">10</span>, <span class="number">5</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"和: %d, 差: %d\n"</span>, sum, diff)
+}
+
+<span class="function">func</span> <span class="function">calculate</span>(a, b <span class="keyword">int</span>) (<span class="keyword">int</span>, <span class="keyword">int</span>) {
+    <span class="keyword">return</span> a + b, a - b
+}</code></pre>
+
+            <h2 id="types">数据类型</h2>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon">🔤</div>
+                    <h4>字符串</h4>
+                    <p>使用 string 关键字声明，不可变序列</p>
+                    <pre><code><span class="keyword">var</span> s <span class="keyword">string</span> = <span class="string">"Hello"</span></code></pre>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔢</div>
+                    <h4>整数</h4>
+                    <p>int, int8, int16, int32, int64</p>
+                    <pre><code><span class="keyword">var</span> n <span class="keyword">int</span> = <span class="number">42</span></code></pre>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔵</div>
+                    <h4>浮点数</h4>
+                    <p>float32, float64</p>
+                    <pre><code><span class="keyword">var</span> f <span class="keyword">float64</span> = <span class="number">3.14</span></code></pre>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">✅</div>
+                    <h4>布尔值</h4>
+                    <p>true 或 false</p>
+                    <pre><code><span class="keyword">var</span> b <span class="keyword">bool</span> = <span class="keyword">true</span></code></pre>
+                </div>
+            </div>
+
+            <h2 id="zero-values">零值</h2>
+
+            <div class="example-box">
+                <h3>什么是零值？</h3>
+                <p>Go 语言中，变量声明时如果没有显式初始化，会自动赋值为该类型的零值。</p>
+            </div>
+
+            <table class="comparison-table">
+                <caption>各类型的零值</caption>
+                <thead>
+                    <tr>
+                        <th>类型</th>
+                        <th>零值</th>
+                        <th>示例</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>int, int8, int16, int32, int64</td>
+                        <td>0</td>
+                        <td><code>var n int // n = 0</code></td>
+                    </tr>
+                    <tr>
+                        <td>uint, uint8, uint16, uint32, uint64</td>
+                        <td>0</td>
+                        <td><code>var n uint // n = 0</code></td>
+                    </tr>
+                    <tr>
+                        <td>float32, float64</td>
+                        <td>0.0</td>
+                        <td><code>var f float64 // f = 0.0</code></td>
+                    </tr>
+                    <tr>
+                        <td>bool</td>
+                        <td>false</td>
+                        <td><code>var b bool // b = false</code></td>
+                    </tr>
+                    <tr>
+                        <td>string</td>
+                        <td>"" (空字符串)</td>
+                        <td><code>var s string // s = ""</code></td>
+                    </tr>
+                    <tr>
+                        <td>pointer, slice, map, channel</td>
+                        <td>nil</td>
+                        <td><code>var p *int // p = nil</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning-box">
+                <h3>⚠️ 注意事项</h3>
+                <ul>
+                    <li>未初始化的指针使用会导致 <strong>panic</strong></li>
+                    <li>零值 nil 与空字符串 <code>""</code> 是不同的</li>
+                    <li>nil slice 可以安全使用，但 nil pointer 不行</li>
+                </ul>
+            </div>
+
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ 推荐做法</h3>
+                <ul>
+                    <li><strong>函数内部</strong>：使用短变量声明 <code>:=</code></li>
+                    <li><strong>需要零值</strong>：使用 <code>var</code> 声明</li>
+                    <li><strong>批量声明</strong>：使用 <code>var ()</code> 语法</li>
+                    <li><strong>命名规范</strong>：使用驼峰命名法（camelCase）</li>
+                </ul>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">
+                    <span>查看完整代码示例</span>
+                    <span class="icon">▼</span>
+                </div>
+                <div class="collapsible-content">
+                    <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 推荐做法示例</span>
+    
+    <span class="comment">// 1. 函数内使用短变量声明</span>
+    <span class="keyword">if</span> err := <span class="function">doSomething</span>(); err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="comment">// 2. 需要零值时使用 var</span>
+    <span class="keyword">var</span> counter <span class="keyword">int</span>  <span class="comment">// counter = 0</span>
+    
+    <span class="comment">// 3. 批量声明相关变量</span>
+    <span class="keyword">var</span> (
+        userName  <span class="keyword">string</span>
+        userEmail <span class="keyword">string</span>
+        userAge   <span class="keyword">int</span>
+    )
+    
+    <span class="comment">// 4. 有意义的变量名</span>
+    <span class="keyword">var</span> maxRetryCount = <span class="number">3</span>
+    <span class="keyword">var</span> isActive = <span class="keyword">true</span>
+}
+
+<span class="function">func</span> <span class="function">doSomething</span>() <span class="keyword">error</span> {
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+                </div>
+            </div>
+
+            <h2 id="flowchart">变量声明流程</h2>
+
+            <div class="flowchart">
+                <div class="flowchart-node">开始声明变量</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">确定使用场景</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">选择声明方式</div>
+                <br><br>
+                <div class="flowchart-node">函数内?</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">使用 :=</div>
+                <br>
+                <div class="flowchart-node">需要零值?</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">使用 var</div>
+                <br>
+                <div class="flowchart-node">批量声明?</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">使用 var ()</div>
+            </div>
+
+            <div class="note-box">
+                <h3>💡 快捷键</h3>
+                <ul>
+                    <li><kbd>Ctrl/Cmd + K</kbd> - 切换所有代码块</li>
+                    <li><kbd>Ctrl/Cmd + Shift + K</kbd> - 展开所有代码块</li>
+                </ul>
+            </div>
         </div>
     </div>
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

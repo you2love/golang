@@ -26,11 +26,388 @@
                     <li><strong>零依赖</strong>：不需要额外的依赖管理</li>
                     <li><strong>简单易用</strong>：通过 //go:embed 指令声明</li>
                 </ul>
+            </div>
+
+            <h3>嵌入单个文件为字符串</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">_ "embed"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="comment">//go:embed config.txt</span>
+<span class="keyword">var</span> configFile <span class="keyword">string</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    fmt.<span class="function">Println</span>(<span class="string">"配置文件内容:"</span>)
+    fmt.<span class="function">Println</span>(configFile)
+}</code></pre>
+
+            <p><strong>config.txt 文件内容：</strong></p>
+            <pre><code>app.name=MyApp
+app.version=1.0.0
+debug=true</code></pre>
+
+            <h3>嵌入单个文件为字节切片</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">_ "embed"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="comment">//go:embed logo.png</span>
+<span class="keyword">var</span> logo []<span class="keyword">byte</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    fmt.<span class="function">Printf</span>(<span class="string">"Logo 大小: %d 字节\n"</span>, <span class="function">len</span>(logo))
+    fmt.<span class="function">Printf</span>(<span class="string">"Logo 前几个字节: %x\n"</span>, logo[:<span class="function">min</span>(<span class="number">10</span>, <span class="function">len</span>(logo))])
+}</code></pre>
+
+            <h3>嵌入多个文件为文件系统</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"io/fs"</span>
+)
+
+<span class="comment">//go:embed templates/*.html</span>
+<span class="keyword">var</span> templatesFS embed.FS
+
+<span class="function">func</span> <span class="function">main</span>() {
+    fmt.<span class="function">Println</span>(<span class="string">"读取模板文件:"</span>)
+    
+    <span class="comment">// 遍历文件系统</span>
+    err := fs.<span class="function">WalkDir</span>(templatesFS, <span class="string">"."</span>, <span class="keyword">func</span>(path <span class="keyword">string</span>, d fs.DirEntry, err <span class="keyword">error</span>) <span class="keyword">error</span> {
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> err
+        }
+        
+        <span class="keyword">if</span> !d.<span class="function">IsDir</span>() {
+            fmt.<span class="function">Printf</span>(<span class="string">"文件: %s\n"</span>, path)
+            
+            <span class="comment">// 读取文件内容</span>
+            content, err := fs.<span class="function">ReadFile</span>(templatesFS, path)
+            <span class="keyword">if</span> err == <span class="keyword">nil</span> {
+                fmt.<span class="function">Printf</span>(<span class="string">"内容: %s\n"</span>, <span class="keyword">string</span>(content))
+            }
+        }
+        <span class="keyword">return</span> <span class="keyword">nil</span>
+    })
+    
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"错误:"</span>, err)
+    }
+}</code></pre>
+
+            <h3>嵌入整个目录</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"io/fs"</span>
+    <span class="string">"log"</span>
+    <span class="string">"net/http"</span>
+)
+
+<span class="comment">//go:embed static</span>
+<span class="keyword">var</span> staticFS embed.FS
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 列出嵌入的静态文件</span>
+    err := fs.<span class="function">WalkDir</span>(staticFS, <span class="string">"static"</span>, <span class="keyword">func</span>(path <span class="keyword">string</span>, d fs.DirEntry, err <span class="keyword">error</span>) <span class="keyword">error</span> {
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> err
+        }
+        <span class="keyword">if</span> d.<span class="function">IsDir</span>() {
+            fmt.<span class="function">Printf</span>(<span class="string">"目录: %s\n"</span>, path)
+        } <span class="keyword">else</span> {
+            fmt.<span class="function">Printf</span>(<span class="string">"文件: %s\n"</span>, path)
+        }
+        <span class="keyword">return</span> <span class="keyword">nil</span>
+    })
+    
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        log.<span class="function">Fatal</span>(err)
+    }
+    
+    <span class="comment">// 创建 HTTP 服务器</span>
+    <span class="comment">// 注意：需要使用 fs.Sub 来去掉 "static" 前缀</span>
+    staticFiles, err := fs.<span class="function">Sub</span>(staticFS, <span class="string">"static"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        log.<span class="function">Fatal</span>(err)
+    }
+    
+    http.<span class="function">Handle</span>(<span class="string">"/"</span>, http.<span class="function">FileServer</span>(http.FS(staticFiles)))
+    fmt.<span class="function">Println</span>(<span class="string">"服务器启动在 http://localhost:8080"</span>)
+    log.<span class="function">Fatal</span>(http.<span class="function">ListenAndServe</span>(<span class="string">":8080"</span>, <span class="keyword">nil</span>))
+}</code></pre>
+
+            <div class="info-box">
+                <h3>💡 目录结构示例</h3>
+                <pre><code>project/
+├── main.go
+├── config.txt
+├── logo.png
+└── static/
+    ├── index.html
+    ├── css/
+    │   └── style.css
+    └── js/
+        └── app.js
+</code></pre>
+            </div>
+
+            <h3>嵌入 HTML 模板</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"html/template"</span>
+)
+
+<span class="comment">//go:embed templates/index.html</span>
+<span class="keyword">var</span> indexTemplate <span class="keyword">string</span>
+
+<span class="comment">//go:embed templates/*.html</span>
+<span class="keyword">var</span> templatesFS embed.FS
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 方法1：直接使用字符串</span>
+    tmpl, err := template.<span class="function">New</span>(<span class="string">"index"</span>).<span class="function">Parse</span>(indexTemplate)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"解析模板错误:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="comment">// 方法2：使用文件系统</span>
+    tmplFS, err := template.<span class="function">ParseFS</span>(templatesFS, <span class="string">"templates/*.html"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"解析模板错误:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    data := <span class="keyword">struct</span> {
+        Title   <span class="keyword">string</span>
+        Message <span class="keyword">string</span>
+    }{
+        Title:   <span class="string">"欢迎"</span>,
+        Message: <span class="string">"Hello, Go Embed!"</span>,
+    }
+    
+    err = tmpl.<span class="function">Execute</span>(<span class="keyword">nil</span>, data)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"执行模板错误:"</span>, err)
+    }
+    
+    <span class="comment">// 使用文件系统模板</span>
+    err = tmplFS.<span class="function">ExecuteTemplate</span>(<span class="keyword">nil</span>, <span class="string">"index.html"</span>, data)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"执行模板错误:"</span>, err)
+    }
+}</code></pre>
+
+            <h3>嵌入配置文件（JSON/YAML）</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">_ "embed"</span>
+    <span class="string">"encoding/json"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="comment">//go:embed config.json</span>
+<span class="keyword">var</span> configFile <span class="keyword">string</span>
+
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    AppName <span class="keyword">string</span> <span class="string">`json:"app_name"`</span>
+    Version <span class="keyword">string</span> <span class="string">`json:"version"`</span>
+    Debug   <span class="keyword">bool</span>   <span class="string">`json:"debug"`</span>
+    Server  <span class="keyword">struct</span> {
+        Host <span class="keyword">string</span> <span class="string">`json:"host"`</span>
+        Port <span class="keyword">int</span>    <span class="string">`json:"port"`</span>
+    } <span class="string">`json:"server"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> config Config
+    
+    err := json.<span class="function">Unmarshal</span>([]<span class="keyword">byte</span>(configFile), &config)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"解析配置错误:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"应用名称: %s\n"</span>, config.AppName)
+    fmt.<span class="function">Printf</span>(<span class="string">"版本: %s\n"</span>, config.Version)
+    fmt.<span class="function">Printf</span>(<span class="string">"调试模式: %v\n"</span>, config.Debug)
+    fmt.<span class="function">Printf</span>(<span class="string">"服务器: %s:%d\n"</span>, config.Server.Host, config.Server.Port)
+}</code></pre>
+
+            <p><strong>config.json 文件内容：</strong></p>
+            <pre><code>{
+    "app_name": "MyGoApp",
+    "version": "1.0.0",
+    "debug": true,
+    "server": {
+        "host": "localhost",
+        "port": 8080
+    }
+}</code></pre>
+
+            <h3>使用通配符</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"io/fs"</span>
+)
+
+<span class="comment">// 嵌入所有 .txt 文件</span>
+<span class="comment">//go:embed *.txt</span>
+<span class="keyword">var</span> textFiles embed.FS
+
+<span class="comment">// 嵌入所有文件（包括子目录）</span>
+<span class="comment">//go:embed all:*</span>
+<span class="keyword">var</span> allFiles embed.FS
+
+<span class="comment">// 嵌入特定模式</span>
+<span class="comment">//go:embed data/*.json</span>
+<span class="keyword">var</span> jsonFiles embed.FS
+
+<span class="function">func</span> <span class="function">main</span>() {
+    fmt.<span class="function">Println</span>(<span class="string">"所有文本文件:"</span>)
+    fs.<span class="function">WalkDir</span>(textFiles, <span class="string">"."</span>, <span class="keyword">func</span>(path <span class="keyword">string</span>, d fs.DirEntry, err <span class="keyword">error</span>) <span class="keyword">error</span> {
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> || d.<span class="function">IsDir</span>() {
+            <span class="keyword">return</span> err
+        }
+        fmt.<span class="function">Printf</span>(<span class="string">"  - %s\n"</span>, path)
+        <span class="keyword">return</span> <span class="keyword">nil</span>
+    })
+    
+    fmt.<span class="function">Println</span>(<span class="string">"\n所有 JSON 文件:"</span>)
+    fs.<span class="function">WalkDir</span>(jsonFiles, <span class="string">"."</span>, <span class="keyword">func</span>(path <span class="keyword">string</span>, d fs.DirEntry, err <span class="keyword">error</span>) <span class="keyword">error</span> {
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> || d.<span class="function">IsDir</span>() {
+            <span class="keyword">return</span> err
+        }
+        fmt.<span class="function">Printf</span>(<span class="string">"  - %s\n"</span>, path)
+        <span class="keyword">return</span> <span class="keyword">nil</span>
+    })
+}</code></pre>
+
+            <div class="warning-box">
+                <h3>⚠️ Embed 使用注意事项</h3>
+                <ul>
+                    <li><strong>//go:embed 指令位置</strong>：必须在变量声明紧上方，中间不能有空行</li>
+                    <li><strong>变量类型限制</strong>：只能是 string、[]byte 或 embed.FS 类型</li>
+                    <li><strong>路径限制</strong>：路径必须是相对路径，不能包含 .. 或绝对路径</li>
+                    <li><strong>文件大小</strong>：嵌入大文件会增加二进制文件大小</li>
+                    <li><strong>跨平台路径</strong>：使用 / 作为路径分隔符，自动处理不同系统</li>
+                    <li><strong>构建限制</strong>：go run 支持嵌入，但某些构建工具可能不支持</li>
+                </ul>
+            </div>
+
+            <h3>完整的 Web 服务器示例</h3>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"io/fs"</span>
+    <span class="string">"log"</span>
+    <span class="string">"net/http"</span>
+)
+
+<span class="comment">//go:embed static</span>
+<span class="keyword">var</span> staticFS embed.FS
+
+<span class="comment">//go:embed templates/*.html</span>
+<span class="keyword">var</span> templatesFS embed.FS
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 设置静态文件服务</span>
+    staticFiles, err := fs.<span class="function">Sub</span>(staticFS, <span class="string">"static"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        log.<span class="function">Fatal</span>(err)
+    }
+    http.<span class="function">Handle</span>(<span class="string">"/static/"</span>, http.<span class="function">FileServer</span>(http.FS(staticFiles)))
+    
+    <span class="comment">// 设置主页</span>
+    http.<span class="function">HandleFunc</span>(<span class="string">"/"</span>, <span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) {
+        content, err := fs.<span class="function">ReadFile</span>(templatesFS, <span class="string">"templates/index.html"</span>)
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            http.<span class="function">Error</span>(w, err.<span class="function">Error</span>(), http.StatusInternalServerError)
+            <span class="keyword">return</span>
+        }
+        w.<span class="function">Header</span>().<span class="function">Set</span>(<span class="string">"Content-Type"</span>, <span class="string">"text/html; charset=utf-8"</span>)
+        w.<span class="function">Write</span>(content)
+    })
+    
+    <span class="comment">// API 端点</span>
+    http.<span class="function">HandleFunc</span>(<span class="string">"/api/status"</span>, <span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) {
+        w.<span class="function">Header</span>().<span class="function">Set</span>(<span class="string">"Content-Type"</span>, <span class="string">"application/json"</span>)
+        fmt.<span class="function">Fprint</span>(w, <span class="string">`{"status": "ok", "message": "Server is running"}`</span>)
+    })
+    
+    fmt.<span class="function">Println</span>(<span class="string">"服务器启动在 http://localhost:8080"</span>)
+    log.<span class="function">Fatal</span>(http.<span class="function">ListenAndServe</span>(<span class="string">":8080"</span>, <span class="keyword">nil</span>))
+}</code></pre>
+
+            <table>
+                <caption>Embed 支持的类型和用法</caption>
+                <thead>
+                    <tr>
+                        <th>类型</th>
+                        <th>用途</th>
+                        <th>示例</th>
+                        <th>适用场景</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>string</strong></td>
+                        <td>嵌入为字符串</td>
+                        <td><code>var s string</code></td>
+                        <td>文本文件、配置文件</td>
+                    </tr>
+                    <tr>
+                        <td><strong>[]byte</strong></td>
+                        <td>嵌入为字节切片</td>
+                        <td><code>var b []byte</code></td>
+                        <td>二进制文件、图片、压缩包</td>
+                    </tr>
+                    <tr>
+                        <td><strong>embed.FS</strong></td>
+                        <td>嵌入为文件系统</td>
+                        <td><code>var fsys embed.FS</code></td>
+                        <td>目录、多个文件</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="success-box">
+                <h3>✅ Embed 的最佳实践</h3>
+                <ul>
+                    <li><strong>小文件优先</strong>：只嵌入必要的小文件，避免嵌入大文件</li>
+                    <li><strong>静态资源</strong>：适合嵌入静态 HTML、CSS、JS 等资源</li>
+                    <li><strong>配置文件</strong>：适合嵌入默认配置或示例配置</li>
+                    <li><strong>版本控制</strong>：嵌入的文件会被包含在版本控制中</li>
+                    <li><strong>构建优化</strong>：使用构建标签控制不同环境下的嵌入</li>
+                </ul>
+            </div>
             
 
 
         </div>
     </div>
+<script src="code-collapse.js"></script>
+
 </body>
     <script src="navigation.js"></script>
 </html>

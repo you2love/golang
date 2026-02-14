@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OOM 分析 - Go 教程</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <!-- 导航栏将通过JavaScript动态加载 -->
+        </div>
+        
+        <div class="content">
+            <h1>OOM 分析</h1>
+            
+            <p>OOM（Out of Memory）是 Go 程序中最常见的故障之一。当程序请求的内存超过系统限制时，会被操作系统终止。本文将深入分析 OOM 现象、常见原因，以及如何使用工具来避免和发现 OOM 问题。</p>
+            
+            <h2>什么是 OOM？</h2>
+            
+            <p>OOM（Out of Memory）是指程序尝试分配的内存超过了系统或进程的限制，导致操作系统强制终止进程。在 Go 中，OOM 通常表现为：</p>
+            
+            <ul>
+                <li>程序突然崩溃</li>
+                <li>进程被操作系统杀死（被 kill -9）</li>
+                <li>Docker 容器被终止</li>
+                <li>Kubernetes Pod 被 OOMKilled</li>
+            </ul>
+            
+            <h3>OOM 的表现形式</h3>
+            
+            <pre><code><span class="comment"># 在 Linux 系统中，可以看到 OOM 日志</span>
+dmesg | grep -i "out of memory"
+
+<span class="comment"># 示例输出：</span>
+[12345.678901] Out of memory: Kill process 12345 (myapp) score 900 or sacrifice child
+[12345.678902] Killed process 12345 (myapp) total-vm: 1234567kB, anon-rss: 456789kB, file-rss: 12345kB</code></pre>
+            
+            <h2>常见 OOM 原因</h2>
+            
+            <h3>1. 内存泄漏</h3>
+            <p>最常见的原因是内存泄漏，即程序持续分配内存但从未释放。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="keyword">var</span> globalCache <span class="keyword">map</span>[<span class="keyword">string</span>][]<span class="keyword">byte</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    globalCache = <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>][]<span class="keyword">byte</span>)
+    
+    <span class="keyword">for</span> i := 0; i < 1000000; i++ {
+        <span class="comment">// 持续向全局缓存添加数据，永不清理</span>
+        key := fmt.<span class="function">Sprintf</span>(<span class="string">"key-%d"</span>, i)
+        globalCache[key] = <span class="function">make</span>([]<span class="keyword">byte</span>, 1024*1024) <span class="comment">// 1MB</span>
+        time.<span class="function">Sleep</span>(time.Millisecond)
+    }
+}</code></pre>
+            
+            <h3>2. 切片持续增长</h3>
+            <p>切片的容量增长策略可能导致内存使用超出预期。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> data []<span class="keyword">int</span>
+    
+    <span class="keyword">for</span> i := 0; i < 100000000; i++ {
+        data = <span class="function">append</span>(data, i)
+        <span class="comment">// 切片容量会不断增长，可能导致大量内存分配</span>
+    }
+    fmt.<span class="function">Println</span>(<span class="function">len</span>(data), <span class="function">cap</span>(data))
+}</code></pre>
+            
+            <h3>3. Goroutine 泄漏</h3>
+            <p>创建的 goroutine 永不退出，导致栈内存持续增长。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">leakyGoroutine</span>(ch <span class="keyword">chan</span> <span class="keyword">struct</span>{}) {
+    <span class="comment">// 如果 ch 永不关闭，这个 goroutine 永不退出</span>
+    <-ch
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>{})
+    
+    <span class="keyword">for</span> i := 0; i < 100000; i++ {
+        <span class="keyword">go</span> <span class="function">leakyGoroutine</span>(ch)
+    }
+    
+    time.<span class="function">Sleep</span>(time.Hour)
+}</code></pre>
+            
+            <h3>4. 大对象分配</h3>
+            <p>一次性分配过大的对象。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 一次性分配 1GB 内存</span>
+    hugeData := <span class="function">make</span>([]<span class="keyword">byte</span>, 1024*1024*1024)
+    fmt.<span class="function">Println</span>(<span class="function">len</span>(hugeData))
+}</code></pre>
+            
+            <h3>5. 缓存无限制增长</h3>
+            <p>缓存没有大小限制，导致无限增长。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"sync"</span>
+)
+
+<span class="keyword">type</span> Cache <span class="keyword">struct</span> {
+    mu    sync.RWMutex
+    data  <span class="keyword">map</span>[<span class="keyword">string</span>][]<span class="keyword">byte</span>
+}
+
+<span class="function">func</span> (c *Cache) <span class="function">Add</span>(key <span class="keyword">string</span>, value []<span class="keyword">byte</span>) {
+    c.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    c.data[key] = value  <span class="comment">// 没有大小限制</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    cache := &Cache{
+        data: <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>][]<span class="keyword">byte</span>),
+    }
+    
+    <span class="keyword">for</span> i := 0; i < 100000; i++ {
+        cache.<span class="function">Add</span>(fmt.<span class="function">Sprintf</span>(<span class="string">"key-%d"</span>, i), <span class="function">make</span>([]<span class="keyword">byte</span>, 1024*1024))
+    }
+}</code></pre>
+            
+            <h3>6. 未关闭的文件或连接</h3>
+            <p>文件句柄或网络连接未关闭，导致资源泄漏。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">for</span> i := 0; i < 100000; i++ {
+        file, _ := os.<span class="function">Open</span>(fmt.<span class="function">Sprintf</span>(<span class="string">"file-%d.txt"</span>, i))
+        <span class="comment">// 忘记关闭文件，导致文件句柄泄漏</span>
+        _ = file
+    }
+}</code></pre>
+            
+            <h3>7. JSON 解析大文件</h3>
+            <p>一次性解析过大的 JSON 文件到内存。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    file, _ := os.<span class="function">Open</span>(<span class="string">"huge.json"</span>)
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    <span class="keyword">var</span> data <span class="keyword">interface</span>{ }
+    decoder := json.<span class="function">NewDecoder</span>(file)
+    <span class="comment">// 如果文件很大，这会导致 OOM</span>
+    decoder.<span class="function">Decode</span>(&data)
+}</code></pre>
+            
+            <h2>如何避免 OOM</h2>
+            
+            <h3>1. 使用限流和限速</h3>
+            <p>限制请求速率和并发数，防止系统过载。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="keyword">type</span> RateLimiter <span class="keyword">struct</span> {
+    semaphore <span class="keyword">chan</span> <span class="keyword">struct</span>{ }
+}
+
+<span class="function">func</span> <span class="function">NewRateLimiter</span>(maxConcurrent <span class="keyword">int</span>) *RateLimiter {
+    <span class="keyword">return</span> &RateLimiter{
+        semaphore: <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>{ }, maxConcurrent),
+    }
+}
+
+<span class="function">func</span> (r *RateLimiter) <span class="function">Acquire</span>() {
+    r.semaphore <- <span class="keyword">struct</span>{ }
+}
+
+<span class="function">func</span> (r *RateLimiter) <span class="function">Release</span>() {
+    <-r.semaphore
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    limiter := <span class="function">NewRateLimiter</span>(100)  <span class="comment">// 限制最多 100 个并发</span>
+    
+    <span class="keyword">var</span> wg sync.WaitGroup
+    <span class="keyword">for</span> i := 0; i < 1000; i++ {
+        wg.<span class="function">Add</span>(1)
+        limiter.<span class="function">Acquire</span>()
+        
+        <span class="keyword">go</span> <span class="function">func</span>(n <span class="keyword">int</span>) {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            <span class="keyword">defer</span> limiter.<span class="function">Release</span>()
+            
+            fmt.<span class="function">Println</span>(<span class="string">"Processing"</span>, n)
+        }(i)
+    }
+    wg.<span class="function">Wait</span>()
+}</code></pre>
+            
+            <h3>2. 使用有大小限制的缓存</h3>
+            <p>实现 LRU 缓存或其他有限大小的缓存策略。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"container/list"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="keyword">type</span> LRUCache <span class="keyword">struct</span> {
+    capacity <span class="keyword">int</span>
+    cache    <span class="keyword">map</span>[<span class="keyword">string</span>]*list.Element
+    ll       *list.List
+    mu       sync.RWMutex
+}
+
+<span class="keyword">type</span> entry <span class="keyword">struct</span> {
+    key   <span class="keyword">string</span>
+    value []<span class="keyword">byte</span>
+}
+
+<span class="function">func</span> <span class="function">NewLRUCache</span>(capacity <span class="keyword">int</span>) *LRUCache {
+    <span class="keyword">return</span> &LRUCache{
+        capacity: capacity,
+        cache:    <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]*list.Element),
+        ll:       list.<span class="function">New</span>(),
+    }
+}
+
+<span class="function">func</span> (c *LRUCache) <span class="function">Add</span>(key <span class="keyword">string</span>, value []<span class="keyword">byte</span>) {
+    c.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    
+    <span class="keyword">if</span> elem, ok := c.cache[key]; ok {
+        c.ll.<span class="function">MoveToFront</span>(elem)
+        elem.Value.(*entry).value = value
+        <span class="keyword">return</span>
+    }
+    
+    elem := c.ll.<span class="function">PushFront</span>(&entry{key, value})
+    c.cache[key] = elem
+    
+    <span class="keyword">if</span> c.ll.<span class="function">Len</span>() > c.capacity {
+        <span class="comment">// 移除最旧的元素</span>
+        oldest := c.ll.<span class="function">Back</span>()
+        <span class="keyword">if</span> oldest != <span class="keyword">nil</span> {
+            c.ll.<span class="function">Remove</span>(oldest)
+            <span class="function">delete</span>(c.cache, oldest.Value.(*entry).key)
+        }
+    }
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    cache := <span class="function">NewLRUCache</span>(1000)  <span class="comment">// 限制缓存大小为 1000</span>
+    
+    <span class="keyword">for</span> i := 0; i < 10000; i++ {
+        cache.<span class="function">Add</span>(fmt.<span class="function">Sprintf</span>(<span class="string">"key-%d"</span>, i), <span class="function">make</span>([]<span class="keyword">byte</span>, 1024))
+    }
+    fmt.<span class="function">Println</span>(<span class="string">"Cache size:"</span>, cache.ll.<span class="function">Len</span>())
+}</code></pre>
+            
+            <h3>3. 使用对象池</h3>
+            <p>使用 sync.Pool 重用对象，减少内存分配。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"bytes"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="keyword">var</span> bufferPool = sync.Pool{
+    <span class="function">New</span>: <span class="function">func</span>() <span class="keyword">interface</span>{ } {
+        <span class="keyword">return</span> <span class="keyword">new</span>(bytes.Buffer)
+    },
+}
+
+<span class="function">func</span> <span class="function">processData</span>(data <span class="keyword">string</span>) <span class="keyword">string</span> {
+    buf := bufferPool.<span class="function">Get</span>().(*bytes.Buffer)
+    <span class="keyword">defer</span> <span class="function">func</span>() {
+        buf.<span class="function">Reset</span>()
+        bufferPool.<span class="function">Put</span>(buf)
+    }()
+    
+    buf.<span class="function">WriteString</span>(data)
+    buf.<span class="function">WriteString</span>(<span class="string">" processed"</span>)
+    <span class="keyword">return</span> buf.<span class="function">String</span>()
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">for</span> i := 0; i < 10000; i++ {
+        result := <span class="function">processData</span>(fmt.<span class="function">Sprintf</span>(<span class="string">"data-%d"</span>, i))
+        _ = result
+    }
+}</code></pre>
+            
+            <h3>4. 流式处理大文件</h3>
+            <p>使用流式处理，避免一次性加载大文件到内存。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"bufio"</span>
+    <span class="string">"encoding/json"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="function">func</span> <span class="function">processLargeFile</span>(filename <span class="keyword">string</span>) <span class="keyword">error</span> {
+    file, err := os.<span class="function">Open</span>(filename)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    scanner := bufio.<span class="function">NewScanner</span>(file)
+    scanner.<span class="function">Split</span>(bufio.<span class="function">ScanLines</span>)
+    
+    <span class="keyword">for</span> scanner.<span class="function">Scan</span>() {
+        <span class="keyword">var</span> data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{ }
+        err := json.<span class="function">Unmarshal</span>(scanner.<span class="function">Bytes</span>(), &data)
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> err
+        }
+        
+        <span class="comment">// 处理数据</span>
+        fmt.<span class="function">Println</span>(data)
+    }
+    
+    <span class="keyword">return</span> scanner.<span class="function">Err</span>()
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="function">processLargeFile</span>(<span class="string">"large-file.jsonl"</span>)
+}</code></pre>
+            
+            <h3>5. 设置内存限制</h3>
+            <p>使用 runtime/debug.SetMemoryLimit 设置内存限制。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"runtime/debug"</span>
+)
+
+<span class="function">func</span> <span class="function">init</span>() {
+    <span class="comment">// 设置内存限制为 1GB</span>
+    debug.<span class="function">SetMemoryLimit</span>(1 << 30)
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    fmt.<span class="function">Println</span>(<span class="string">"Memory limit set to 1GB"</span>)
+}</code></pre>
+            
+            <h3>6. 使用 Context 控制 Goroutine</h3>
+            <p>使用 Context 控制 goroutine 的生命周期。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">worker</span>(ctx context.Context, id <span class="keyword">int</span>) {
+    <span class="keyword">for</span> {
+        <span class="keyword">select</span> {
+        <span class="keyword">case</span> <-ctx.<span class="function">Done</span>():
+            fmt.<span class="function">Printf</span>(<span class="string">"Worker %d stopped\n"</span>, id)
+            <span class="keyword">return</span>
+        <span class="keyword">default</span>:
+            fmt.<span class="function">Printf</span>(<span class="string">"Worker %d working\n"</span>, id)
+            time.<span class="function">Sleep</span>(100 * time.Millisecond)
+        }
+    }
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    ctx, cancel := context.<span class="function">WithCancel</span>(context.<span class="function">Background</span>())
+    <span class="keyword">defer</span> cancel()
+    
+    <span class="keyword">for</span> i := 0; i < 10; i++ {
+        <span class="keyword">go</span> <span class="function">worker</span>(ctx, i)
+    }
+    
+    time.<span class="function">Sleep</span>(2 * time.Second)
+    cancel()  <span class="comment">// 停止所有 goroutine</span>
+    time.<span class="function">Sleep</span>(time.Second)
+}</code></pre>
+            
+            <h3>7. 及时释放资源</h3>
+            <p>使用 defer 确保资源被正确释放。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"database/sql"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="function">func</span> <span class="function">processWithConnection</span>(db *sql.DB) <span class="keyword">error</span> {
+    conn, err := db.<span class="function">Conn</span>(context.<span class="function">Background</span>())
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    <span class="keyword">defer</span> conn.<span class="function">Close</span>()  <span class="comment">// 确保连接被关闭</span>
+    
+    <span class="comment">// 使用连接</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Using connection"</span>)
+    
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            
+            <h2>OOM 发现和分析工具</h2>
+            
+            <h3>1. runtime.ReadMemStats</h3>
+            <p>实时监控内存使用情况。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"runtime"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">printMemStats</span>() {
+    <span class="keyword">var</span> m runtime.MemStats
+    runtime.<span class="function">ReadMemStats</span>(&m)
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Alloc = %v MiB"</span>, m.Alloc/1024/1024)
+    fmt.<span class="function">Printf</span>(<span class="string">"\tTotalAlloc = %v MiB"</span>, m.TotalAlloc/1024/1024)
+    fmt.<span class="function">Printf</span>(<span class="string">"\tSys = %v MiB"</span>, m.Sys/1024/1024)
+    fmt.<span class="function">Printf</span>(<span class="string">"\tNumGC = %v\n"</span>, m.NumGC)
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">go</span> <span class="function">func</span>() {
+        <span class="keyword">for</span> {
+            time.<span class="function">Sleep</span>(time.Second)
+            <span class="function">printMemStats</span>()
+        }
+    }()
+    
+    <span class="comment">// 模拟工作负载</span>
+    data := <span class="function">make</span>([][]<span class="keyword">byte</span>, 0)
+    <span class="keyword">for</span> i := 0; i < 1000; i++ {
+        data = <span class="function">append</span>(data, <span class="function">make</span>([]<span class="keyword">byte</span>, 1024*1024))
+        time.<span class="function">Sleep</span>(100 * time.Millisecond)
+    }
+}</code></pre>
+            
+            <h3>2. pprof</h3>
+            <p>使用 pprof 进行详细的内存分析。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"log"</span>
+    <span class="string">"net/http"</span>
+    _ <span class="string">"net/http/pprof"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">go</span> <span class="function">func</span>() {
+        log.<span class="function">Println</span>(http.<span class="function">ListenAndServe</span>(<span class="string">":6060"</span>, <span class="keyword">nil</span>))
+    }()
+    
+    fmt.<span class="function">Println</span>(<span class="string">"pprof server running on :6060"</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Visit http://localhost:6060/debug/pprof/heap for heap profile"</span>)
+    
+    <span class="keyword">select</span> { }
+}</code></pre>
+            
+            <p>使用 pprof 命令行工具：</p>
+            
+            <pre><code><span class="comment"># 采集 heap profile</span>
+go tool pprof http://localhost:6060/debug/pprof/heap
+
+<span class="comment"># 查看 top 10 内存占用</span>
+(pprof) top10
+
+<span class="comment"># 生成可视化图表</span>
+(pprof) web
+
+<span class="comment"># 查看内存分配来源</span>
+(pprof) list main</code></pre>
+            
+            <h3>3. trace</h3>
+            <p>使用 trace 分析 goroutine 和内存分配。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+    <span class="string">"runtime/trace"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    f, _ := os.<span class="function">Create</span>(<span class="string">"trace.out"</span>)
+    <span class="keyword">defer</span> f.<span class="function">Close</span>()
+    
+    trace.<span class="function">Start</span>(f)
+    <span class="keyword">defer</span> trace.<span class="function">Stop</span>()
+    
+    <span class="comment">// 执行需要分析的代码</span>
+    <span class="keyword">for</span> i := 0; i < 100; i++ {
+        <span class="keyword">go</span> <span class="function">func</span>(n <span class="keyword">int</span>) {
+            fmt.<span class="function">Println</span>(n)
+        }(i)
+    }
+}</code></pre>
+            
+            <p>分析 trace 文件：</p>
+            
+            <pre><code>go tool trace trace.out</code></pre>
+            
+            <h3>4. GODEBUG=gctrace</h3>
+            <p>启用 GC 日志追踪。</p>
+            
+            <pre><code><span class="comment"># 运行程序并启用 GC 追踪</span>
+GODEBUG=gctrace=1 go run main.go</code></pre>
+            
+            <p>输出示例：</p>
+            
+            <pre><code>gc 1 @0.000s 0%: 0.018+0.23+0.003 ms clock, 0.11+1.4+0.019/0.058+0.060/0.14 ms cpu, 4->4->4 MB, 5 MB goal, 4 P
+gc 2 @0.001s 0%: 0.011+0.16+0.002 ms clock, 0.066+0.96+0.012/0.046+0.058/0.15 ms cpu, 4->4->4 MB, 5 MB goal, 4 P</code></pre>
+            
+            <h3>5. memguard</h3>
+            <p>使用第三方库监控和保护内存。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/awnumar/memguard"</span>
+)
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 设置内存限制</span>
+    memguard.<span class="function">CatchInterrupt</span>()
+    <span class="keyword">defer</span> memguard.<span class="function">Purge</span>()
+    
+    <span class="comment">// 使用安全的内存分配</span>
+    sealed := memguard.<span class="function">NewEnclaveFromBytes</span>([]<span class="keyword">byte</span>(<span class="string">"secret data"</span>))
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Memory guard initialized"</span>)
+    _ = sealed
+}</code></pre>
+            
+            <h3>6. leaktest</h3>
+            <p>检测 goroutine 泄漏。</p>
+            
+            <pre><code><span class="comment"># 安装 leaktest</span>
+go install github.com/fortytw2/leaktest@latest
+
+<span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"testing"</span>
+    <span class="string">"time"</span>
+    <span class="string">"github.com/fortytw2/leaktest"</span>
+)
+
+<span class="function">func</span> <span class="function">TestNoLeaks</span>(t *testing.T) {
+    <span class="keyword">defer</span> leaktest.<span class="function">CheckTimeout</span>(t, 10*time.Second)()
+    
+    <span class="comment">// 测试代码</span>
+    <span class="keyword">go</span> <span class="function">func</span>() {
+        time.<span class="function">Sleep</span>(time.Second)
+    }()
+}</code></pre>
+            
+            <h3>7. gops</h3>
+            <p>监控正在运行的 Go 程序。</p>
+            
+            <pre><code><span class="comment"># 安装 gops</span>
+go install github.com/google/gops@latest
+
+<span class="comment"># 列出所有 Go 进程</span>
+gops
+
+<span class="comment"># 查看特定进程的内存统计</span>
+gops stats &lt;pid&gt;
+
+<span class="comment"># 查看 goroutine 堆栈</span>
+gops stack &lt;pid&gt;
+
+<span class="comment"># 查看内存分配情况</span>
+gops memstats &lt;pid&gt;</code></pre>
+            
+            <h3>8. go tool nm</h3>
+            <p>分析二进制文件的符号表。</p>
+            
+            <pre><code><span class="comment"># 分析可执行文件的内存分配</span>
+go build -o myapp main.go
+go tool nm -size myapp | sort -rn | head -20</code></pre>
+            
+            <h3>9. heapster</h3>
+            <p>实时监控堆内存使用。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"runtime"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="function">func</span> <span class="function">monitorHeap</span>() {
+    <span class="keyword">var</span> lastGC uint64
+    <span class="keyword">for</span> {
+        <span class="keyword">var</span> m runtime.MemStats
+        runtime.<span class="function">ReadMemStats</span>(&m)
+        
+        <span class="keyword">if</span> m.NumGC > lastGC {
+            fmt.<span class="function">Printf</span>(<span class="string">"GC #%d: Heap = %v MB, Stack = %v MB\n"</span>, 
+                m.NumGC, 
+                m.HeapAlloc/1024/1024, 
+                m.StackInuse/1024/1024)
+            lastGC = m.NumGC
+        }
+        
+        time.<span class="function">Sleep</span>(time.Second)
+    }
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="keyword">go</span> <span class="function">monitorHeap</span>()
+    
+    <span class="comment">// 模拟工作负载</span>
+    data := <span class="function">make</span>([][]<span class="keyword">byte</span>, 0)
+    <span class="keyword">for</span> i := 0; i < 100; i++ {
+        data = <span class="function">append</span>(data, <span class="function">make</span>([]<span class="keyword">byte</span>, 10*1024*1024))
+        time.<span class="function">Sleep</span>(time.Second)
+    }
+}</code></pre>
+            
+            <h2>生产环境监控</h2>
+            
+            <h3>1. Prometheus + Grafana</h3>
+            <p>使用 Prometheus 收集指标，Grafana 可视化。</p>
+            
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/prometheus/client_golang/prometheus"</span>
+    <span class="string">"github.com/prometheus/client_golang/prometheus/promhttp"</span>
+    <span class="string">"net/http"</span>
+)
+
+<span class="keyword">var</span> (
+    memAlloc = prometheus.<span class="function">NewGauge</span>(
+        prometheus.GaugeOpts{
+            Name: <span class="string">"memory_alloc_bytes"</span>,
+            Help: <span class="string">"Current memory allocation in bytes"</span>,
+        },
+    )
+)
+
+<span class="function">func</span> <span class="function">init</span>() {
+    prometheus.<span class="function">MustRegister</span>(memAlloc)
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    http.<span class="function">Handle</span>(<span class="string">"/metrics"</span>, promhttp.<span class="function">Handler</span>())
+    http.<span class="function">ListenAndServe</span>(<span class="string">":8080"</span>, <span class="keyword">nil</span>)
+}</code></pre>
+            
+            <h3>2. Docker 资源限制</h3>
+            <p>在 Docker 中设置内存限制。</p>
+            
+            <pre><code><span class="comment"># Dockerfile</span>
+FROM golang:1.21-alpine
+COPY . /app
+WORKDIR /app
+RUN go build -o app
+CMD [<span class="string">"./app"</span>]
+
+<span class="comment"># 运行容器时设置内存限制</span>
+docker run -m 512m --memory-swap 1g myapp</code></pre>
+            
+            <h3>3. Kubernetes 资源限制</h3>
+            <p>在 Kubernetes 中设置资源请求和限制。</p>
+            
+            <pre><code><span class="comment"># deployment.yaml</span>
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  template:
+    spec:
+      containers:
+      - name: myapp
+        image: myapp:latest
+        resources:
+          requests:
+            memory: <span class="string">"256Mi"</span>
+          limits:
+            memory: <span class="string">"512Mi"</span></code></pre>
+            
+            <h2>最佳实践</h2>
+            
+            <h3>1. 定期监控内存使用</h3>
+            <p>建立内存监控告警机制，及时发现异常。</p>
+            
+            <h3>2. 压力测试</h3>
+            <p>在生产环境前进行充分的压力测试。</p>
+            
+            <h3>3. 代码审查</h3>
+            <p>重点关注内存分配和资源释放的代码。</p>
+            
+            <h3>4. 使用缓存策略</h3>
+            <p>合理使用缓存，避免无限增长。</p>
+            
+            <h3>5. 优化数据结构</h3>
+            <p>选择合适的数据结构，减少内存占用。</p>
+            
+            <h3>6. 分批处理</h3>
+            <p>对于大数据集，采用分批处理策略。</p>
+            
+            <h2>总结</h2>
+            
+            <p>OOM 是 Go 程序中常见的问题，但通过：</p>
+            
+            <ul>
+                <li>理解 OOM 的常见原因</li>
+                <li>采用良好的编码实践</li>
+                <li>使用适当的工具进行监控和分析</li>
+                <li>在生产环境中设置合理的资源限制</li>
+                <li>建立完善的监控告警机制</li>
+            </ul>
+            
+            <p>可以有效地预防和发现 OOM 问题，提高程序的稳定性和可靠性。</p>
+        </div>
+    </div>
+    
+    <script src="navigation.js"></script>
+    <script src="code-collapse.js"></script>
+</body>
+</html>

@@ -312,9 +312,243 @@
     fmt.<span class="function">Printf</span>(<span class="string">"Swapped: %v, Value: %d\n"</span>, swapped, atomic.<span class="function">LoadInt64</span>(&counter))
 }</code></pre>
 
+            <h3>noCopy 禁止复制</h3>
+            <p><code>noCopy</code> 是 sync 包中的一个重要机制，用于防止并发类型被意外复制。</p>
+            
+            <div class="warning-box">
+                <h3>⚠️ 为什么需要 noCopy？</h3>
+                <ul>
+                    <li><strong>状态一致性</strong>：sync 包中的类型（如 Mutex、WaitGroup）包含内部状态，复制会导致状态不一致</li>
+                    <li><strong>死锁风险</strong>：复制的锁可能导致死锁或不可预期的行为</li>
+                    <li><strong>内存安全</strong>：复制可能导致内存泄漏或竞争条件</li>
+                    <li><strong>API 契约</strong>：sync 类型应该通过指针传递，而不是值传递</li>
+                </ul>
+            </div>
+
+            <pre><code><span class="comment">// noCopy 的定义（在 sync 包中）</span>
+<span class="keyword">type</span> noCopy <span class="keyword">struct</span>{}
+
+<span class="comment">// Mutex 的定义（嵌入了 noCopy）</span>
+<span class="keyword">type</span> Mutex <span class="keyword">struct</span> {
+    state int32
+    sema  uint32
+    noCopy noCopy  <span class="comment">// 嵌入 noCopy，防止复制</span>
+}</code></pre>
+
+            <h4>错误的复制示例</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="keyword">type</span> SafeCounter <span class="keyword">struct</span> {
+    mu    sync.Mutex
+    value <span class="keyword">int</span>
+}
+
+<span class="comment">// ❌ 错误：通过值复制了 Mutex</span>
+<span class="keyword">func</span> <span class="function">badCopyExample</span>() {
+    counter := SafeCounter{
+        value: <span class="number">0</span>,
+    }
+    
+    <span class="comment">// 错误：复制了整个结构体（包括 Mutex）</span>
+    counterCopy := counter  <span class="comment">// 这会复制 Mutex！</span>
+    
+    counterCopy.mu.<span class="function">Lock</span>()
+    counterCopy.value++
+    counterCopy.mu.<span class="function">Unlock</span>()
+    
+    <span class="comment">// 原始 counter 的状态是独立的</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"Original: %d, Copy: %d\n"</span>, counter.value, counterCopy.value)
+}
+
+<span class="comment">// ✅ 正确：使用指针传递</span>
+<span class="keyword">func</span> <span class="function">correctPointerExample</span>() {
+    counter := &SafeCounter{
+        value: <span class="number">0</span>,
+    }
+    
+    <span class="comment">// 正确：传递指针</span>
+    <span class="function">incrementCounter</span>(counter)
+}
+
+<span class="function">func</span> <span class="function">incrementCounter</span>(c *SafeCounter) {
+    c.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    c.value++
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    fmt.<span class="function">Println</span>(<span class="string">"运行 badCopyExample..."</span>)
+    <span class="function">badCopyExample</span>()
+    
+    fmt.<span class="function">Println</span>(<span class="string">"\n运行 correctPointerExample..."</span>)
+    <span class="function">correctPointerExample</span>()
+}</code></pre>
+
+            <h4>使用 go vet 检测复制</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="keyword">type</span> Resource <span class="keyword">struct</span> {
+    mu sync.Mutex
+    data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>
+}
+
+<span class="comment">// ❌ 错误：函数参数使用值传递</span>
+<span class="comment">// go vet 会检测到这个问题</span>
+<span class="keyword">func</span> <span class="function">processResource</span>(r Resource) {  <span class="comment">// 错误：复制了 Mutex</span>
+    r.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> r.mu.<span class="function">Unlock</span>()
+    r.data[<span class="string">"key"</span>] = <span class="number">42</span>
+}
+
+<span class="comment">// ✅ 正确：函数参数使用指针传递</span>
+<span class="keyword">func</span> <span class="function">processResourceSafe</span>(r *Resource) {  <span class="comment">// 正确：使用指针</span>
+    r.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> r.mu.<span class="function">Unlock</span>()
+    r.data[<span class="string">"key"</span>] = <span class="number">42</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    resource := &Resource{
+        data: <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>),
+    }
+    
+    <span class="comment">// 使用 go vet 检测复制问题</span>
+    <span class="comment">// 运行命令：go vet main.go</span>
+    
+    fmt.<span class="function">Println</span>(<span class="string">"使用 go vet 检测复制问题..."</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"运行 'go vet' 命令会检测到 processResource 函数的复制问题"</span>)
+}</code></pre>
+
+            <div class="info-box">
+                <h3>💡 noCopy 工作原理</h3>
+                <ul>
+                    <li><strong>空结构体</strong>：noCopy 是一个空结构体，不占用内存</li>
+                    <li><strong>嵌入到类型中</strong>：sync 包中的类型都嵌入了 noCopy</li>
+                    <li><strong>go vet 检测</strong>：go vet 工具会检查包含 noCopy 的类型是否被复制</li>
+                    <li><strong>编译时警告</strong>：虽然不是编译错误，但会发出警告</li>
+                    <li><strong>最佳实践</strong>：始终使用指针传递 sync 包中的类型</li>
+                </ul>
+            </div>
+
+            <h4>自定义类型的 noCopy 使用</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="comment">// 自定义类型嵌入 noCopy</span>
+<span class="keyword">type</span> SafeMap <span class="keyword">struct</span> {
+    mu    sync.Mutex
+    data  <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}
+    noCopy sync.noCopy  <span class="comment">// 嵌入 noCopy，防止复制</span>
+}
+
+<span class="function">func</span> <span class="function">NewSafeMap</span>() *SafeMap {
+    <span class="keyword">return</span> &SafeMap{
+        data: <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}),
+    }
+}
+
+<span class="function">func</span> (m *SafeMap) <span class="function">Get</span>(key <span class="keyword">string</span>) (<span class="keyword">interface</span>{}, <span class="keyword">bool</span>) {
+    m.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> m.mu.<span class="function">Unlock</span>()
+    val, ok := m.data[key]
+    <span class="keyword">return</span> val, ok
+}
+
+<span class="function">func</span> (m *SafeMap) <span class="function">Set</span>(key <span class="keyword">string</span>, value <span class="keyword">interface</span>{}) {
+    m.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> m.mu.<span class="function">Unlock</span>()
+    m.data[key] = value
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    sm := <span class="function">NewSafeMap</span>()
+    
+    sm.<span class="function">Set</span>(<span class="string">"name"</span>, <span class="string">"Alice"</span>)
+    sm.<span class="function">Set</span>(<span class="string">"age"</span>, <span class="number">30</span>)
+    
+    <span class="keyword">if</span> name, ok := sm.<span class="function">Get</span>(<span class="string">"name"</span>); ok {
+        fmt.<span class="function">Println</span>(<span class="string">"Name:"</span>, name)
+    }
+}</code></pre>
+
+            <table>
+                <caption>sync 包中包含 noCopy 的类型</caption>
+                <thead>
+                    <tr>
+                        <th>类型</th>
+                        <th>说明</th>
+                        <th>是否可复制</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Mutex</strong></td>
+                        <td>互斥锁</td>
+                        <td>❌ 不可复制</td>
+                    </tr>
+                    <tr>
+                        <td><strong>RWMutex</strong></td>
+                        <td>读写锁</td>
+                        <td>❌ 不可复制</td>
+                    </tr>
+                    <tr>
+                        <td><strong>WaitGroup</strong></td>
+                        <td>等待组</td>
+                        <td>❌ 不可复制</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Once</strong></td>
+                        <td>单次执行</td>
+                        <td>❌ 不可复制</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cond</strong></td>
+                        <td>条件变量</td>
+                        <td>❌ 不可复制</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pool</strong></td>
+                        <td>对象池</td>
+                        <td>❌ 不可复制</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Map</strong></td>
+                        <td>并发安全映射</td>
+                        <td>❌ 不可复制</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning-box">
+                <h3>⚠️ 使用 noCopy 的最佳实践</h3>
+                <ul>
+                    <li><strong>始终使用指针</strong>：sync 类型的变量应该始终使用指针</li>
+                    <li><strong>函数参数</strong>：函数参数应该使用指针类型（*sync.Mutex）</li>
+                    <li><strong>结构体字段</strong>：如果结构体包含 sync 类型，也应该使用指针</li>
+                    <li><strong>go vet 检查</strong>：定期运行 go vet 检测复制问题</li>
+                    <li><strong>CI/CD 集成</strong>：在 CI/CD 流程中集成 go vet 检查</li>
+                </ul>
+            </div>
+
             
         </div>
     </div>
+<script src="code-collapse.js"></script>
+
 </body>
     <script src="navigation.js"></script>
 </html>

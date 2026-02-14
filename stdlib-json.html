@@ -148,201 +148,208 @@
     wg.<span class="function">Wait</span>()
 }</code></pre>
 
-            <h3>WaitGroup 等待组</h3>
+            <h3>encoding/json/v2</h3>
+            <p>Go 1.24 引入了 <code>encoding/json/v2</code>，这是一个全新的 JSON 实现，提供了更好的性能、更严格的类型安全和更清晰的 API。</p>
+
+            <div class="info-box">
+                <h3>💡 json/v2 的主要改进</h3>
+                <ul>
+                    <li><strong>更好的性能</strong>：重新设计的编解码器，性能提升 20-30%</li>
+                    <li><strong>更严格的类型安全</strong>：拒绝不安全的类型转换</li>
+                    <li><strong>更清晰的 API</strong>：简化的接口，减少混淆</li>
+                    <li><strong>更好的错误信息</strong>：提供更详细的错误上下文</li>
+                    <li><strong>支持 JSON Schema</strong>：内置 JSON Schema 验证支持</li>
+                </ul>
+            </div>
+
+            <h4>基本用法</h4>
             <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
+    <span class="string">"encoding/json/v2"</span>
     <span class="string">"fmt"</span>
-    <span class="string">"sync"</span>
 )
 
-<span class="function">func</span> <span class="function">worker</span>(id <span class="keyword">int</span>, wg *sync.WaitGroup) {
-    <span class="keyword">defer</span> wg.<span class="function">Done</span>()
-    fmt.<span class="function">Printf</span>(<span class="string">"Worker %d started\n"</span>, id)
-    fmt.<span class="function">Printf</span>(<span class="string">"Worker %d finished\n"</span>, id)
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    Name  <span class="keyword">string</span> <span class="string">`json:"name"`</span>
+    Age   <span class="keyword">int</span>    <span class="string">`json:"age"`</span>
+    Email <span class="keyword">string</span> <span class="string">`json:"email,omitempty"`</span>
 }
 
 <span class="function">func</span> <span class="function">main</span>() {
-    <span class="keyword">var</span> wg sync.WaitGroup
-    
-    <span class="keyword">for</span> i := <span class="number">1</span>; i <= <span class="number">5</span>; i++ {
-        wg.<span class="function">Add</span>(<span class="number">1</span>)
-        <span class="keyword">go</span> <span class="function">worker</span>(i, &wg)
+    <span class="comment">// 编码</span>
+    user := User{
+        Name: <span class="string">"Alice"</span>,
+        Age:  <span class="number">30</span>,
     }
     
-    wg.<span class="function">Wait</span>()
-    fmt.<span class="function">Println</span>(<span class="string">"All workers finished"</span>)
+    jsonData, err := json.<span class="function">Marshal</span>(user)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    fmt.<span class="function">Println</span>(<span class="string">"JSON:"</span>, <span class="keyword">string</span>(jsonData))
+    
+    <span class="comment">// 解码</span>
+    <span class="keyword">var</span> decoded User
+    err = json.<span class="function">Unmarshal</span>(jsonData, &decoded)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    fmt.<span class="function">Printf</span>(<span class="string">"Decoded: %+v\n"</span>, decoded)
 }</code></pre>
 
-            <h3>Once 单次执行</h3>
+            <h4>使用 Decoder 和 Encoder</h4>
             <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
+    <span class="string">"encoding/json/v2"</span>
     <span class="string">"fmt"</span>
-    <span class="string">"sync"</span>
+    <span class="string">"os"</span>
 )
 
-<span class="keyword">var</span> (
-    once     sync.Once
-    instance *Singleton
-)
-
-<span class="keyword">type</span> Singleton <span class="keyword">struct</span> {
-    value <span class="keyword">string</span>
-}
-
-<span class="function">func</span> <span class="function">GetInstance</span>() *Singleton {
-    once.<span class="function">Do</span>(<span class="keyword">func</span>() {
-        instance = &Singleton{value: <span class="string">"initialized"</span>}
-        fmt.<span class="function">Println</span>(<span class="string">"Singleton initialized"</span>)
-    })
-    <span class="keyword">return</span> instance
+<span class="keyword">type</span> Person <span class="keyword">struct</span> {
+    Name <span class="keyword">string</span> <span class="string">`json:"name"`</span>
+    Age  <span class="keyword">int</span>    <span class="string">`json:"age"`</span>
 }
 
 <span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 多次调用只会初始化一次</span>
-    <span class="function">GetInstance</span>()
-    <span class="function">GetInstance</span>()
-    <span class="function">GetInstance</span>()
+    <span class="comment">// 写入 JSON 文件</span>
+    file, err := os.<span class="function">Create</span>(<span class="string">"people.json"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    encoder := json.<span class="function">NewEncoder</span>(file)
+    encoder.<span class="function">SetIndent</span>(<span class="string">""</span>, <span class="string">"  "</span>)
+    
+    people := []Person{
+        {Name: <span class="string">"Alice"</span>, Age: <span class="number">30</span>},
+        {Name: <span class="string">"Bob"</span>, Age: <span class="number">25</span>},
+    }
+    
+    err = encoder.<span class="function">Encode</span>(people)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="comment">// 读取 JSON 文件</span>
+    file, err = os.<span class="function">Open</span>(<span class="string">"people.json"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    <span class="keyword">var</span> result []Person
+    decoder := json.<span class="function">NewDecoder</span>(file)
+    err = decoder.<span class="function">Decode</span>(&result)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"People: %+v\n"</span>, result)
 }</code></pre>
 
-            <h3>Cond 条件变量</h3>
+            <h4>严格模式</h4>
             <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
+    <span class="string">"encoding/json/v2"</span>
     <span class="string">"fmt"</span>
-    <span class="string">"sync"</span>
+)
+
+<span class="keyword">type</span> Product <span class="keyword">struct</span> {
+    Name     <span class="keyword">string</span>  <span class="string">`json:"name"`</span>
+    Price    <span class="keyword">float64</span> <span class="string">`json:"price"`</span>
+    Quantity <span class="keyword">int</span>     <span class="string">json:"quantity"`</span>
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 使用严格模式的解码器</span>
+    opts := &json.<span class="function">DecodeOptions</span>{
+        RejectUnknownFields: <span class="keyword">true</span>,
+        DisallowDuplicateFields: <span class="keyword">true</span>,
+    }
+    
+    jsonData := []<span class="keyword">byte</span>(<span class="string">`{
+        "name": "Laptop",
+        "price": 999.99,
+        "quantity": 10,
+        "extra_field": "will cause error"
+    }`</span>)
+    
+    <span class="keyword">var</span> product Product
+    decoder := json.<span class="function">NewDecoder</span>(jsonData)
+    decoder.<span class="function">SetDecodeOptions</span>(opts)
+    
+    err := decoder.<span class="function">Decode</span>(&product)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Strict mode error (expected):"</span>, err)
+    }
+}</code></pre>
+
+            <h4>自定义类型转换</h4>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json/v2"</span>
+    <span class="string">"fmt"</span>
     <span class="string">"time"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="keyword">var</span> mu sync.Mutex
-    cond := sync.<span class="function">NewCond</span>(&mu)
-    ready := <span class="keyword">false</span>
-    
-    <span class="comment">// 等待者</span>
-    <span class="keyword">go</span> <span class="keyword">func</span>() {
-        mu.<span class="function">Lock</span>()
-        <span class="keyword">for</span> !ready {
-            fmt.<span class="function">Println</span>(<span class="string">"Waiting..."</span>)
-            cond.<span class="function">Wait</span>()
-        }
-        fmt.<span class="function">Println</span>(<span class="string">"Ready!"</span>)
-        mu.<span class="function">Unlock</span>()
-    }()
-    
-    time.<span class="function">Sleep</span>(time.Second)
-    
-    <span class="comment">// 通知者</span>
-    mu.<span class="function">Lock</span>()
-    ready = <span class="keyword">true</span>
-    fmt.<span class="function">Println</span>(<span class="string">"Signaling..."</span>)
-    cond.<span class="function">Signal</span>()
-    mu.<span class="function">Unlock</span>()
-    
-    time.<span class="function">Sleep</span>(time.Second)
-}</code></pre>
-
-            <h3>Pool 对象池</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"bytes"</span>
-    <span class="string">"fmt"</span>
-    <span class="string">"sync"</span>
-)
-
-<span class="keyword">var</span> bufferPool = sync.<span class="function">Pool</span>{
-    New: <span class="keyword">func</span>() <span class="keyword">interface</span>{} {
-        fmt.<span class="function">Println</span>(<span class="string">"Creating new buffer"</span>)
-        <span class="keyword">return</span> &bytes.Buffer{}
-    },
-}
-
-<span class="function">func</span> <span class="function">process</span>() {
-    <span class="comment">// 从池中获取</span>
-    buf := bufferPool.<span class="function">Get</span>().(*bytes.Buffer)
-    <span class="keyword">defer</span> <span class="keyword">func</span>() {
-        <span class="comment">// 重置并放回池中</span>
-        buf.<span class="function">Reset</span>()
-        bufferPool.<span class="function">Put</span>(buf)
-    }()
-    
-    buf.<span class="function">WriteString</span>(<span class="string">"Hello, World!"</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"Buffer:"</span>, buf.<span class="function">String</span>())
+<span class="keyword">type</span> Event <span class="keyword">struct</span> {
+    Name      <span class="keyword">string</span>    <span class="string">`json:"name"`</span>
+    Timestamp <span class="keyword">string</span>    <span class="string">`json:"timestamp"`</span>
+    Date      <span class="keyword">time</span>.Time <span class="string">`json:"date,omitempty"`</span>
 }
 
 <span class="function">func</span> <span class="function">main</span>() {
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">5</span>; i++ {
-        <span class="function">process</span>()
-    }
-}</code></pre>
-
-            <h3>Map 并发安全映射</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"sync"</span>
-)
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="keyword">var</span> m sync.Map
+    jsonData := []<span class="keyword">byte</span>(<span class="string">`{
+        "name": "Meeting",
+        "timestamp": "2024-01-15T10:30:00Z"
+    }`</span>)
     
-    <span class="comment">// 存储</span>
-    m.<span class="function">Store</span>(<span class="string">"key1"</span>, <span class="string">"value1"</span>)
-    m.<span class="function">Store</span>(<span class="string">"key2"</span>, <span class="string">"value2"</span>)
-    
-    <span class="comment">// 加载</span>
-    <span class="keyword">if</span> val, ok := m.<span class="function">Load</span>(<span class="string">"key1"</span>); ok {
-        fmt.<span class="function">Println</span>(<span class="string">"key1:"</span>, val)
+    <span class="keyword">var</span> event Event
+    err := json.<span class="function">Unmarshal</span>(jsonData, &event)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        <span class="keyword">return</span>
     }
     
-    <span class="comment">// 加载或存储</span>
-    actual, loaded := m.<span class="function">LoadOrStore</span>(<span class="string">"key3"</span>, <span class="string">"value3"</span>)
-    fmt.<span class="function">Printf</span>(<span class="string">"key3: %v, loaded: %v\n"</span>, actual, loaded)
+    <span class="comment">// 解析时间字符串</span>
+    parsedTime, err := time.<span class="function">Parse</span>(time.RFC3339, event.Timestamp)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error parsing time:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    event.Date = parsedTime
     
-    <span class="comment">// 遍历</span>
-    m.<span class="function">Range</span>(<span class="keyword">func</span>(key, value <span class="keyword">interface</span>{}) <span class="keyword">bool</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"%s: %s\n"</span>, key, value)
-        <span class="keyword">return</span> <span class="keyword">true</span>
-    })
-    
-    <span class="comment">// 删除</span>
-    m.<span class="function">Delete</span>(<span class="string">"key1"</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"Event: %+v\n"</span>, event)
+    fmt.<span class="function">Printf</span>(<span class="string">"Date: %s\n"</span>, event.Date.<span class="function">Format</span>(time.RFC3339))
 }</code></pre>
 
-            <h3>Atomic 原子操作</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"sync/atomic"</span>
-)
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="keyword">var</span> counter int64
-    
-    <span class="comment">// 原子增加</span>
-    atomic.<span class="function">AddInt64</span>(&counter, <span class="number">1</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"Counter:"</span>, counter)
-    
-    <span class="comment">// 原子加载</span>
-    value := atomic.<span class="function">LoadInt64</span>(&counter)
-    fmt.<span class="function">Println</span>(<span class="string">"Loaded:"</span>, value)
-    
-    <span class="comment">// 原子存储</span>
-    atomic.<span class="function">StoreInt64</span>(&counter, <span class="number">100</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"Stored:"</span>, atomic.<span class="function">LoadInt64</span>(&counter))
-    
-    <span class="comment">// 原子比较并交换</span>
-    swapped := atomic.<span class="function">CompareAndSwapInt64</span>(&counter, <span class="number">100</span>, <span class="number">200</span>)
-    fmt.<span class="function">Printf</span>(<span class="string">"Swapped: %v, Value: %d\n"</span>, swapped, atomic.<span class="function">LoadInt64</span>(&counter))
-}</code></pre>
+            <div class="warning-box">
+                <h3>⚠️ json/v2 vs json</h3>
+                <ul>
+                    <li><strong>向后兼容</strong>：json/v2 与 json/v1 不完全兼容，需要逐步迁移</li>
+                    <li><strong>行为差异</strong>：某些边缘情况的处理方式有所不同</li>
+                    <li><strong>性能提升</strong>：json/v2 在大多数场景下性能更好</li>
+                    <li><strong>类型安全</strong>：json/v2 对类型检查更严格</li>
+                    <li><strong>迁移建议</strong>：新项目优先使用 json/v2，旧项目谨慎评估后再迁移</li>
+                </ul>
+            </div>
 
             
         </div>
     </div>
+<script src="code-collapse.js"></script>
+
 </body>
     <script src="navigation.js"></script>
 </html>

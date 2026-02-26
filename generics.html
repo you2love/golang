@@ -4,8 +4,8 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>泛型 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.3">
+    <title>泛型 - Go 语言学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.4">
     <script src="scroll.js"></script>
     </head>
 <body>
@@ -15,19 +15,69 @@
     </aside>
         <div class="content">
             <a href="index.html" class="back-link">← 返回首页</a>
-            <h1>泛型（Generics）</h1>
+            <h1>泛型（Generics）- Go 1.26</h1>
 
             <h2 id="intro">什么是泛型？</h2>
             <p>泛型是 Go 1.18 引入的重要特性，允许编写可以处理多种类型的代码，而不需要为每种类型重复编写相同的逻辑。泛型提高了代码的复用性和类型安全性。</p>
+            
+            <!-- 泛型优势对比 -->
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon">🛡️</div>
+                    <h4>类型安全</h4>
+                    <p>编译时检查，避免运行时类型错误</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">♻️</div>
+                    <h4>代码复用</h4>
+                    <p>一次编写，支持多种类型</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⚡</div>
+                    <h4>零运行时开销</h4>
+                    <p>编译时实例化，无性能损失</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔄</div>
+                    <h4>自引用泛型 (1.26)</h4>
+                    <p>支持递归类型约束</p>
+                </div>
+            </div>
+
+            <!-- 类型约束层级 -->
+            <h3>类型约束层级</h3>
+            <div class="type-hierarchy">
+                <div class="hierarchy-level">
+                    <div class="hierarchy-node">any</div>
+                    <span class="hierarchy-arrow">←</span>
+                    <div class="hierarchy-node">所有类型 (空约束)</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="hierarchy-node">comparable</div>
+                    <span class="hierarchy-arrow">←</span>
+                    <div class="hierarchy-node">可比较类型 (==, !=)</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="hierarchy-node">cmp.Ordered</div>
+                    <span class="hierarchy-arrow">←</span>
+                    <div class="hierarchy-node">可排序类型 (&lt;, &gt;, &lt;=, &gt;=)</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="hierarchy-node highlight">自定义约束</div>
+                    <span class="hierarchy-arrow">←</span>
+                    <div class="hierarchy-node">interface { ~int | float64 }</div>
+                </div>
+            </div>
 
             <h2 id="functions">泛型函数</h2>
             <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
+<span class="keyword">import</span> <span class="string">"cmp"</span>
 
-<span class="comment">// 泛型函数：使用类型参数</span>
+<span class="comment">// 泛型函数：使用 cmp.Ordered 约束</span>
 <span class="function">func</span> <span class="function">Min</span>[T <span class="keyword">cmp.Ordered</span>](x, y T) T {
-    <span class="keyword">if</span> x < y {
+    <span class="keyword">if</span> x &lt; y {
         <span class="keyword">return</span> x
     }
     <span class="keyword">return</span> y
@@ -42,6 +92,37 @@
 
     <span class="comment">// 使用字符串</span>
     fmt.<span class="function">Println</span>(<span class="function">Min</span>(<span class="string">"apple"</span>, <span class="string">"banana"</span>))  <span class="comment">// apple</span>
+}</code></pre>
+
+            <h2 id="constraints">类型约束</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// 自定义类型约束</span>
+<span class="keyword">type</span> Number <span class="keyword">interface</span> {
+    <span class="keyword">int</span> | <span class="keyword">int64</span> | <span class="keyword">float64</span>
+}
+
+<span class="comment">// ~ 表示底层类型</span>
+<span class="keyword">type</span> SignedNumber <span class="keyword">interface</span> {
+    ~<span class="keyword">int</span> | ~<span class="keyword">int64</span> | ~<span class="keyword">int32</span>
+}
+
+<span class="function">func</span> <span class="function">Sum</span>[T Number](numbers []T) T {
+    <span class="keyword">var</span> total T
+    <span class="keyword">for</span> _, num := <span class="keyword">range</span> numbers {
+        total += num
+    }
+    <span class="keyword">return</span> total
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    ints := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>}
+    floats := []<span class="keyword">float64</span>{<span class="number">1.1</span>, <span class="number">2.2</span>, <span class="number">3.3</span>}
+
+    fmt.<span class="function">Println</span>(<span class="string">"整数和:"</span>, <span class="function">Sum</span>(ints))
+    fmt.<span class="function">Println</span>(<span class="string">"浮点数和:"</span>, <span class="function">Sum</span>(floats))
 }</code></pre>
 
             <h2 id="constraints">类型约束</h2>
@@ -247,33 +328,72 @@
     fmt.<span class="function">Println</span>(<span class="string">"结果:"</span>, result)
 }</code></pre>
 
-            <h2 id="tilde">使用 ~ 进行类型约束</h2>
+            <h2 id="tilde">Go 1.26 新特性：自引用泛型</h2>
+            <div class="info-box">
+                <h3>⭐ Go 1.26 新增：自引用泛型</h3>
+                <p>Go 1.26 解除了泛型类型不能在其自身类型参数列表中引用自己的限制。这使得实现复杂的递归数据结构成为可能。</p>
+            </div>
             <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
-<span class="comment">// ~ 表示底层类型</span>
-<span class="keyword">type</span> Ordered <span class="keyword">interface</span> {
-    ~<span class="keyword">int</span> | ~<span class="keyword">float64</span> | ~<span class="keyword">string</span>
+<span class="comment">// Go 1.26: 自引用泛型 - 递归约束</span>
+<span class="comment">// Adder 类型约束要求 A 必须实现 Add(A) A 方法</span>
+<span class="keyword">type</span> Adder[A Adder[A]] <span class="keyword">interface</span> {
+    <span class="function">Add</span>(A) A
 }
 
 <span class="keyword">type</span> MyInt <span class="keyword">int</span>
-<span class="keyword">type</span> MyFloat <span class="keyword">float64</span>
 
-<span class="function">func</span> <span class="function">Max</span>[T Ordered](a, b T) T {
-    <span class="keyword">if</span> a > b {
-        <span class="keyword">return</span> a
-    }
-    <span class="keyword">return</span> b
+<span class="keyword">func</span> (m MyInt) <span class="function">Add</span>(other MyInt) MyInt {
+    <span class="keyword">return</span> m + other
+}
+
+<span class="keyword">func</span> <span class="function">sum</span>[A Adder[A]](x, y A) A {
+    <span class="keyword">return</span> x.<span class="function">Add</span>(y)
 }
 
 <span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 支持自定义类型</span>
-    var x, y MyInt = <span class="number">10</span>, <span class="number">20</span>
-    fmt.<span class="function">Println</span>(<span class="function">Max</span>(x, y))
+    x, y := MyInt(<span class="number">10</span>), MyInt(<span class="number">20</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Sum:"</span>, <span class="function">sum</span>(x, y))  <span class="comment">// 30</span>
+}</code></pre>
 
-    var f1, f2 MyFloat = <span class="number">3.14</span>, <span class="number">2.71</span>
-    fmt.<span class="function">Println</span>(<span class="function">Max</span>(f1, f2))
+            <h2 id="new">Go 1.26 新特性：new() 表达式增强</h2>
+            <div class="success-box">
+                <h3>⭐ Go 1.26: new() 函数增强</h3>
+                <p>new() 函数现在可以接受表达式作为初始值，简化了代码。</p>
+            </div>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"encoding/json"</span>
+
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    MaxRetries *<span class="keyword">int</span>  <span class="string">`json:"max_retries,omitempty"`</span>
+    Timeout    *<span class="keyword">int</span>     <span class="string">`json:"timeout,omitempty"`</span>
+}
+
+<span class="comment">// Go 1.26 之前的写法</span>
+<span class="keyword">func</span> <span class="function">oldWay</span>() Config {
+    n := <span class="number">3</span>
+    t := <span class="number">30</span>
+    <span class="keyword">return</span> Config{
+        MaxRetries: &n,
+        Timeout:    &t,
+    }
+}
+
+<span class="comment">// Go 1.26: 简化写法</span>
+<span class="keyword">func</span> <span class="function">newWay</span>() Config {
+    <span class="keyword">return</span> Config{
+        MaxRetries: <span class="function">new</span>(<span class="number">3</span>),   <span class="comment">// 直接 new(表达式)</span>
+        Timeout:    <span class="function">new</span>(<span class="number">30</span>),
+    }
+}
+
+<span class="function">func</span> <span class="function">main</span>() {
+    c := <span class="function">newWay</span>()
+    jsonBytes, _ := json.<span class="function">Marshal</span>(c)
+    fmt.<span class="function">Println</span>(<span class="string">string</span>(jsonBytes))
 }</code></pre>
 
             <h2 id="bestpractices">泛型最佳实践</h2>

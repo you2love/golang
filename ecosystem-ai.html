@@ -4,8 +4,8 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 库 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.3">
+    <title>AI 库 - Go 语言学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.4">
     </head>
 <body>
     <div class="container">
@@ -14,6 +14,54 @@
     </aside>
                 <div class="content">
             <a href="ecosystem.html" class="back-link">← 返回 社区库</a>
+            <h1>🤖 AI 库 - Go 生态系统</h1>
+            <p class="intro">Go 语言在 AI/ML 领域快速发展，Go 1.26 的 SIMD 支持和性能提升使其成为 AI 服务端开发的优秀选择。</p>
+
+            <h2>AI 框架对比</h2>
+            <table>
+                <caption>Go AI 库对比</caption>
+                <thead>
+                    <tr>
+                        <th>库/框架</th>
+                        <th>用途</th>
+                        <th>特点</th>
+                        <th>推荐度</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>go-openai</td>
+                        <td>OpenAI API 客户端</td>
+                        <td>官方支持、类型安全</td>
+                        <td><span class="tag tag-success">⭐⭐⭐⭐⭐</span></td>
+                    </tr>
+                    <tr>
+                        <td>ollama</td>
+                        <td>本地 LLM 运行</td>
+                        <td>离线运行、多模型</td>
+                        <td><span class="tag tag-success">⭐⭐⭐⭐⭐</span></td>
+                    </tr>
+                    <tr>
+                        <td>tiktoken</td>
+                        <td>Token 计数</td>
+                        <td>快速、BPE 编码</td>
+                        <td><span class="tag tag-info">⭐⭐⭐⭐</span></td>
+                    </tr>
+                    <tr>
+                        <td>gorgonia</td>
+                        <td>张量计算</td>
+                        <td>类似 PyTorch</td>
+                        <td><span class="tag tag-warning">⭐⭐⭐</span></td>
+                    </tr>
+                    <tr>
+                        <td>go-ml</td>
+                        <td>机器学习</td>
+                        <td>基础算法</td>
+                        <td><span class="tag tag-warning">⭐⭐⭐</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
             <h2 id="openai">OpenAI SDK</h2>
             <p>go-openai 是 OpenAI API 的官方 Go 语言客户端库，提供了完整的类型安全支持和流式响应处理。</p>
 

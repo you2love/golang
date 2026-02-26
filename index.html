@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Go 语言学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.3">
+    <link rel="stylesheet" href="styles.css?v=1.4">
 </head>
 <body>
     <div class="container">
@@ -13,6 +13,90 @@
         <!-- 导航栏将通过JavaScript动态加载 -->
     </aside>
         <div class="content">
+            <h1>Go 语言学习教程</h1>
+            <p class="intro">Go 语言是 Google 于 2009 年发布的开源编程语言，以简洁、高效、并发著称。当前最新版本为 <strong>Go 1.26</strong>，带来了革命性的性能提升和新特性。</p>
+
+            <h2>📊 Go 1.26 核心新特性</h2>
+            
+            <!-- Go 1.26 新特性卡片 -->
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon">🆕</div>
+                    <h4>new() 表达式增强</h4>
+                    <p>new() 函数现在可以接受表达式作为初始值</p>
+                    <code class="tag">ptr := new(int64(300))</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔄</div>
+                    <h4>自引用泛型</h4>
+                    <p>泛型类型可以引用自身，实现更复杂的约束</p>
+                    <code class="tag">type Adder[A Adder[A]]</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">♻️</div>
+                    <h4>Green Tea GC</h4>
+                    <p>新版垃圾回收器，默认启用，性能提升 10-40%</p>
+                    <code class="tag">GC overhead -30%</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⚡</div>
+                    <h4>cgo 性能提升</h4>
+                    <p>cgo 调用开销减少约 30%</p>
+                    <code class="tag">cgo overhead -30%</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔒</div>
+                    <h4>Secret Mode</h4>
+                    <p>新增 runtime/secret 包，安全清除敏感数据</p>
+                    <code class="tag">安全擦除</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔢</div>
+                    <h4>SIMD 支持</h4>
+                    <p>实验性 simd/archsimd 包，支持向量运算</p>
+                    <code class="tag">GOEXPERIMENT=simd</code>
+                </div>
+            </div>
+
+            <h2>📈 Go 版本演进时间线</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker">2009</div>
+                    <div class="timeline-content">
+                        <h4>Go 语言诞生</h4>
+                        <p>Google 发布 Go 语言初始版本</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">2012</div>
+                    <div class="timeline-content">
+                        <h4>Go 1.0 发布</h4>
+                        <p>第一个稳定版本发布</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">2022</div>
+                    <div class="timeline-content">
+                        <h4>Go 1.18</h4>
+                        <p>引入泛型 (Generics) 重大特性</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">2024</div>
+                    <div class="timeline-content">
+                        <h4>Go 1.22</h4>
+                        <p>range over func 迭代器特性</p>
+                    </div>
+                </div>
+                <div class="timeline-item highlight">
+                    <div class="timeline-marker">Now</div>
+                    <div class="timeline-content">
+                        <h4>Go 1.26 ⭐</h4>
+                        <p>Green Tea GC、自引用泛型、new()增强</p>
+                    </div>
+                </div>
+            </div>
+            
             <h2>📊 Go 语言核心概念</h2>
             
             <h3>核心名词对照表</h3>
@@ -90,33 +174,83 @@
                 </tbody>
             </table>
 
-            <h3>Goroutine 调度模型（GMP）</h3>
+            <h3>Goroutine 调度模型（GMP）- 优化版</h3>
             <div class="flowchart">
-                <div class="flowchart-node">G (Goroutine)</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">P (Processor)</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">M (Machine/Thread)</div>
-                <br><br>
-                <div class="flowchart-node">本地运行队列</div>
-                <span class="flowchart-arrow">↔</span>
-                <div class="flowchart-node">全局运行队列</div>
-                <span class="flowchart-arrow">↔</span>
-                <div class="flowchart-node">工作窃取</div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node primary">G (Goroutine)</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node primary">P (Processor)</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node primary">M (Machine/Thread)</div>
+                </div>
+                <div class="flowchart-divider"></div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node">本地运行队列</div>
+                    <span class="flowchart-arrow">↔</span>
+                    <div class="flowchart-node">全局运行队列</div>
+                    <span class="flowchart-arrow">↔</span>
+                    <div class="flowchart-node success">工作窃取 (Work Stealing)</div>
+                </div>
             </div>
 
             <div class="info-box">
-                <h3>💡 GMP 模型说明</h3>
+                <h3>💡 GMP 模型说明 (Go 1.26 优化)</h3>
                 <ul>
-                    <li><strong>G (Goroutine)</strong>：Go 协程，用户态轻量级线程</li>
-                    <li><strong>P (Processor)</strong>：处理器，每个 P 有一个本地运行队列</li>
-                    <li><strong>M (Machine)</strong>：系统线程，负责执行 goroutine</li>
-                    <li><strong>工作窃取</strong>：当 P 的本地队列为空时，从其他 P 窃取任务</li>
+                    <li><strong>G (Goroutine)</strong>：Go 协程，用户态轻量级线程，初始栈 2KB，最大 1GB</li>
+                    <li><strong>P (Processor)</strong>：处理器，每个 P 有一个本地运行队列 (256个槽位)</li>
+                    <li><strong>M (Machine)</strong>：系统线程，负责执行 goroutine，与 P 绑定</li>
+                    <li><strong>工作窃取</strong>：当 P 的本地队列为空时，从其他 P 窃取任务 (负载均衡)</li>
+                    <li><strong>Go 1.26 优化</strong>：Green Tea GC 提升调度效率，减少 GC 暂停时间</li>
                 </ul>
             </div>
 
-            <h3>Channel（通道）</h3>
+            <h3>Goroutine 状态转换图</h3>
+            <div class="state-diagram">
+                <div class="state-node" data-state="_Gidle">_Gidle<br><small>创建</small></div>
+                <div class="state-arrow">→</div>
+                <div class="state-node" data-state="_Grunnable">_Grunnable<br><small>就绪</small></div>
+                <div class="state-arrow">→</div>
+                <div class="state-node" data-state="_Grunning">_Grunning<br><small>运行</small></div>
+                <div class="state-arrow">→</div>
+                <div class="state-node" data-state="_Gwaiting">_Gwaiting<br><small>等待</small></div>
+                <div class="state-arrow">→</div>
+                <div class="state-node" data-state="_Grunnable">_Grunnable<br><small>唤醒</small></div>
+                <div class="state-arrow">→</div>
+                <div class="state-node" data-state="_Gdead">_Gdead<br><small>完成</small></div>
+            </div>
+            <div class="state-diagram" style="margin-top: 15px;">
+                <div class="state-node" data-state="_Grunning">_Grunning</div>
+                <div class="state-arrow">→</div>
+                <div class="state-node" data-state="_Gsyscall">_Gsyscall<br><small>系统调用</small></div>
+                <div class="state-arrow">→</div>
+                <div class="state-node" data-state="_Grunnable">_Grunnable</div>
+            </div>
+
+            <h3>Channel（通道）- CSP 通信模型</h3>
             <p>Channel 是 Go 语言中用于 goroutine 之间通信的核心机制，实现了 CSP（Communicating Sequential Processes）模型。</p>
+            
+            <!-- Channel 通信序列图 -->
+            <div class="sequence-diagram">
+                <div class="sequence-header">
+                    <span>Goroutine A (发送者)</span>
+                    <span>Channel</span>
+                    <span>Goroutine B (接收者)</span>
+                </div>
+                <div class="sequence-body">
+                    <div class="sequence-line">
+                        <div class="sequence-actor">A</div>
+                        <div class="sequence-step send">send(ch, data)</div>
+                    </div>
+                    <div class="sequence-line">
+                        <div class="sequence-actor">CH</div>
+                        <div class="sequence-step buffer">[data]</div>
+                    </div>
+                    <div class="sequence-line">
+                        <div class="sequence-actor">B</div>
+                        <div class="sequence-step receive">← receive(ch)</div>
+                    </div>
+                </div>
+            </div>
             
             <table>
                 <caption>Channel 类型与特性</caption>
@@ -133,39 +267,44 @@
                         <td><strong>无缓冲通道</strong></td>
                         <td>同步通信，发送和接收必须同时进行</td>
                         <td><code>ch := make(chan int)</code></td>
-                        <td>阻塞式，保证数据传递</td>
+                        <td><span class="tag tag-warning">阻塞式</span> 保证数据传递</td>
                     </tr>
                     <tr>
                         <td><strong>有缓冲通道</strong></td>
                         <td>异步通信，缓冲区未满时不阻塞</td>
                         <td><code>ch := make(chan int, 10)</code></td>
-                        <td>非阻塞式，提高吞吐量</td>
+                        <td><span class="tag tag-info">非阻塞式</span> 提高吞吐量</td>
                     </tr>
                     <tr>
                         <td><strong>单向通道</strong></td>
                         <td>限制只能发送或接收</td>
                         <td><code>ch := make(chan<- int)</code></td>
-                        <td>类型安全，防止误用</td>
+                        <td><span class="tag tag-success">类型安全</span> 防止误用</td>
                     </tr>
                     <tr>
                         <td><strong>Select 通道</strong></td>
                         <td>同时监听多个通道</td>
                         <td><code>select { case <-ch: }</code></td>
-                        <td>多路复用，随机选择</td>
+                        <td><span class="tag tag-info">多路复用</span> 随机选择</td>
                     </tr>
                 </tbody>
             </table>
 
             <div class="flowchart">
-                <div class="flowchart-node">Goroutine A</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">发送数据到 Channel</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">Channel（缓冲区）</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">从 Channel 接收数据</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">Goroutine B</div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node">Goroutine A</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node warning">发送数据到 Channel</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node success">Channel（缓冲区）</div>
+                </div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node">Goroutine B</div>
+                    <span class="flowchart-arrow">←</span>
+                    <div class="flowchart-node warning">从 Channel 接收数据</div>
+                    <span class="flowchart-arrow">←</span>
+                    <div class="flowchart-node success">数据传递完成</div>
+                </div>
             </div>
 
             <div class="info-box">
@@ -178,8 +317,43 @@
                 </ul>
             </div>
 
-            <h3>Context（上下文）</h3>
+            <h3>Context（上下文）- 请求生命周期管理</h3>
             <p>Context 是 Go 语言中用于控制 goroutine 生命周期、传递请求范围数据的机制。</p>
+
+            <!-- Context 传播流程图 -->
+            <div class="flowchart">
+                <div class="flowchart-row">
+                    <div class="flowchart-node warning">HTTP Request</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">创建 Root Context</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">WithTimeout 设置超时</div>
+                </div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node">超时或完成</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node danger">自动取消所有子 Context</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node success">释放资源</div>
+                </div>
+            </div>
+
+            <!-- Context 层级结构 -->
+            <div class="context-tree">
+                <div class="tree-root">context.Background()</div>
+                <div class="tree-branch">
+                    <span class="tree-line">├──</span>
+                    <div class="tree-node">WithTimeout(5s)</div>
+                    <div class="tree-branch">
+                        <span class="tree-line">├──</span>
+                        <div class="tree-node">WithValue("user_id", "123")</div>
+                        <span class="tree-line">├──</span>
+                        <div class="tree-node">WithCancel()</div>
+                    </div>
+                    <span class="tree-line">├──</span>
+                    <div class="tree-node">WithDeadline(time)</div>
+                </div>
+            </div>
 
             <table>
                 <caption>Context 类型与用途</caption>
@@ -196,85 +370,51 @@
                         <td><strong>Background</strong></td>
                         <td>根上下文，永不取消</td>
                         <td><code>ctx := context.Background()</code></td>
-                        <td>所有 context 的根节点</td>
+                        <td><span class="tag tag-success">根节点</span> 所有 context 的根</td>
                     </tr>
                     <tr>
                         <td><strong>TODO</strong></td>
                         <td>临时使用，不确定使用何种 context</td>
                         <td><code>ctx := context.TODO()</code></td>
-                        <td>待优化时替换</td>
+                        <td><span class="tag tag-warning">待优化</span> 后续替换</td>
                     </tr>
                     <tr>
                         <td><strong>WithCancel</strong></td>
                         <td>可手动取消的 context</td>
                         <td><code>ctx, cancel := context.WithCancel(parent)</code></td>
-                        <td>主动取消操作</td>
+                        <td><span class="tag tag-info">主动取消</span> 手动控制</td>
                     </tr>
                     <tr>
                         <td><strong>WithTimeout</strong></td>
                         <td>超时自动取消的 context</td>
                         <td><code>ctx, cancel := context.WithTimeout(parent, timeout)</code></td>
-                        <td>防止长时间阻塞</td>
+                        <td><span class="tag tag-warning">超时取消</span> 防止阻塞</td>
                     </tr>
                     <tr>
                         <td><strong>WithDeadline</strong></td>
                         <td>到截止时间自动取消</td>
                         <td><code>ctx, cancel := context.WithDeadline(parent, deadline)</code></td>
-                        <td>指定截止时间</td>
+                        <td><span class="tag tag-warning">定时取消</span> 指定时间</td>
                     </tr>
                     <tr>
                         <td><strong>WithValue</strong></td>
                         <td>携带键值对数据的 context</td>
                         <td><code>ctx := context.WithValue(parent, key, value)</code></td>
-                        <td>传递请求范围数据</td>
+                        <td><span class="tag tag-info">传递数据</span> 请求范围</td>
                     </tr>
                 </tbody>
             </table>
 
-            <div class="flowchart">
-                <div class="flowchart-node">Parent Context</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">创建 Child Context</div>
-                <br><br>
-                <div class="flowchart-node">WithCancel</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">手动调用 cancel()</div>
-                <br>
-                <div class="flowchart-node">WithTimeout</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">超时自动取消</div>
-                <br>
-                <div class="flowchart-node">WithValue</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">传递键值对数据</div>
-            </div>
-
             <div class="warning-box">
-                <h3>⚠️ Context 使用原则</h3>
+                <h3>⚠️ Context 使用原则 (最佳实践)</h3>
                 <ul>
                     <li><strong>不要在结构体中存储</strong>：Context 应该作为第一个参数传递</li>
                     <li><strong>不要设为可选参数</strong>：明确需要 context 时必须传递</li>
                     <li><strong>使用 nil 表示无上下文</strong>：不确定是否需要时传递 nil</li>
-                    <li><strong>及时调用 cancel</strong>：避免资源泄漏</li>
+                    <li><strong>及时调用 cancel</strong>：避免资源泄漏 (Go 1.26 推荐使用 defer)</li>
                     <li><strong>只传递请求范围数据</strong>：不要使用 Context 传递可选参数</li>
+                    <li><strong>Go 1.26 建议</strong>：配合新版的 goroutine leak profiler 检测泄漏</li>
                 </ul>
-            </div>
-
-            <h3>Context 传播流程</h3>
-            <div class="flowchart">
-                <div class="flowchart-node">HTTP Request</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">创建 Root Context</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">WithTimeout 设置超时</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">传递给 Service 层</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">传递给 Database 层</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">超时或完成</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">自动取消所有子 Context</div>
             </div>
 
             <h3>函数迭代器（Function Iterator）</h3>
@@ -425,17 +565,45 @@ fmt.<span class="function">Println</span>(<span class="function">next</span>()) 
                 </tbody>
             </table>
 
-            <h3>泛型（Generics）</h3>
-            <p>泛型是 Go 1.18 引入的重要特性，允许编写与类型无关的代码，提高代码复用性和类型安全性。</p>
+            <h3>泛型（Generics）- Go 1.18+ 特性</h3>
+            <p>泛型是 Go 1.18 引入的重要特性，允许编写与类型无关的代码，提高代码复用性和类型安全性。Go 1.26 新增了<strong>自引用泛型</strong>支持。</p>
+
+            <!-- 泛型类型约束层次图 -->
+            <div class="type-hierarchy">
+                <div class="hierarchy-level">
+                    <div class="hierarchy-node">any</div>
+                    <span class="hierarchy-arrow">←</span>
+                    <div class="hierarchy-node">所有类型</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="hierarchy-node">comparable</div>
+                    <span class="hierarchy-arrow">←</span>
+                    <div class="hierarchy-node">可比较类型</div>
+                    <span class="hierarchy-arrow">←</span>
+                    <div class="hierarchy-node">==, !=</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="hierarchy-node">cmp.Ordered</div>
+                    <span class="hierarchy-arrow">←</span>
+                    <div class="hierarchy-node">可排序类型</div>
+                    <span class="hierarchy-arrow">←</span>
+                    <div class="hierarchy-node">&lt;, &gt;, &lt;=, &gt;=</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="hierarchy-node highlight">自定义约束</div>
+                    <span class="hierarchy-arrow">←</span>
+                    <div class="hierarchy-node">interface { ~int | float64 }</div>
+                </div>
+            </div>
 
             <table>
-                <caption>泛型类型与用途</caption>
+                <caption>泛型类型与用途 (Go 1.26 更新)</caption>
                 <thead>
                     <tr>
                         <th>类型</th>
                         <th>说明</th>
                         <th>示例</th>
-                        <th>适用场景</th>
+                        <th>Go版本</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -443,112 +611,96 @@ fmt.<span class="function">Println</span>(<span class="function">next</span>()) 
                         <td><strong>泛型函数</strong></td>
                         <td>函数接受任意类型参数</td>
                         <td><code>func Max[T comparable](a, b T) T</code></td>
-                        <td>通用算法、工具函数</td>
+                        <td><span class="tag">1.18+</span></td>
                     </tr>
                     <tr>
                         <td><strong>泛型类型</strong></td>
                         <td>结构体或接口使用类型参数</td>
                         <td><code>type Stack[T any] struct { items []T }</code></td>
-                        <td>数据结构、容器类型</td>
+                        <td><span class="tag">1.18+</span></td>
                     </tr>
                     <tr>
                         <td><strong>泛型方法</strong></td>
                         <td>泛型类型的方法</td>
                         <td><code>func (s *Stack[T]) Push(v T)</code></td>
-                        <td>泛型类型的行为定义</td>
+                        <td><span class="tag">1.18+</span></td>
                     </tr>
                     <tr>
                         <td><strong>类型约束</strong></td>
                         <td>限制类型参数的范围</td>
                         <td><code>type Number interface { int | float64 }</code></td>
-                        <td>确保类型参数满足要求</td>
+                        <td><span class="tag">1.18+</span></td>
                     </tr>
                     <tr>
-                        <td><strong>类型推断</strong></td>
-                        <td>编译器自动推断类型参数</td>
-                        <td><code>Max(1, 2) // 自动推断为 int</code></td>
-                        <td>简化泛型调用</td>
+                        <td><strong>~底层类型</strong></td>
+                        <td>支持底层类型匹配</td>
+                        <td><code>~int | ~float64</code></td>
+                        <td><span class="tag">1.18+</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>自引用泛型 ⭐</strong></td>
+                        <td>泛型类型引用自身</td>
+                        <td><code>type Adder[A Adder[A]]</code></td>
+                        <td><span class="tag tag-success">1.26+</span></td>
                     </tr>
                 </tbody>
             </table>
 
             <div class="flowchart">
-                <div class="flowchart-node">定义泛型函数</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">声明类型参数 [T]</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">添加类型约束</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">使用类型参数</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">编译器类型推断</div>
-                <span class="flowchart-arrow">→</span>
-                <div class="flowchart-node">生成具体类型代码</div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node">定义泛型函数</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">声明类型参数 [T]</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">添加类型约束</div>
+                </div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node">使用类型参数</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">编译器类型推断</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node success">生成具体类型代码</div>
+                </div>
             </div>
 
             <div class="info-box">
-                <h3>💡 泛型核心特性</h3>
+                <h3>💡 泛型核心特性 (Go 1.26)</h3>
                 <ul>
                     <li><strong>类型安全</strong>：编译时检查类型，避免运行时错误</li>
                     <li><strong>代码复用</strong>：编写一次代码，支持多种类型</li>
                     <li><strong>零性能开销</strong>：泛型在编译时实例化，无运行时开销</li>
                     <li><strong>类型推断</strong>：编译器可自动推断类型参数，简化调用</li>
                     <li><strong>约束系统</strong>：通过接口限制类型参数的使用范围</li>
+                    <li><strong>自引用泛型</strong>：Go 1.26 新特性，支持递归类型约束</li>
                 </ul>
             </div>
 
             <div class="example-box">
-                <h3>📝 泛型实现示例</h3>
-                <pre><code><span class="comment">// 泛型函数：找出两个值中较大的一个</span>
-<span class="keyword">func</span> <span class="function">Max</span>[T <span class="keyword">comparable</span>](a, b T) T {
-    <span class="keyword">if</span> a > b {
-        <span class="keyword">return</span> a
-    }
-    <span class="keyword">return</span> b
+                <h3>📝 Go 1.26 泛型新特性示例</h3>
+                <pre><code><span class="comment">// Go 1.26: new() 函数增强 - 直接初始化值</span>
+<span class="comment">// 之前</span>
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    MaxRetries *<span class="keyword">int</span> <span class="string">`json:"max_retries,omitempty"`</span>
+}
+<span class="keyword">func</span> <span class="function">helper</span>() *<span class="keyword">int</span> {
+    n := <span class="number">3</span>
+    <span class="keyword">return</span> &n
 }
 
-<span class="comment">// 泛型类型：栈</span>
-<span class="keyword">type</span> <span class="function">Stack</span>[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
-    items []T
+<span class="comment">// Go 1.26: 简化写法</span>
+c := Config{
+    MaxRetries: <span class="function">new</span>(<span class="number">3</span>),  <span class="comment">// 直接 new(表达式)</span>
+    Timeout:    <span class="function">new</span>(<span class="number">30</span>),
 }
 
-<span class="keyword">func</span> (s *<span class="function">Stack</span>[T]) <span class="function">Push</span>(v T) {
-    s.items = <span class="function">append</span>(s.items, v)
+<span class="comment">// Go 1.26: 自引用泛型 - 递归约束</span>
+<span class="keyword">type</span> Adder[A Adder[A]] <span class="keyword">interface</span> {
+    <span class="function">Add</span>(A) A
 }
 
-<span class="keyword">func</span> (s *<span class="function">Stack</span>[T]) <span class="function">Pop</span>() (T, <span class="keyword">bool</span>) {
-    <span class="keyword">if</span> <span class="function">len</span>(s.items) == <span class="number">0</span> {
-        <span class="keyword">var</span> zero T
-        <span class="keyword">return</span> zero, <span class="keyword">false</span>
-    }
-    index := <span class="function">len</span>(s.items) - <span class="number">1</span>
-    item := s.items[index]
-    s.items = s.items[:index]
-    <span class="keyword">return</span> item, <span class="keyword">true</span>
-}
-
-<span class="comment">// 类型约束：数值类型</span>
-<span class="keyword">type</span> Number <span class="keyword">interface</span> {
-    <span class="keyword">int</span> | <span class="keyword">int64</span> | <span class="keyword">float64</span>
-}
-
-<span class="comment">// 使用类型约束的泛型函数</span>
-<span class="keyword">func</span> <span class="function">Sum</span>[T Number](values []T) T {
-    <span class="keyword">var</span> total T
-    <span class="keyword">for</span> _, v := <span class="keyword">range</span> values {
-        total += v
-    }
-    <span class="keyword">return</span> total
-}
-
-<span class="comment">// 使用泛型</span>
-s := <span class="function">NewStack</span>[<span class="keyword">string</span>]()
-s.<span class="function">Push</span>(<span class="string">"Hello"</span>)
-s.<span class="function">Push</span>(<span class="string">"World"</span>)
-
-<span class="comment">// 类型推断</span>
-<span class="function">Max</span>(<span class="number">1</span>, <span class="number">2</span>)          <span class="comment">// 自动推断为 int</span>
-<span class="function">Max</span>(<span class="number">1.5</span>, <span class="number">2.5</span>)     <span class="comment">// 自动推断为 float64</span></code></pre>
+<span class="keyword">func</span> <span class="function">sum</span>[A Adder[A]](x, y A) A {
+    <span class="keyword">return</span> x.<span class="function">Add</span>(y)
+}</code></pre>
             </div>
 
             <div class="warning-box">
@@ -618,25 +770,25 @@ s.<span class="function">Push</span>(<span class="string">"World"</span>)
                         <td><strong>Web 开发</strong></td>
                         <td>API 服务、Web 后端</td>
                         <td>高并发、低延迟、易部署</td>
-                        <td>Gin、Echo、Fiber</td>
+                        <td>Gin、Echo、Fiber、Chi</td>
                     </tr>
                     <tr>
                         <td><strong>微服务架构</strong></td>
                         <td>分布式系统、微服务</td>
                         <td>轻量级、易扩展、容器化</td>
-                        <td>gRPC、Go-Micro、Kratos</td>
+                        <td>gRPC、Go-Micro、Kratos、GoZero</td>
                     </tr>
                     <tr>
                         <td><strong>云原生</strong></td>
                         <td>Docker、Kubernetes</td>
                         <td>系统级编程、性能优秀</td>
-                        <td>containerd、CNI、CSI</td>
+                        <td>containerd、CNI、CSI、Istio</td>
                     </tr>
                     <tr>
                         <td><strong>区块链</strong></td>
                         <td>以太坊、Hyperledger</td>
                         <td>高性能、安全性、并发处理</td>
-                        <td>go-ethereum、Fabric</td>
+                        <td>go-ethereum、Fabric、Railgun</td>
                     </tr>
                     <tr>
                         <td><strong>命令行工具</strong></td>
@@ -648,7 +800,7 @@ s.<span class="function">Push</span>(<span class="string">"World"</span>)
                         <td><strong>网络编程</strong></td>
                         <td>代理、网关、中间件</td>
                         <td>高并发网络 I/O</td>
-                        <td>net/http、net/rpc</td>
+                        <td>net/http、net/rpc、gRPC</td>
                     </tr>
                     <tr>
                         <td><strong>数据处理</strong></td>
@@ -662,8 +814,58 @@ s.<span class="function">Push</span>(<span class="string">"World"</span>)
                         <td>持久化、查询优化</td>
                         <td>TiDB、CockroachDB、BadgerDB</td>
                     </tr>
+                    <tr>
+                        <td><strong>AI/ML</strong> ⭐</td>
+                        <td>机器学习服务、LLM</td>
+                        <td>高性能推理、高并发</td>
+                        <td>go-ml、gorgonia、 Ollama Go</td>
+                    </tr>
                 </tbody>
             </table>
+
+            <h3>Go 1.26 性能提升概览</h3>
+            <div class="performance-chart">
+                <div class="perf-item">
+                    <div class="perf-label">GC 性能</div>
+                    <div class="perf-bar-container">
+                        <div class="perf-bar" style="width: 60%;">-40%</div>
+                    </div>
+                    <div class="perf-value">Green Tea GC</div>
+                </div>
+                <div class="perf-item">
+                    <div class="perf-label">cgo 调用</div>
+                    <div class="perf-bar-container">
+                        <div class="perf-bar" style="width: 70%;">-30%</div>
+                    </div>
+                    <div class="perf-value">开销减少</div>
+                </div>
+                <div class="perf-item">
+                    <div class="perf-label">io.ReadAll</div>
+                    <div class="perf-bar-container">
+                        <div class="perf-bar" style="width: 50%;">2x</div>
+                    </div>
+                    <div class="perf-value">读取速度</div>
+                </div>
+                <div class="perf-item">
+                    <div class="perf-label">fmt.Errorf</div>
+                    <div class="perf-bar-container">
+                        <div class="perf-bar" style="width: 50%;">~errors.New</div>
+                    </div>
+                    <div class="perf-value">性能相当</div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h3>💡 为什么要学习 Go 1.26？</h3>
+                <ul>
+                    <li><strong>云原生首选</strong>：Kubernetes、Docker 等核心技术栈</li>
+                    <li><strong>高性能</strong>：Green Tea GC 带来 10-40% 性能提升</li>
+                    <li><strong>简单易学</strong>：语法简洁，入门容易</li>
+                    <li><strong>并发原生</strong>：goroutine + channel 天然支持高并发</li>
+                    <li><strong>工具链完善</strong>：go fix 自动现代化代码</li>
+                    <li><strong>生态系统丰富</strong>：成熟的 Web 框架、数据库驱动、云原生工具</li>
+                </ul>
+            </div>
 
             </div>
     </div>

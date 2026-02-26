@@ -4,8 +4,8 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goroutine - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.3">
+    <title>Goroutine - Go 语言学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.4">
     </head>
 <body>
     <div class="container">
@@ -14,8 +14,84 @@
     </aside>
                 <div class="content">
             <a href="concurrency.html" class="back-link">← 返回 concurrency</a>
-            <h2 id="goroutine">Goroutine</h2>
-            <p>Goroutine 是 Go 语言轻量级的线程实现，由 Go 运行时管理。</p>
+            <h2 id="goroutine">Goroutine - 并发编程核心</h2>
+            <p>Goroutine 是 Go 语言轻量级的线程实现，由 Go 运行时管理。Go 1.26 优化了调度器性能，结合 Green Tea GC 实现更低的延迟。</p>
+
+            <!-- GMP 模型架构图 -->
+            <h3>GMP 调度模型架构 (Go 1.26 优化版)</h3>
+            <div class="gmp-diagram">
+                <div class="gmp-component">
+                    <div class="gmp-title">G (Goroutine)</div>
+                    <div class="gmp-desc">轻量级执行单元</div>
+                    <div class="gmp-details">
+                        <ul>
+                            <li>初始栈: 2KB</li>
+                            <li>最大栈: 1GB</li>
+                            <li>状态: 6种</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="gmp-arrow">→</div>
+                <div class="gmp-component">
+                    <div class="gmp-title">P (Processor)</div>
+                    <div class="gmp-desc">调度上下文</div>
+                    <div class="gmp-details">
+                        <ul>
+                            <li>本地队列: 256</li>
+                            <li>MCache 缓存</li>
+                            <li>调度tick</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="gmp-arrow">→</div>
+                <div class="gmp-component">
+                    <div class="gmp-title">M (Machine)</div>
+                    <div class="gmp-desc">系统线程</div>
+                    <div class="gmp-details">
+                        <ul>
+                            <li>OS线程</li>
+                            <li>执行Goroutine</li>
+                            <li>工作窃取</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Goroutine 状态流程图 -->
+            <h3>Goroutine 状态转换图</h3>
+            <div class="state-diagram">
+                <div class="state-node" data-state="_Gidle">_Gidle<br><small>创建</small></div>
+                <div class="state-arrow">→</div>
+                <div class="state-node" data-state="_Grunnable">_Grunnable<br><small>就绪</small></div>
+                <div class="state-arrow">→</div>
+                <div class="state-node" data-state="_Grunning">_Grunning<br><small>运行</small></div>
+            </div>
+            <div class="state-diagram" style="margin-top: 15px;">
+                <div class="state-node" data-state="_Grunning">_Grunning</div>
+                <div class="state-arrow">→</div>
+                <div class="state-node" data-state="_Gwaiting">_Gwaiting<br><small>等待Channel/sleep</small></div>
+                <div class="state-arrow">→</div>
+                <div class="state-node" data-state="_Grunnable">_Grunnable<br><small>唤醒</small></div>
+                <div class="state-arrow">→</div>
+                <div class="state-node" data-state="_Gdead">_Gdead<br><small>完成</small></div>
+            </div>
+
+            <!-- 工作窃取流程图 -->
+            <h3>工作窃取 (Work Stealing) 流程</h3>
+            <div class="flowchart">
+                <div class="flowchart-row">
+                    <div class="flowchart-node warning">P1 本地队列满</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">P1 新任务放入全局队列</div>
+                </div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node success">P2 空闲</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">从全局队列获取任务</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">P2 执行任务</div>
+                </div>
+            </div>
 
             <pre><code><span class="keyword">package</span> main
 
@@ -51,7 +127,6 @@
     gopc        uintptr <span class="comment">// 创建该 goroutine 的 PC</span>
     startpc     uintptr <span class="comment">// goroutine 函数的起始 PC</span>
     atomicstatus uint32 <span class="comment">// 原子状态</span>
-    goid        int64   <span class="comment">// Goroutine 唯一标识</span>
 }</code></pre>
 
                 <p><strong>2. M（Machine）结构：</strong></p>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go 1.26 新特性 - Go 语言学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.4">
+    </head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+        <div class="content">
+            <a href="index.html" class="back-link">← 返回首页</a>
+            <h1>Go 1.26 新特性指南</h1>
+            <p class="intro">Go 1.26 发布，带来了革命性的性能提升和新语言特性。</p>
+
+            <h2>📋 版本信息</h2>
+            <table>
+                <caption>Go 1.26 发布信息</caption>
+                <thead>
+                    <tr>
+                        <th>项目</th>
+                        <th>内容</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>发布日期</td>
+                        <td>最新版本</td>
+                    </tr>
+                    <tr>
+                        <td>前一个版本</td>
+                        <td>Go 1.25</td>
+                    </tr>
+                    <tr>
+                        <td>自举要求</td>
+                        <td>Go 1.24.6+</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>🆕 语言层面更新</h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon">✨</div>
+                    <h4>new() 表达式增强</h4>
+                    <p>new() 函数现在可以直接接受表达式作为初始值</p>
+                    <pre><code>ptr := new(int64(300))</code></pre>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔄</div>
+                    <h4>自引用泛型</h4>
+                    <p>泛型类型可以引用自身，实现递归约束</p>
+                    <pre><code>type Adder[A Adder[A]]</code></pre>
+                </div>
+            </div>
+
+            <h3>new() 函数增强示例</h3>
+            <div class="example-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"encoding/json"</span>
+
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    MaxRetries *<span class="keyword">int</span> <span class="string">`json:"max_retries,omitempty"`</span>
+    Timeout    *<span class="keyword">int</span>     <span class="string">`json:"timeout,omitempty"`</span>
+}
+
+<span class="comment">// Go 1.26 简化写法</span>
+<span class="keyword">func</span> <span class="function">newConfig</span>() Config {
+    <span class="keyword">return</span> Config{
+        MaxRetries: <span class="function">new</span>(<span class="number">3</span>),
+        Timeout:    <span class="function">new</span>(<span class="number">30</span>),
+    }
+}
+
+<span class="comment">// JSON 序列化</span>
+<span class="keyword">func</span> <span class="function">main</span>() {
+    c := <span class="function">newConfig</span>()
+    data, _ := json.<span class="function">Marshal</span>(c)
+    fmt.<span class="function">Println</span>(<span class="string">string</span>(data))
+}</code></pre>
+            </div>
+
+            <h3>自引用泛型示例</h3>
+            <div class="example-box">
+                <pre><code><span class="comment">// 递归类型约束 - Go 1.26 新特性</span>
+<span class="keyword">type</span> Node[T Node[T]] <span class="keyword">interface</span> {
+    <span class="function">Value</span>() T
+    <span class="function">Children</span>() []Node[T]
+}
+
+<span class="comment">// 使用自引用泛型</span>
+<span class="keyword">type</span> Tree[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
+    Value    T
+    Children []Tree[T]
+}
+
+<span class="comment">// 递归计算</span>
+<span class="keyword">func</span> <span class="function">Sum</span>[T <span class="keyword">any</span>](t Tree[T]) T {
+    <span class="keyword">var</span> total T = t.Value
+    <span class="keyword">for</span> _, child := <span class="keyword">range</span> t.Children {
+        total += <span class="function">Sum</span>(child)
+    }
+    <span class="keyword">return</span> total
+}</code></pre>
+            </div>
+
+            <h2>⚡ 性能提升</h2>
+            
+            <table>
+                <caption>Go 1.26 性能改进</caption>
+                <thead>
+                    <tr>
+                        <th>特性</th>
+                        <th>改进</th>
+                        <th>说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Green Tea GC</strong></td>
+                        <td><span class="tag tag-success">GC 开销 -10~40%</span></td>
+                        <td>新版垃圾回收器，默认启用</td>
+                    </tr>
+                    <tr>
+                        <td><strong>cgo 调用</strong></td>
+                        <td><span class="tag tag-success">开销 -30%</span></td>
+                        <td>与 C 语言交互性能提升</td>
+                    </tr>
+                    <tr>
+                        <td><strong>io.ReadAll</strong></td>
+                        <td><span class="tag tag-success">速度 2x</span></td>
+                        <td>使用指数级增长缓冲区</td>
+                    </tr>
+                    <tr>
+                        <td><strong>fmt.Errorf</strong></td>
+                        <td><span class="tag tag-success">性能 ~errors.New</span></td>
+                        <td>错误创建性能优化</td>
+                    </tr>
+                    <tr>
+                        <td><strong>切片栈分配</strong></td>
+                        <td><span class="tag tag-info">更多场景优化</span></td>
+                        <td>编译器优化</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Green Tea GC 性能对比</h3>
+            <div class="performance-chart">
+                <div class="perf-item">
+                    <div class="perf-label">GC 开销</div>
+                    <div class="perf-bar-container">
+                        <div class="perf-bar" style="width: 60%;">-40%</div>
+                    </div>
+                    <div class="perf-value">典型工作负载</div>
+                </div>
+                <div class="perf-item">
+                    <div class="perf-label">GC 开销</div>
+                    <div class="perf-bar-container">
+                        <div class="perf-bar" style="width: 90%;">-10%</div>
+                    </div>
+                    <div class="perf-value">GC 密集型</div>
+                </div>
+                <div class="perf-item">
+                    <div class="perf-label">额外优化</div>
+                    <div class="perf-bar-container">
+                        <div class="perf-bar" style="width: 50%;">+10%</div>
+                    </div>
+                    <div class="perf-value">Ice Lake/Zen4</div>
+                </div>
+            </div>
+
+            <h2>🧪 实验性功能</h2>
+            
+            <div class="warning-box">
+                <h3>⚠️ 实验性功能 (需要启用)</h3>
+                <p>以下功能默认关闭，需要设置环境变量启用：</p>
+            </div>
+
+            <table>
+                <caption>Go 1.26 实验性功能</caption>
+                <thead>
+                    <tr>
+                        <th>功能</th>
+                        <th>启用方式</th>
+                        <th>说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>SIMD 支持</strong></td>
+                        <td><code>GOEXPERIMENT=simd</code></td>
+                        <td>simd/archsimd 包，向量运算</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Secret Mode</strong></td>
+                        <td><code>GOEXPERIMENT=secret</code></td>
+                        <td>runtime/secret 包，安全擦除</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Goroutine 泄漏分析</strong></td>
+                        <td>默认启用</td>
+                        <td>runtime/pprof 新增</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>实验性 SIMD 示例</h3>
+            <div class="example-box">
+                <pre><code><span class="comment">// 需要 GOEXPERIMENT=simd</span>
+<span class="keyword">package</span> main
+
+<span class="comment">// 使用 simd/archsimd 进行向量运算</span>
+<span class="keyword">func</span> <span class="function">VectorAdd</span>(a, b []<span class="keyword">float32</span>) []<span class="keyword">float32</span> {
+    result := <span class="function">make</span>([]<span class="keyword">float32</span>, <span class="function">len</span>(a))
+    
+    <span class="comment">// 使用 SIMD 指令加速</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="function">len</span>(a); i += <span class="number">8</span> {
+        va := archsimd.<span class="function">LoadF32x8</span>(a[i:])
+        vb := archsimd.<span class="function">LoadF32x8</span>(b[i:])
+        vc := archsimd.<span class="function">AddF32x8</span>(va, vb)
+        archsimd.<span class="function">StoreF32x8</span>(result[i:], vc)
+    }
+    
+    <span class="keyword">return</span> result
+}</code></pre>
+            </div>
+
+            <h2>🔧 工具改进</h2>
+            
+            <table>
+                <caption>Go 1.26 工具链改进</caption>
+                <thead>
+                    <tr>
+                        <th>工具</th>
+                        <th>改进内容</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>go fix</td>
+                        <td>完全重写，包含 24+ 个现代化分析器</td>
+                    </tr>
+                    <tr>
+                        <td>go mod init</td>
+                        <td>默认创建 go 1.25.0 (向前兼容)</td>
+                    </tr>
+                    <tr>
+                        <td>go test</td>
+                        <td>支持新的测试模式</td>
+                    </tr>
+                    <tr>
+                        <td>Go Telemetry</td>
+                        <td>可选的匿名使用统计</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>🔒 安全增强</h2>
+            
+            <div class="success-box">
+                <h3>安全改进</h3>
+                <ul>
+                    <li><strong>堆基地址随机化</strong>：64位平台启用，增强 ASLR 保护</li>
+                    <li><strong>Secret Mode</strong>：安全清除敏感数据 (实验性)</li>
+                    <li><strong>FIPS 140-3</strong>：密码学模块合规性</li>
+                </ul>
+            </div>
+
+            <h2>📦 标准库新增</h2>
+            
+            <table>
+                <caption>Go 1.26 新增包</caption>
+                <thead>
+                    <tr>
+                        <th>包名</th>
+                        <th>用途</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>crypto/hpke</td>
+                        <td>混合公钥加密 (RFC 9180)</td>
+                    </tr>
+                    <tr>
+                        <td>simd/archsimd</td>
+                        <td>SIMD 向量运算 (实验性)</td>
+                    </tr>
+                    <tr>
+                        <td>runtime/secret</td>
+                        <td>敏感数据安全擦除 (实验性)</td>
+                    </tr>
+                    <tr>
+                        <td>crypto/mlkem/mlkemtest</td>
+                        <td>后量子 KEM</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>🚀 迁移指南</h2>
+            
+            <div class="info-box">
+                <h3>从 Go 1.25 迁移</h3>
+                <ol>
+                    <li>运行 <code>go mod tidy</code> 更新依赖</li>
+                    <li>运行 <code>go fix ./...</code> 自动现代化代码</li>
+                    <li>测试新特性：<code>GOEXPERIMENT=simd go test</code></li>
+                    <li>如有问题可使用 <code>GOEXPERIMENT=nogreenteagc</code> 禁用 Green Tea GC</li>
+                </ol>
+            </div>
+
+            <div class="warning-box">
+                <h3>注意事项</h3>
+                <ul>
+                    <li>Green Tea GC 的 opt-out 选项将在 Go 1.27 中移除</li>
+                    <li>如果遇到问题请提交 issue</li>
+                    <li>推荐使用 go 1.25.0 作为模块最低版本以确保兼容性</li>
+                </ul>
+            </div>
+
+            <h2>📚 扩展阅读</h2>
+            <ul>
+                <li><a href="https://go.dev/doc/go1.26">Go 1.26 官方发布说明</a></li>
+                <li><a href="https://go.dev/blog/go1.26">Go 1.26 博客文章</a></li>
+                <li><a href="index.html">← 返回首页</a></li>
+            </ul>
+        </div>
+    </div>
+    <script src="navigation.js"></script>
+    <script src="code-collapse.js"></script>
+</body>
+</html>

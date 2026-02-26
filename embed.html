@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Embed 标准库 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.3">
+    <link rel="stylesheet" href="styles.css?v=1.4">
     <script src="scroll.js"></script>
     </head>
 <body>
@@ -16,6 +16,30 @@
         <div class="content">
             <a href="index.html" class="back-link">← 返回首页</a>
             <h1>Embed 标准库</h1>
+            <p class="intro">embed 包允许将文件直接编译进二进制程序。</p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon">📁</div>
+                    <h4>文件嵌入</h4>
+                    <p>将文件打包进二进制</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📄</div>
+                    <h4>字符串</h4>
+                    <p>embed string</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📂</div>
+                    <h4>字节切片</h4>
+                    <p>embed []byte</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📦</div>
+                    <h4>FS 接口</h4>
+                    <p>embed fs.FS</p>
+                </div>
+            </div>
 
             <h2 id="introduction">Embed 简介</h2>
             <p><code>embed</code> 是 Go 1.16 引入的标准库，用于在编译时将文件嵌入到 Go 程序中。它提供了一种简单、类型安全的方式来访问嵌入的文件，无需在运行时读取文件系统。</p>

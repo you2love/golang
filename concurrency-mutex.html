@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mutex - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.3">
+    <link rel="stylesheet" href="styles.css?v=1.4">
     </head>
 <body>
     <div class="container">
@@ -14,6 +14,32 @@
     </aside>
                 <div class="content">
             <a href="concurrency.html" class="back-link">← 返回 concurrency</a>
+            <h1>互斥锁 (Mutex)</h1>
+            <p class="intro">Mutex 用于保护共享资源，确保同一时刻只有一个 goroutine 访问。</p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon">🔒</div>
+                    <h4>Lock/Unlock</h4>
+                    <p>加锁/解锁</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📖</div>
+                    <h4>RLock</h4>
+                    <p>读锁并发</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⚠️</div>
+                    <h4>避免死锁</h4>
+                    <p>正确加锁顺序</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">💡</div>
+                    <h4>sync.Mutex</h4>
+                    <p>标准库实现</p>
+                </div>
+            </div>
+
             <h2 id="mutex">互斥锁（Mutex）</h2>
             <pre><code><span class="keyword">package</span> main
 

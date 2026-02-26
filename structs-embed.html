@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>结构体 Embed 使用 - Go 学习教程</title>
+    <link rel="stylesheet" href="styles.css?v=1.4">
+    </head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+        <!-- 导航栏将通过JavaScript动态加载 -->
+    </aside>
+        <div class="content">
+            <a href="structs.html" class="back-link">← 返回结构体</a>
+            <h1>结构体 Embed 使用</h1>
+            <p class="intro">Go 1.16 引入的 embed 包允许在编译时将静态文件嵌入到二进制文件中。</p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon">📁</div>
+                    <h4>文件嵌入</h4>
+                    <p>将文件打包进二进制</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📄</div>
+                    <h4>字符串</h4>
+                    <p>embed string</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📂</div>
+                    <h4>字节切片</h4>
+                    <p>embed []byte</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📦</div>
+                    <h4>FS 接口</h4>
+                    <p>embed fs.FS</p>
+                </div>
+            </div>
+
+            <h2>1. 基本使用</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="comment">//go:embed hello.txt</span>
+<span class="keyword">var</span> content <span class="keyword">string</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    fmt.<span class="function">Println</span>(content)
+}</code></pre>
+
+            <h2>2. 嵌入多个文件</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"io/fs"</span>
+)
+
+<span class="comment">//go:embed config.yaml</span>
+<span class="keyword">var</span> config <span class="keyword">string</span>
+
+<span class="comment">//go:embed version.txt</span>
+<span class="keyword">var</span> version <span class="keyword">string</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    fmt.<span class="function">Println</span>(<span class="string">"配置文件:"</span>, config)
+    fmt.<span class="function">Println</span>(<span class="string">"版本:"</span>, version)
+}</code></pre>
+
+            <h2>3. 嵌入多个文件（通配符）</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"io/fs"</span>
+)
+
+<span class="comment">//go:embed templates/*.html</span>
+<span class="keyword">var</span> templates embed.FS
+
+<span class="function">func</span> <span class="function">main</span>() {
+    content, err := templates.<span class="function">ReadFile</span>(<span class="string">"templates/index.html"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"错误:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    fmt.<span class="function">Println</span>(<span class="keyword">string</span>(content))
+
+    <span class="comment">// 遍历文件</span>
+    fs.<span class="function">WalkDir</span>(templates, <span class="string">"."</span>, <span class="keyword">func</span>(path <span class="keyword">string</span>, d fs.DirEntry, err <span class="keyword">error</span>) <span class="keyword">error</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"文件: %s\n"</span>, path)
+        <span class="keyword">return</span> <span class="keyword">nil</span>
+    })
+}</code></pre>
+
+            <h2>4. 嵌入整个目录</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"io/fs"</span>
+    <span class="string">"net/http"</span>
+)
+
+<span class="comment">//go:embed static/*</span>
+<span class="keyword">var</span> staticFiles embed.FS
+
+<span class="function">func</span> <span class="function">main</span>() {
+    staticFS, err := fs.<span class="function">Sub</span>(staticFiles, <span class="string">"static"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"错误:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    http.<span class="function">Handle</span>(<span class="string">"/static/"</span>, http.<span class="function">FileServer</span>(http.FS(staticFS)))
+    fmt.<span class="function">Println</span>(<span class="string">"服务器启动在 http://localhost:8080"</span>)
+    http.<span class="function">ListenAndServe</span>(<span class="string">":8080"</span>, <span class="keyword">nil</span>)
+}</code></pre>
+
+            <h2>5. 嵌入多个模式</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="comment">//go:embed config/*.yaml</span>
+<span class="comment">//go:embed templates/*.html</span>
+<span class="comment">//go:embed static/*</span>
+<span class="keyword">var</span> files embed.FS
+
+<span class="function">func</span> <span class="function">main</span>() {
+    config, _ := files.<span class="function">ReadFile</span>(<span class="string">"config/app.yaml"</span>)
+    template, _ := files.<span class="function">ReadFile</span>(<span class="string">"templates/index.html"</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"配置:"</span>, <span class="keyword">string</span>(config))
+    fmt.<span class="function">Println</span>(<span class="string">"模板:"</span>, <span class="keyword">string</span>(template))
+}</code></pre>
+
+            <h2>6. 嵌入为字节数组</h2>
+            <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"embed"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="comment">//go:embed image.png</span>
+<span class="keyword">var</span> imageData []<span class="keyword">byte</span>
+
+<span class="function">func</span> <span class="function">main</span>() {
+    fmt.<span class="function">Printf</span>(<span class="string">"图片大小: %d 字节\n"</span>, <span class="function">len</span>(imageData))
+}</code></pre>
+
+            <h2>7. 注意事项</h2>
+            <div class="warning-box">
+                <h3>⚠️ 重要提示</h3>
+                <ul>
+                    <li><strong>指令位置</strong>：//go:embed 指令必须紧邻变量声明，中间不能有空行</li>
+                    <li><strong>变量类型</strong>：可以是 string、[]byte 或 embed.FS</li>
+                    <li><strong>路径限制</strong>：只能嵌入当前包所在目录及其子目录的文件</li>
+                    <li><strong>文件大小</strong>：嵌入大文件会增加二进制文件的大小</li>
+                </ul>
+            </div>
+
+            <h2>8. 最佳实践</h2>
+            <div class="info-box">
+                <h3>💡 建议</h3>
+                <ul>
+                    <li><strong>静态资源</strong>：HTML 模板、CSS、JavaScript、图片等</li>
+                    <li><strong>配置文件</strong>：默认配置、示例配置等</li>
+                    <li><strong>单文件应用</strong>：创建无需外部依赖的可执行文件</li>
+                    <li><strong>版本控制</strong>：将嵌入的文件纳入版本控制</li>
+                    <li><strong>测试数据</strong>：将测试数据嵌入到测试代码中</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="navigation.js"></script>
+    <script src="code-collapse.js"></script>
+</body>
+</html>

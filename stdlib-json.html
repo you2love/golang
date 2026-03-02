@@ -4,353 +4,369 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>json 数据编码 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>encoding/json - Go JSON 数据编解码</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="stdlib.html" class="back-link">← 返回 stdlib</a>
-            <h2 id="json">json 数据编码</h2>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="stdlib-sync.html" class="back-link">← sync 包</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="stdlib-time.html" class="back-link">time 包 →</a>
 
-            <h3>基本编码和解码</h3>
-            <pre><code><span class="keyword">package</span> main
+            <h1>encoding/json - JSON 数据编解码</h1>
+            <p class="intro">encoding/json 包提供了 JSON 数据的编解码功能，是 Go 中最常用的标准库之一。掌握 JSON 处理是开发 Web API、配置文件解析等场景的基础。</p>
 
-<span class="keyword">import</span> (
-    <span class="string">"encoding/json"</span>
-    <span class="string">"fmt"</span>
-)
-
-<span class="keyword">type</span> Person <span class="keyword">struct</span> {
-    Name  <span class="keyword">string</span> <span class="string">`json:"name"`</span>
-    Age   <span class="keyword">int</span>    <span class="string">`json:"age"`</span>
-    Email <span class="keyword">string</span> <span class="string">`json:"email,omitempty"`</span>
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 编码</span>
-    person := Person{
-        Name: <span class="string">"Alice"</span>,
-        Age:  <span class="number">30</span>,
-    }
-    
-    jsonData, err := json.<span class="function">Marshal</span>(person)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
-        <span class="keyword">return</span>
-    }
-    fmt.<span class="function">Println</span>(<span class="string">"JSON:"</span>, <span class="keyword">string</span>(jsonData))
-    
-    <span class="comment">// 解码</span>
-    <span class="keyword">var</span> decoded Person
-    err = json.<span class="function">Unmarshal</span>(jsonData, &decoded)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
-        <span class="keyword">return</span>
-    }
-    fmt.<span class="function">Printf</span>(<span class="string">"Decoded: %+v\n"</span>, decoded)
-}</code></pre>
-
-            <h3>处理嵌套结构</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"encoding/json"</span>
-    <span class="string">"fmt"</span>
-)
-
-<span class="keyword">type</span> Address <span class="keyword">struct</span> {
-    City    <span class="keyword">string</span> <span class="string">`json:"city"`</span>
-    Country <span class="keyword">string</span> <span class="string">`json:"country"`</span>
-}
-
-<span class="keyword">type</span> User <span class="keyword">struct</span> {
-    Name    <span class="keyword">string</span>  <span class="string">`json:"name"`</span>
-    Age     <span class="keyword">int</span>     <span class="string">`json:"age"`</span>
-    Address Address  <span class="string">`json:"address"`</span>
-    Tags    []<span class="keyword">string</span> <span class="string">`json:"tags"`</span>
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    jsonData := []<span class="keyword">byte</span>(<span class="string">`{
-        "name": "Bob",
-        "age": 25,
-        "address": {
-            "city": "Beijing",
-            "country": "China"
-        },
-        "tags": ["developer", "golang"]
-    }`</span>)
-    
-    <span class="keyword">var</span> user User
-    err := json.<span class="function">Unmarshal</span>(jsonData, &user)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
-        <span class="keyword">return</span>
-    }
-    
-    fmt.<span class="function">Printf</span>(<span class="string">"User: %+v\n"</span>, user)
-    fmt.<span class="function">Printf</span>(<span class="string">"Address: %+v\n"</span>, user.Address)
-    fmt.<span class="function">Printf</span>(<span class="string">"Tags: %v\n"</span>, user.Tags)
-}</code></pre>
-
-            <h3>使用 map 和 interface</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"encoding/json"</span>
-    <span class="string">"fmt"</span>
-)
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 解码到 map</span>
-    jsonData := []<span class="keyword">byte</span>(<span class="string">`{"name": "Charlie", "age": 35}`</span>)
-    <span class="keyword">var</span> data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}, ok := m.data[key]
-    <span class="keyword">return</span> val, ok
-}
-
-<span class="function">func</span> (c *Cache) <span class="function">Set</span>(key, value <span class="keyword">string</span>) {
-    c.mu.<span class="function">Lock</span>()
-    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
-    c.data[key] = value
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    cache := <span class="function">NewCache</span>()
-    <span class="keyword">var</span> wg sync.WaitGroup
-    
-    <span class="comment">// 写入</span>
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">10</span>; i++ {
-        wg.<span class="function">Add</span>(<span class="number">1</span>)
-        <span class="keyword">go</span> <span class="keyword">func</span>(i <span class="keyword">int</span>) {
-            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
-            key := fmt.<span class="function">Sprintf</span>(<span class="string">"key%d"</span>, i)
-            value := fmt.<span class="function">Sprintf</span>(<span class="string">"value%d"</span>, i)
-            cache.<span class="function">Set</span>(key, value)
-        }(i)
-    }
-    
-    <span class="comment">// 读取</span>
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">10</span>; i++ {
-        wg.<span class="function">Add</span>(<span class="number">1</span>)
-        <span class="keyword">go</span> <span class="keyword">func</span>(i <span class="keyword">int</span>) {
-            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
-            key := fmt.<span class="function">Sprintf</span>(<span class="string">"key%d"</span>, i)
-            time.<span class="function">Sleep</span>(time.Millisecond)
-            val, ok := cache.<span class="function">Get</span>(key)
-            fmt.<span class="function">Printf</span>(<span class="string">"Get %s: %v, %v\n"</span>, key, val, ok)
-        }(i)
-    }
-    
-    wg.<span class="function">Wait</span>()
-}</code></pre>
-
-            <h3>encoding/json/v2</h3>
-            <p>Go 1.24 引入了 <code>encoding/json/v2</code>，这是一个全新的 JSON 实现，提供了更好的性能、更严格的类型安全和更清晰的 API。</p>
-
-            <div class="info-box">
-                <h3>💡 json/v2 的主要改进</h3>
-                <ul>
-                    <li><strong>更好的性能</strong>：重新设计的编解码器，性能提升 20-30%</li>
-                    <li><strong>更严格的类型安全</strong>：拒绝不安全的类型转换</li>
-                    <li><strong>更清晰的 API</strong>：简化的接口，减少混淆</li>
-                    <li><strong>更好的错误信息</strong>：提供更详细的错误上下文</li>
-                    <li><strong>支持 JSON Schema</strong>：内置 JSON Schema 验证支持</li>
-                </ul>
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">📤</div>
+                    <h4>Marshal</h4>
+                    <p>Go 结构体 → JSON</p>
+                    <code class="tag">json.Marshal</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📥</div>
+                    <h4>Unmarshal</h4>
+                    <p>JSON → Go 结构体</p>
+                    <code class="tag">json.Unmarshal</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🏷️</div>
+                    <h4>Struct Tag</h4>
+                    <p>字段映射和选项</p>
+                    <code class="tag">`json:"name"`</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔧</div>
+                    <h4>自定义编解码</h4>
+                    <p>实现 json.Marshaler</p>
+                    <code class="tag">MarshalJSON()</code>
+                </div>
             </div>
 
-            <h4>基本用法</h4>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 基础用法 -->
+            <h2 id="basic">基础编解码</h2>
+
+            <div class="example-box">
+                <h3>📝 Marshal 和 Unmarshal</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
-    <span class="string">"encoding/json/v2"</span>
+    <span class="string">"encoding/json"</span>
     <span class="string">"fmt"</span>
-)
-
-<span class="keyword">type</span> User <span class="keyword">struct</span> {
-    Name  <span class="keyword">string</span> <span class="string">`json:"name"`</span>
-    Age   <span class="keyword">int</span>    <span class="string">`json:"age"`</span>
-    Email <span class="keyword">string</span> <span class="string">`json:"email,omitempty"`</span>
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 编码</span>
-    user := User{
-        Name: <span class="string">"Alice"</span>,
-        Age:  <span class="number">30</span>,
-    }
-    
-    jsonData, err := json.<span class="function">Marshal</span>(user)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
-        <span class="keyword">return</span>
-    }
-    fmt.<span class="function">Println</span>(<span class="string">"JSON:"</span>, <span class="keyword">string</span>(jsonData))
-    
-    <span class="comment">// 解码</span>
-    <span class="keyword">var</span> decoded User
-    err = json.<span class="function">Unmarshal</span>(jsonData, &decoded)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
-        <span class="keyword">return</span>
-    }
-    fmt.<span class="function">Printf</span>(<span class="string">"Decoded: %+v\n"</span>, decoded)
-}</code></pre>
-
-            <h4>使用 Decoder 和 Encoder</h4>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"encoding/json/v2"</span>
-    <span class="string">"fmt"</span>
-    <span class="string">"os"</span>
 )
 
 <span class="keyword">type</span> Person <span class="keyword">struct</span> {
     Name <span class="keyword">string</span> <span class="string">`json:"name"`</span>
     Age  <span class="keyword">int</span>    <span class="string">`json:"age"`</span>
+    City <span class="keyword">string</span> <span class="string">`json:"city,omitempty"`</span>
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 写入 JSON 文件</span>
-    file, err := os.<span class="function">Create</span>(<span class="string">"people.json"</span>)
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 编码：结构体 → JSON</span>
+    p := Person{Name: <span class="string">"Alice"</span>, Age: <span class="number">30</span>}
+    
+    data, err := json.<span class="function">Marshal</span>(p)
     <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
-        <span class="keyword">return</span>
+        <span class="keyword">panic</span>(err)
     }
-    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    fmt.<span class="function">Println</span>(<span class="function">string</span>(data))
+    <span class="comment">// {"name":"Alice","age":30}</span>
     
-    encoder := json.<span class="function">NewEncoder</span>(file)
-    encoder.<span class="function">SetIndent</span>(<span class="string">""</span>, <span class="string">"  "</span>)
+    <span class="comment">// 美化输出</span>
+    pretty, _ := json.<span class="function">MarshalIndent</span>(p, <span class="string">""</span>, <span class="string">"  "</span>)
+    fmt.<span class="function">Println</span>(<span class="function">string</span>(pretty))
     
-    people := []Person{
-        {Name: <span class="string">"Alice"</span>, Age: <span class="number">30</span>},
-        {Name: <span class="string">"Bob"</span>, Age: <span class="number">25</span>},
-    }
+    <span class="comment">// 解码：JSON → 结构体</span>
+    jsonStr := <span class="string">`{"name":"Bob","age":25,"city":"Beijing"}`</span>
     
-    err = encoder.<span class="function">Encode</span>(people)
+    <span class="keyword">var</span> p2 Person
+    err = json.<span class="function">Unmarshal</span>([]<span class="keyword">byte</span>(jsonStr), &p2)
     <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
-        <span class="keyword">return</span>
+        <span class="keyword">panic</span>(err)
     }
-    
-    <span class="comment">// 读取 JSON 文件</span>
-    file, err = os.<span class="function">Open</span>(<span class="string">"people.json"</span>)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
-        <span class="keyword">return</span>
-    }
-    <span class="keyword">defer</span> file.<span class="function">Close</span>()
-    
-    <span class="keyword">var</span> result []Person
-    decoder := json.<span class="function">NewDecoder</span>(file)
-    err = decoder.<span class="function">Decode</span>(&result)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
-        <span class="keyword">return</span>
-    }
-    
-    fmt.<span class="function">Printf</span>(<span class="string">"People: %+v\n"</span>, result)
+    fmt.<span class="function">Printf</span>(<span class="string">"%+v\n"</span>, p2)
+    <span class="comment">// {Name:Bob Age:25 City:Beijing}</span>
 }</code></pre>
+            </div>
 
-            <h4>严格模式</h4>
-            <pre><code><span class="keyword">package</span> main
+            <div class="info-box">
+                <h3>💡 JSON 包要点</h3>
+                <ul>
+                    <li><strong>字段导出</strong>: 只有大写开头的字段才会被编解码</li>
+                    <li><strong>omitempty</strong>: 零值时省略该字段</li>
+                    <li><strong>-</strong>: <code>json:"-"</code> 忽略该字段</li>
+                    <li><strong>指针解码</strong>: Unmarshal 需要传递指针</li>
+                    <li><strong>错误处理</strong>: 始终检查返回的 error</li>
+                </ul>
+            </div>
+
+            <!-- Struct Tag -->
+            <h2 id="tags">Struct Tag 详解</h2>
+
+            <div class="example-box">
+                <h3>📝 JSON Tag 选项</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
-    <span class="string">"encoding/json/v2"</span>
+    <span class="string">"encoding/json"</span>
     <span class="string">"fmt"</span>
 )
 
-<span class="keyword">type</span> Product <span class="keyword">struct</span> {
-    Name     <span class="keyword">string</span>  <span class="string">`json:"name"`</span>
-    Price    <span class="keyword">float64</span> <span class="string">`json:"price"`</span>
-    Quantity <span class="keyword">int</span>     <span class="string">json:"quantity"`</span>
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    ID       <span class="keyword">int</span>    <span class="string">`json:"id"`</span>              <span class="comment">// 自定义字段名</span>
+    Name     <span class="keyword">string</span> <span class="string">`json:"name"`</span>            <span class="comment">// 正常映射</span>
+    Email    <span class="keyword">string</span> <span class="string">`json:"email,omitempty"`</span> <span class="comment">// 空值时省略</span>
+    Password <span class="keyword">string</span> <span class="string">`json:"-"`</span>               <span class="comment">// 忽略此字段</span>
+    Role     <span class="keyword">string</span> <span class="string">`json:"role,omitempty"`</span>
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 使用严格模式的解码器</span>
-    opts := &json.<span class="function">DecodeOptions</span>{
-        RejectUnknownFields: <span class="keyword">true</span>,
-        DisallowDuplicateFields: <span class="keyword">true</span>,
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// omitempty 测试</span>
+    u1 := User{ID: <span class="number">1</span>, Name: <span class="string">"Alice"</span>}
+    data, _ := json.<span class="function">Marshal</span>(u1)
+    fmt.<span class="function">Println</span>(<span class="function">string</span>(data))
+    <span class="comment">// {"id":1,"name":"Alice"}</span>
+    
+    u2 := User{ID: <span class="number">2</span>, Name: <span class="string">"Bob"</span>, Email: <span class="string">"bob@example.com"</span>, Role: <span class="string">"admin"</span>}
+    data, _ = json.<span class="function">Marshal</span>(u2)
+    fmt.<span class="function">Println</span>(<span class="function">string</span>(data))
+    <span class="comment">// {"id":2,"name":"Bob","email":"bob@example.com","role":"admin"}</span>
+    
+    <span class="comment">// 嵌套结构体</span>
+    <span class="keyword">type</span> Post <span class="keyword">struct</span> {
+        ID   <span class="keyword">int</span>    <span class="string">`json:"id"`</span>
+        Title <span class="keyword">string</span> <span class="string">`json:"title"`</span>
+        Author User   <span class="string">`json:"author"`</span>
     }
     
-    jsonData := []<span class="keyword">byte</span>(<span class="string">`{
-        "name": "Laptop",
-        "price": 999.99,
-        "quantity": 10,
-        "extra_field": "will cause error"
-    }`</span>)
-    
-    <span class="keyword">var</span> product Product
-    decoder := json.<span class="function">NewDecoder</span>(jsonData)
-    decoder.<span class="function">SetDecodeOptions</span>(opts)
-    
-    err := decoder.<span class="function">Decode</span>(&product)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"Strict mode error (expected):"</span>, err)
+    post := Post{
+        ID:     <span class="number">1</span>,
+        Title:  <span class="string">"Hello World"</span>,
+        Author: u2,
     }
+    
+    data, _ = json.<span class="function">Marshal</span>(post)
+    fmt.<span class="function">Println</span>(<span class="function">string</span>(data))
 }</code></pre>
+            </div>
 
-            <h4>自定义类型转换</h4>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 解码到 interface -->
+            <h2 id="interface">解码到 interface{}</h2>
+            <div class="example-box">
+                <h3>📝 处理未知结构的 JSON</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
-    <span class="string">"encoding/json/v2"</span>
+    <span class="string">"encoding/json"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 解码到 interface{} - 类型映射：</span>
+    <span class="comment">// JSON bool    → bool</span>
+    <span class="comment">// JSON number  → float64</span>
+    <span class="comment">// JSON string  → string</span>
+    <span class="comment">// JSON array   → []interface{}</span>
+    <span class="comment">// JSON object  → map[string]interface{}</span>
+    <span class="comment">// JSON null    → nil</span>
+    
+    jsonStr := <span class="string">`{
+        "name": "Alice",
+        "age": 30,
+        "skills": ["Go", "Python"],
+        "active": true,
+        "address": {
+            "city": "Beijing",
+            "zip": "100000"
+        }
+    }`</span>
+    
+    <span class="keyword">var</span> data <span class="keyword">interface</span>{}
+    json.<span class="function">Unmarshal</span>([]<span class="keyword">byte</span>(jsonStr), &data)
+    
+    m := data.(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{})
+    
+    <span class="comment">// 类型断言访问</span>
+    name := m[<span class="string">"name"</span>].(<span class="keyword">string</span>)
+    age := m[<span class="string">"age"</span>].(<span class="keyword">float64</span>) <span class="comment">// 注意：是 float64!</span>
+    active := m[<span class="string">"active"</span>].(<span class="keyword">bool</span>)
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Name: %s, Age: %.0f, Active: %v\n"</span>, name, age, active)
+    
+    <span class="comment">// 访问数组</span>
+    skills := m[<span class="string">"skills"</span>].([]<span class="keyword">interface</span>{})
+    <span class="keyword">for</span> _, skill := <span class="keyword">range</span> skills {
+        fmt.<span class="function">Println</span>(skill.(<span class="keyword">string</span>))
+    }
+    
+    <span class="comment">// 访问嵌套对象</span>
+    address := m[<span class="string">"address"</span>].(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{})
+    fmt.<span class="function">Println</span>(address[<span class="string">"city"</span>])
+}</code></pre>
+            </div>
+
+            <div class="warning-box">
+                <h3>⚠️ interface{} 解码注意</h3>
+                <ul>
+                    <li><strong>数字类型</strong>: JSON 数字解码为 <code>float64</code>，不是 <code>int</code></li>
+                    <li><strong>类型断言</strong>: 必须使用类型断言访问值</li>
+                    <li><strong>类型检查</strong>: 使用 type switch 安全访问</li>
+                    <li><strong>推荐</strong>: 优先使用结构体，类型更安全</li>
+                </ul>
+            </div>
+
+            <!-- 自定义编解码 -->
+            <h2 id="custom">自定义编解码</h2>
+
+            <h3>实现 Marshaler/Unmarshaler</h3>
+            <div class="example-box">
+                <h3>📝 自定义 JSON 格式</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json"</span>
     <span class="string">"fmt"</span>
     <span class="string">"time"</span>
 )
 
-<span class="keyword">type</span> Event <span class="keyword">struct</span> {
-    Name      <span class="keyword">string</span>    <span class="string">`json:"name"`</span>
-    Timestamp <span class="keyword">string</span>    <span class="string">`json:"timestamp"`</span>
-    Date      <span class="keyword">time</span>.Time <span class="string">`json:"date,omitempty"`</span>
+<span class="comment">// 自定义时间格式</span>
+<span class="keyword">type</span> Time time.Time
+
+<span class="keyword">func</span> (t Time) <span class="function">MarshalJSON</span>() ([]<span class="keyword">byte</span>, <span class="keyword">error</span>) {
+    s := time.<span class="function">Time</span>(t).<span class="function">Format</span>(<span class="string">"2006-01-02 15:04:05"</span>)
+    <span class="keyword">return</span> json.<span class="function">Marshal</span>(s)
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    jsonData := []<span class="keyword">byte</span>(<span class="string">`{
-        "name": "Meeting",
-        "timestamp": "2024-01-15T10:30:00Z"
-    }`</span>)
-    
-    <span class="keyword">var</span> event Event
-    err := json.<span class="function">Unmarshal</span>(jsonData, &event)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
-        <span class="keyword">return</span>
+<span class="keyword">func</span> (t *Time) <span class="function">UnmarshalJSON</span>(data []<span class="keyword">byte</span>) <span class="keyword">error</span> {
+    <span class="keyword">var</span> s <span class="keyword">string</span>
+    <span class="keyword">if</span> err := json.<span class="function">Unmarshal</span>(data, &s); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
     }
     
-    <span class="comment">// 解析时间字符串</span>
-    parsedTime, err := time.<span class="function">Parse</span>(time.RFC3339, event.Timestamp)
+    parsed, err := time.<span class="function">Parse</span>(<span class="string">"2006-01-02 15:04:05"</span>, s)
     <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"Error parsing time:"</span>, err)
-        <span class="keyword">return</span>
+        <span class="keyword">return</span> err
     }
-    event.Date = parsedTime
     
-    fmt.<span class="function">Printf</span>(<span class="string">"Event: %+v\n"</span>, event)
-    fmt.<span class="function">Printf</span>(<span class="string">"Date: %s\n"</span>, event.Date.<span class="function">Format</span>(time.RFC3339))
-}</code></pre>
+    *t = Time(parsed)
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
 
-            <div class="warning-box">
-                <h3>⚠️ json/v2 vs json</h3>
+<span class="comment">// 自定义类型：脱敏处理</span>
+<span class="keyword">type</span> Password <span class="keyword">string</span>
+
+<span class="keyword">func</span> (p Password) <span class="function">MarshalJSON</span>() ([]<span class="keyword">byte</span>, <span class="keyword">error</span>) {
+    <span class="keyword">return</span> json.<span class="function">Marshal</span>(<span class="string">"***"</span>) <span class="comment">// 脱敏输出</span>
+}
+
+<span class="keyword">type</span> Account <span class="keyword">struct</span> {
+    Username <span class="keyword">string</span> <span class="string">`json:"username"`</span>
+    Password Password <span class="string">`json:"password"`</span>
+    Created  Time     <span class="string">`json:"created"`</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    acc := Account{
+        Username: <span class="string">"alice"</span>,
+        Password: <span class="string">"secret123"</span>,
+        Created:  Time(time.<span class="function">Now</span>()),
+    }
+    
+    data, _ := json.<span class="function">MarshalIndent</span>(acc, <span class="string">""</span>, <span class="string">"  "</span>)
+    fmt.<span class="function">Println</span>(<span class="function">string</span>(data))
+    <span class="comment">// 密码会被脱敏</span>
+}</code></pre>
+            </div>
+
+            <!-- JSON 流处理 -->
+            <h2 id="streaming">流式处理</h2>
+            <div class="example-box">
+                <h3>📝 Encoder 和 Decoder</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"encoding/json"</span>
+    <span class="string">"os"</span>
+    <span class="string">"strings"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// Encoder: 流式编码</span>
+    enc := json.<span class="function">NewEncoder</span>(os.Stdout)
+    enc.<span class="function">Encode</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>{<span class="string">"a"</span>: <span class="number">1</span>})
+    enc.<span class="function">Encode</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>{<span class="string">"b"</span>: <span class="number">2</span>})
+    
+    <span class="comment">// Decoder: 流式解码</span>
+    jsonData := <span class="string">`{"name": "Alice"} {"name": "Bob"}`</span>
+    dec := json.<span class="function">NewDecoder</span>(strings.<span class="function">NewReader</span>(jsonData))
+    
+    <span class="keyword">for</span> {
+        <span class="keyword">var</span> v <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>
+        <span class="keyword">if</span> err := dec.<span class="function">Decode</span>(&v); err != <span class="keyword">nil</span> {
+            <span class="keyword">break</span>
+        }
+        <span class="function">println</span>(v[<span class="string">"name"</span>])
+    }
+}</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ JSON 使用建议</h3>
                 <ul>
-                    <li><strong>向后兼容</strong>：json/v2 与 json/v1 不完全兼容，需要逐步迁移</li>
-                    <li><strong>行为差异</strong>：某些边缘情况的处理方式有所不同</li>
-                    <li><strong>性能提升</strong>：json/v2 在大多数场景下性能更好</li>
-                    <li><strong>类型安全</strong>：json/v2 对类型检查更严格</li>
-                    <li><strong>迁移建议</strong>：新项目优先使用 json/v2，旧项目谨慎评估后再迁移</li>
+                    <li><strong>使用结构体</strong>: 类型安全，代码清晰</li>
+                    <li><strong>定义 Tag</strong>: 明确字段映射关系</li>
+                    <li><strong>错误处理</strong>: 始终检查 error</li>
+                    <li><strong>验证输入</strong>: Unmarshal 后验证数据</li>
+                    <li><strong>使用 omitempty</strong>: 减少不必要的数据传输</li>
+                    <li><strong>性能敏感</strong>: 考虑使用 sonic 等第三方库</li>
                 </ul>
             </div>
 
-            
+            <div class="warning-box">
+                <h3>🚨 常见陷阱</h3>
+                <ul>
+                    <li><strong>字段未导出</strong>: 小写字段不会被编解码</li>
+                    <li><strong>数字类型</strong>: interface{} 解码时数字是 float64</li>
+                    <li><strong>时间格式</strong>: 默认 RFC3339 格式，可能需要自定义</li>
+                    <li><strong>大数精度</strong>: float64 可能丢失 int64 精度</li>
+                    <li><strong>空 vs nil</strong>: 空切片和 nil 切片编码不同</li>
+                </ul>
+            </div>
+
+            <!-- 总结 -->
+            <h2 id="summary">总结</h2>
+
+            <div class="success-box">
+                <h3>✅ 核心要点</h3>
+                <ul>
+                    <li><strong>Marshal/Unmarshal</strong>: 基础编解码函数</li>
+                    <li><strong>Struct Tag</strong>: 字段映射和选项</li>
+                    <li><strong>omitempty</strong>: 零值时省略字段</li>
+                    <li><strong>自定义编解码</strong>: 实现 Marshaler 接口</li>
+                    <li><strong>流式处理</strong>: Encoder/Decoder 处理大数据</li>
+                    <li><strong>类型安全</strong>: 优先使用结构体而非 interface{}</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="stdlib-time.html">time 包 - 时间处理</a></li>
+                    <li><a href="stdlib-io.html">io 包 - 输入输出</a></li>
+                    <li><a href="ecosystem-sonic.html">Sonic - 高性能 JSON 库</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

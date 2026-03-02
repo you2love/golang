@@ -153,6 +153,129 @@
                 </ul>
             </div>
 
+            <h2 id="internals">Map 内部实现原理</h2>
+            <div class="example-box">
+                <h3>📖 Map 的底层数据结构</h3>
+                <pre><code><span class="comment">// runtime/map.go - Map 的底层结构</span>
+<span class="keyword">type</span> hmap <span class="keyword">struct</span> {
+    count     <span class="keyword">int</span>              <span class="comment">// 当前元素个数</span>
+    flags     <span class="keyword">uint8</span>            <span class="comment">// 状态标志</span>
+    B         <span class="keyword">uint8</span>            <span class="comment">// bucket 数量的对数 (2^B 个 bucket)</span>
+    noverflow <span class="keyword">uint16</span>           <span class="comment">// 溢出 bucket 的数量</span>
+    hash0     <span class="keyword">uint32</span>           <span class="comment">// 哈希种子</span>
+    buckets   unsafe.Pointer   <span class="comment">// bucket 数组指针</span>
+    oldbuckets unsafe.Pointer  <span class="comment">// 旧 bucket 数组 (扩容时使用)</span>
+    nevacuate <span class="keyword">uintptr</span>          <span class="comment">// 已迁移的 bucket 数量</span>
+    <span class="comment">// ... 更多字段</span>
+}
+
+<span class="comment">// bucket 结构</span>
+<span class="keyword">type</span> bmap <span class="keyword">struct</span> {
+    tophash [<span class="number">8</span>]<span class="keyword">uint8</span>  <span class="comment">// 哈希值的高 8 位</span>
+    <span class="comment">// 键值对数据...</span>
+    <span class="comment">// overflow 指针...</span>
+}</code></pre>
+            </div>
+
+            <div class="flowchart">
+                <div class="flowchart-node">hmap</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">buckets 数组</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">bucket[0]</div>
+                <br><br>
+                <div class="flowchart-node">tophash[8]</div>
+                <span class="flowchart-arrow">|</span>
+                <div class="flowchart-node">keys[8]</div>
+                <span class="flowchart-arrow">|</span>
+                <div class="flowchart-node">values[8]</div>
+            </div>
+
+            <div class="example-box">
+                <h3>📝 Map 结构图示</h3>
+                <pre><code><span class="comment">// Map 内存布局:</span>
+<span class="comment">// hmap</span>
+<span class="comment">//   ├── count: 5</span>
+<span class="comment">//   ├── B: 3 (8 个 bucket)</span>
+<span class="comment">//   ├── buckets → [bucket0] [bucket1] ... [bucket7]</span>
+<span class="comment">//   └── hash0: 随机种子</span>
+
+<span class="comment">// 每个 bucket 存储 8 个键值对:</span>
+<span class="comment">// bucket:</span>
+<span class="comment">//   ├── tophash[8]: 哈希高 8 位 (快速查找)</span>
+<span class="comment">//   ├── keys[8]:    键数据</span>
+<span class="comment">//   ├── values[8]:  值数据</span>
+<span class="comment">//   └── overflow:   指向下一个 bucket (冲突时)</span>
+
+<span class="comment">// 查找流程:</span>
+<span class="comment">// 1. 计算 key 的哈希值</span>
+<span class="comment">// 2. 用哈希低 B 位确定 bucket 索引</span>
+<span class="comment">// 3. 用哈希高 8 位匹配 tophash</span>
+<span class="comment">// 4. 完全比较 key 确认</span>
+<span class="comment">// 5. 返回对应的 value</span></code></pre>
+            </div>
+
+            <h3>哈希冲突处理</h3>
+            <div class="example-box">
+                <h3>📖 链地址法</h3>
+                <pre><code><span class="comment">// Go Map 使用链地址法解决哈希冲突</span>
+<span class="comment">// 每个 bucket 最多存储 8 个键值对</span>
+<span class="comment">// 超过 8 个时，创建 overflow bucket</span>
+
+<span class="comment">// 示例:</span>
+m := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">int</span>]<span class="keyword">string</span>)
+
+<span class="comment">// 假设 key 1, 9, 17 哈希冲突 (都映射到 bucket 0)</span>
+m[<span class="number">1</span>] = <span class="string">"one"</span>
+m[<span class="number">9</span>] = <span class="string">"nine"</span>
+m[<span class="number">17</span>] = <span class="string">"seventeen"</span>
+
+<span class="comment">// 内存布局:</span>
+<span class="comment">// bucket[0] → [1, 9, 17, ...] (前 8 个)</span>
+<span class="comment">//    ↓ overflow</span>
+<span class="comment">// overflow_bucket → [...](超出 8 个的部分)</span></code></pre>
+            </div>
+
+            <h3>扩容机制</h3>
+            <div class="example-box">
+                <h3>📖 渐进式扩容</h3>
+                <pre><code><span class="comment">// 扩容触发条件:</span>
+<span class="comment">// 1. 负载因子 > 6.5 (count / 2^B > 6.5)</span>
+<span class="comment">// 2. overflow bucket 过多</span>
+
+<span class="comment">// 扩容流程 (渐进式):</span>
+<span class="comment">// 1. 分配新的 bucket 数组 (容量翻倍)</span>
+<span class="comment">// 2. 设置 oldbuckets 指向旧数组</span>
+<span class="comment">// 3. 每次插入/删除时迁移 2 个 bucket</span>
+<span class="comment">// 4. 所有 bucket 迁移完成后，释放旧数组</span>
+
+<span class="comment">// 示例:</span>
+m := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>, <span class="number">100</span>)
+
+<span class="comment">// 初始：B=3, 8 个 bucket, 负载因子 12.5</span>
+<span class="comment">// 触发扩容 → B=4, 16 个 bucket</span>
+
+<span class="comment">// 扩容期间:</span>
+<span class="comment">// - hmap.buckets 指向新数组</span>
+<span class="comment">// - hmap.oldbuckets 指向旧数组</span>
+<span class="comment">// - hmap.nevacuate 记录已迁移的 bucket 数</span>
+
+<span class="comment">// 扩容完成:</span>
+<span class="comment">// - oldbuckets = nil</span>
+<span class="comment">// - 旧数组被 GC 回收</span></code></pre>
+            </div>
+
+            <div class="info-box">
+                <h3>💡 Map 性能优化</h3>
+                <ul>
+                    <li><strong>预分配容量</strong>: 使用 <code>make(map[K]V, hint)</code> 减少扩容</li>
+                    <li><strong>避免频繁删除</strong>: 删除不会缩小 map，只标记删除</li>
+                    <li><strong>注意内存</strong>: 大 map 删除元素后内存不会释放</li>
+                    <li><strong>并发访问</strong>: 使用 <code>sync.Map</code> 或加锁保护</li>
+                    <li><strong>键的选择</strong>: 使用简单类型作为键，避免复杂结构</li>
+                </ul>
+            </div>
+
             <h2 id="concurrent">并发 Map</h2>
             <div class="example-box">
                 <h3>📝 sync.Map 并发安全</h3>

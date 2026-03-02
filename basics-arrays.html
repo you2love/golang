@@ -137,6 +137,86 @@ b := <span class="function">make</span>([]<span class="keyword">int</span>, <spa
 <span class="function">copy</span>(b, a[<span class="number">1</span>:<span class="number">3</span>])</code></pre>
             </div>
 
+            <h2 id="internals">切片内部实现原理</h2>
+            <div class="example-box">
+                <h3>📖 切片的底层数据结构</h3>
+                <pre><code><span class="comment">// runtime/slice.go - 切片的底层结构</span>
+<span class="keyword">type</span> slice <span class="keyword">struct</span> {
+    array unsafe.Pointer <span class="comment">// 指向底层数组的指针</span>
+    len   <span class="keyword">int</span>            <span class="comment">// 切片长度</span>
+    cap   <span class="keyword">int</span>            <span class="comment">// 切片容量</span>
+}
+
+<span class="comment">// 切片三要素:</span>
+<span class="comment">// 1. array: 指向底层数组的指针</span>
+<span class="comment">// 2. len: 当前切片包含的元素个数</span>
+<span class="comment">// 3. cap: 从切片起始位置到底层数组末尾的容量</span></code></pre>
+            </div>
+
+            <div class="flowchart">
+                <div class="flowchart-node">切片 (slice)</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">array 指针</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">底层数组</div>
+                <br><br>
+                <div class="flowchart-node">len = 3</div>
+                <span class="flowchart-arrow">|</span>
+                <div class="flowchart-node">cap = 5</div>
+            </div>
+
+            <div class="example-box">
+                <h3>📝 切片结构图示</h3>
+                <pre><code><span class="comment">// 示例 1: 从数组创建切片</span>
+arr := [<span class="number">5</span>]<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>}
+slice := arr[<span class="number">1</span>:<span class="number">4</span>]  <span class="comment">// [2 3 4]</span>
+
+<span class="comment">// 内存布局:</span>
+<span class="comment">// arr: [1] [2] [3] [4] [5]</span>
+<span class="comment">//           ↑         ↑</span>
+<span class="comment">//         len=3     cap=4</span>
+<span class="comment">// slice.array 指向 arr[1]</span>
+
+<span class="comment">// 示例 2: 切片共享底层数组</span>
+a := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>}
+b := a[<span class="number">1</span>:<span class="number">3</span>]  <span class="comment">// b.array 指向 a.array[1]</span>
+c := a[<span class="number">2</span>:<span class="number">5</span>]  <span class="comment">// c.array 指向 a.array[2]</span>
+
+<span class="comment">// a, b, c 共享同一个底层数组!</span>
+<span class="comment">// 修改 b 或 c 会影响 a</span></code></pre>
+            </div>
+
+            <h3>append 扩容机制</h3>
+            <div class="example-box">
+                <h3>📖 append 的扩容策略</h3>
+                <pre><code><span class="comment">// 当容量不足时，append 会分配新数组</span>
+s := <span class="function">make</span>([]<span class="keyword">int</span>, <span class="number">0</span>, <span class="number">2</span>)  <span class="comment">// cap=2</span>
+s = <span class="function">append</span>(s, <span class="number">1</span>)          <span class="comment">// len=1, cap=2</span>
+s = <span class="function">append</span>(s, <span class="number">2</span>)          <span class="comment">// len=2, cap=2</span>
+s = <span class="function">append</span>(s, <span class="number">3</span>)          <span class="comment">// len=3, cap=4 (扩容!)</span>
+
+<span class="comment">// Go 1.18+ 扩容策略:</span>
+<span class="comment">// 1. cap < 256: 容量翻倍 (oldCap * 2)</span>
+<span class="comment">// 2. cap >= 256: 容量增长 25% (oldCap * 1.25)</span>
+<span class="comment">// 3. 如果新容量超过预期，会调整到预期值</span>
+
+<span class="comment">// 扩容流程:</span>
+<span class="comment">// 1. 分配新的更大的底层数组</span>
+<span class="comment">// 2. 复制旧数组元素到新数组</span>
+<span class="comment">// 3. 添加新元素</span>
+<span class="comment">// 4. 返回指向新数组的切片</span></code></pre>
+            </div>
+
+            <div class="info-box">
+                <h3>💡 切片性能优化</h3>
+                <ul>
+                    <li><strong>预分配容量</strong>: 使用 <code>make([]T, 0, cap)</code> 避免多次扩容</li>
+                    <li><strong>避免内存泄漏</strong>: 大数组的切片可能阻止 GC 回收</li>
+                    <li><strong>使用 copy</strong>: 需要独立数据时显式复制</li>
+                    <li><strong>注意容量</strong>: <code>append</code> 可能改变底层数组指针</li>
+                </ul>
+            </div>
+
             <h2 id="best-practices">最佳实践</h2>
             <div class="success-box">
                 <h3>✅ 切片使用建议</h3>

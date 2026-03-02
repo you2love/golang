@@ -464,16 +464,154 @@
 
 <span class="keyword">func</span> <span class="function">main</span>() {
     iface := <span class="function">getInterface</span>()
-    
+
     <span class="comment">// ⚠️ 这不是 nil!</span>
     <span class="keyword">if</span> iface == <span class="keyword">nil</span> {
         fmt.<span class="function">Println</span>(<span class="string">"This won't print"</span>)
     }
-    
+
     <span class="comment">// ✅ 正确检查</span>
     <span class="keyword">if</span> iface == <span class="function">nil</span> || iface.(*MyStruct) == <span class="keyword">nil</span> {
         fmt.<span class="function">Println</span>(<span class="string">"Interface contains nil pointer"</span>)
     }
+}</code></pre>
+            </div>
+
+            <!-- 接口内部实现 -->
+            <h2 id="internals-deep">接口内部实现原理</h2>
+
+            <h3>接口的底层结构</h3>
+            <div class="example-box">
+                <h3>📖 iface 和 eface</h3>
+                <pre><code><span class="comment">// runtime/runtime2.go - 接口的底层表示</span>
+
+<span class="comment">// 带方法的接口 (iface)</span>
+<span class="keyword">type</span> iface <span class="keyword">struct</span> {
+    tab  *itab          <span class="comment">// 类型信息表</span>
+    data unsafe.Pointer <span class="comment">// 指向底层数据</span>
+}
+
+<span class="comment">// 空接口 (eface)</span>
+<span class="keyword">type</span> eface <span class="keyword">struct</span> {
+    _type *_type        <span class="comment">// 类型信息</span>
+    data  unsafe.Pointer <span class="comment">// 指向底层数据</span>
+}
+
+<span class="comment">// itab - 接口类型表 (缓存方法查找结果)</span>
+<span class="keyword">type</span> itab <span class="keyword">struct</span> {
+    inter  *interfacetype <span class="comment">// 接口类型</span>
+    _type  *_type         <span class="comment">// 具体类型</span>
+    hash   uint32         <span class="comment">// 类型哈希值</span>
+    _      [4]byte
+    fun    [1]uintptr     <span class="comment">// 方法函数指针数组</span>
+}
+
+<span class="comment">// 关键要点:</span>
+<span class="comment">// 1. iface 用于带方法的接口，eface 用于空接口</span>
+<span class="comment">// 2. itab 缓存了接口方法的具体实现，避免运行时查找</span>
+<span class="comment">// 3. data 指向实际的数据 (堆或栈)</span></code></pre>
+            </div>
+
+            <div class="flowchart">
+                <div class="flowchart-node">接口变量</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">itab</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">方法指针数组</div>
+                <br><br>
+                <div class="flowchart-node">data 指针</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">实际数据</div>
+            </div>
+
+            <h3>接口转换过程</h3>
+            <div class="example-box">
+                <h3>📖 从具体类型到接口</h3>
+                <pre><code><span class="keyword">type</span> Reader <span class="keyword">interface</span> {
+    Read(p []<span class="keyword">byte</span>) (<span class="keyword">int</span>, <span class="keyword">error</span>)
+}
+
+<span class="keyword">type</span> File <span class="keyword">struct</span> {
+    fd <span class="keyword">int</span>
+}
+
+<span class="keyword">func</span> (f *File) Read(p []<span class="keyword">byte</span>) (<span class="keyword">int</span>, <span class="keyword">error</span>) {
+    <span class="comment">// ... 实现</span>
+}
+
+<span class="comment">// 转换过程:</span>
+<span class="keyword">var</span> r Reader = &File{fd: <span class="number">3</span>}
+
+<span class="comment">// 1. 编译器检查 *File 是否实现 Reader 接口</span>
+<span class="comment">// 2. 查找或创建 itab (*File 的 Read 方法指针)</span>
+<span class="comment">// 3. 创建 iface{tab: itab, data: &File}</span>
+
+<span class="comment">// 内存布局:</span>
+<span class="comment">// r (iface)</span>
+<span class="comment">//   ├── tab → itab {</span>
+<span class="comment">//   │     inter: &Reader</span>
+<span class="comment">//   │     _type: &File</span>
+<span class="comment">//   │     fun: [File.Read 指针]</span>
+<span class="comment">//   │   }</span>
+<span class="comment">//   └── data → File{fd: 3}</span></code></pre>
+            </div>
+
+            <h3>方法调用与动态分发</h3>
+            <div class="example-box">
+                <h3>📖 接口方法调用</h3>
+                <pre><code><span class="keyword">func</span> process(r Reader) {
+    buf := <span class="function">make</span>([]<span class="keyword">byte</span>, <span class="number">1024</span>)
+    n, err := r.Read(buf)  <span class="comment">// 动态分发</span>
+}
+
+<span class="comment">// 调用过程:</span>
+<span class="comment">// 1. 通过 iface.tab 获取 itab</span>
+<span class="comment">// 2. 通过 itab.fun[0] 获取 Read 方法指针</span>
+<span class="comment">// 3. 通过 iface.data 获取接收者指针</span>
+<span class="comment">// 4. 调用方法：fun[0](data, buf)</span>
+
+<span class="comment">// 伪代码:</span>
+<span class="comment">// itab := iface.tab</span>
+<span class="comment">// data := iface.data</span>
+<span class="comment">// result := itab.fun[0](data, buf)  <span class="comment">// 间接调用</span></span></code></pre>
+            </div>
+
+            <div class="info-box">
+                <h3>💡 接口性能优化</h3>
+                <ul>
+                    <li><strong>itab 缓存</strong>: 第一次转换后，itab 会被缓存，后续转换无需重新查找</li>
+                    <li><strong>零成本抽象</strong>: 接口调用只比直接调用多一次间接寻址</li>
+                    <li><strong>避免装箱</strong>: 频繁转换会产生 itab 查找开销</li>
+                    <li><strong>小接口</strong>: 方法越少，itab 越小，缓存效率越高</li>
+                    <li><strong>内联优化</strong>: 接口方法通常无法内联，性能敏感场景考虑具体类型</li>
+                </ul>
+            </div>
+
+            <h3>接口逃逸分析</h3>
+            <div class="example-box">
+                <h3>📖 接口与内存分配</h3>
+                <pre><code><span class="comment">// 情况 1: 接口存储小对象 (可能不逃逸)</span>
+<span class="keyword">func</span> <span class="function">process1</span>() {
+    x := <span class="number">42</span>
+    <span class="keyword">var</span> iface <span class="keyword">interface</span>{} = x  <span class="comment">// 可能栈分配</span>
+    fmt.<span class="function">Println</span>(iface)
+}
+
+<span class="comment">// 情况 2: 接口存储大对象 (通常逃逸)</span>
+<span class="keyword">type</span> BigStruct <span class="keyword">struct</span> {
+    data [<span class="number">1024</span>]<span class="keyword">byte</span>
+}
+
+<span class="keyword">func</span> <span class="function">process2</span>() {
+    x := BigStruct{}
+    <span class="keyword">var</span> iface <span class="keyword">interface</span>{} = &x  <span class="comment">// 逃逸到堆</span>
+    fmt.<span class="function">Println</span>(iface)
+}
+
+<span class="comment">// 情况 3: 接口作为返回值 (通常逃逸)</span>
+<span class="keyword">func</span> <span class="function">create</span>() <span class="keyword">interface</span>{} {
+    x := <span class="number">42</span>
+    <span class="keyword">return</span> x  <span class="comment">// x 逃逸到堆</span>
 }</code></pre>
             </div>
 

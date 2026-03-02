@@ -4,87 +4,79 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 库 - Go 语言学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>AI SDK - Go AI 开发库</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
             <!-- 导航栏通过 JavaScript 动态加载 -->
         </aside>
         <div class="content">
-            <a href="ecosystem.html" class="back-link">← 返回 社区库</a>
-            <h1>🤖 AI 库 - Go 生态系统</h1>
-            <p class="intro">Go 语言在 AI/ML 领域快速发展，Go 1.26 的 SIMD 支持和性能提升使其成为 AI 服务端开发的优秀选择。</p>
+            <a href="ecosystem.html" class="back-link">← 返回生态概览</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="ecosystem-gin.html" class="back-link">Gin →</a>
 
-            <h2>AI 框架对比</h2>
-            <table>
-                <caption>Go AI 库对比</caption>
-                <thead>
-                    <tr>
-                        <th>库/框架</th>
-                        <th>用途</th>
-                        <th>特点</th>
-                        <th>推荐度</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>go-openai</td>
-                        <td>OpenAI API 客户端</td>
-                        <td>官方支持、类型安全</td>
-                        <td><span class="tag tag-success">⭐⭐⭐⭐⭐</span></td>
-                    </tr>
-                    <tr>
-                        <td>ollama</td>
-                        <td>本地 LLM 运行</td>
-                        <td>离线运行、多模型</td>
-                        <td><span class="tag tag-success">⭐⭐⭐⭐⭐</span></td>
-                    </tr>
-                    <tr>
-                        <td>tiktoken</td>
-                        <td>Token 计数</td>
-                        <td>快速、BPE 编码</td>
-                        <td><span class="tag tag-info">⭐⭐⭐⭐</span></td>
-                    </tr>
-                    <tr>
-                        <td>gorgonia</td>
-                        <td>张量计算</td>
-                        <td>类似 PyTorch</td>
-                        <td><span class="tag tag-warning">⭐⭐⭐</span></td>
-                    </tr>
-                    <tr>
-                        <td>go-ml</td>
-                        <td>机器学习</td>
-                        <td>基础算法</td>
-                        <td><span class="tag tag-warning">⭐⭐⭐</span></td>
-                    </tr>
-                </tbody>
-            </table>
+            <h1>AI SDK - Go AI 开发库</h1>
+            <p class="intro">Go 语言拥有丰富的 AI 开发生态，包括 OpenAI、Anthropic 等大模型的官方/非官方 SDK，以及 LangChain 等框架的 Go 实现。</p>
 
+            <!-- 核心库 -->
+            <h2>📌 核心 AI 库</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">🤖</div>
+                    <h4>go-openai</h4>
+                    <p>OpenAI 官方 Go SDK</p>
+                    <code class="tag">github.com/sashabaranov/go-openai</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔗</div>
+                    <h4>langchaingo</h4>
+                    <p>LangChain Go 实现</p>
+                    <code class="tag">github.com/tmc/langchaingo</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🧠</div>
+                    <h4>go-anthropic</h4>
+                    <p>Claude API 客户端</p>
+                    <code class="tag">github.com/liushuangls/go-anthropic</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📊</div>
+                    <h4>go-llama</h4>
+                    <p>Llama 模型绑定</p>
+                    <code class="tag">github.com/go-skynet/go-llama.cpp</code>
+                </div>
+            </div>
+
+            <!-- OpenAI SDK -->
             <h2 id="openai">OpenAI SDK</h2>
-            <p>go-openai 是 OpenAI API 的官方 Go 语言客户端库，提供了完整的类型安全支持和流式响应处理。</p>
 
             <h3>安装</h3>
-            <pre><code><span class="keyword">go</span> get github.com/sashabaranov/go-openai</code></pre>
+            <div class="example-box">
+                <pre><code><span class="keyword">go</span> get github.com/sashabaranov/go-openai</code></pre>
+            </div>
 
-            <h3>快速开始</h3>
-            <pre><code><span class="keyword">package</span> main
+            <h3>基础聊天</h3>
+            <div class="example-box">
+                <h3>📝 ChatCompletion 示例</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"context"</span>
     <span class="string">"fmt"</span>
-    <span class="string">"github.com/sashabaranov/go-openai"</span>
+    openai <span class="string">"github.com/sashabaranov/go-openai"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    apiKey := <span class="string">"your-api-key"</span>
-    client := openai.<span class="function">NewClient</span>(apiKey)
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建客户端</span>
+    client := openai.<span class="function">NewClient</span>(<span class="string">"your-api-key"</span>)
 
+    <span class="comment">// 创建聊天请求</span>
     resp, err := client.<span class="function">CreateChatCompletion</span>(
         context.<span class="function">Background</span>(),
         openai.ChatCompletionRequest{
-            Model: openai.GPT4,
+            Model: openai.GPT3Dot5Turbo,
             Messages: []openai.ChatCompletionMessage{
                 {
                     Role:    openai.ChatMessageRoleUser,
@@ -95,34 +87,37 @@
     )
 
     <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"ChatCompletion error: %v\n"</span>, err)
+        fmt.<span class="function">Printf</span>(<span class="string">"Error: %v\n"</span>, err)
         <span class="keyword">return</span>
     }
 
-    fmt.<span class="function">Println</span>(resp.<span class="function">Choices</span>[<span class="number">0</span>].Message.Content)
+    fmt.<span class="function">Println</span>(resp.Choices[<span class="number">0</span>].Message.Content)
 }</code></pre>
+            </div>
 
             <h3>流式响应</h3>
-            <pre><code><span class="keyword">package</span> main
+            <div class="example-box">
+                <h3>📝 Stream 示例</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"context"</span>
     <span class="string">"fmt"</span>
-    <span class="string">"github.com/sashabaranov/go-openai"</span>
+    <span class="string">"strings"</span>
+    openai <span class="string">"github.com/sashabaranov/go-openai"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    apiKey := <span class="string">"your-api-key"</span>
-    client := openai.<span class="function">NewClient</span>(apiKey)
+<span class="keyword">func</span> <span class="function">main</span>() {
+    client := openai.<span class="function">NewClient</span>(<span class="string">"your-api-key"</span>)
 
     stream, err := client.<span class="function">CreateChatCompletionStream</span>(
         context.<span class="function">Background</span>(),
         openai.ChatCompletionRequest{
-            Model: openai.GPT4,
+            Model: openai.GPT3Dot5Turbo,
             Messages: []openai.ChatCompletionMessage{
                 {
                     Role:    openai.ChatMessageRoleUser,
-                    Content: <span class="string">"Tell me a joke"</span>,
+                    Content: <span class="string">"Tell me a story"</span>,
                 },
             },
             Stream: <span class="keyword">true</span>,
@@ -130,151 +125,176 @@
     )
 
     <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"ChatCompletionStream error: %v\n"</span>, err)
+        fmt.<span class="function">Printf</span>(<span class="string">"Error: %v\n"</span>, err)
         <span class="keyword">return</span>
     }
     <span class="keyword">defer</span> stream.<span class="function">Close</span>()
 
+    fmt.<span class="function">Printf</span>(<span class="string">"Stream response: "</span>)
     <span class="keyword">for</span> {
         response, err := stream.<span class="function">Recv</span>()
         <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-            fmt.<span class="function">Printf</span>(<span class="string">"Stream error: %v\n"</span>, err)
+            <span class="keyword">break</span>
+        }
+        fmt.<span class="function">Print</span>(response.Choices[<span class="number">0</span>].Delta.Content)
+    }
+    fmt.<span class="function">Println</span>()
+}</code></pre>
+            </div>
+
+            <h3>多轮对话</h3>
+            <div class="example-box">
+                <h3>📝 对话历史管理</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"bufio"</span>
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+    openai <span class="string">"github.com/sashabaranov/go-openai"</span>
+)
+
+<span class="keyword">type</span> ChatBot <span class="keyword">struct</span> {
+    client   *openai.Client
+    messages []openai.ChatCompletionMessage
+}
+
+<span class="keyword">func</span> <span class="function">NewChatBot</span>(apiKey <span class="keyword">string</span>) *ChatBot {
+    <span class="keyword">return</span> &ChatBot{
+        client: openai.<span class="function">NewClient</span>(apiKey),
+        messages: []openai.ChatCompletionMessage{
+            {
+                Role:    openai.ChatMessageRoleSystem,
+                Content: <span class="string">"You are a helpful assistant."</span>,
+            },
+        },
+    }
+}
+
+<span class="keyword">func</span> (b *ChatBot) <span class="function">Chat</span>(input <span class="keyword">string</span>) (<span class="keyword">string</span>, <span class="keyword">error</span>) {
+    <span class="comment">// 添加用户消息</span>
+    b.messages = <span class="function">append</span>(b.messages, openai.ChatCompletionMessage{
+        Role:    openai.ChatMessageRoleUser,
+        Content: input,
+    })
+
+    <span class="comment">// 创建请求</span>
+    resp, err := b.client.<span class="function">CreateChatCompletion</span>(
+        context.<span class="function">Background</span>(),
+        openai.ChatCompletionRequest{
+            Model:    openai.GPT3Dot5Turbo,
+            Messages: b.messages,
+        },
+    )
+
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, err
+    }
+
+    <span class="comment">// 添加助手回复</span>
+    content := resp.Choices[<span class="number">0</span>].Message.Content
+    b.messages = <span class="function">append</span>(b.messages, openai.ChatCompletionMessage{
+        Role:    openai.ChatMessageRoleAssistant,
+        Content: content,
+    })
+
+    <span class="keyword">return</span> content, <span class="keyword">nil</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    bot := <span class="function">NewChatBot</span>(<span class="string">"your-api-key"</span>)
+    scanner := bufio.<span class="function">NewScanner</span>(os.Stdin)
+
+    fmt.<span class="function">Println</span>(<span class="string">"Chat with AI (type 'quit' to exit)"</span>)
+
+    <span class="keyword">for</span> {
+        fmt.<span class="function">Print</span>(<span class="string">"You: "</span>)
+        <span class="keyword">if</span> !scanner.<span class="function">Scan</span>() {
             <span class="keyword">break</span>
         }
 
-        fmt.<span class="function">Print</span>(response.<span class="function">Choices</span>[<span class="number">0</span>].Delta.Content)
+        input := scanner.<span class="function">Text</span>()
+        <span class="keyword">if</span> input == <span class="string">"quit"</span> {
+            <span class="keyword">break</span>
+        }
+
+        response, err := bot.<span class="function">Chat</span>(input)
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            fmt.<span class="function">Printf</span>(<span class="string">"Error: %v\n"</span>, err)
+            <span class="keyword">continue</span>
+        }
+
+        fmt.<span class="function">Printf</span>(<span class="string">"AI: %s\n"</span>, response)
     }
 }</code></pre>
+            </div>
 
-            <h3>多轮对话</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"context"</span>
-    <span class="string">"fmt"</span>
-    <span class="string">"github.com/sashabaranov/go-openai"</span>
-)
-
-<span class="function">func</span> <span class="function">main</span>() {
-    apiKey := <span class="string">"your-api-key"</span>
-    client := openai.<span class="function">NewClient</span>(apiKey)
-
-    <span class="comment">// 对话历史</span>
-    messages := []openai.ChatCompletionMessage{
-        {
-            Role:    openai.ChatMessageRoleSystem,
-            Content: <span class="string">"You are a helpful assistant."</span>,
-        },
-        {
-            Role:    openai.ChatMessageRoleUser,
-            Content: <span class="string">"What is the capital of France?"</span>,
-        },
-    }
-
-    resp, err := client.<span class="function">CreateChatCompletion</span>(
-        context.<span class="function">Background</span>(),
-        openai.ChatCompletionRequest{
-            Model:    openai.GPT4,
-            Messages: messages,
-        },
-    )
-
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"Error: %v\n"</span>, err)
-        <span class="keyword">return</span>
-    }
-
-    assistantReply := resp.<span class="function">Choices</span>[<span class="number">0</span>].Message.Content
-    fmt.<span class="function">Println</span>(<span class="string">"Assistant:"</span>, assistantReply)
-
-    <span class="comment">// 添加助手回复到历史</span>
-    messages = <span class="function">append</span>(messages, openai.ChatCompletionMessage{
-        Role:    openai.ChatMessageRoleAssistant,
-        Content: assistantReply,
-    })
-
-    <span class="comment">// 继续对话</span>
-    messages = <span class="function">append</span>(messages, openai.ChatCompletionMessage{
-        Role:    openai.ChatMessageRoleUser,
-        Content: <span class="string">"And what about Germany?"</span>,
-    })
-
-    resp2, err := client.<span class="function">CreateChatCompletion</span>(
-        context.<span class="function">Background</span>(),
-        openai.ChatCompletionRequest{
-            Model:    openai.GPT4,
-            Messages: messages,
-        },
-    )
-
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"Error: %v\n"</span>, err)
-        <span class="keyword">return</span>
-    }
-
-    fmt.<span class="function">Println</span>(<span class="string">"Assistant:"</span>, resp2.<span class="function">Choices</span>[<span class="number">0</span>].Message.Content)
-}</code></pre>
-
-            <h3>Function Calling</h3>
-            <pre><code><span class="keyword">package</span> main
+            <h3>函数调用</h3>
+            <div class="example-box">
+                <h3>📝 Function Calling</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"context"</span>
     <span class="string">"encoding/json"</span>
     <span class="string">"fmt"</span>
-    <span class="string">"github.com/sashabaranov/go-openai"</span>
+    openai <span class="string">"github.com/sashabaranov/go-openai"</span>
 )
 
-<span class="comment">// 定义函数参数结构</span>
-<span class="keyword">type</span> WeatherParams <span class="keyword">struct</span> {
-    City    <span class="keyword">string</span> <span class="string">`json:"city"`</span>
-    Country <span class="keyword">string</span> <span class="string">`json:"country,omitempty"`</span>
-}
+<span class="keyword">func</span> <span class="function">main</span>() {
+    client := openai.<span class="function">NewClient</span>(<span class="string">"your-api-key"</span>)
 
-<span class="function">func</span> <span class="function">getWeather</span>(params WeatherParams) <span class="keyword">string</span> {
-    <span class="comment">// 模拟获取天气</span>
-    <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"The weather in %s is sunny, 25°C"</span>, params.City)
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    apiKey := <span class="string">"your-api-key"</span>
-    client := openai.<span class="function">NewClient</span>(apiKey)
-
+    <span class="comment">// 定义函数</span>
     tools := []openai.Tool{
         {
             Type: openai.ToolTypeFunction,
-            Function: openai.FunctionDefinition{
+            Function: &openai.FunctionDefinition{
                 Name:        <span class="string">"get_weather"</span>,
-                Description: <span class="string">"Get the current weather for a city"</span>,
-                Parameters: <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{
-                    <span class="string">"type"</span>: <span class="string">"object"</span>,
-                    <span class="string">"properties"</span>: <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{
-                        <span class="string">"city"</span>: <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{
-                            <span class="string">"type"</span>:        <span class="string">"string"</span>,
-                            <span class="string">"description"</span>: <span class="string">"The name of the city"</span>,
+                Description: <span class="string">"Get current weather for a location"</span>,
+                Parameters: <span class="keyword">struct</span> {
+                    Type       <span class="keyword">string</span>                 <span class="string">`json:"type"`</span>
+                    Properties <span class="keyword">map</span>[<span class="keyword">string</span>]*struct {
+                        Type        <span class="keyword">string</span>   <span class="string">`json:"type"`</span>
+                        Description <span class="keyword">string</span>   <span class="string">`json:"description"`</span>
+                        Enum        []<span class="keyword">string</span> <span class="string">`json:"enum,omitempty"`</span>
+                    } <span class="string">`json:"properties"`</span>
+                    Required []<span class="keyword">string</span> <span class="string">`json:"required"`</span>
+                }{
+                    Type: <span class="string">"object"</span>,
+                    Properties: <span class="keyword">map</span>[<span class="keyword">string</span>]*struct {
+                        Type        <span class="keyword">string</span>   <span class="string">`json:"type"`</span>
+                        Description <span class="keyword">string</span>   <span class="string">`json:"description"`</span>
+                        Enum        []<span class="keyword">string</span> <span class="string">`json:"enum,omitempty"`</span>
+                    }{
+                        <span class="string">"location"</span>: {
+                            Type:        <span class="string">"string"</span>,
+                            Description: <span class="string">"City name"</span>,
                         },
-                        <span class="string">"country"</span>: <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{
-                            <span class="string">"type"</span>:        <span class="string">"string"</span>,
-                            <span class="string">"description"</span>: <span class="string">"The country (optional)"</span>,
+                        <span class="string">"unit"</span>: {
+                            Type: <span class="string">"string"</span>,
+                            Description: <span class="string">"Temperature unit"</span>,
+                            Enum: []<span class="keyword">string</span>{<span class="string">"celsius"</span>, <span class="string">"fahrenheit"</span>},
                         },
                     },
-                    <span class="string">"required"</span>: []<span class="keyword">string</span>{<span class="string">"city"</span>},
+                    Required: []<span class="keyword">string</span>{<span class="string">"location"</span>},
                 },
             },
         },
     }
 
+    <span class="comment">// 创建请求</span>
     resp, err := client.<span class="function">CreateChatCompletion</span>(
         context.<span class="function">Background</span>(),
         openai.ChatCompletionRequest{
-            Model:    openai.GPT4,
+            Model: openai.GPT4TurboPreview,
             Messages: []openai.ChatCompletionMessage{
                 {
                     Role:    openai.ChatMessageRoleUser,
-                    Content: <span class="string">"What's the weather like in Tokyo?"</span>,
+                    Content: <span class="string">"What's the weather in Beijing?"</span>,
                 },
             },
-            Tools:    tools,
+            Tools: tools,
         },
     )
 
@@ -284,313 +304,213 @@
     }
 
     <span class="comment">// 检查是否需要调用函数</span>
-    <span class="keyword">if</span> <span class="function">len</span>(resp.<span class="function">Choices</span>) > <span class="number">0</span> && resp.<span class="function">Choices</span>[<span class="number">0</span>].FinishReason == <span class="string">"tool_calls"</span> {
-        toolCall := resp.<span class="function">Choices</span>[<span class="number">0</span>].Message.ToolCalls[<span class="number">0</span>]
-
-        <span class="keyword">if</span> toolCall.Function.Name == <span class="string">"get_weather"</span> {
-            <span class="keyword">var</span> params WeatherParams
-            json.<span class="function">Unmarshal</span>([]<span class="keyword">byte</span>(toolCall.Function.Arguments), &params)
-
-            weather := <span class="function">getWeather</span>(params)
-            fmt.<span class="function">Println</span>(<span class="string">"Weather:"</span>, weather)
-        }
+    <span class="keyword">if</span> resp.Choices[<span class="number">0</span>].FinishReason == openai.FinishReasonToolCalls {
+        toolCall := resp.Choices[<span class="number">0</span>].Message.ToolCalls[<span class="number">0</span>]
+        fmt.<span class="function">Printf</span>(<span class="string">"Function: %s\n"</span>, toolCall.Function.Name)
+        
+        <span class="keyword">var</span> args <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}
+        json.<span class="function">Unmarshal</span>([]<span class="keyword">byte</span>(toolCall.Function.Arguments), &args)
+        fmt.<span class="function">Printf</span>(<span class="string">"Arguments: %v\n"</span>, args)
     }
 }</code></pre>
+            </div>
 
-            <h3>图像生成</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"context"</span>
-    <span class="string">"fmt"</span>
-    <span class="string">"github.com/sashabaranov/go-openai"</span>
-)
-
-<span class="function">func</span> <span class="function">main</span>() {
-    apiKey := <span class="string">"your-api-key"</span>
-    client := openai.<span class="function">NewClient</span>(apiKey)
-
-    resp, err := client.<span class="function">CreateImage</span>(
-        context.<span class="function">Background</span>(),
-        openai.ImageRequest{
-            Prompt:         <span class="string">"A beautiful sunset over the ocean"</span>,
-            Size:           openai.CreateImageSize1024x1024,
-            ResponseFormat: openai.CreateImageResponseFormatURL,
-            N:              <span class="number">1</span>,
-        },
-    )
-
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"Image generation error: %v\n"</span>, err)
-        <span class="keyword">return</span>
-    }
-
-    fmt.<span class="function">Println</span>(<span class="string">"Image URL:"</span>, resp.<span class="function">Data</span>[<span class="number">0</span>].URL)
-}</code></pre>
-
-            <h3>语音识别</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"context"</span>
-    <span class="string">"fmt"</span>
-    <span class="string">"os"</span>
-    <span class="string">"github.com/sashabaranov/go-openai"</span>
-)
-
-<span class="function">func</span> <span class="function">main</span>() {
-    apiKey := <span class="string">"your-api-key"</span>
-    client := openai.<span class="function">NewClient</span>(apiKey)
-
-    <span class="comment">// 读取音频文件</span>
-    audioFile, err := os.<span class="function">Open</span>(<span class="string">"audio.mp3"</span>)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"Error opening file: %v\n"</span>, err)
-        <span class="keyword">return</span>
-    }
-    <span class="keyword">defer</span> audioFile.<span class="function">Close</span>()
-
-    resp, err := client.<span class="function">CreateTranscription</span>(
-        context.<span class="function">Background</span>(),
-        openai.AudioRequest{
-            Model:    openai.Whisper1,
-            FilePath: <span class="string">"audio.mp3"</span>,
-            Reader:   audioFile,
-        },
-    )
-
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"Transcription error: %v\n"</span>, err)
-        <span class="keyword">return</span>
-    }
-
-    fmt.<span class="function">Println</span>(<span class="string">"Transcription:"</span>, resp.Text)
-}</code></pre>
-
-            <h2 id="ollama">Ollama Go</h2>
-            <p>Ollama Go 是 Ollama 本地大语言模型的 Go 客户端库，支持在本地运行和调用各种开源模型。</p>
+            <!-- LangChainGo -->
+            <h2 id="langchain">LangChainGo</h2>
 
             <h3>安装</h3>
-            <pre><code><span class="keyword">go</span> get github.com/ollama/ollama-go</code></pre>
+            <div class="example-box">
+                <pre><code><span class="keyword">go</span> get github.com/tmc/langchaingo</code></pre>
+            </div>
 
-            <h3>快速开始</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"context"</span>
-    <span class="string">"fmt"</span>
-    <span class="string">"github.com/ollama/ollama-go"</span>
-)
-
-<span class="function">func</span> <span class="function">main</span>() {
-    client := ollama.<span class="function">NewClient</span>(ollama.<span class="function">DefaultHost</span>())
-
-    <span class="comment">// 生成文本</span>
-    resp, err := client.<span class="function">Generate</span>(context.<span class="function">Background</span>(), &ollama.GenerateRequest{
-        Model:  <span class="string">"llama2"</span>,
-        Prompt: <span class="string">"What is the capital of France?"</span>,
-        Stream: <span class="keyword">false</span>,
-    })
-
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"Error: %v\n"</span>, err)
-        <span class="keyword">return</span>
-    }
-
-    fmt.<span class="function">Println</span>(resp.Response)
-}</code></pre>
-
-            <h3>流式生成</h3>
-            <pre><code><span class="keyword">package</span> main
+            <h3>基础链式调用</h3>
+            <div class="example-box">
+                <h3>📝 LLM Chain</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"context"</span>
     <span class="string">"fmt"</span>
-    <span class="string">"github.com/ollama/ollama-go"</span>
-)
+    <span class="string">"log"</span>
 
-<span class="function">func</span> <span class="function">main</span>() {
-    client := ollama.<span class="function">NewClient</span>(ollama.<span class="function">DefaultHost</span>())
-
-    ctx := context.<span class="function">Background</span>()
-    defer ctx.<span class="function">Done</span>()
-
-    <span class="function">func</span> <span class="function">stream</span>() {
-        req := &ollama.GenerateRequest{
-            Model:  <span class="string">"llama2"</span>,
-            Prompt: <span class="string">"Tell me a short story"</span>,
-            Stream: <span class="keyword">true</span>,
-        }
-
-        <span class="function">for</span> resp := <span class="keyword">range</span> client.<span class="function">GenerateStream</span>(ctx, req) {
-            fmt.<span class="function">Print</span>(resp.Response)
-        }
-        fmt.<span class="function">Println</span>()
-    }
-
-    <span class="function">stream</span>()
-}</code></pre>
-
-            <h3>聊天对话</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"context"</span>
-    <span class="string">"fmt"</span>
-    <span class="string">"github.com/ollama/ollama-go"</span>
-)
-
-<span class="function">func</span> <span class="function">main</span>() {
-    client := ollama.<span class="function">NewClient</span>(ollama.<span class="function">DefaultHost</span>())
-
-    messages := []ollama.Message{
-        {Role: <span class="string">"user"</span>, Content: <span class="string">"Hello, how are you?"</span>},
-    }
-
-    resp, err := client.<span class="function">Chat</span>(context.<span class="function">Background</span>(), &ollama.ChatRequest{
-        Model:    <span class="string">"llama2"</span>,
-        Messages: messages,
-        Stream:   <span class="keyword">false</span>,
-    })
-
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"Error: %v\n"</span>, err)
-        <span class="keyword">return</span>
-    }
-
-    fmt.<span class="function">Println</span>(resp.Message.Content)
-}</code></pre>
-
-            <h2 id="langchaingo">LangChain Go</h2>
-            <p>LangChain Go 是 LangChain 框架的 Go 语言实现，提供构建 AI 应用的工具和组件。</p>
-
-            <h3>安装</h3>
-            <pre><code><span class="keyword">go</span> get github.com/tmc/langchaingo</code></pre>
-
-            <h3>快速开始</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"context"</span>
-    <span class="string">"fmt"</span>
-    <span class="string">"github.com/tmc/langchaingo/llms"</span>
-    <span class="string">"github.com/tmc/langchaingo/llms/openai"</span>
-)
-
-<span class="function">func</span> <span class="function">main</span>() {
-    apiKey := <span class="string">"your-api-key"</span>
-    llm, err := openai.<span class="function">New</span>(openai.WithToken(apiKey))
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"Error: %v\n"</span>, err)
-        <span class="keyword">return</span>
-    }
-
-    ctx := context.<span class="function">Background</span>()
-    completion, err := llms.<span class="function">GenerateFromSinglePrompt</span>(
-        ctx,
-        llm,
-        <span class="string">"What is the capital of France?"</span>,
-    )
-
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"Error: %v\n"</span>, err)
-        <span class="keyword">return</span>
-    }
-
-    fmt.<span class="function">Println</span>(completion)
-}</code></pre>
-
-            <h3>使用模板</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"context"</span>
-    <span class="string">"fmt"</span>
     <span class="string">"github.com/tmc/langchaingo/llms"</span>
     <span class="string">"github.com/tmc/langchaingo/llms/openai"</span>
     <span class="string">"github.com/tmc/langchaingo/prompts"</span>
+    <span class="string">"github.com/tmc/langchaingo/chains"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    apiKey := <span class="string">"your-api-key"</span>
-    llm, err := openai.<span class="function">New</span>(openai.WithToken(apiKey))
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建 LLM</span>
+    llm, err := openai.<span class="function">New</span>()
     <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"Error: %v\n"</span>, err)
-        <span class="keyword">return</span>
+        log.<span class="function">Fatal</span>(err)
     }
 
     <span class="comment">// 创建提示模板</span>
-    template := prompts.<span class="function">NewPromptTemplate</span>(
-        <span class="string">"Tell me a joke about {{topic}}"</span>,
-        []<span class="keyword">string</span>{<span class="string">"topic"</span>},
+    p := prompts.<span class="function">NewPromptTemplate</span>(
+        <span class="string">"Tell me a {{adjective}} joke about {{content}}."</span>,
+        []<span class="keyword">string</span>{<span class="string">"adjective"</span>, <span class="string">"content"</span>},
     )
 
-    prompt, err := template.<span class="function">Format</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">any</span>{
-        <span class="string">"topic"</span>: <span class="string">"programming"</span>,
-    })
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"Error: %v\n"</span>, err)
-        <span class="keyword">return</span>
-    }
+    <span class="comment">// 创建链</span>
+    c := chains.<span class="function">NewLLMChain</span>(llm, p)
 
-    ctx := context.<span class="function">Background</span>()
-    completion, err := llms.<span class="function">GenerateFromSinglePrompt</span>(ctx, llm, prompt)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"Error: %v\n"</span>, err)
-        <span class="keyword">return</span>
-    }
-
-    fmt.<span class="function">Println</span>(completion)
-}</code></pre>
-
-            <h2 id="embedding">文本嵌入</h2>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"context"</span>
-    <span class="string">"fmt"</span>
-    <span class="string">"github.com/sashabaranov/go-openai"</span>
-)
-
-<span class="function">func</span> <span class="function">main</span>() {
-    apiKey := <span class="string">"your-api-key"</span>
-    client := openai.<span class="function">NewClient</span>(apiKey)
-
-    resp, err := client.<span class="function">CreateEmbeddings</span>(
+    <span class="comment">// 运行链</span>
+    result, err := chains.<span class="function">Run</span>(
         context.<span class="function">Background</span>(),
-        openai.EmbeddingRequest{
-            Input: []<span class="keyword">string</span>{
-                <span class="string">"The quick brown fox jumps over the lazy dog"</span>,
-                <span class="string">"Hello world"</span>,
-            },
-            Model: openai.SmallEmbedding3,
+        c,
+        <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">any</span>{
+            <span class="string">"adjective"</span>: <span class="string">"funny"</span>,
+            <span class="string">"content"</span>:   <span class="string">"chickens"</span>,
         },
     )
 
     <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"Embedding error: %v\n"</span>, err)
-        <span class="keyword">return</span>
+        log.<span class="function">Fatal</span>(err)
     }
 
-    fmt.<span class="function">Printf</span>(<span class="string">"Embedding dimension: %d\n"</span>, <span class="function">len</span>(resp.<span class="function">Data</span>[<span class="number">0</span>].Embedding))
+    fmt.<span class="function">Println</span>(result)
 }</code></pre>
+            </div>
+
+            <h3>文档问答</h3>
+            <div class="example-box">
+                <h3>📝 RAG 示例</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"log"</span>
+    <span class="string">"strings"</span>
+
+    <span class="string">"github.com/tmc/langchaingo/documentloaders"</span>
+    <span class="string">"github.com/tmc/langchaingo/embeddings"</span>
+    <span class="string">"github.com/tmc/langchaingo/llms/openai"</span>
+    <span class="string">"github.com/tmc/langchaingo/schema"</span>
+    <span class="string">"github.com/tmc/langchaingo/textsplitter"</span>
+    <span class="string">"github.com/tmc/langchaingo/vectorstores/chroma"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建 embeddings</span>
+    embedder, err := embeddings.<span class="function">NewEmbedder</span>()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        log.<span class="function">Fatal</span>(err)
+    }
+
+    <span class="comment">// 加载文档</span>
+    doc := <span class="string">`Go is an open source programming language supported by Google.
+    Go is easy to learn and simple to use. It is fast and efficient.
+    Go has great support for concurrency and is perfect for cloud computing.`</span>
+
+    loader := documentloaders.<span class="function">NewText</span>(strings.<span class="function">NewReader</span>(doc))
+    docs, err := loader.<span class="function">Load</span>(context.<span class="function">Background</span>())
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        log.<span class="function">Fatal</span>(err)
+    }
+
+    <span class="comment">// 分割文本</span>
+    splitter := textsplitter.<span class="function">NewTokenSplitter</span>()
+    splitDocs := splitter.<span class="function">SplitDocuments</span>(docs)
+
+    <span class="comment">// 创建向量存储</span>
+    store, err := chroma.<span class="function">New</span>(
+        chroma.<span class="function">WithEmbedder</span>(embedder),
+        chroma.<span class="function">WithDistanceFunction</span>(<span class="string">"cosine"</span>),
+    )
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        log.<span class="function">Fatal</span>(err)
+    }
+
+    <span class="comment">// 添加文档</span>
+    _, err = store.<span class="function">AddDocuments</span>(context.<span class="function">Background</span>(), splitDocs)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        log.<span class="function">Fatal</span>(err)
+    }
+
+    <span class="comment">// 相似度搜索</span>
+    results, err := store.<span class="function">SimilaritySearch</span>(
+        context.<span class="function">Background</span>(),
+        <span class="string">"What is Go good for?"</span>,
+        <span class="number">2</span>,
+    )
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        log.<span class="function">Fatal</span>(err)
+    }
+
+    fmt.<span class="function">Println</span>(<span class="string">"Search results:"</span>)
+    <span class="keyword">for</span> _, result := <span class="keyword">range</span> results {
+        fmt.<span class="function">Println</span>(result.PageContent)
+    }
+}</code></pre>
+            </div>
+
+            <!-- 本地模型 -->
+            <h2 id="local">本地模型</h2>
+
+            <h3>go-llama.cpp</h3>
+            <div class="example-box">
+                <h3>📝 本地 Llama 模型</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"github.com/go-skynet/go-llama.cpp"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 加载模型</span>
+    model, err := llama.<span class="function">New</span>(
+        <span class="string">"models/llama-7b.gguf"</span>,
+        llama.<span class="function">SetContext</span>(<span class="number">512</span>),
+        llama.<span class="function">SetThreads</span>(<span class="number">4</span>),
+    )
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        panic(err)
+    }
+    <span class="keyword">defer</span> model.<span class="function">Free</span>()
+
+    <span class="comment">// 生成文本</span>
+    output, err := model.<span class="function">Predict</span>(
+        <span class="string">"Once upon a time,"</span>,
+        llama.<span class="function">SetTokens</span>(<span class="number">100</span>),
+        llama.<span class="function">SetTemperature</span>(<span class="number">0.8</span>),
+    )
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        panic(err)
+    }
+
+    fmt.<span class="function">Println</span>(output)
+}</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ AI 开发建议</h3>
+                <ul>
+                    <li><strong>API Key 管理</strong>: 使用环境变量存储 API Key</li>
+                    <li><strong>错误处理</strong>: 处理速率限制和网络错误</li>
+                    <li><strong>流式响应</strong>: 长文本使用流式提高用户体验</li>
+                    <li><strong>上下文管理</strong>: 合理管理对话历史长度</li>
+                    <li><strong>缓存结果</strong>: 缓存常见查询结果降低成本</li>
+                    <li><strong>超时设置</strong>: 设置合理的超时时间</li>
+                </ul>
+            </div>
 
             <div class="note-box">
-                <h3>AI 库使用建议</h3>
+                <h3>📖 延伸阅读</h3>
                 <ul>
-                    <li><strong>API Key 安全</strong>：不要将 API Key 硬编码在代码中，使用环境变量或配置文件</li>
-                    <li><strong>错误处理</strong>：始终处理 API 调用可能返回的错误</li>
-                    <li><strong>超时控制</strong>：为长时间运行的 AI 调用设置合理的超时</li>
-                    <li><strong>成本控制</strong>：监控 API 使用量，避免意外的高额费用</li>
-                    <li><strong>本地优先</strong>：对于敏感数据或成本敏感场景，考虑使用 Ollama 等本地模型</li>
+                    <li><a href="ecosystem-gin.html">Gin Web 框架</a></li>
+                    <li><a href="stdlib-json.html">JSON 编解码</a></li>
+                    <li><a href="concurrency-context.html">Context 上下文</a></li>
                 </ul>
             </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
     <script src="code-collapse.js"></script>
+</body>
 </html>

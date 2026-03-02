@@ -96,6 +96,7 @@ const navigationConfig = [
     section: "🌐 生态框架",
     items: [
       { title: "生态概览", href: "ecosystem.html", icon: "🌐" },
+      { title: "AI SDK", href: "ecosystem-ai.html", icon: "🤖" },
       { title: "Gin Web 框架", href: "ecosystem-gin.html", icon: "🍸" },
       { title: "GORM ORM", href: "ecosystem-gorm.html", icon: "🗄️" },
       { title: "Viper 配置", href: "ecosystem-viper.html", icon: "🐍" },

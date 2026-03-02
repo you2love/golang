@@ -4,43 +4,340 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Type 和 Value - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>Type 和 Value - Go 反射核心</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="reflection.html" class="back-link">← 返回 reflection</a>
-            <h2 id="typevalue">reflect.Type 和 reflect.Value</h2>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="reflection-struct.html" class="back-link">← 结构体反射</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="reflection-modify.html" class="back-link">修改值 →</a>
+
+            <h1>Type 和 Value - 反射核心</h1>
+            <p class="intro">reflect.Type 和 reflect.Value 是 Go 反射的两大核心概念。Type 表示类型信息，Value 表示值信息。深入理解它们是掌握反射的关键。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">🏷️</div>
+                    <h4>reflect.Type</h4>
+                    <p>类型信息</p>
+                    <code class="tag">TypeOf()</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⚖️</div>
+                    <h4>reflect.Value</h4>
+                    <p>值信息</p>
+                    <code class="tag">ValueOf()</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📊</div>
+                    <h4>Kind</h4>
+                    <p>类型类别</p>
+                    <code class="tag">Kind()</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔄</div>
+                    <h4>转换</h4>
+                    <p>Type/Value 互转</p>
+                    <code class="tag">Interface()</code>
+                </div>
+            </div>
+
+            <!-- reflect.Type -->
+            <h2 id="type">reflect.Type 详解</h2>
+
+            <div class="example-box">
+                <h3>📖 Type 类型信息</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
     <span class="string">"reflect"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="keyword">var</span> x <span class="keyword">int</span> = <span class="number">42</span>
+<span class="keyword">func</span> <span class="function">inspectType</span>(v <span class="keyword">interface</span>{}) {
+    t := reflect.<span class="function">TypeOf</span>(v)
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Type: %v\n"</span>, t)
+    fmt.<span class="function">Printf</span>(<span class="string">"Name: %v\n"</span>, t.<span class="function">Name</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"Kind: %v\n"</span>, t.<span class="function">Kind</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"String: %v\n"</span>, t.<span class="function">String</span>())
+    
+    <span class="comment">// 复杂类型信息</span>
+    <span class="keyword">switch</span> t.<span class="function">Kind</span>() {
+    <span class="keyword">case</span> reflect.Struct:
+        fmt.<span class="function">Printf</span>(<span class="string">"NumField: %d\n"</span>, t.<span class="function">NumField</span>())
+        <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; t.<span class="function">NumField</span>(); i++ {
+            field := t.<span class="function">Field</span>(i)
+            fmt.<span class="function">Printf</span>(<span class="string">"  Field %d: %s (%v)\n"</span>, 
+                i, field.Name, field.Type)
+        }
+    
+    <span class="keyword">case</span> reflect.Slice, reflect.Array:
+        fmt.<span class="function">Printf</span>(<span class="string">"Elem: %v\n"</span>, t.<span class="function">Elem</span>())
+        fmt.<span class="function">Printf</span>(<span class="string">"Len: %d\n"</span>, t.<span class="function">Len</span>())
+    
+    <span class="keyword">case</span> reflect.Map:
+        fmt.<span class="function">Printf</span>(<span class="string">"Key: %v, Elem: %v\n"</span>, 
+            t.<span class="function">Key</span>(), t.<span class="function">Elem</span>())
+    
+    <span class="keyword">case</span> reflect.Ptr:
+        fmt.<span class="function">Printf</span>(<span class="string">"Elem: %v\n"</span>, t.<span class="function">Elem</span>())
+    
+    <span class="keyword">case</span> reflect.Func:
+        fmt.<span class="function">Printf</span>(<span class="string">"NumIn: %d, NumOut: %d\n"</span>, 
+            t.<span class="function">NumIn</span>(), t.<span class="function">NumOut</span>())
+    }
+}
 
-    <span class="comment">// 获取类型和值</span>
-    t := reflect.<span class="function">TypeOf</span>(x)
-    v := reflect.<span class="function">ValueOf</span>(x)
+<span class="keyword">type</span> Person <span class="keyword">struct</span> {
+    Name <span class="keyword">string</span>
+    Age  <span class="keyword">int</span>
+}
 
-    fmt.<span class="function">Println</span>(<span class="string">"类型:"</span>, t)
-    fmt.<span class="function">Println</span>(<span class="string">"值:"</span>, v)
-    fmt.<span class="function">Println</span>(<span class="string">"类型种类:"</span>, t.<span class="function">Kind</span>())
-    fmt.<span class="function">Println</span>(<span class="string">"值的种类:"</span>, v.<span class="function">Kind</span>())
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="function">inspectType</span>(<span class="number">42</span>)
+    <span class="function">inspectType</span>([]<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>})
+    <span class="function">inspectType</span>(<span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>))
+    <span class="function">inspectType</span>(Person{})
 }</code></pre>
+            </div>
 
-            
+            <div class="info-box">
+                <h3>💡 Type 要点</h3>
+                <ul>
+                    <li><strong>TypeOf</strong>: 获取 reflect.Type</li>
+                    <li><strong>Kind vs Type</strong>: Kind 是类别，Type 是具体类型</li>
+                    <li><strong>Name</strong>: 类型名称（非基本类型才有）</li>
+                    <li><strong>只读</strong>: Type 信息是只读的</li>
+                </ul>
+            </div>
+
+            <!-- reflect.Value -->
+            <h2 id="value">reflect.Value 详解</h2>
+            <div class="example-box">
+                <h3>📖 Value 值信息</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"reflect"</span>
+)
+
+<span class="keyword">func</span> <span class="function">inspectValue</span>(v <span class="keyword">interface</span>{}) {
+    val := reflect.<span class="function">ValueOf</span>(v)
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Kind: %v\n"</span>, val.<span class="function">Kind</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"Type: %v\n"</span>, val.<span class="function">Type</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"CanSet: %v\n"</span>, val.<span class="function">CanSet</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"CanAddr: %v\n"</span>, val.<span class="function">CanAddr</span>())
+    
+    <span class="comment">// 获取值</span>
+    <span class="keyword">switch</span> val.<span class="function">Kind</span>() {
+    <span class="keyword">case</span> reflect.Int, reflect.Int8, reflect.Int64:
+        fmt.<span class="function">Printf</span>(<span class="string">"Int: %d\n"</span>, val.<span class="function">Int</span>())
+    <span class="keyword">case</span> reflect.Uint, reflect.Uint64:
+        fmt.<span class="function">Printf</span>(<span class="string">"Uint: %d\n"</span>, val.<span class="function">Uint</span>())
+    <span class="keyword">case</span> reflect.Float64:
+        fmt.<span class="function">Printf</span>(<span class="string">"Float: %f\n"</span>, val.<span class="function">Float</span>())
+    <span class="keyword">case</span> reflect.String:
+        fmt.<span class="function">Printf</span>(<span class="string">"String: %s\n"</span>, val.<span class="function">String</span>())
+    <span class="keyword">case</span> reflect.Bool:
+        fmt.<span class="function">Printf</span>(<span class="string">"Bool: %v\n"</span>, val.<span class="function">Bool</span>())
+    <span class="keyword">case</span> reflect.Slice:
+        fmt.<span class="function">Printf</span>(<span class="string">"Len: %d, Cap: %d\n"</span>, 
+            val.<span class="function">Len</span>(), val.<span class="function">Cap</span>())
+    <span class="keyword">case</span> reflect.Struct:
+        fmt.<span class="function">Printf</span>(<span class="string">"NumField: %d\n"</span>, val.<span class="function">NumField</span>())
+    <span class="keyword">case</span> reflect.Ptr:
+        fmt.<span class="function">Printf</span>(<span class="string">"IsNil: %v\n"</span>, val.<span class="function">IsNil</span>())
+        <span class="keyword">if</span> !val.<span class="function">IsNil</span>() {
+            fmt.<span class="function">Printf</span>(<span class="string">"Elem: %v\n"</span>, val.<span class="function">Elem</span>())
+        }
+    }
+    
+    <span class="comment">// 获取底层值</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"Interface: %v\n"</span>, val.<span class="function">Interface</span>())
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="function">inspectValue</span>(<span class="number">42</span>)
+    <span class="function">inspectValue</span>(<span class="string">"hello"</span>)
+    <span class="function">inspectValue</span>([]<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>})
+    
+    ptr := <span class="function">new</span>(<span class="keyword">int</span>)
+    *ptr = <span class="number">100</span>
+    <span class="function">inspectValue</span>(ptr)
+}</code></pre>
+            </div>
+
+            <!-- Type 和 Value 转换 -->
+            <h2 id="conversion">Type 和 Value 转换</h2>
+            <div class="example-box">
+                <h3>📝 Type/Value 互转</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"reflect"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    original := <span class="number">42</span>
+    
+    <span class="comment">// interface{} → Type</span>
+    t := reflect.<span class="function">TypeOf</span>(original)
+    fmt.<span class="function">Printf</span>(<span class="string">"Type: %v\n"</span>, t)
+    
+    <span class="comment">// interface{} → Value</span>
+    v := reflect.<span class="function">ValueOf</span>(original)
+    fmt.<span class="function">Printf</span>(<span class="string">"Value: %v\n"</span>, v)
+    
+    <span class="comment">// Value → Type</span>
+    t2 := v.<span class="function">Type</span>()
+    fmt.<span class="function">Printf</span>(<span class="string">"From Value Type: %v\n"</span>, t2)
+    
+    <span class="comment">// Value → interface{}</span>
+    iface := v.<span class="function">Interface</span>()
+    fmt.<span class="function">Printf</span>(<span class="string">"Interface: %v (type: %T)\n"</span>, iface, iface)
+    
+    <span class="comment">// Type → 创建新 Value</span>
+    newVal := reflect.<span class="function">New</span>(t)
+    fmt.<span class="function">Printf</span>(<span class="string">"New Value: %v\n"</span>, newVal)
+    
+    <span class="comment">// 完整循环</span>
+    <span class="comment">// original → Value → Interface → Type</span>
+    v2 := reflect.<span class="function">ValueOf</span>(original)
+    iface2 := v2.<span class="function">Interface</span>()
+    t3 := reflect.<span class="function">TypeOf</span>(iface2)
+    fmt.<span class="function">Printf</span>(<span class="string">"Round trip: %v\n"</span>, t3)
+}</code></pre>
+            </div>
+
+            <!-- Kind 详解 -->
+            <h2 id="kind">Kind 类型类别</h2>
+            <div class="example-box">
+                <h3>📖 Kind 与 Type 区别</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"reflect"</span>
+)
+
+<span class="keyword">type</span> MyInt <span class="keyword">int</span>
+<span class="keyword">type</span> MyString <span class="keyword">string</span>
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> a <span class="keyword">int</span> = <span class="number">42</span>
+    <span class="keyword">var</span> b MyInt = <span class="number">100</span>
+    <span class="keyword">var</span> c <span class="keyword">string</span> = <span class="string">"hello"</span>
+    <span class="keyword">var</span> d MyString = <span class="string">"world"</span>
+    
+    <span class="comment">// Kind: 底层类别</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"int Kind: %v\n"</span>, reflect.<span class="function">TypeOf</span>(a).<span class="function">Kind</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"MyInt Kind: %v\n"</span>, reflect.<span class="function">TypeOf</span>(b).<span class="function">Kind</span>())
+    
+    <span class="comment">// Type: 具体类型</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"int Type: %v\n"</span>, reflect.<span class="function">TypeOf</span>(a))
+    fmt.<span class="function">Printf</span>(<span class="string">"MyInt Type: %v\n"</span>, reflect.<span class="function">TypeOf</span>(b))
+    
+    <span class="comment">// Name: 类型名称</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"int Name: %v\n"</span>, reflect.<span class="function">TypeOf</span>(a).<span class="function">Name</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"MyInt Name: %v\n"</span>, reflect.<span class="function">TypeOf</span>(b).<span class="function">Name</span>())
+    
+    <span class="comment">// Kind 相同但 Type 不同</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"Same Kind: %v\n"</span>, 
+        reflect.<span class="function">TypeOf</span>(a).<span class="function">Kind</span>() == reflect.<span class="function">TypeOf</span>(b).<span class="function">Kind</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"Same Type: %v\n"</span>, 
+        reflect.<span class="function">TypeOf</span>(a) == reflect.<span class="function">TypeOf</span>(b))
+}</code></pre>
+            </div>
+
+            <!-- 实用模式 -->
+            <h2 id="patterns">实用模式</h2>
+
+            <h3>1. 通用类型检查</h3>
+            <div class="example-box">
+                <h3>📝 类型检查函数</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">checkType</span>(v <span class="keyword">interface</span>{}) <span class="keyword">string</span> {
+    t := reflect.<span class="function">TypeOf</span>(v)
+    
+    <span class="keyword">switch</span> t.<span class="function">Kind</span>() {
+    <span class="keyword">case</span> reflect.Int, reflect.Int8, reflect.Int64:
+        <span class="keyword">return</span> <span class="string">"integer"</span>
+    <span class="keyword">case</span> reflect.Float32, reflect.Float64:
+        <span class="keyword">return</span> <span class="string">"float"</span>
+    <span class="keyword">case</span> reflect.String:
+        <span class="keyword">return</span> <span class="string">"string"</span>
+    <span class="keyword">case</span> reflect.Bool:
+        <span class="keyword">return</span> <span class="string">"boolean"</span>
+    <span class="keyword">case</span> reflect.Slice:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"slice of %s"</span>, t.<span class="function">Elem</span>().<span class="function">Kind</span>())
+    <span class="keyword">case</span> reflect.Map:
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"map[%s]%s"</span>, 
+            t.<span class="function">Key</span>().<span class="function">Kind</span>(), t.<span class="function">Elem</span>().<span class="function">Kind</span>())
+    <span class="keyword">default</span>:
+        <span class="keyword">return</span> t.<span class="function">Kind</span>().<span class="function">String</span>()
+    }
+}</code></pre>
+            </div>
+
+            <h3>2. 动态调用</h3>
+            <div class="example-box">
+                <h3>📝 反射调用函数</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">add</span>(a, b <span class="keyword">int</span>) <span class="keyword">int</span> {
+    <span class="keyword">return</span> a + b
+}
+
+<span class="keyword">func</span> <span class="function">callFunction</span>() {
+    <span class="comment">// 获取函数 Value</span>
+    fn := reflect.<span class="function">ValueOf</span>(add)
+    
+    <span class="comment">// 准备参数</span>
+    args := []reflect.Value{
+        reflect.<span class="function">ValueOf</span>(<span class="number">10</span>),
+        reflect.<span class="function">ValueOf</span>(<span class="number">20</span>),
+    }
+    
+    <span class="comment">// 调用函数</span>
+    results := fn.<span class="function">Call</span>(args)
+    
+    <span class="comment">// 获取返回值</span>
+    result := results[<span class="number">0</span>].<span class="function">Int</span>()
+    fmt.<span class="function">Println</span>(result) <span class="comment">// 30</span>
+}</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ Type 和 Value 使用建议</h3>
+                <ul>
+                    <li><strong>Kind 检查</strong>: 先检查 Kind 再操作 Value</li>
+                    <li><strong>CanSet</strong>: 修改前检查 CanSet</li>
+                    <li><strong>缓存 Type</strong>: 避免重复获取 Type 信息</li>
+                    <li><strong>优先泛型</strong>: Go 1.18+ 优先使用泛型</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="reflection.html">反射概览</a></li>
+                    <li><a href="reflection-struct.html">结构体反射</a></li>
+                    <li><a href="reflection-modify.html">修改值</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

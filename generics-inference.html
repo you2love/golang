@@ -4,41 +4,300 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>类型推断 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>类型推断 - Go 泛型推断详解</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="generics.html" class="back-link">← 返回 generics</a>
-            <h2 id="inference">类型推断</h2>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="generics-constraints.html" class="back-link">← 类型约束</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="reflection.html" class="back-link">反射 →</a>
+
+            <h1>类型推断 - 泛型推断详解</h1>
+            <p class="intro">类型推断允许编译器自动推导泛型类型参数，使代码更简洁。理解类型推断规则是编写优雅泛型代码的关键。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">🔍</div>
+                    <h4>参数推断</h4>
+                    <p>从实参推导</p>
+                    <code class="tag">自动推导</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📝</div>
+                    <h4>显式指定</h4>
+                    <p>手动指定类型</p>
+                    <code class="tag">[T int]</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⚠️</div>
+                    <h4>推断失败</h4>
+                    <p>需要显式指定</p>
+                    <code class="tag">编译错误</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🆕</div>
+                    <h4>Go 1.22+</h4>
+                    <p>推断能力增强</p>
+                    <code class="tag">新特性</code>
+                </div>
+            </div>
+
+            <!-- 基础推断 -->
+            <h2 id="basic-inference">基础类型推断</h2>
+
+            <div class="example-box">
+                <h3>📝 从函数参数推断</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
-<span class="function">func</span> <span class="function">Print</span>[T <span class="keyword">any</span>](value T) {
-    fmt.<span class="function">Println</span>(value)
+<span class="comment">// 简单推断：从参数类型推导</span>
+<span class="keyword">func</span> <span class="function">Identity</span>[T <span class="keyword">any</span>](v T) T {
+    <span class="keyword">return</span> v
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 类型推断：编译器自动推断类型</span>
-    <span class="function">Print</span>(<span class="number">42</span>)      <span class="comment">// T 推断为 int</span>
-    <span class="function">Print</span>(<span class="string">"hello"</span>)  <span class="comment">// T 推断为 string</span>
-    <span class="function">Print</span>(<span class="number">3.14</span>)     <span class="comment">// T 推断为 float64</span>
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// ✅ 类型推断：T 推断为 int</span>
+    a := <span class="function">Identity</span>(<span class="number">42</span>)
+    
+    <span class="comment">// ✅ 类型推断：T 推断为 string</span>
+    b := <span class="function">Identity</span>(<span class="string">"hello"</span>)
+    
+    <span class="comment">// ✅ 显式指定类型</span>
+    c := <span class="function">Identity</span>[<span class="keyword">int</span>](<span class="number">100</span>)
+    
+    fmt.<span class="function">Println</span>(a, b, c)
+}
 
-    <span class="comment">// 显式指定类型</span>
-    <span class="function">Print</span>[<span class="keyword">int</span>](<span class="number">100</span>)
+<span class="comment">// 多参数推断</span>
+<span class="keyword">func</span> <span class="function">Pair</span>[T1, T2 <span class="keyword">any</span>](a T1, b T2) (T1, T2) {
+    <span class="keyword">return</span> a, b
+}
+
+<span class="keyword">func</span> <span class="function">testPair</span>() {
+    <span class="comment">// ✅ T1=int, T2=string</span>
+    x, y := <span class="function">Pair</span>(<span class="number">1</span>, <span class="string">"one"</span>)
+    
+    <span class="comment">// ✅ 部分推断 + 显式指定</span>
+    <span class="comment">// z, w := Pair[string, int]("two", 2)</span>
 }</code></pre>
+            </div>
 
-            
+            <!-- 推断规则 -->
+            <h2 id="inference-rules">类型推断规则</h2>
+
+            <div class="example-box">
+                <h3>📖 推断成功与失败</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// ✅ 推断成功：从参数推导</span>
+<span class="keyword">func</span> <span class="function">Wrap</span>[T <span class="keyword">any</span>](v T) []T {
+    <span class="keyword">return</span> []T{v}
+}
+
+<span class="comment">// ❌ 推断失败：没有参数可供推断</span>
+<span class="keyword">func</span> <span class="function">MakeSlice</span>[T <span class="keyword">any</span>](n <span class="keyword">int</span>) []T {
+    <span class="keyword">return</span> <span class="function">make</span>([]T, n)
+}
+
+<span class="comment">// ✅ Go 1.22+: 从返回类型推断</span>
+<span class="keyword">func</span> <span class="function">First</span>[T <span class="keyword">any</span>](slice []T) T {
+    <span class="keyword">return</span> slice[<span class="number">0</span>]
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// ✅ 从参数推断</span>
+    w := <span class="function">Wrap</span>(<span class="number">42</span>)
+    
+    <span class="comment">// ❌ 推断失败：必须显式指定</span>
+    <span class="comment">// s := MakeSlice(10)  // 编译错误!</span>
+    s := <span class="function">MakeSlice</span>[<span class="keyword">int</span>](<span class="number">10</span>) <span class="comment">// ✅ 显式指定</span>
+    
+    <span class="comment">// ✅ 从切片参数推断</span>
+    nums := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}
+    f := <span class="function">First</span>(nums)
+    
+    fmt.<span class="function">Println</span>(w, s, f)
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <h3>💡 推断规则总结</h3>
+                <ul>
+                    <li><strong>参数推断</strong>: 从函数实参类型推导类型参数</li>
+                    <li><strong>无参数失败</strong>: 没有类型参数相关的参数时推断失败</li>
+                    <li><strong>部分推断</strong>: 可以部分推断 + 部分显式指定</li>
+                    <li><strong>Go 1.22+</strong>: 增强了从返回类型推断的能力</li>
+                </ul>
+            </div>
+
+            <!-- 复杂推断 -->
+            <h2 id="complex-inference">复杂推断场景</h2>
+
+            <div class="example-box">
+                <h3>📝 多类型参数推断</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// Map: 从 slice 和 fn 推断 T 和 U</span>
+<span class="keyword">func</span> <span class="function">Map</span>[T, U <span class="keyword">any</span>](slice []T, fn <span class="keyword">func</span>(T) U) []U {
+    result := <span class="function">make</span>([]U, <span class="function">len</span>(slice))
+    <span class="keyword">for</span> i, v := <span class="keyword">range</span> slice {
+        result[i] = <span class="function">fn</span>(v)
+    }
+    <span class="keyword">return</span> result
+}
+
+<span class="comment">// Filter: 从 slice 推断 T</span>
+<span class="keyword">func</span> <span class="function">Filter</span>[T <span class="keyword">any</span>](slice []T, predicate <span class="keyword">func</span>(T) <span class="keyword">bool</span>) []T {
+    result := []T{}
+    <span class="keyword">for</span> _, v := <span class="keyword">range</span> slice {
+        <span class="keyword">if</span> <span class="function">predicate</span>(v) {
+            result = <span class="function">append</span>(result, v)
+        }
+    }
+    <span class="keyword">return</span> result
+}
+
+<span class="comment">// Reduce: 从 slice 和 initial 推断 T 和 R</span>
+<span class="keyword">func</span> <span class="function">Reduce</span>[T, R <span class="keyword">any</span>](slice []T, initial R, fn <span class="keyword">func</span>(R, T) R) R {
+    result := initial
+    <span class="keyword">for</span> _, v := <span class="keyword">range</span> slice {
+        result = <span class="function">fn</span>(result, v)
+    }
+    <span class="keyword">return</span> result
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    nums := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>}
+    
+    <span class="comment">// ✅ T=int, U=string 自动推断</span>
+    strs := <span class="function">Map</span>(nums, <span class="keyword">func</span>(n <span class="keyword">int</span>) <span class="keyword">string</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"num-%d"</span>, n)
+    })
+    
+    <span class="comment">// ✅ T=int 自动推断</span>
+    evens := <span class="function">Filter</span>(nums, <span class="keyword">func</span>(n <span class="keyword">int</span>) <span class="keyword">bool</span> {
+        <span class="keyword">return</span> n%<span class="number">2</span> == <span class="number">0</span>
+    })
+    
+    <span class="comment">// ✅ T=int, R=int 自动推断</span>
+    sum := <span class="function">Reduce</span>(nums, <span class="number">0</span>, <span class="keyword">func</span>(acc, n <span class="keyword">int</span>) <span class="keyword">int</span> {
+        <span class="keyword">return</span> acc + n
+    })
+    
+    fmt.<span class="function">Println</span>(strs, evens, sum)
+}</code></pre>
+            </div>
+
+            <!-- 推断技巧 -->
+            <h2 id="inference-tips">推断技巧</h2>
+            <div class="example-box">
+                <h3>📝 帮助类型推断</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// 技巧 1: 添加辅助参数帮助推断</span>
+<span class="keyword">func</span> <span class="function">NewMap</span>[K, V <span class="keyword">any</span>](key K, value V) <span class="keyword">map</span>[K]V {
+    m := <span class="function">make</span>(<span class="keyword">map</span>[K]V)
+    m[key] = value
+    <span class="keyword">return</span> m
+}
+
+<span class="comment">// 技巧 2: 使用类型别名简化</span>
+<span class="keyword">type</span> StringFunc <span class="keyword">func</span>(<span class="keyword">string</span>) <span class="keyword">string</span>
+
+<span class="keyword">func</span> <span class="function">Process</span>(fn StringFunc, input <span class="keyword">string</span>) <span class="keyword">string</span> {
+    <span class="keyword">return</span> <span class="function">fn</span>(input)
+}
+
+<span class="comment">// 技巧 3: 提供非泛型版本</span>
+<span class="keyword">func</span> <span class="function">NewIntSlice</span>() []<span class="keyword">int</span> {
+    <span class="keyword">return</span> <span class="function">make</span>([]<span class="keyword">int</span>, <span class="number">0</span>)
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// ✅ 帮助推断</span>
+    m := <span class="function">NewMap</span>(<span class="string">"key"</span>, <span class="string">"value"</span>)
+    
+    <span class="comment">// ✅ 类型别名</span>
+    result := <span class="function">Process</span>(<span class="keyword">func</span>(s <span class="keyword">string</span>) <span class="keyword">string</span> {
+        <span class="keyword">return</span> s + <span class="string">"!"</span>
+    }, <span class="string">"hello"</span>)
+    
+    <span class="comment">// ✅ 非泛型版本</span>
+    ints := <span class="function">NewIntSlice</span>()
+    
+    fmt.<span class="function">Println</span>(m, result, ints)
+}</code></pre>
+            </div>
+
+            <!-- 常见陷阱 -->
+            <h2 id="pitfalls">常见陷阱</h2>
+
+            <div class="warning-box">
+                <h3>⚠️ 推断失败场景</h3>
+                <pre><code><span class="comment">// 陷阱 1: 没有参数可供推断</span>
+<span class="keyword">func</span> <span class="function">Empty</span>[T <span class="keyword">any</span>]() []T {
+    <span class="keyword">return</span> []T{}
+}
+<span class="comment">// Empty()  // ❌ 推断失败</span>
+<span class="comment">// Empty[int]()  // ✅ 必须显式指定</span>
+
+<span class="comment">// 陷阱 2: 参数类型不匹配</span>
+<span class="keyword">func</span> <span class="function">Compare</span>[T <span class="keyword">comparable</span>](a, b T) <span class="keyword">bool</span> {
+    <span class="keyword">return</span> a == b
+}
+<span class="comment">// Compare(1, "one")  // ❌ 类型不匹配</span>
+
+<span class="comment">// 陷阱 3: 约束太宽泛</span>
+<span class="keyword">func</span> <span class="function">Process</span>[T <span class="keyword">any</span>](v T) T {
+    <span class="comment">// 无法对 T 做任何操作</span>
+    <span class="keyword">return</span> v
+}
+
+<span class="comment">// 陷阱 4: 返回值依赖推断</span>
+<span class="keyword">func</span> <span class="function">Create</span>[T <span class="keyword">any</span>](n <span class="keyword">int</span>) []T {
+    <span class="keyword">return</span> <span class="function">make</span>([]T, n)
+}
+<span class="comment">// Create(5)  // ❌ 推断失败</span>
+<span class="comment">// Create[int](5)  // ✅ 显式指定</span></code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ 类型推断使用建议</h3>
+                <ul>
+                    <li><strong>优先推断</strong>: 让编译器推断类型，代码更简洁</li>
+                    <li><strong>设计参数</strong>: 设计函数时考虑推断友好性</li>
+                    <li><strong>显式指定</strong>: 推断失败时显式指定类型</li>
+                    <li><strong>清晰命名</strong>: 类型参数使用 T、K、V 等通用名称</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="generics.html">泛型概览</a></li>
+                    <li><a href="generics-functions.html">泛型函数</a></li>
+                    <li><a href="generics-constraints.html">类型约束</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

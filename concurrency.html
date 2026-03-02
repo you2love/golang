@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
+        <!-- 导航栏通过JavaScript动态加载 -->
     </aside>
         <div class="content">
             <a href="index.html" class="back-link">← 返回首页</a>
@@ -162,7 +162,7 @@
 <span class="function">func</span> <span class="function">main</span>() {
     <span class="comment">// Goroutine 调度过程：</span>
     <span class="comment">// 1. 创建 goroutine：go func() {}</span>
-    <span class="comment">// 2. 将 goroutine 放入本地运行队列（P 的 runq）</span>
+    <span class="comment">// 2.  goroutine 放入本地运行队列（P 的 runq）</span>
     <span class="comment">// 3. M 从 P 的 runq 中获取 goroutine 执行</span>
     <span class="comment">// 4. 如果 P 的 runq 为空，从全局队列或其他 P 窃取 goroutine</span>
     <span class="comment">// 5. Goroutine 执行完成或阻塞，M 继续执行下一个 goroutine</span>
@@ -239,7 +239,7 @@
     <span class="comment">// 1. 初始栈大小：2KB（Go 1.4+）</span>
     <span class="comment">// 2. 动态增长：栈空间不足时自动扩容</span>
     <span class="comment">// 3. 最大栈大小：1GB（可配置）</span>
-    <span class="comment">// 4. 栈拷贝：扩容时将旧栈内容拷贝到新栈</span>
+    <span class="comment">// 4. 栈拷贝：扩容时旧栈内容拷贝到新栈</span>
     
     <span class="keyword">go</span> <span class="function">recursive</span>(<span class="number">0</span>)
     
@@ -611,7 +611,7 @@
     <span class="keyword">for</span> _, v := <span class="keyword">range</span> s {
         sum += v
     }
-    c &lt;- sum <span class="comment">// 将和发送到 channel</span>
+    c &lt;- sum <span class="comment">// 和发送到 channel</span>
 }
 
 <span class="function">func</span> <span class="function">main</span>() {
@@ -680,7 +680,7 @@
 
 <span class="comment">// 步骤 3: 如果缓冲区有空间，放入缓冲区</span>
 <span class="keyword">if</span> c.qcount &lt; c.dataqsiz {
-    <span class="comment">// 将数据放入环形队列</span>
+    <span class="comment">// 数据放入环形队列</span>
     qp := <span class="function">chanbuf</span>(c, c.sendx)
     <span class="function">typedmemmove</span>(c.elemtype, qp, ep)
     c.sendx++
@@ -692,7 +692,7 @@
 }
 
 <span class="comment">// 步骤 4: 缓冲区已满，阻塞当前 goroutine</span>
-<span class="comment">// 将当前 goroutine 加入发送等待队列</span>
+<span class="comment">// 当前 goroutine 加入发送等待队列</span>
 <span class="comment">// gopark() - 让出 CPU，等待被唤醒</span></code></pre>
 
                 <p><strong>4. 接收操作流程：</strong></p>
@@ -724,7 +724,7 @@
 }
 
 <span class="comment">// 步骤 4: 缓冲区为空且未关闭，阻塞当前 goroutine</span>
-<span class="comment">// 将当前 goroutine 加入接收等待队列</span>
+<span class="comment">// 当前 goroutine 加入接收等待队列</span>
 <span class="comment">// gopark() - 让出 CPU，等待被唤醒</span></code></pre>
 
                 <p><strong>5. 关闭操作流程：</strong></p>

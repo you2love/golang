@@ -496,10 +496,44 @@
             <!-- 底层原理 -->
             <h2 id="internals">底层实现原理</h2>
 
-            <h3>cancelCtx 结构</h3>
+            <h3>Context 类型家族</h3>
+            <div class="example-box">
+                <h3>📖 四种核心实现</h3>
+                <pre><code><span class="comment">// 1. emptyCtx - 空 Context (Background/TODO)</span>
+<span class="keyword">type</span> emptyCtx <span class="keyword">int</span>
+
+<span class="keyword">func</span> (*emptyCtx) <span class="function">Deadline</span>() (deadline time.Time, ok <span class="keyword">bool</span>) { <span class="keyword">return</span> }
+<span class="keyword">func</span> (*emptyCtx) <span class="function">Done</span>() &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>{}                 { <span class="keyword">return</span> <span class="keyword">nil</span> }
+<span class="keyword">func</span> (*emptyCtx) <span class="function">Err</span>() <span class="keyword">error</span>                             { <span class="keyword">return</span> <span class="keyword">nil</span> }
+<span class="keyword">func</span> (*emptyCtx) <span class="function">Value</span>(key <span class="keyword">interface</span>{}) <span class="keyword">interface</span>{}      { <span class="keyword">return</span> <span class="keyword">nil</span> }
+
+<span class="comment">// 2. cancelCtx - 可取消 Context (WithCancel)</span>
+<span class="keyword">type</span> cancelCtx <span class="keyword">struct</span> {
+    Context
+    mu       sync.Mutex
+    done     <span class="keyword">atomic</span>.Value
+    children map[canceler]<span class="keyword">struct</span>{}
+    err      <span class="keyword">error</span>
+}
+
+<span class="comment">// 3. timerCtx - 超时 Context (WithTimeout/WithDeadline)</span>
+<span class="keyword">type</span> timerCtx <span class="keyword">struct</span> {
+    cancelCtx
+    timer *time.Timer <span class="comment">// 超时自动取消</span>
+    deadline time.Time
+}
+
+<span class="comment">// 4. valueCtx - 带值 Context (WithValue)</span>
+<span class="keyword">type</span> valueCtx <span class="keyword">struct</span> {
+    Context
+    key, val <span class="keyword">interface</span>{}
+}</code></pre>
+            </div>
+
+            <h3>cancelCtx 详细实现</h3>
             <div class="example-box">
                 <h3>📖 WithCancel 的实现</h3>
-                <pre><code><span class="comment">// context/context.go - cancelCtx 结构 (简化)</span>
+                <pre><code><span class="comment">// context/context.go - cancelCtx 结构</span>
 <span class="keyword">type</span> cancelCtx <span class="keyword">struct</span> {
     Context
     mu       sync.Mutex
@@ -508,22 +542,34 @@
     err      <span class="keyword">error</span>         <span class="comment">// 取消原因</span>
 }
 
+<span class="comment">// Done 返回 channel (懒加载)</span>
+<span class="keyword">func</span> (c *cancelCtx) <span class="function">Done</span>() &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>{} {
+    c.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    d := c.done.<span class="function">Load</span>().(<span class="keyword">chan</span> <span class="keyword">struct</span>{})
+    <span class="keyword">if</span> d == <span class="keyword">nil</span> {
+        d = <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>{})
+        c.done.<span class="function">Store</span>(d)
+    }
+    <span class="keyword">return</span> d
+}
+
 <span class="comment">// 取消操作</span>
 <span class="keyword">func</span> (c *cancelCtx) <span class="function">cancel</span>(err <span class="keyword">error</span>, deliver bool) {
     c.mu.<span class="function">Lock</span>()
     <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
-    
+
     <span class="keyword">if</span> c.err != <span class="keyword">nil</span> {
         <span class="keyword">return</span> <span class="comment">// 已经取消</span>
     }
-    
+
     c.err = err
     <span class="keyword">if</span> c.done.<span class="function">Load</span>() == <span class="keyword">nil</span> {
         c.done.<span class="function">Store</span>(closedchan) <span class="comment">// 使用预关闭的 channel</span>
     } <span class="keyword">else</span> {
         <span class="function">close</span>(c.done.<span class="function">Load</span>().(<span class="keyword">chan</span> <span class="keyword">struct</span>{}))
     }
-    
+
     <span class="comment">// 递归取消所有子 Context</span>
     <span class="keyword">for</span> child := <span class="keyword">range</span> c.children {
         child.<span class="function">cancel</span>(err, <span class="keyword">true</span>)
@@ -532,14 +578,104 @@
 }</code></pre>
             </div>
 
+            <h3>timerCtx 超时实现</h3>
+            <div class="example-box">
+                <h3>📖 WithTimeout 的实现</h3>
+                <pre><code><span class="keyword">type</span> timerCtx <span class="keyword">struct</span> {
+    cancelCtx
+    timer *time.Timer
+    deadline time.Time
+}
+
+<span class="keyword">func</span> <span class="function">WithTimeout</span>(parent Context, timeout time.Duration) (Context, CancelFunc) {
+    <span class="keyword">return</span> WithDeadline(parent, time.Now().Add(timeout))
+}
+
+<span class="keyword">func</span> <span class="function">WithDeadline</span>(parent Context, deadline time.Time) (Context, CancelFunc) {
+    <span class="comment">// 如果已经超时，直接返回</span>
+    <span class="keyword">if</span> cur := time.Now(); deadline.After(cur) {
+        c := &timerCtx{
+            cancelCtx: *<span class="function">newCancelCtx</span>(parent),
+            deadline:  deadline,
+        }
+        
+        <span class="comment">// 设置定时器</span>
+        c.timer = time.<span class="function">AfterFunc</span>(deadline.Sub(cur), <span class="keyword">func</span>() {
+            c.<span class="function">cancel</span>(DeadlineExceeded, <span class="keyword">true</span>)
+        })
+        
+        <span class="keyword">return</span> c, <span class="keyword">func</span>() { c.<span class="function">cancel</span>(Canceled, <span class="keyword">true</span>) }
+    }
+    
+    <span class="comment">// 已经超时，返回已取消的 context</span>
+    <span class="keyword">return</span> &cancelCtx{err: DeadlineExceeded, done: closedchan}, <span class="keyword">func</span>{}{}
+}
+
+<span class="comment">// 取消时停止定时器</span>
+<span class="keyword">func</span> (c *timerCtx) <span class="function">cancel</span>(err <span class="keyword">error</span>, deliver bool) {
+    c.cancelCtx.<span class="function">cancel</span>(err, deliver)
+    <span class="keyword">if</span> c.timer != <span class="keyword">nil</span> {
+        c.timer.<span class="function">Stop</span>()
+    }
+}</code></pre>
+            </div>
+
+            <h3>valueCtx 值传递实现</h3>
+            <div class="example-box">
+                <h3>📖 WithValue 的实现</h3>
+                <pre><code><span class="keyword">type</span> valueCtx <span class="keyword">struct</span> {
+    Context
+    key, val <span class="keyword">interface</span>{}
+}
+
+<span class="keyword">func</span> <span class="function">WithValue</span>(parent Context, key, val <span class="keyword">interface</span>{}) Context {
+    <span class="keyword">if</span> key == <span class="keyword">nil</span> {
+        <span class="function">panic</span>(<span class="string">"nil key"</span>)
+    }
+    <span class="keyword">return</span> &valueCtx{parent, key, val}
+}
+
+<span class="comment">// Value 方法沿树向上查找</span>
+<span class="keyword">func</span> (c *valueCtx) <span class="function">Value</span>(key <span class="keyword">interface</span>{}) <span class="keyword">interface</span>{} {
+    <span class="keyword">if</span> key == c.key {
+        <span class="keyword">return</span> c.val
+    }
+    <span class="keyword">return</span> c.Context.<span class="function">Value</span>(key) <span class="comment">// 向父节点查找</span>
+}</code></pre>
+            </div>
+
+            <h3>取消传播流程图</h3>
+            <div class="flowchart">
+                <div class="flowchart-row">
+                    <div class="flowchart-node warning">调用 cancel()</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">设置 err</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">关闭 done channel</div>
+                </div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node">遍历 children</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node danger">递归取消子 Context</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">所有子节点 Done() 返回</div>
+                </div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node success">监听 Done() 的 Goroutine 收到信号</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">清理资源并退出</div>
+                </div>
+            </div>
+
             <div class="info-box">
                 <h3>💡 Context 核心原理</h3>
                 <ul>
                     <li><strong>树形传播</strong>: 父 Context 取消时，递归取消所有子节点</li>
                     <li><strong>懒初始化</strong>: done channel 在第一次使用时才创建</li>
                     <li><strong>原子操作</strong>: 使用 atomic.Value 保证并发安全</li>
-                    <li><strong>共享关闭 channel</strong>: 已取消的 Context 共享同一个 closed channel</li>
+                    <li><strong>共享关闭 channel</strong>: 已取消的 Context 共享同一个 closedchan</li>
                     <li><strong>无锁读取</strong>: Done() 返回的 channel 只关闭不发送，读取无锁</li>
+                    <li><strong>Value 链式查找</strong>: 沿父节点链向上查找，O(n) 复杂度</li>
                 </ul>
             </div>
 

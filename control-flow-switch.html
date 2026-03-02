@@ -4,80 +4,261 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>switch 语句 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>switch 分支 - Go 流程控制</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="control-flow.html" class="back-link">← 返回 control-flow</a>
-            <h2 id="switch">switch 语句</h2>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="control-flow-for.html" class="back-link">← for 循环</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="control-flow-defer.html" class="back-link">defer 延迟 →</a>
+
+            <h1>switch 分支 - Go 流程控制</h1>
+            <p class="intro">switch 语句是多分支选择结构，Go 的 switch 灵活强大，支持类型 switch、fallthrough 等特性，是处理多条件分支的利器。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">🔀</div>
+                    <h4>多分支</h4>
+                    <p>case 匹配</p>
+                    <code class="tag">switch</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📝</div>
+                    <h4>初始化语句</h4>
+                    <p>switch 前初始化</p>
+                    <code class="tag">if x := f();</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⏬</div>
+                    <h4>fallthrough</h4>
+                    <p>穿透执行</p>
+                    <code class="tag">穿透 case</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔍</div>
+                    <h4>类型 switch</h4>
+                    <p>类型判断</p>
+                    <code class="tag">type switch</code>
+                </div>
+            </div>
+
+            <!-- 基础用法 -->
+            <h2 id="basic">基础用法</h2>
+
+            <div class="example-box">
+                <h3>📝 switch 基本形式</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 基本 switch</span>
+    day := time.<span class="function">Now</span>().<span class="function">Weekday</span>()
+    
+    <span class="keyword">switch</span> day {
+    <span class="keyword">case</span> time.Saturday, time.Sunday:
+        fmt.<span class="function">Println</span>(<span class="string">"Weekend!"</span>)
+    <span class="keyword">default</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"Workday"</span>)
+    }
+    
+    <span class="comment">// switch 返回布尔值</span>
+    num := <span class="number">5</span>
+    <span class="keyword">switch</span> {
+    <span class="keyword">case</span> num &lt; <span class="number">5</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"less than 5"</span>)
+    <span class="keyword">case</span> num == <span class="number">5</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"equals 5"</span>)
+    <span class="keyword">case</span> num &gt; <span class="number">5</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"greater than 5"</span>)
+    }
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <h3>💡 switch 要点</h3>
+                <ul>
+                    <li><strong>自动 break</strong>: Go 的 case 自动 break，不需要显式写</li>
+                    <li><strong>括号可选</strong>: 条件不需要括号</li>
+                    <li><strong>多条件</strong>: 一个 case 可以有多个值</li>
+                    <li><strong>无条件 switch</strong>: switch {} 类似 if-else 链</li>
+                </ul>
+            </div>
+
+            <!-- 初始化语句 -->
+            <h2 id="initialization">初始化语句</h2>
+            <div class="example-box">
+                <h3>📝 switch 前初始化</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 基本 switch</span>
-    day := <span class="number">3</span>
-    <span class="keyword">switch</span> day {
-    <span class="keyword">case</span> <span class="number">1</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"星期一"</span>)
-    <span class="keyword">case</span> <span class="number">2</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"星期二"</span>)
-    <span class="keyword">case</span> <span class="number">3</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"星期三"</span>)
-    <span class="keyword">case</span> <span class="number">4</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"星期四"</span>)
-    <span class="keyword">case</span> <span class="number">5</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"星期五"</span>)
-    <span class="keyword">default</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"周末"</span>)
-    }
-
-    <span class="comment">// 多个 case 共享处理</span>
-    grade := <span class="string">"B"</span>
-    <span class="keyword">switch</span> grade {
-    <span class="keyword">case</span> <span class="string">"A"</span>, <span class="string">"B"</span>, <span class="string">"C"</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"及格"</span>)
-    <span class="keyword">case</span> <span class="string">"D"</span>, <span class="string">"F"</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"不及格"</span>)
-    <span class="keyword">default</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"未知等级"</span>)
-    }
-
-    <span class="comment">// 无表达式的 switch（类似 if-else if）</span>
-    score := <span class="number">75</span>
-    <span class="keyword">switch</span> {
-    <span class="keyword">case</span> score >= <span class="number">90</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"优秀"</span>)
-    <span class="keyword">case</span> score >= <span class="number">70</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"良好"</span>)
-    <span class="keyword">case</span> score >= <span class="number">60</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"及格"</span>)
-    <span class="keyword">default</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"不及格"</span>)
-    }
-
+<span class="keyword">func</span> <span class="function">main</span>() {
     <span class="comment">// 带初始化语句的 switch</span>
-    <span class="keyword">switch</span> num := <span class="number">15</span>; {
-    <span class="keyword">case</span> num < <span class="number">0</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"负数"</span>)
-    <span class="keyword">case</span> num == <span class="number">0</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"零"</span>)
-    <span class="keyword">case</span> num > <span class="number">0</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"正数"</span>)
+    <span class="keyword">switch</span> x := <span class="function">getValue</span>(); x {
+    <span class="keyword">case</span> <span class="number">1</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"one"</span>)
+    <span class="keyword">case</span> <span class="number">2</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"two"</span>)
+    <span class="keyword">default</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"other"</span>)
+    }
+    <span class="comment">// x 在这里不可用</span>
+}
+
+<span class="keyword">func</span> <span class="function">getValue</span>() <span class="keyword">int</span> {
+    <span class="keyword">return</span> <span class="number">1</span>
+}</code></pre>
+            </div>
+
+            <!-- fallthrough -->
+            <h2 id="fallthrough">fallthrough 穿透</h2>
+            <div class="example-box">
+                <h3>📝 fallthrough 用法</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// fallthrough: 执行下一个 case</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">3</span>; i++ {
+        <span class="keyword">switch</span> i {
+        <span class="keyword">case</span> <span class="number">0</span>:
+            fmt.<span class="function">Println</span>(<span class="string">"zero"</span>)
+            <span class="keyword">fallthrough</span> <span class="comment">// 继续执行下一个 case</span>
+        <span class="keyword">case</span> <span class="number">1</span>:
+            fmt.<span class="function">Println</span>(<span class="string">"one"</span>)
+            <span class="keyword">fallthrough</span>
+        <span class="keyword">case</span> <span class="number">2</span>:
+            fmt.<span class="function">Println</span>(<span class="string">"two"</span>)
+        }
+        fmt.<span class="function">Println</span>(<span class="string">"---"</span>)
+    }
+    <span class="comment">// 输出:</span>
+    <span class="comment">// i=0: zero → one → two</span>
+    <span class="comment">// i=1: one → two</span>
+    <span class="comment">// i=2: two</span>
+    
+    <span class="comment">// ⚠️ fallthrough 必须是 case 的最后一个语句</span>
+}</code></pre>
+            </div>
+
+            <!-- 类型 switch -->
+            <h2 id="type-switch">类型 switch</h2>
+            <div class="example-box">
+                <h3>📝 类型判断</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> values = []<span class="keyword">interface</span>{}{<span class="number">42</span>, <span class="string">"hello"</span>, <span class="number">3.14</span>, <span class="keyword">true</span>}
+    
+    <span class="keyword">for</span> _, v := <span class="keyword">range</span> values {
+        <span class="keyword">switch</span> x := v.(<span class="keyword">type</span>) {
+        <span class="keyword">case</span> <span class="keyword">int</span>:
+            fmt.<span class="function">Printf</span>(<span class="string">"Integer: %d\n"</span>, x)
+        <span class="keyword">case</span> <span class="keyword">string</span>:
+            fmt.<span class="function">Printf</span>(<span class="string">"String: %s\n"</span>, x)
+        <span class="keyword">case</span> <span class="keyword">float64</span>:
+            fmt.<span class="function">Printf</span>(<span class="string">"Float: %f\n"</span>, x)
+        <span class="keyword">case</span> <span class="keyword">bool</span>:
+            fmt.<span class="function">Printf</span>(<span class="string">"Boolean: %v\n"</span>, x)
+        <span class="keyword">default</span>:
+            fmt.<span class="function">Printf</span>(<span class="string">"Unknown type: %T\n"</span>, x)
+        }
+    }
+}
+
+<span class="comment">// 类型 switch 要点:</span>
+<span class="comment">// 1. 使用 .(type) 语法</span>
+<span class="comment">// 2. case 后面是类型而不是值</span>
+<span class="comment">// 3. 变量 x 在每个 case 中有对应类型</span></code></pre>
+            </div>
+
+            <!-- 实用模式 -->
+            <h2 id="patterns">实用模式</h2>
+
+            <h3>1. 状态机</h3>
+            <div class="example-box">
+                <h3>📝 状态处理</h3>
+                <pre><code><span class="keyword">type</span> State <span class="keyword">int</span>
+
+<span class="keyword">const</span> (
+    StateIdle State = <span class="keyword">iota</span>
+    StateRunning
+    StatePaused
+    StateStopped
+)
+
+<span class="keyword">func</span> <span class="function">handleState</span>(state State) {
+    <span class="keyword">switch</span> state {
+    <span class="keyword">case</span> StateIdle:
+        fmt.<span class="function">Println</span>(<span class="string">"Starting..."</span>)
+    <span class="keyword">case</span> StateRunning:
+        fmt.<span class="function">Println</span>(<span class="string">"Processing..."</span>)
+    <span class="keyword">case</span> StatePaused:
+        fmt.<span class="function">Println</span>(<span class="string">"Paused"</span>)
+    <span class="keyword">case</span> StateStopped:
+        fmt.<span class="function">Println</span>(<span class="string">"Stopped"</span>)
+    <span class="keyword">default</span>:
+        fmt.<span class="function">Println</span>(<span class="string">"Unknown state"</span>)
     }
 }</code></pre>
+            </div>
 
-            
+            <h3>2. 命令分发</h3>
+            <div class="example-box">
+                <h3>📝 命令处理</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">handleCommand</span>(cmd <span class="keyword">string</span>, args []<span class="keyword">string</span>) {
+    <span class="keyword">switch</span> cmd {
+    <span class="keyword">case</span> <span class="string">"start"</span>, <span class="string">"run"</span>:
+        <span class="function">startService</span>(args)
+    <span class="keyword">case</span> <span class="string">"stop"</span>, <span class="string">"exit"</span>:
+        <span class="function">stopService</span>()
+    <span class="keyword">case</span> <span class="string">"restart"</span>:
+        <span class="function">restartService</span>()
+    <span class="keyword">case</span> <span class="string">"status"</span>:
+        <span class="function">showStatus</span>()
+    <span class="keyword">default</span>:
+        fmt.<span class="function">Printf</span>(<span class="string">"Unknown command: %s\n"</span>, cmd)
+    }
+}</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ switch 使用建议</h3>
+                <ul>
+                    <li><strong>多分支优先</strong>: 3 个以上分支用 switch</li>
+                    <li><strong>默认 case</strong>: 始终包含 default 处理未知情况</li>
+                    <li><strong>慎用 fallthrough</strong>: 除非确实需要穿透</li>
+                    <li><strong>类型 switch</strong>: 处理 interface{} 的好工具</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="control-flow-if.html">if 条件</a></li>
+                    <li><a href="control-flow-for.html">for 循环</a></li>
+                    <li><a href="control-flow-defer.html">defer 延迟</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

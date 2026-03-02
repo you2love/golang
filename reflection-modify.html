@@ -4,57 +4,330 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>修改值 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>修改值 - Go 反射修改详解</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="reflection.html" class="back-link">← 返回 reflection</a>
-            <h2 id="modify">修改值</h2>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="reflection-typevalue.html" class="back-link">← Type 和 Value</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="reflection-methods.html" class="back-link">方法反射 →</a>
+
+            <h1>修改值 - 反射修改详解</h1>
+            <p class="intro">通过反射修改值是反射的高级应用，需要理解可寻址性、指针解引用等概念。掌握这些技术是实现 ORM、配置绑定等框架的基础。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">✏️</div>
+                    <h4>可修改性</h4>
+                    <p>CanSet 检查</p>
+                    <code class="tag">CanSet()</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📍</div>
+                    <h4>可寻址性</h4>
+                    <p>CanAddr 检查</p>
+                    <code class="tag">CanAddr()</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔗</div>
+                    <h4>指针解引用</h4>
+                    <p>Elem() 方法</p>
+                    <code class="tag">Elem()</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⚠️</div>
+                    <h4>类型匹配</h4>
+                    <p>Set 类型检查</p>
+                    <code class="tag">Set()</code>
+                </div>
+            </div>
+
+            <!-- 可修改性检查 -->
+            <h2 id="can-set">可修改性检查</h2>
+
+            <div class="example-box">
+                <h3>📝 CanSet 和 CanAddr</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
     <span class="string">"reflect"</span>
 )
 
-<span class="function">func</span> <span class="function">modifyValue</span>(value <span class="keyword">interface</span>{}) {
-    v := reflect.<span class="function">ValueOf</span>(value)
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// ❌ 不可修改：非指针的值</span>
+    x := <span class="number">42</span>
+    v1 := reflect.<span class="function">ValueOf</span>(x)
+    fmt.<span class="function">Printf</span>(<span class="string">"Value CanSet: %v\n"</span>, v1.<span class="function">CanSet</span>()) <span class="comment">// false</span>
+    
+    <span class="comment">// ❌ 不可修改：指针本身</span>
+    v2 := reflect.<span class="function">ValueOf</span>(&x)
+    fmt.<span class="function">Printf</span>(<span class="string">"Pointer CanSet: %v\n"</span>, v2.<span class="function">CanSet</span>()) <span class="comment">// false</span>
+    
+    <span class="comment">// ✅ 可修改：指针解引用后</span>
+    v3 := reflect.<span class="function">ValueOf</span>(&x).<span class="function">Elem</span>()
+    fmt.<span class="function">Printf</span>(<span class="string">"Elem CanSet: %v\n"</span>, v3.<span class="function">CanSet</span>()) <span class="comment">// true</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"Elem CanAddr: %v\n"</span>, v3.<span class="function">CanAddr</span>()) <span class="comment">// true</span>
+    
+    <span class="comment">// 修改值</span>
+    v3.<span class="function">SetInt</span>(<span class="number">100</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"x = %d\n"</span>, x) <span class="comment">// x = 100</span>
+}</code></pre>
+            </div>
 
-    <span class="comment">// 检查是否可设置</span>
-    <span class="keyword">if</span> v.<span class="function">CanSet</span>() {
-        <span class="keyword">switch</span> v.<span class="function">Kind</span>() {
-        <span class="keyword">case</span> reflect.Int:
-            v.<span class="function">SetInt</span>(<span class="number">100</span>)
-        <span class="keyword">case</span> reflect.String:
-            v.<span class="function">SetString</span>(<span class="string">"Modified"</span>)
-        <span class="keyword">case</span> reflect.Bool:
-            v.<span class="function">SetBool</span>(<span class="keyword">true</span>)
-        }
-    }
+            <div class="warning-box">
+                <h3>⚠️ 修改规则</h3>
+                <ul>
+                    <li><strong>必须指针</strong>: 只有指针解引用后的值才能修改</li>
+                    <li><strong>导出字段</strong>: 结构体只有大写字段才能修改</li>
+                    <li><strong>类型匹配</strong>: Set 时类型必须匹配</li>
+                    <li><strong>先检查</strong>: 修改前检查 CanSet()</li>
+                </ul>
+            </div>
+
+            <!-- 修改基本类型 -->
+            <h2 id="basic-types">修改基本类型</h2>
+
+            <div class="example-box">
+                <h3>📝 修改各种基本类型</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"reflect"</span>
+)
+
+<span class="keyword">func</span> <span class="function">modifyBasicTypes</span>() {
+    <span class="comment">// 修改 int</span>
+    <span class="keyword">var</span> a <span class="keyword">int</span> = <span class="number">10</span>
+    reflect.<span class="function">ValueOf</span>(&a).<span class="function">Elem</span>().<span class="function">SetInt</span>(<span class="number">20</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"a = %d\n"</span>, a)
+    
+    <span class="comment">// 修改 float64</span>
+    <span class="keyword">var</span> b <span class="keyword">float64</span> = <span class="number">3.14</span>
+    reflect.<span class="function">ValueOf</span>(&b).<span class="function">Elem</span>().<span class="function">SetFloat</span>(<span class="number">2.71</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"b = %f\n"</span>, b)
+    
+    <span class="comment">// 修改 string</span>
+    <span class="keyword">var</span> c <span class="keyword">string</span> = <span class="string">"hello"</span>
+    reflect.<span class="function">ValueOf</span>(&c).<span class="function">Elem</span>().<span class="function">SetString</span>(<span class="string">"world"</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"c = %s\n"</span>, c)
+    
+    <span class="comment">// 修改 bool</span>
+    <span class="keyword">var</span> d <span class="keyword">bool</span> = <span class="keyword">true</span>
+    reflect.<span class="function">ValueOf</span>(&d).<span class="function">Elem</span>().<span class="function">SetBool</span>(<span class="keyword">false</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"d = %v\n"</span>, d)
+    
+    <span class="comment">// 通用 Set</span>
+    <span class="keyword">var</span> e <span class="keyword">int</span> = <span class="number">5</span>
+    v := reflect.<span class="function">ValueOf</span>(&e).<span class="function">Elem</span>()
+    v.<span class="function">Set</span>(reflect.<span class="function">ValueOf</span>(<span class="number">100</span>))
+    fmt.<span class="function">Printf</span>(<span class="string">"e = %d\n"</span>, e)
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 使用指针才能修改值</span>
-    x := <span class="number">42</span>
-    <span class="function">modifyValue</span>(&x)
-    fmt.<span class="function">Println</span>(<span class="string">"修改后:"</span>, x)
-
-    s := <span class="string">"Hello"</span>
-    <span class="function">modifyValue</span>(&s)
-    fmt.<span class="function">Println</span>(<span class="string">"修改后:"</span>, s)
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="function">modifyBasicTypes</span>()
 }</code></pre>
+            </div>
 
-            
+            <!-- 修改结构体 -->
+            <h2 id="struct">修改结构体字段</h2>
+            <div class="example-box">
+                <h3>📝 修改结构体字段</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"reflect"</span>
+)
+
+<span class="keyword">type</span> Person <span class="keyword">struct</span> {
+    Name <span class="keyword">string</span>
+    Age  <span class="keyword">int</span>
+    city <span class="keyword">string</span> <span class="comment">// 小写，未导出</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    p := Person{Name: <span class="string">"Alice"</span>, Age: <span class="number">30</span>, city: <span class="string">"Beijing"</span>}
+    
+    <span class="comment">// 获取 reflect.Value (必须指针)</span>
+    v := reflect.<span class="function">ValueOf</span>(&p).<span class="function">Elem</span>()
+    
+    <span class="comment">// 修改导出字段</span>
+    nameField := v.<span class="function">FieldByName</span>(<span class="string">"Name"</span>)
+    <span class="keyword">if</span> nameField.<span class="function">CanSet</span>() {
+        nameField.<span class="function">SetString</span>(<span class="string">"Bob"</span>)
+    }
+    
+    ageField := v.<span class="function">FieldByName</span>(<span class="string">"Age"</span>)
+    <span class="keyword">if</span> ageField.<span class="function">CanSet</span>() {
+        ageField.<span class="function">SetInt</span>(<span class="number">25</span>)
+    }
+    
+    <span class="comment">// ❌ 不能修改未导出字段</span>
+    cityField := v.<span class="function">FieldByName</span>(<span class="string">"city"</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"city CanSet: %v\n"</span>, cityField.<span class="function">CanSet</span>()) <span class="comment">// false</span>
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Person: %+v\n"</span>, p)
+    <span class="comment">// Person: {Name:Bob Age:25 city:Beijing}</span>
+}
+
+<span class="comment">// 通用字段设置函数</span>
+<span class="keyword">func</span> <span class="function">SetField</span>(obj <span class="keyword">interface</span>{}, fieldName <span class="keyword">string</span>, value <span class="keyword">interface</span>{}) <span class="keyword">error</span> {
+    v := reflect.<span class="function">ValueOf</span>(obj)
+    
+    <span class="keyword">if</span> v.<span class="function">Kind</span>() != reflect.Ptr {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"obj must be a pointer"</span>)
+    }
+    
+    v = v.<span class="function">Elem</span>()
+    field := v.<span class="function">FieldByName</span>(fieldName)
+    
+    <span class="keyword">if</span> !field.<span class="function">CanSet</span>() {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"field %s cannot be set or not found"</span>, fieldName)
+    }
+    
+    field.<span class="function">Set</span>(reflect.<span class="function">ValueOf</span>(value))
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+
+            <!-- 修改切片和 Map -->
+            <h2 id="slice-map">修改切片和 Map</h2>
+
+            <div class="example-box">
+                <h3>📝 修改切片和 Map 元素</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"reflect"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 修改切片元素</span>
+    slice := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}
+    v := reflect.<span class="function">ValueOf</span>(&slice).<span class="function">Elem</span>()
+    
+    <span class="comment">// 修改索引 0 的元素</span>
+    v.<span class="function">Index</span>(<span class="number">0</span>).<span class="function">SetInt</span>(<span class="number">100</span>)
+    fmt.<span class="function">Println</span>(slice) <span class="comment">// [100 2 3]</span>
+    
+    <span class="comment">// 追加元素 (需要重新赋值)</span>
+    newElem := reflect.<span class="function">Append</span>(v, reflect.<span class="function">ValueOf</span>(<span class="number">4</span>))
+    slice = newElem.<span class="function">Interface</span>().([]<span class="keyword">int</span>)
+    fmt.<span class="function">Println</span>(slice) <span class="comment">// [100 2 3 4]</span>
+    
+    <span class="comment">// 修改 Map 元素</span>
+    m := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>)
+    m[<span class="string">"a"</span>] = <span class="number">1</span>
+    
+    mv := reflect.<span class="function">ValueOf</span>(&m).<span class="function">Elem</span>()
+    mv.<span class="function">SetMapIndex</span>(reflect.<span class="function">ValueOf</span>(<span class="string">"b"</span>), reflect.<span class="function">ValueOf</span>(<span class="number">2</span>))
+    fmt.<span class="function">Println</span>(m) <span class="comment">// map[a:1 b:2]</span>
+    
+    <span class="comment">// 删除 Map 元素</span>
+    mv.<span class="function">SetMapIndex</span>(reflect.<span class="function">ValueOf</span>(<span class="string">"a"</span>), reflect.Value{})
+    fmt.<span class="function">Println</span>(m) <span class="comment">// map[b:2]</span>
+}</code></pre>
+            </div>
+
+            <!-- 实用模式 -->
+            <h2 id="patterns">实用模式</h2>
+
+            <h3>1. JSON 反序列化简化</h3>
+            <div class="example-box">
+                <h3>📝 通用字段填充</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">FillFromMap</span>(obj <span class="keyword">interface</span>{}, data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}) <span class="keyword">error</span> {
+    v := reflect.<span class="function">ValueOf</span>(obj)
+    <span class="keyword">if</span> v.<span class="function">Kind</span>() != reflect.Ptr {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"obj must be a pointer"</span>)
+    }
+    
+    v = v.<span class="function">Elem</span>()
+    t := v.<span class="function">Type</span>()
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; t.<span class="function">NumField</span>(); i++ {
+        field := t.<span class="function">Field</span>(i)
+        jsonTag := field.Tag.<span class="function">Get</span>(<span class="string">"json"</span>)
+        
+        <span class="keyword">if</span> jsonTag == <span class="string">"-"</span> {
+            <span class="keyword">continue</span>
+        }
+        
+        key := jsonTag
+        <span class="keyword">if</span> key == <span class="string">""</span> {
+            key = field.Name
+        }
+        
+        <span class="keyword">if</span> value, ok := data[key]; ok {
+            fieldVal := v.<span class="function">FieldByName</span>(field.Name)
+            <span class="keyword">if</span> fieldVal.<span class="function">CanSet</span>() {
+                fieldVal.<span class="function">Set</span>(reflect.<span class="function">ValueOf</span>(value))
+            }
+        }
+    }
+    
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+
+            <h3>2. 默认值填充</h3>
+            <div class="example-box">
+                <h3>📝 零值检查与填充</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">FillDefaults</span>(obj <span class="keyword">interface</span>{}, defaults <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}) {
+    v := reflect.<span class="function">ValueOf</span>(obj).<span class="function">Elem</span>()
+    t := v.<span class="function">Type</span>()
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; t.<span class="function">NumField</span>(); i++ {
+        field := t.<span class="function">Field</span>(i)
+        fieldVal := v.<span class="function">FieldByName</span>(field.Name)
+        
+        <span class="keyword">if</span> !fieldVal.<span class="function">CanSet</span>() {
+            <span class="keyword">continue</span>
+        }
+        
+        <span class="comment">// 检查是否为零值</span>
+        <span class="keyword">if</span> fieldVal.<span class="function">IsZero</span>() {
+            <span class="keyword">if</span> defaultValue, ok := defaults[field.Name]; ok {
+                fieldVal.<span class="function">Set</span>(reflect.<span class="function">ValueOf</span>(defaultValue))
+            }
+        }
+    }
+}</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ 修改值使用建议</h3>
+                <ul>
+                    <li><strong>指针传递</strong>: 必须传递指针才能修改</li>
+                    <li><strong>CanSet 检查</strong>: 修改前检查 CanSet()</li>
+                    <li><strong>导出字段</strong>: 只有导出字段才能修改</li>
+                    <li><strong>类型匹配</strong>: Set 时确保类型匹配</li>
+                    <li><strong>优先泛型</strong>: Go 1.18+ 优先使用泛型</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="reflection.html">反射概览</a></li>
+                    <li><a href="reflection-typevalue.html">Type 和 Value</a></li>
+                    <li><a href="reflection-struct.html">结构体反射</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

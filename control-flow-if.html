@@ -4,77 +4,256 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>if 语句 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>if 条件 - Go 流程控制</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="control-flow.html" class="back-link">← 返回 control-flow</a>
-            <h1>if 语句</h1>
-            <p class="intro">if 语句是 Go 语言中最基本的条件控制结构。</p>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="basics-operators.html" class="back-link">← 运算符</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="control-flow-for.html" class="back-link">for 循环 →</a>
 
+            <h1>if 条件 - Go 流程控制</h1>
+            <p class="intro">if 语句是 Go 最基本的条件控制语句。Go 的 if 语句简洁灵活，支持初始化语句，是错误处理的核心工具。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
             <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="icon">🔀</div>
+                <div class="feature-card highlight">
+                    <div class="icon">❓</div>
                     <h4>条件判断</h4>
-                    <p>if 后接条件表达式</p>
+                    <p>布尔表达式</p>
+                    <code class="tag">if condition</code>
                 </div>
                 <div class="feature-card">
-                    <div class="icon">📦</div>
-                    <h4>作用域</h4>
-                    <p>if 内部变量局部可用</p>
+                    <div class="icon">🔀</div>
+                    <h4>else 分支</h4>
+                    <p>条件不满足</p>
+                    <code class="tag">else</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📝</div>
+                    <h4>初始化语句</h4>
+                    <p>if 前初始化</p>
+                    <code class="tag">if x := f();</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">✅</div>
+                    <h4>错误处理</h4>
+                    <p>if err != nil</p>
+                    <code class="tag">错误检查</code>
                 </div>
             </div>
 
-            <h2 id="if">if 语句</h2>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 基础用法 -->
+            <h2 id="basic">基础用法</h2>
+
+            <div class="example-box">
+                <h3>📝 if 语句基本形式</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 基本 if 语句</span>
-    age := <span class="number">18</span>
-    <span class="keyword">if</span> age >= <span class="number">18</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"成年人"</span>)
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 基本 if</span>
+    x := <span class="number">10</span>
+    <span class="keyword">if</span> x &gt; <span class="number">5</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"x is greater than 5"</span>)
     }
-
-    <span class="comment">// if-else 语句</span>
-    <span class="keyword">if</span> age >= <span class="number">18</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"成年人"</span>)
+    
+    <span class="comment">// if-else</span>
+    <span class="keyword">if</span> x%<span class="number">2</span> == <span class="number">0</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"x is even"</span>)
     } <span class="keyword">else</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"未成年人"</span>)
+        fmt.<span class="function">Println</span>(<span class="string">"x is odd"</span>)
     }
-
-    <span class="comment">// if-else if-else 语句</span>
-    score := <span class="number">85</span>
-    <span class="keyword">if</span> score >= <span class="number">90</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"优秀"</span>)
-    } <span class="keyword">else if</span> score >= <span class="number">80</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"良好"</span>)
-    } <span class="keyword">else if</span> score >= <span class="number">60</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"及格"</span>)
+    
+    <span class="comment">// if-else if-else</span>
+    <span class="keyword">if</span> x &lt; <span class="number">5</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"x is small"</span>)
+    } <span class="keyword">else if</span> x &lt; <span class="number">15</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"x is medium"</span>)
     } <span class="keyword">else</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"不及格"</span>)
-    }
-
-    <span class="comment">// 带初始化语句的 if</span>
-    <span class="keyword">if</span> num := <span class="number">10</span>; num % <span class="number">2</span> == <span class="number">0</span> {
-        fmt.<span class="function">Println</span>(num, <span class="string">"是偶数"</span>)
-    } <span class="keyword">else</span> {
-        fmt.<span class="function">Println</span>(num, <span class="string">"是奇数"</span>)
+        fmt.<span class="function">Println</span>(<span class="string">"x is large"</span>)
     }
 }</code></pre>
+            </div>
 
-            
+            <div class="info-box">
+                <h3>💡 if 语句要点</h3>
+                <ul>
+                    <li><strong>括号可选</strong>: 条件不需要括号</li>
+                    <li><strong>花括号必需</strong>: 即使只有一行代码</li>
+                    <li><strong>布尔表达式</strong>: 条件必须是 bool 类型</li>
+                    <li><strong>作用域</strong>: 初始化语句的变量只在 if 块内有效</li>
+                </ul>
+            </div>
+
+            <!-- 初始化语句 -->
+            <h2 id="initialization">初始化语句</h2>
+            <div class="example-box">
+                <h3>📝 if 前初始化</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 带初始化语句的 if</span>
+    <span class="keyword">if</span> x := <span class="function">getValue</span>(); x &gt; <span class="number">5</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"x is greater than 5"</span>)
+    }
+    <span class="comment">// x 在这里不可用</span>
+    
+    <span class="comment">// 常见模式：函数调用 + 错误检查</span>
+    <span class="keyword">if</span> result, err := <span class="function">doSomething</span>(); err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+    } <span class="keyword">else</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Result:"</span>, result)
+    }
+    
+    <span class="comment">// 多个初始化</span>
+    <span class="keyword">if</span> a := <span class="number">1</span>; a &gt; <span class="number">0</span> {
+        <span class="keyword">if</span> b := <span class="number">2</span>; b &gt; <span class="number">0</span> {
+            fmt.<span class="function">Println</span>(a + b)
+        }
+    }
+}
+
+<span class="keyword">func</span> <span class="function">getValue</span>() <span class="keyword">int</span> {
+    <span class="keyword">return</span> <span class="number">10</span>
+}
+
+<span class="keyword">func</span> <span class="function">doSomething</span>() (<span class="keyword">int</span>, <span class="keyword">error</span>) {
+    <span class="keyword">return</span> <span class="number">42</span>, <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+
+            <!-- 错误处理 -->
+            <h2 id="error-handling">错误处理</h2>
+            <div class="example-box">
+                <h3>📝 if 错误检查模式</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 标准错误检查模式</span>
+    file, err := os.<span class="function">Open</span>(<span class="string">"file.txt"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Failed to open file:"</span>, err)
+        <span class="keyword">return</span>
+    }
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    <span class="comment">// 多个错误检查</span>
+    data, err := os.<span class="function">ReadFile</span>(<span class="string">"config.json"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">if</span> os.<span class="function">IsNotExist</span>(err) {
+            fmt.<span class="function">Println</span>(<span class="string">"File does not exist"</span>)
+        } <span class="keyword">else if</span> os.<span class="function">IsPermission</span>(err) {
+            fmt.<span class="function">Println</span>(<span class="string">"Permission denied"</span>)
+        } <span class="keyword">else</span> {
+            fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
+        }
+        <span class="keyword">return</span>
+    }
+    
+    fmt.<span class="function">Println</span>(<span class="function">string</span>(data))
+}
+
+<span class="comment">// 早期返回模式</span>
+<span class="keyword">func</span> <span class="function">processFile</span>(path <span class="keyword">string</span>) <span class="keyword">error</span> {
+    file, err := os.<span class="function">Open</span>(path)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err <span class="comment">// 早期返回</span>
+    }
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    <span class="comment">// 正常处理逻辑...</span>
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+
+            <!-- 实用模式 -->
+            <h2 id="patterns">实用模式</h2>
+
+            <h3>1. 守卫子句</h3>
+            <div class="example-box">
+                <h3>📝 提前返回模式</h3>
+                <pre><code><span class="comment">// ❌ 不推荐：嵌套过深</span>
+<span class="keyword">func</span> <span class="function">process</span>(data []<span class="keyword">int</span>) <span class="keyword">error</span> {
+    <span class="keyword">if</span> data != <span class="keyword">nil</span> {
+        <span class="keyword">if</span> <span class="function">len</span>(data) &gt; <span class="number">0</span> {
+            <span class="keyword">if</span> data[<span class="number">0</span>] &gt; <span class="number">0</span> {
+                <span class="comment">// 处理逻辑</span>
+            }
+        }
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="comment">// ✅ 推荐：守卫子句</span>
+<span class="keyword">func</span> <span class="function">process</span>(data []<span class="keyword">int</span>) <span class="keyword">error</span> {
+    <span class="keyword">if</span> data == <span class="keyword">nil</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"data is nil"</span>)
+    }
+    <span class="keyword">if</span> <span class="function">len</span>(data) == <span class="number">0</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"data is empty"</span>)
+    }
+    <span class="keyword">if</span> data[<span class="number">0</span>] &lt;= <span class="number">0</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"first element must be positive"</span>)
+    }
+    
+    <span class="comment">// 正常处理逻辑</span>
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+
+            <h3>2. 类型断言检查</h3>
+            <div class="example-box">
+                <h3>📝 类型检查</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">processValue</span>(v <span class="keyword">interface</span>{}) {
+    <span class="comment">// 类型断言检查</span>
+    <span class="keyword">if</span> num, ok := v.(<span class="keyword">int</span>); ok {
+        fmt.<span class="function">Println</span>(<span class="string">"Integer:"</span>, num)
+    } <span class="keyword">else if</span> str, ok := v.(<span class="keyword">string</span>); ok {
+        fmt.<span class="function">Println</span>(<span class="string">"String:"</span>, str)
+    } <span class="keyword">else</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Unknown type"</span>)
+    }
+}</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ if 语句使用建议</h3>
+                <ul>
+                    <li><strong>早期返回</strong>: 使用守卫子句减少嵌套</li>
+                    <li><strong>错误检查</strong>: 始终检查 error != nil</li>
+                    <li><strong>初始化语句</strong>: 利用 if 前初始化限制作用域</li>
+                    <li><strong>避免深层嵌套</strong>: 超过 3 层考虑重构</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="control-flow-for.html">for 循环</a></li>
+                    <li><a href="control-flow-switch.html">switch 分支</a></li>
+                    <li><a href="control-flow-defer.html">defer 延迟</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

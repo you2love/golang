@@ -4,1872 +4,268 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>结构体 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    <script src="scroll.js"></script>
-    </head>
+    <title>结构体 Struct - Go 复合类型</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
         <div class="content">
-            <a href="index.html" class="back-link">← 返回首页</a>
-            <h1>结构体</h1>
-            <p class="intro">结构体是 Go 语言中组合数据类型，用于封装不同类型的字段，类似于其他语言的类概念。</p>
+            <a href="control-flow-defer.html" class="back-link">← defer 延迟</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="structs-nested.html" class="back-link">嵌套与嵌入 →</a>
 
+            <h1>结构体 Struct - Go 复合类型</h1>
+            <p class="intro">结构体是 Go 中唯一的复合数据类型，用于将相关数据组合在一起。理解结构体是掌握 Go 面向对象编程的基础。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
             <div class="feature-grid">
-                <div class="feature-card">
+                <div class="feature-card highlight">
                     <div class="icon">🏗️</div>
-                    <h4>自定义类型</h4>
-                    <p>组合多个字段创建新类型</p>
+                    <h4>结构体</h4>
+                    <p>字段集合</p>
+                    <code class="tag">type T struct</code>
                 </div>
                 <div class="feature-card">
-                    <div class="icon">🎯</div>
-                    <h4>方法绑定</h4>
-                    <p>为结构体定义行为</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🔗</div>
-                    <h4>嵌入</h4>
-                    <p>结构体嵌入实现组合</p>
+                    <div class="icon">📝</div>
+                    <h4>字段</h4>
+                    <p>数据成员</p>
+                    <code class="tag">Field Type</code>
                 </div>
                 <div class="feature-card">
                     <div class="icon">🏷️</div>
-                    <h4>标签</h4>
-                    <p>元数据用于序列化</p>
+                    <h4>Tag</h4>
+                    <p>元数据</p>
+                    <code class="tag">`json:"name"`</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🆕</div>
+                    <h4>构造函数</h4>
+                    <p>New 函数</p>
+                    <code class="tag">NewT()</code>
                 </div>
             </div>
 
-            <h2 id="struct">定义结构体</h2>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 基础定义 -->
+            <h2 id="definition">结构体定义</h2>
+
+            <div class="example-box">
+                <h3>📝 定义和初始化</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
 <span class="comment">// 定义结构体</span>
 <span class="keyword">type</span> Person <span class="keyword">struct</span> {
-    Name    <span class="keyword">string</span>
-    Age     <span class="keyword">int</span>
-    Email   <span class="keyword">string</span>
+    Name <span class="keyword">string</span>
+    Age  <span class="keyword">int</span>
+    City <span class="keyword">string</span>
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 创建结构体实例</span>
-    <span class="comment">// 方式1：按字段顺序</span>
-    p1 := Person{<span class="string">"张三"</span>, <span class="number">25</span>, <span class="string">"zhangsan@example.com"</span>}
-
-    <span class="comment">// 方式2：按字段名（推荐）</span>
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 方式 1: 按字段顺序初始化</span>
+    p1 := Person{<span class="string">"Alice"</span>, <span class="number">30</span>, <span class="string">"Beijing"</span>}
+    
+    <span class="comment">// 方式 2: 按字段名初始化 (推荐)</span>
     p2 := Person{
-        Name:  <span class="string">"李四"</span>,
-        Age:   <span class="number">30</span>,
-        Email: <span class="string">"lisi@example.com"</span>,
-    }
-
-    <span class="comment">// 方式3：使用 new 关键字</span>
-    p3 := <span class="keyword">new</span>(Person)
-    p3.Name = <span class="string">"王五"</span>
-    p3.Age = <span class="number">28</span>
-    p3.Email = <span class="string">"wangwu@example.com"</span>
-
-    fmt.<span class="function">Println</span>(<span class="string">"p1:"</span>, p1)
-    fmt.<span class="function">Println</span>(<span class="string">"p2:"</span>, p2)
-    fmt.<span class="function">Println</span>(<span class="string">"p3:"</span>, p3)
-}</code></pre>
-
-            <h2 id="fields">访问结构体字段</h2>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="keyword">type</span> Person <span class="keyword">struct</span> {
-    Name  <span class="keyword">string</span>
-    Age   <span class="keyword">int</span>
-    Email <span class="keyword">string</span>
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    p := Person{Name: <span class="string">"张三"</span>, Age: <span class="number">25</span>}
-
-    <span class="comment">// 访问字段</span>
-    fmt.<span class="function">Println</span>(<span class="string">"姓名:"</span>, p.Name)
-    fmt.<span class="function">Println</span>(<span class="string">"年龄:"</span>, p.Age)
-
-    <span class="comment">// 修改字段</span>
-    p.Age = <span class="number">26</span>
-    fmt.<span class="function">Println</span>(<span class="string">"新年龄:"</span>, p.Age)
-
-    <span class="comment">// 使用指针</span>
-    ptr := &p
-    ptr.Name = <span class="string">"李四"</span>
-    fmt.<span class="function">Println</span>(<span class="string">"新姓名:"</span>, p.Name)
-}</code></pre>
-
-            <h2 id="nested">结构体嵌套</h2>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="comment">// 地址结构体</span>
-<span class="keyword">type</span> Address <span class="keyword">struct</span> {
-    City    <span class="keyword">string</span>
-    Street  <span class="keyword">string</span>
-    ZipCode <span class="keyword">string</span>
-}
-
-<span class="comment">// 用户结构体</span>
-<span class="keyword">type</span> User <span class="keyword">struct</span> {
-    Name    <span class="keyword">string</span>
-    Age     <span class="keyword">int</span>
-    Address <span class="comment">// 嵌套结构体</span>
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    user := User{
-        Name: <span class="string">"张三"</span>,
+        Name: <span class="string">"Bob"</span>,
         Age:  <span class="number">25</span>,
-        Address: Address{
-            City:    <span class="string">"北京"</span>,
-            Street:  <span class="string">"长安街"</span>,
-            ZipCode: <span class="string">"100000"</span>,
-        },
+        City: <span class="string">"Shanghai"</span>,
     }
-
-    fmt.<span class="function">Println</span>(<span class="string">"用户:"</span>, user.Name)
-    fmt.<span class="function">Println</span>(<span class="string">"城市:"</span>, user.Address.City)
-    fmt.<span class="function">Println</span>(<span class="string">"街道:"</span>, user.Address.Street)
+    
+    <span class="comment">// 方式 3: 零值初始化</span>
+    <span class="keyword">var</span> p3 Person
+    p3.Name = <span class="string">"Carol"</span>
+    p3.Age = <span class="number">28</span>
+    
+    <span class="comment">// 方式 4: 使用 new</span>
+    p4 := new(Person)
+    p4.Name = <span class="string">"David"</span>
+    
+    <span class="comment">// 访问字段</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"%s is %d years old\n"</span>, p1.Name, p1.Age)
+    
+    <span class="comment">// 指针访问 (自动解引用)</span>
+    pp := &p1
+    fmt.<span class="function">Printf</span>(<span class="string">"%s lives in %s\n"</span>, pp.Name, pp.City)
 }</code></pre>
+            </div>
 
-            <h2 id="anonymous">匿名嵌套（提升字段）</h2>
-            <pre><code><span class="keyword">package</span> main
+            <div class="info-box">
+                <h3>💡 结构体要点</h3>
+                <ul>
+                    <li><strong>值类型</strong>: 结构体是值类型，赋值会复制</li>
+                    <li><strong>字段导出</strong>: 大写开头的字段可被外部访问</li>
+                    <li><strong>零值</strong>: 未初始化的字段为零值</li>
+                    <li><strong>指针接收者</strong>: 方法修改字段需用指针</li>
+                </ul>
+            </div>
+
+            <!-- 构造函数 -->
+            <h2 id="constructor">构造函数</h2>
+            <div class="example-box">
+                <h3>📝 New 函数模式</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    Host <span class="keyword">string</span>
+    Port <span class="keyword">int</span>
+    Debug <span class="keyword">bool</span>
+}
+
+<span class="comment">// 构造函数</span>
+<span class="keyword">func</span> <span class="function">NewConfig</span>(host <span class="keyword">string</span>, port <span class="keyword">int</span>) *Config {
+    <span class="keyword">return</span> &Config{
+        Host:  host,
+        Port:  port,
+        Debug: <span class="keyword">false</span>, <span class="comment">// 默认值</span>
+    }
+}
+
+<span class="comment">// 带选项的构造函数</span>
+<span class="keyword">type</span> ConfigOption <span class="keyword">func</span>(*Config)
+
+<span class="keyword">func</span> <span class="function">WithDebug</span>(debug <span class="keyword">bool</span>) ConfigOption {
+    <span class="keyword">return</span> <span class="keyword">func</span>(c *Config) {
+        c.Debug = debug
+    }
+}
+
+<span class="keyword">func</span> <span class="function">NewConfigWithOptions</span>(host <span class="keyword">string</span>, port <span class="keyword">int</span>, opts ...ConfigOption) *Config {
+    cfg := &Config{
+        Host: host,
+        Port: port,
+    }
+    
+    <span class="keyword">for</span> _, opt := <span class="keyword">range</span> opts {
+        opt(cfg)
+    }
+    
+    <span class="keyword">return</span> cfg
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 简单构造</span>
+    cfg1 := <span class="function">NewConfig</span>(<span class="string">"localhost"</span>, <span class="number">8080</span>)
+    
+    <span class="comment">// 带选项构造</span>
+    cfg2 := <span class="function">NewConfigWithOptions</span>(<span class="string">"localhost"</span>, <span class="number">8080</span>,
+        <span class="function">WithDebug</span>(<span class="keyword">true</span>),
+    )
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"%+v\n"</span>, cfg2)
+}</code></pre>
+            </div>
+
+            <!-- 结构体方法 -->
+            <h2 id="methods">结构体方法</h2>
+            <div class="example-box">
+                <h3>📝 值接收者 vs 指针接收者</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">type</span> Counter <span class="keyword">struct</span> {
+    count <span class="keyword">int</span>
+}
+
+<span class="comment">// 值接收者：不能修改原值</span>
+<span class="keyword">func</span> (c Counter) <span class="function">Value</span>() <span class="keyword">int</span> {
+    <span class="keyword">return</span> c.count
+}
+
+<span class="comment">// 指针接收者：可以修改原值</span>
+<span class="keyword">func</span> (c *Counter) <span class="function">Inc</span>() {
+    c.count++
+}
+
+<span class="comment">// 指针接收者：也可以读取</span>
+<span class="keyword">func</span> (c *Counter) <span class="function">GetValue</span>() <span class="keyword">int</span> {
+    <span class="keyword">return</span> c.count
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    c := Counter{}
+    
+    c.<span class="function">Inc</span>()
+    c.<span class="function">Inc</span>()
+    
+    fmt.<span class="function">Println</span>(c.<span class="function">Value</span>())    <span class="comment">// 2</span>
+    fmt.<span class="function">Println</span>(c.<span class="function">GetValue</span>()) <span class="comment">// 2</span>
+    
+    <span class="comment">// 值和指针都可以调用方法</span>
+    (&c).<span class="function">Inc</span>()  <span class="comment">// 指针调用</span>
+    c.<span class="function">Inc</span>()    <span class="comment">// 自动取地址</span>
+}</code></pre>
+            </div>
+
+            <!-- 结构体比较 -->
+            <h2 id="comparison">结构体比较</h2>
+            <div class="example-box">
+                <h3>📝 相等性比较</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
 <span class="keyword">type</span> Point <span class="keyword">struct</span> {
-    X, Y <span class="keyword">int</span>
+    X <span class="keyword">int</span>
+    Y <span class="keyword">int</span>
 }
 
-<span class="keyword">type</span> Circle <span class="keyword">struct</span> {
-    Point   <span class="comment">// 匿名嵌套</span>
-    Radius <span class="keyword">int</span>
+<span class="keyword">func</span> <span class="function">main</span>() {
+    p1 := Point{<span class="number">1</span>, <span class="number">2</span>}
+    p2 := Point{<span class="number">1</span>, <span class="number">2</span>}
+    p3 := Point{<span class="number">2</span>, <span class="number">1</span>}
+    
+    <span class="comment">// 结构体可以直接比较 (所有字段都可比较)</span>
+    fmt.<span class="function">Println</span>(p1 == p2) <span class="comment">// true</span>
+    fmt.<span class="function">Println</span>(p1 == p3) <span class="comment">// false</span>
+    
+    <span class="comment">// 指针比较的是地址</span>
+    pp1 := &p1
+    pp2 := &p2
+    fmt.<span class="function">Println</span>(pp1 == pp2) <span class="comment">// false (不同地址)</span>
+    
+    <span class="comment">// 解引用后比较</span>
+    fmt.<span class="function">Println</span>(*pp1 == *pp2) <span class="comment">// true</span>
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    c := Circle{
-        Point:  Point{X: <span class="number">10</span>, Y: <span class="number">20</span>},
-        Radius: <span class="number">5</span>,
-    }
-
-    <span class="comment">// 可以直接访问提升的字段</span>
-    fmt.<span class="function">Println</span>(<span class="string">"X:"</span>, c.X)
-    fmt.<span class="function">Println</span>(<span class="string">"Y:"</span>, c.Y)
-    fmt.<span class="function">Println</span>(<span class="string">"半径:"</span>, c.Radius)
-
-    <span class="comment">// 也可以通过嵌套类型访问</span>
-    fmt.<span class="function">Println</span>(<span class="string">"Point.X:"</span>, c.Point.X)
+<span class="comment">// 不能比较的情况:</span>
+<span class="comment">// 如果结构体包含 slice、map、function 等不可比较类型</span>
+<span class="keyword">type</span> Bad <span class="keyword">struct</span> {
+    Data []<span class="keyword">int</span> <span class="comment">// 包含 slice，不能比较</span>
 }</code></pre>
+            </div>
 
-            <h2 id="methods">结构体方法</h2>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
 
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="keyword">type</span> Rectangle <span class="keyword">struct</span> {
-    Width  <span class="keyword">float64</span>
-    Height <span class="keyword">float64</span>
-}
-
-<span class="comment">// 值接收者方法</span>
-<span class="function">func</span> (r Rectangle) <span class="function">Area</span>() <span class="keyword">float64</span> {
-    <span class="keyword">return</span> r.Width * r.Height
-}
-
-<span class="comment">// 值接收者方法（不修改原结构体）</span>
-<span class="function">func</span> (r Rectangle) <span class="function">Perimeter</span>() <span class="keyword">float64</span> {
-    <span class="keyword">return</span> <span class="number">2</span> * (r.Width + r.Height)
-}
-
-<span class="comment">// 指针接收者方法（可以修改原结构体）</span>
-<span class="function">func</span> (r *Rectangle) <span class="function">Scale</span>(factor <span class="keyword">float64</span>) {
-    r.Width *= factor
-    r.Height *= factor
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    rect := Rectangle{Width: <span class="number">3</span>, Height: <span class="number">4</span>}
-
-    fmt.<span class="function">Printf</span>(<span class="string">"面积: %.2f\n"</span>, rect.<span class="function">Area</span>())
-    fmt.<span class="function">Printf</span>(<span class="string">"周长: %.2f\n"</span>, rect.<span class="function">Perimeter</span>())
-
-    rect.<span class="function">Scale</span>(<span class="number">2</span>)
-    fmt.<span class="function">Printf</span>(<span class="string">"缩放后面积: %.2f\n"</span>, rect.<span class="function">Area</span>())
-}</code></pre>
-
-            <h2 id="interface">接口</h2>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="comment">// 定义接口</span>
-<span class="keyword">type</span> Shape <span class="keyword">interface</span> {
-    <span class="function">Area</span>() <span class="keyword">float64</span>
-    <span class="function">Perimeter</span>() <span class="keyword">float64</span>
-}
-
-<span class="keyword">type</span> Rectangle <span class="keyword">struct</span> {
-    Width, Height <span class="keyword">float64</span>
-}
-
-<span class="function">func</span> (r Rectangle) <span class="function">Area</span>() <span class="keyword">float64</span> {
-    <span class="keyword">return</span> r.Width * r.Height
-}
-
-<span class="function">func</span> (r Rectangle) <span class="function">Perimeter</span>() <span class="keyword">float64</span> {
-    <span class="keyword">return</span> <span class="number">2</span> * (r.Width + r.Height)
-}
-
-<span class="keyword">type</span> Circle <span class="keyword">struct</span> {
-    Radius <span class="keyword">float64</span>
-}
-
-<span class="function">func</span> (c Circle) <span class="function">Area</span>() <span class="keyword">float64</span> {
-    <span class="keyword">return</span> <span class="number">3.14159</span> * c.Radius * c.Radius
-}
-
-<span class="function">func</span> (c Circle) <span class="function">Perimeter</span>() <span class="keyword">float64</span> {
-    <span class="keyword">return</span> <span class="number">2</span> * <span class="number">3.14159</span> * c.Radius
-}
-
-<span class="function">func</span> <span class="function">printShapeInfo</span>(s Shape) {
-    fmt.<span class="function">Printf</span>(<span class="string">"面积: %.2f, 周长: %.2f\n"</span>, s.<span class="function">Area</span>(), s.<span class="function">Perimeter</span>())
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    rect := Rectangle{Width: <span class="number">3</span>, Height: <span class="number">4</span>}
-    circle := Circle{Radius: <span class="number">5</span>}
-
-    <span class="function">printShapeInfo</span>(rect)
-    <span class="function">printShapeInfo</span>(circle)
-}</code></pre>
-
-            <h2 id="empty">空接口</h2>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="comment">// 空接口可以接受任何类型</span>
-<span class="function">func</span> <span class="function">printAnything</span>(value <span class="keyword">interface</span>{}) {
-    fmt.<span class="function">Println</span>(<span class="string">"值:"</span>, value)
-
-    <span class="comment">// 类型断言</span>
-    <span class="keyword">if</span> str, ok := value.<span class="keyword">(</span><span class="keyword">string</span><span class="keyword">)</span>; ok {
-        fmt.<span class="function">Println</span>(<span class="string">"是字符串，长度:"</span>, <span class="function">len</span>(str))
-    } <span class="keyword">else if</span> num, ok := value.<span class="keyword">(</span><span class="keyword">int</span><span class="keyword">)</span>; ok {
-        fmt.<span class="function">Println</span>(<span class="string">"是整数，值:"</span>, num)
-    }
-}
-
-<span class="comment">// 类型 switch</span>
-<span class="function">func</span> <span class="function">checkType</span>(value <span class="keyword">interface</span>{}) {
-    <span class="keyword">switch</span> v := value.<span class="keyword">(</span><span class="keyword">type</span><span class="keyword">)</span> {
-    <span class="keyword">case</span> <span class="keyword">string</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"字符串:"</span>, v)
-    <span class="keyword">case</span> <span class="keyword">int</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"整数:"</span>, v)
-    <span class="keyword">case</span> <span class="keyword">bool</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"布尔值:"</span>, v)
-    <span class="keyword">default</span>:
-        fmt.<span class="function">Println</span>(<span class="string">"未知类型"</span>)
-    }
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="function">printAnything</span>(<span class="string">"Hello"</span>)
-    <span class="function">printAnything</span>(<span class="number">42</span>)
-    <span class="function">printAnything</span>(<span class="number">3.14</span>)
-
-    <span class="function">checkType</span>(<span class="string">"Go"</span>)
-    <span class="function">checkType</span>(<span class="number">100</span>)
-    <span class="function">checkType</span>(<span class="keyword">true</span>)
-}</code></pre>
-
-            <div class="note-box">
-                <h3>Interface 的内部实现原理</h3>
-                <p><strong>1. Interface 的内部结构：</strong></p>
-                <p>Go 的接口在运行时使用 <code>eface</code>（空接口）和 <code>iface</code>（非空接口）两种结构：</p>
-                <pre><code><span class="comment">// 空接口 (interface{}) 的内部结构</span>
-<span class="keyword">type</span> eface <span class="keyword">struct</span> {
-    _type *_type   <span class="comment">// 指向类型信息的指针</span>
-    data  unsafe.Pointer  <span class="comment">// 指向数据的指针</span>
-}
-
-<span class="comment">// 非空接口的内部结构</span>
-<span class="keyword">type</span> iface <span class="keyword">struct</span> {
-    tab  *itab    <span class="comment">// 指向方法表的指针</span>
-    data unsafe.Pointer  <span class="comment">// 指向数据的指针</span>
-}
-
-<span class="comment">// 方法表结构</span>
-<span class="keyword">type</span> itab <span class="keyword">struct</span> {
-    inter *interfacetype  <span class="comment">// 接口类型信息</span>
-    _type *_type          <span class="comment">// 具体类型信息</span>
-    hash  <span class="keyword">uint32</span>           <span class="comment">// 类型哈希值</span>
-    _     [<span class="number">4</span>]<span class="keyword">byte</span>         <span class="comment">// 填充</span>
-    fun   [<span class="number">1</span>]<span class="keyword">uintptr</span>      <span class="comment">// 方法指针数组（可变长）</span>
-}</code></pre>
-
-                <p><strong>2. 类型信息结构：</strong></p>
-                <pre><code><span class="keyword">type</span> _type <span class="keyword">struct</span> {
-    size       <span class="keyword">uintptr</span>  <span class="comment">// 类型大小</span>
-    ptrdata    <span class="keyword">uintptr</span>  <span class="comment">// 包含指针的字节数</span>
-    hash       <span class="keyword">uint32</span>   <span class="comment">// 类型哈希值</span>
-    tflag      tflag     <span class="comment">// 类型标志</span>
-    align      <span class="keyword">uint8</span>    <span class="comment">// 对齐</span>
-    fieldalign <span class="keyword">uint8</span>    <span class="comment">// 字段对齐</span>
-    kind       <span class="keyword">uint8</span>    <span class="comment">// 类型种类</span>
-    alg        *typeAlg  <span class="comment">// 算法表（hash、equal）</span>
-    gcdata     *<span class="keyword">byte</span>    <span class="comment">// GC 数据</span>
-    str        nameOff   <span class="comment">// 类型名称</span>
-    ptrToThis  typeOff   <span class="comment">// 指向此类型的指针类型</span>
-}</code></pre>
-
-                <p><strong>3. 接口赋值过程：</strong></p>
-                <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="keyword">type</span> Shape <span class="keyword">interface</span> {
-    <span class="function">Area</span>() <span class="keyword">float64</span>
-}
-
-<span class="keyword">type</span> Rectangle <span class="keyword">struct</span> {
-    Width, Height <span class="keyword">float64</span>
-}
-
-<span class="function">func</span> (r Rectangle) <span class="function">Area</span>() <span class="keyword">float64</span> {
-    <span class="keyword">return</span> r.Width * r.Height
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    rect := Rectangle{Width: <span class="number">3</span>, Height: <span class="number">4</span>}
-    
-    <span class="comment">// 赋值给接口时的内部过程：</span>
-    <span class="comment">// 1. 创建 itab 结构</span>
-    <span class="comment">// 2. 填充接口类型信息 (inter = Shape)</span>
-    <span class="comment">// 3. 填充具体类型信息 (_type = Rectangle)</span>
-    <span class="comment">// 4. 填充方法指针 (fun[0] = Rectangle.Area)</span>
-    <span class="comment">// 5. 设置 data 指向 rect</span>
-    
-    <span class="keyword">var</span> s Shape = rect
-    
-    <span class="comment">// 调用方法时的内部过程：</span>
-    <span class="comment">// 1. 通过 s.tab.fun[0] 找到 Rectangle.Area</span>
-    <span class="comment">// 2. 将 s.data 作为接收者传递</span>
-    fmt.<span class="function">Println</span>(<span class="string">"面积:"</span>, s.<span class="function">Area</span>())
-}</code></pre>
-
-                <p><strong>4. 类型断言原理：</strong></p>
-                <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="keyword">type</span> Writer <span class="keyword">interface</span> {
-    <span class="function">Write</span>([]<span class="keyword">byte</span>) (<span class="keyword">int</span>, <span class="keyword">error</span>)
-}
-
-<span class="keyword">type</span> File <span class="keyword">struct</span> {
-    name <span class="keyword">string</span>
-}
-
-<span class="function">func</span> (f *File) <span class="function">Write</span>(data []<span class="keyword">byte</span>) (<span class="keyword">int</span>, <span class="keyword">error</span>) {
-    fmt.<span class="function">Println</span>(<span class="string">"写入文件:"</span>, f.name)
-    <span class="keyword">return</span> <span class="function">len</span>(data), <span class="keyword">nil</span>
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="keyword">var</span> w Writer = &File{<span class="string">"test.txt"</span>}
-    
-    <span class="comment">// 类型断言的内部过程：</span>
-    <span class="comment">// 1. 检查 w.tab._type 是否等于 *File</span>
-    <span class="comment">// 2. 如果相等，返回 w.data</span>
-    <span class="comment">// 3. 如果不相等，检查 *File 是否实现了 Writer</span>
-    
-    <span class="keyword">if</span> file, ok := w.(*File); ok {
-        fmt.<span class="function">Println</span>(<span class="string">"类型断言成功:"</span>, file.name)
-    }
-}</code></pre>
-
-                <p><strong>5. 接口比较：</strong></p>
-                <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 空接口比较</span>
-    <span class="keyword">var</span> a, b <span class="keyword">interface</span>{} = <span class="number">1</span>, <span class="number">1</span>
-    fmt.<span class="function">Println</span>(<span class="string">"a == b:"</span>, a == b)  <span class="comment">// true</span>
-
-    <span class="comment">// 非空接口比较</span>
-    <span class="keyword">type</span> I <span class="keyword">interface</span> {
-        <span class="function">M</span>()
-    }
-    <span class="keyword">type</span> T <span class="keyword">struct</span> { x <span class="keyword">int</span> }
-    <span class="function">func</span> (t T) <span class="function">M</span>() {}
-    
-    <span class="keyword">var</span> i1, i2 I = T{<span class="number">1</span>}, T{<span class="number">1</span>}
-    fmt.<span class="function">Println</span>(<span class="string">"i1 == i2:"</span>, i1 == i2)  <span class="comment">// true</span>
-    
-    <span class="comment">// 比较原理：</span>
-    <span class="comment">// 1. 比较 tab 指针（类型是否相同）</span>
-    <span class="comment">// 2. 比较 data 指向的值</span>
-}</code></pre>
-
-                <p><strong>6. 动态分派（Dynamic Dispatch）：</strong></p>
-                <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="keyword">type</span> Writer <span class="keyword">interface</span> {
-    <span class="function">Write</span>([]<span class="keyword">byte</span>) (<span class="keyword">int</span>, <span class="keyword">error</span>)
-}
-
-<span class="keyword">type</span> Buffer <span class="keyword">struct</span> {
-    data []<span class="keyword">byte</span>
-}
-
-<span class="function">func</span> (b *Buffer) <span class="function">Write</span>(p []<span class="keyword">byte</span>) (<span class="keyword">int</span>, <span class="keyword">error</span>) {
-    b.data = <span class="function">append</span>(b.data, p...)
-    <span class="keyword">return</span> <span class="function">len</span>(p), <span class="keyword">nil</span>
-}
-
-<span class="keyword">type</span> File <span class="keyword">struct</span> {
-    name <span class="keyword">string</span>
-}
-
-<span class="function">func</span> (f *File) <span class="function">Write</span>(p []<span class="keyword">byte</span>) (<span class="keyword">int</span>, <span class="keyword">error</span>) {
-    fmt.<span class="function">Printf</span>(<span class="string">"写入到文件 %s: %s\n"</span>, f.name, p)
-    <span class="keyword">return</span> <span class="function">len</span>(p), <span class="keyword">nil</span>
-}
-
-<span class="comment">// 动态分派：运行时决定调用哪个方法</span>
-<span class="function">func</span> <span class="function">writeData</span>(w Writer, data []<span class="keyword">byte</span>) {
-    w.<span class="function">Write</span>(data)
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="keyword">var</span> w Writer
-    
-    <span class="comment">// 动态选择实现</span>
-    w = &Buffer{}
-    w.<span class="function">Write</span>([]<span class="keyword">byte</span>(<span class="string">"hello"</span>))
-    
-    w = &File{<span class="string">"test.txt"</span>}
-    w.<span class="function">Write</span>([]<span class="keyword">byte</span>(<span class="string">"world"</span>))
-}</code></pre>
-
-                <p><strong>7. 接口转换（Interface Conversion）：</strong></p>
-                <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="keyword">type</span> Reader <span class="keyword">interface</span> {
-    <span class="function">Read</span>() <span class="keyword">string</span>
-}
-
-<span class="keyword">type</span> Writer <span class="keyword">interface</span> {
-    <span class="function">Write</span>(<span class="keyword">string</span>)
-}
-
-<span class="keyword">type</span> ReadWriter <span class="keyword">interface</span> {
-    Reader
-    Writer
-}
-
-<span class="keyword">type</span> MyStruct <span class="keyword">struct</span> {
-    data <span class="keyword">string</span>
-}
-
-<span class="function">func</span> (m *MyStruct) <span class="function">Read</span>() <span class="keyword">string</span> {
-    <span class="keyword">return</span> m.data
-}
-
-<span class="function">func</span> (m *MyStruct) <span class="function">Write</span>(s <span class="keyword">string</span>) {
-    m.data = s
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    m := &MyStruct{data: <span class="string">"hello"</span>}
-    
-    <span class="comment">// 接口转换：从具体类型到接口</span>
-    <span class="keyword">var</span> rw ReadWriter = m
-    
-    <span class="comment">// 接口转换：从大接口到小接口</span>
-    <span class="keyword">var</span> r Reader = rw
-    fmt.<span class="function">Println</span>(<span class="string">"读取:"</span>, r.<span class="function">Read</span>())
-    
-    <span class="comment">// 接口转换：从小接口到大接口（需要类型断言）</span>
-    <span class="keyword">if</span> rw2, ok := r.(ReadWriter); ok {
-        rw2.<span class="function">Write</span>(<span class="string">"world"</span>)
-    }
-}</code></pre>
-
-                <p><strong>8. nil 接口的特殊性：</strong></p>
-                <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="keyword">type</span> Error <span class="keyword">interface</span> {
-    <span class="function">Error</span>() <span class="keyword">string</span>
-}
-
-<span class="keyword">type</span> MyError <span class="keyword">struct</span> {
-    msg <span class="keyword">string</span>
-}
-
-<span class="function">func</span> (e *MyError) <span class="function">Error</span>() <span class="keyword">string</span> {
-    <span class="keyword">return</span> e.msg
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 1. 完全的 nil 接口</span>
-    <span class="keyword">var</span> err1 <span class="keyword">interface</span>{} = <span class="keyword">nil</span>
-    fmt.<span class="function">Println</span>(<span class="string">"err1 == nil:"</span>, err1 == <span class="keyword">nil</span>)  <span class="comment">// true</span>
-    
-    <span class="comment">// 2. 包含 nil 指针的接口（不是 nil）</span>
-    <span class="keyword">var</span> err2 Error = (*MyError)(<span class="keyword">nil</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"err2 == nil:"</span>, err2 == <span class="keyword">nil</span>)  <span class="comment">// false</span>
-    fmt.<span class="function">Println</span>(<span class="string">"err2 != nil 但 err2.(*MyError) == nil:"</span>, err2.(*MyError) == <span class="keyword">nil</span>)
-    
-    <span class="comment">// 3. nil 接口调用方法会 panic</span>
-    <span class="keyword">var</span> err3 <span class="keyword">interface</span>{} = <span class="keyword">nil</span>
-    <span class="comment">// err3.(Error).Error() // panic</span>
-    
-    <span class="comment">// 4. 安全检查</span>
-    <span class="keyword">if</span> e, ok := err2.(Error); ok {
-        fmt.<span class="function">Println</span>(<span class="string">"err2.Error():"</span>, e.<span class="function">Error</span>())
-    }
-}</code></pre>
-
-                <p><strong>9. 接口与指针（值接收者 vs 指针接收者）：</strong></p>
-                <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="keyword">type</span> Counter <span class="keyword">interface</span> {
-    <span class="function">Increment</span>()
-    <span class="function">Get</span>() <span class="keyword">int</span>
-}
-
-<span class="keyword">type</span> ValueCounter <span class="keyword">struct</span> {
-    value <span class="keyword">int</span>
-}
-
-<span class="comment">// 值接收者</span>
-<span class="function">func</span> (v ValueCounter) <span class="function">Increment</span>() {
-    v.value++  <span class="comment">// 不会修改原值</span>
-}
-
-<span class="function">func</span> (v ValueCounter) <span class="function">Get</span>() <span class="keyword">int</span> {
-    <span class="keyword">return</span> v.value
-}
-
-<span class="keyword">type</span> PointerCounter <span class="keyword">struct</span> {
-    value <span class="keyword">int</span>
-}
-
-<span class="comment">// 指针接收者</span>
-<span class="function">func</span> (p *PointerCounter) <span class="function">Increment</span>() {
-    p.value++  <span class="comment">// 会修改原值</span>
-}
-
-<span class="function">func</span> (p *PointerCounter) <span class="function">Get</span>() <span class="keyword">int</span> {
-    <span class="keyword">return</span> p.value
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 值接收者：值和指针都可以赋值给接口</span>
-    v1 := ValueCounter{value: <span class="number">0</span>}
-    <span class="keyword">var</span> c1 Counter = v1
-    c1.<span class="function">Increment</span>()
-    fmt.<span class="function">Println</span>(<span class="string">"v1.value:"</span>, v1.value)  <span class="comment">// 0（未修改）</span>
-    
-    v2 := &ValueCounter{value: <span class="number">0</span>}
-    <span class="keyword">var</span> c2 Counter = v2
-    c2.<span class="function">Increment</span>()
-    fmt.<span class="function">Println</span>(<span class="string">"v2.value:"</span>, v2.value)  <span class="comment">// 0（未修改）</span>
-    
-    <span class="comment">// 指针接收者：只有指针可以赋值给接口</span>
-    p := &PointerCounter{value: <span class="number">0</span>}
-    <span class="keyword">var</span> c3 Counter = p
-    c3.<span class="function">Increment</span>()
-    fmt.<span class="function">Println</span>(<span class="string">"p.value:"</span>, p.value)  <span class="comment">// 1（已修改）</span>
-    
-    <span class="comment">// var c4 Counter = PointerCounter{value: 0}  // 编译错误</span>
-}</code></pre>
-
-                <p><strong>10. 接口性能优化：</strong></p>
+            <div class="success-box">
+                <h3>✅ 结构体使用建议</h3>
                 <ul>
-                    <li><strong>避免频繁类型断言</strong>：缓存类型断言结果</li>
-                    <li><strong>使用小接口</strong>：接口方法越少，性能越好</li>
-                    <li><strong>避免接口嵌套</strong>：减少间接调用层级</li>
-                    <li><strong>减少接口转换</strong>：避免不必要的接口类型转换</li>
-                    <li><strong>使用具体类型</strong>：在性能关键路径上使用具体类型而非接口</li>
+                    <li><strong>字段命名</strong>: 使用有意义的名称</li>
+                    <li><strong>构造函数</strong>: 提供 New 函数简化初始化</li>
+                    <li><strong>指针接收者</strong>: 修改字段或大结构体用指针</li>
+                    <li><strong>字段导出</strong>: 只导出必要的字段</li>
+                    <li><strong>零值可用</strong>: 设计时考虑零值是否有意义</li>
                 </ul>
             </div>
 
-            <div class="example-box">
-
-                            <h3>Embed（嵌入）库使用</h3>
-
-                            <p><strong>1. 结构体嵌入（Struct Embedding）：</strong></p>
-
-                            <pre><code><span class="keyword">package</span> main
-
-            
-
-            <span class="keyword">import</span> <span class="string">"fmt"</span>
-
-            
-
-            <span class="comment">// 基础结构体</span>
-
-            <span class="keyword">type</span> Animal <span class="keyword">struct</span> {
-
-                Name <span class="keyword">string</span>
-
-                Age  <span class="keyword">int</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (a Animal) <span class="function">Speak</span>() {
-
-                fmt.<span class="function">Printf</span>(<span class="string">"%s 发出声音\n"</span>, a.Name)
-
-            }
-
-            
-
-            <span class="function">func</span> (a Animal) <span class="function">Eat</span>() {
-
-                fmt.<span class="function">Printf</span>(<span class="string">"%s 在吃东西\n"</span>, a.Name)
-
-            }
-
-            
-
-            <span class="comment">// 嵌入 Animal</span>
-
-            <span class="keyword">type</span> Dog <span class="keyword">struct</span> {
-
-                Animal  <span class="comment">// 嵌入结构体</span>
-
-                Breed   <span class="keyword">string</span>
-
-            }
-
-            
-
-            <span class="comment">// Dog 特有的方法</span>
-
-            <span class="function">func</span> (d Dog) <span class="function">Bark</span>() {
-
-                fmt.<span class="function">Printf</span>(<span class="string">"%s 汪汪叫！\n"</span>, d.Name)
-
-            }
-
-            
-
-            <span class="keyword">type</span> Cat <span class="keyword">struct</span> {
-
-                Animal  <span class="comment">// 嵌入结构体</span>
-
-                Color   <span class="keyword">string</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (c Cat) <span class="function">Meow</span>() {
-
-                fmt.<span class="function">Printf</span>(<span class="string">"%s 喵喵叫！\n"</span>, c.Name)
-
-            }
-
-            
-
-            <span class="function">func</span> <span class="function">main</span>() {
-
-                dog := Dog{
-
-                    Animal: Animal{Name: <span class="string">"旺财"</span>, Age: <span class="number">3</span>},
-
-                    Breed:  <span class="string">"金毛"</span>,
-
-                }
-
-                
-
-                <span class="comment">// 可以直接调用嵌入结构体的方法</span>
-
-                dog.<span class="function">Speak</span>()   <span class="comment">// 旺财 发出声音</span>
-
-                dog.<span class="function">Eat</span>()     <span class="comment">// 旺财 在吃东西</span>
-
-                dog.<span class="function">Bark</span>()    <span class="comment">// 旺财 汪汪叫！</span>
-
-                
-
-                <span class="comment">// 可以直接访问嵌入结构体的字段</span>
-
-                fmt.<span class="function">Printf</span>(<span class="string">"%s 今年 %d 岁\n"</span>, dog.Name, dog.Age)
-
-                
-
-                cat := Cat{
-
-                    Animal: Animal{Name: <span class="string">"咪咪"</span>, Age: <span class="number">2</span>},
-
-                    Color:  <span class="string">"白色"</span>,
-
-                }
-
-                
-
-                cat.<span class="function">Speak</span>()
-
-                cat.<span class="function">Meow</span>()
-
-            }</code></pre>
-
-            
-
-                            <p><strong>2. 接口嵌入（Interface Embedding）：</strong></p>
-
-            
-
-                                                        <pre><code><span class="keyword">package</span> main
-
-            
-
-                            
-
-            
-
-                            <span class="keyword">import</span> <span class="string">"fmt"</span>
-
-            
-
-                            
-
-            
-
-                            <span class="comment">// 基础接口</span>
-
-            
-
-                            <span class="keyword">type</span> Reader <span class="keyword">interface</span> {
-
-            
-
-                                <span class="function">Read</span>([]<span class="keyword">byte</span>) (<span class="keyword">int</span>, <span class="keyword">error</span>)
-
-            
-
-                            }
-
-            
-
-                            
-
-            
-
-                            <span class="keyword">type</span> Writer <span class="keyword">interface</span> {
-
-            
-
-                                <span class="function">Write</span>([]<span class="keyword">byte</span>) (<span class="keyword">int</span>, <span class="keyword">error</span>)
-
-            
-
-                            }
-
-            
-
-                            
-
-            
-
-                            <span class="comment">// 嵌入接口</span>
-
-            
-
-                            <span class="keyword">type</span> ReadWriter <span class="keyword">interface</span> {
-
-            
-
-                                Reader   <span class="comment">// 嵌入 Reader 接口</span>
-
-            
-
-                                Writer   <span class="comment">// 嵌入 Writer 接口</span>
-
-            
-
-                                <span class="function">Close</span>() <span class="keyword">error</span>  <span class="comment">// 额外的方法</span>
-
-            
-
-                            }
-
-            
-
-                            
-
-            
-
-                            <span class="keyword">type</span> File <span class="keyword">struct</span> {
-
-            
-
-                                name <span class="keyword">string</span>
-
-            
-
-                            }
-
-            
-
-                            
-
-            
-
-                            <span class="function">func</span> (f *File) <span class="function">Read</span>(p []<span class="keyword">byte</span>) (<span class="keyword">int</span>, <span class="keyword">error</span>) {
-
-            
-
-                                fmt.<span class="function">Println</span>(<span class="string">"读取文件:"</span>, f.name)
-
-            
-
-                                <span class="keyword">return</span> <span class="function">len</span>(p), <span class="keyword">nil</span>
-
-            
-
-                            }
-
-            
-
-                            
-
-            
-
-                            <span class="function">func</span> (f *File) <span class="function">Write</span>(p []<span class="keyword">byte</span>) (<span class="keyword">int</span>, <span class="keyword">error</span>) {
-
-            
-
-                                fmt.<span class="function">Println</span>(<span class="string">"写入文件:"</span>, f.name)
-
-            
-
-                                <span class="keyword">return</span> <span class="function">len</span>(p), <span class="keyword">nil</span>
-
-            
-
-                            }
-
-            
-
-                            
-
-            
-
-                            <span class="function">func</span> (f *File) <span class="function">Close</span>() <span class="keyword">error</span> {
-
-            
-
-                                fmt.<span class="function">Println</span>(<span class="string">"关闭文件:"</span>, f.name)
-
-            
-
-                                <span class="keyword">return</span> <span class="keyword">nil</span>
-
-            
-
-                            }
-
-            
-
-                            
-
-            
-
-                            <span class="function">func</span> <span class="function">main</span>() {
-
-            
-
-                                file := &File{<span class="string">"data.txt"</span>}
-
-            
-
-                                
-
-            
-
-                                <span class="comment">// File 实现了 ReadWriter 接口</span>
-
-            
-
-                                <span class="keyword">var</span> rw ReadWriter = file
-
-            
-
-                                
-
-            
-
-                                rw.<span class="function">Read</span>(<span class="keyword">nil</span>)
-
-            
-
-                                rw.<span class="function">Write</span>(<span class="keyword">nil</span>)
-
-                rw.<span class="function">Close</span>()
-
-            }</code></pre>
-
-            
-
-                            <p><strong>3. 多重嵌入：</strong></p>
-
-                            <pre><code><span class="keyword">package</span> main
-
-            
-
-            <span class="keyword">import</span> <span class="string">"fmt"</span>
-
-            
-
-            <span class="keyword">type</span> Base1 <span class="keyword">struct</span> {
-
-                Field1 <span class="keyword">string</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (b Base1) <span class="function">Method1</span>() {
-
-                fmt.<span class="function">Println</span>(<span class="string">"Base1.Method1"</span>)
-
-            }
-
-            
-
-            <span class="keyword">type</span> Base2 <span class="keyword">struct</span> {
-
-                Field2 <span class="keyword">int</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (b Base2) <span class="function">Method2</span>() {
-
-                fmt.<span class="function">Println</span>(<span class="string">"Base2.Method2"</span>)
-
-            }
-
-            
-
-            <span class="keyword">type</span> Derived <span class="keyword">struct</span> {
-
-                Base1  <span class="comment">// 嵌入 Base1</span>
-
-                Base2  <span class="comment">// 嵌入 Base2</span>
-
-                Field3 <span class="keyword">bool</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (d Derived) <span class="function">Method3</span>() {
-
-                fmt.<span class="function">Println</span>(<span class="string">"Derived.Method3"</span>)
-
-            }
-
-            
-
-            <span class="function">func</span> <span class="function">main</span>() {
-
-                d := Derived{
-
-                    Base1: Base1{Field1: <span class="string">"value1"</span>},
-
-                    Base2: Base2{Field2: <span class="number">42</span>},
-
-                    Field3: <span class="keyword">true</span>,
-
-                }
-
-                
-
-                d.<span class="function">Method1</span>()  <span class="comment">// 来自 Base1</span>
-
-                d.<span class="function">Method2</span>()  <span class="comment">// 来自 Base2</span>
-
-                d.<span class="function">Method3</span>()  <span class="comment">// 来自 Derived</span>
-
-                
-
-                fmt.<span class="function">Println</span>(d.Field1, d.Field2, d.Field3)
-
-            }</code></pre>
-
-            
-
-                            <p><strong>4. 嵌入与覆盖：</strong></p>
-
-                            <pre><code><span class="keyword">package</span> main
-
-            
-
-            <span class="keyword">import</span> <span class="string">"fmt"</span>
-
-            
-
-            <span class="keyword">type</span> Base <span class="keyword">struct</span> {
-
-                Name <span class="keyword">string</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (b Base) <span class="function">Greet</span>() {
-
-                fmt.<span class="function">Println</span>(<span class="string">"Hello from Base:"</span>, b.Name)
-
-            }
-
-            
-
-            <span class="keyword">type</span> Derived <span class="keyword">struct</span> {
-
-                Base
-
-                Name <span class="keyword">string</span>  <span class="comment">// 覆盖 Base.Name</span>
-
-            }
-
-            
-
-            <span class="comment">// 覆盖 Base.Greet</span>
-
-            <span class="function">func</span> (d Derived) <span class="function">Greet</span>() {
-
-                fmt.<span class="function">Println</span>(<span class="string">"Hello from Derived:"</span>, d.Name)
-
-                <span class="comment">// 调用被覆盖的方法</span>
-
-                d.Base.Greet()
-
-            }
-
-            
-
-            <span class="function">func</span> <span class="function">main</span>() {
-
-                d := Derived{
-
-                    Base: Base{Name: <span class="string">"BaseName"</span>},
-
-                    Name: <span class="string">"DerivedName"</span>,
-
-                }
-
-                
-
-                fmt.<span class="function">Println</span>(<span class="string">"d.Name:"</span>, d.Name)        <span class="comment">// DerivedName</span>
-
-                fmt.<span class="function">Println</span>(<span class="string">"d.Base.Name:"</span>, d.Base.Name)  <span class="comment">// BaseName</span>
-
-                
-
-                d.<span class="function">Greet</span>()  <span class="comment">// 调用 Derived.Greet</span>
-
-            }</code></pre>
-
-            
-
-                            <p><strong>5. 嵌入的注意事项：</strong></p>
-
-                            <ul>
-
-                                <li><strong>命名冲突</strong>：如果嵌入的多个结构体有相同的字段名，需要明确指定</li>
-
-                                <li><strong>方法覆盖</strong>：外层结构体的方法会覆盖嵌入结构体的同名方法</li>
-
-                                <li><strong>零值问题</strong>：嵌入的结构体字段会被初始化为零值</li>
-
-                                <li><strong>序列化</strong>：嵌入结构体的字段会被平铺到外层结构体</li>
-
-                            </ul>
-
-                            <pre><code><span class="keyword">package</span> main
-
-            
-
-            <span class="keyword">import</span> (
-
-                <span class="string">"encoding/json"</span>
-
-                <span class="string">"fmt"</span>
-
-            )
-
-            
-
-            <span class="keyword">type</span> Address <span class="keyword">struct</span> {
-
-                City    <span class="keyword">string</span> <span class="string">`json:"city"`</span>
-
-                Country <span class="keyword">string</span> <span class="string">`json:"country"`</span>
-
-            }
-
-            
-
-            <span class="keyword">type</span> Person <span class="keyword">struct</span> {
-
-                Name    <span class="keyword">string</span> <span class="string">`json:"name"`</span>
-
-                Address <span class="comment">// 嵌入 Address</span>
-
-            }
-
-            
-
-            <span class="function">func</span> <span class="function">main</span>() {
-
-                p := Person{
-
-                    Name: <span class="string">"张三"</span>,
-
-                    Address: Address{
-
-                        City:    <span class="string">"北京"</span>,
-
-                        Country: <span class="string">"中国"</span>,
-
-                    },
-
-                }
-
-                
-
-                <span class="comment">// JSON 序列化时，Address 的字段会被平铺</span>
-
-                data, _ := json.<span class="function">Marshal</span>(p)
-
-                fmt.<span class="function">Println</span>(<span class="function">string</span>(data))
-
-                <span class="comment">// 输出: {"name":"张三","city":"北京","country":"中国"}</span>
-
-            }</code></pre>
-
-            
-
-                            <p><strong>6. 嵌入与组合（Composition）：</strong></p>
-
-                            <pre><code><span class="keyword">package</span> main
-
-            
-
-            <span class="keyword">import</span> <span class="string">"fmt"</span>
-
-            
-
-            <span class="comment">// 基础组件</span>
-
-            <span class="keyword">type</span> Engine <span class="keyword">struct</span> {
-
-                Power <span class="keyword">int</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (e *Engine) <span class="function">Start</span>() {
-
-                fmt.<span class="function">Printf</span>(<span class="string">"引擎启动，功率: %d\n"</span>, e.Power)
-
-            }
-
-            
-
-            <span class="keyword">type</span> Wheels <span class="keyword">struct</span> {
-
-                Count <span class="keyword">int</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (w *Wheels) <span class="function">Rotate</span>() {
-
-                fmt.<span class="function">Printf</span>(<span class="string">"%d 个轮子转动\n"</span>, w.Count)
-
-            }
-
-            
-
-            <span class="comment">// 通过嵌入组合成汽车</span>
-
-            <span class="keyword">type</span> Car <span class="keyword">struct</span> {
-
-                Engine
-
-                Wheels
-
-                Brand <span class="keyword">string</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (c Car) <span class="function">Drive</span>() {
-
-                c.<span class="function">Start</span>()
-
-                c.<span class="function">Rotate</span>()
-
-                fmt.<span class="function">Printf</span>(<span class="string">"%s 汽车行驶中\n"</span>, c.Brand)
-
-            }
-
-            
-
-            <span class="function">func</span> <span class="function">main</span>() {
-
-                car := Car{
-
-                    Engine: Engine{Power: <span class="number">200</span>},
-
-                    Wheels: Wheels{Count: <span class="number">4</span>},
-
-                    Brand:  <span class="string">"特斯拉"</span>,
-
-                }
-
-                car.<span class="function">Drive</span>()
-
-            }</code></pre>
-
-            
-
-                            <p><strong>7. 嵌入与接口（Interface Embedding）：</strong></p>
-
-                            <pre><code><span class="keyword">package</span> main
-
-            
-
-            <span class="keyword">import</span> <span class="string">"fmt"</span>
-
-            
-
-            <span class="comment">// 基础接口</span>
-
-            <span class="keyword">type</span> Reader <span class="keyword">interface</span> {
-
-                <span class="function">Read</span>([]<span class="keyword">byte</span>) (<span class="keyword">int</span>, <span class="keyword">error</span>)
-
-            }
-
-            
-
-            <span class="keyword">type</span> Writer <span class="keyword">interface</span> {
-
-                <span class="function">Write</span>([]<span class="keyword">byte</span>) (<span class="keyword">int</span>, <span class="keyword">error</span>)
-
-            }
-
-            
-
-            <span class="keyword">type</span> Closer <span class="keyword">interface</span> {
-
-                <span class="function">Close</span>() <span class="keyword">error</span>
-
-            }
-
-            
-
-            <span class="comment">// 组合多个接口</span>
-
-            <span class="keyword">type</span> ReadWriteCloser <span class="keyword">interface</span> {
-
-                Reader
-
-                Writer
-
-                Closer
-
-            }
-
-            
-
-            <span class="comment">// 嵌入接口实现</span>
-
-            <span class="keyword">type</span> MyFile <span class="keyword">struct</span> {
-
-                name <span class="keyword">string</span>
-
-                data []<span class="keyword">byte</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (f *MyFile) <span class="function">Read</span>(p []<span class="keyword">byte</span>) (<span class="keyword">int</span>, <span class="keyword">error</span>) {
-
-                fmt.<span class="function">Println</span>(<span class="string">"读取文件:"</span>, f.name)
-
-                <span class="keyword">return</span> <span class="function">len</span>(p), <span class="keyword">nil</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (f *MyFile) <span class="function">Write</span>(p []<span class="keyword">byte</span>) (<span class="keyword">int</span>, <span class="keyword">error</span>) {
-
-                f.data = <span class="function">append</span>(f.data, p...)
-
-                fmt.<span class="function">Println</span>(<span class="string">"写入文件:"</span>, f.name)
-
-                <span class="keyword">return</span> <span class="function">len</span>(p), <span class="keyword">nil</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (f *MyFile) <span class="function">Close</span>() <span class="keyword">error</span> {
-
-                fmt.<span class="function">Println</span>(<span class="string">"关闭文件:"</span>, f.name)
-
-                <span class="keyword">return</span> <span class="keyword">nil</span>
-
-            }
-
-            
-
-            <span class="function">func</span> <span class="function">main</span>() {
-
-                file := &MyFile{name: <span class="string">"test.txt"</span>}
-
-                
-
-                <span class="comment">// MyFile 自动实现了 ReadWriteCloser 接口</span>
-
-                <span class="keyword">var</span> rwc ReadWriteCloser = file
-
-                
-
-                rwc.<span class="function">Write</span>([]<span class="keyword">byte</span>(<span class="string">"hello"</span>))
-
-                rwc.<span class="function">Read</span>(<span class="keyword">nil</span>)
-
-                rwc.<span class="function">Close</span>()
-
-            }</code></pre>
-
-            
-
-                            <p><strong>8. 嵌入与并发（Concurrency）：</strong></p>
-
-                            <pre><code><span class="keyword">package</span> main
-
-            
-
-            <span class="keyword">import</span> (
-
-                <span class="string">"fmt"</span>
-
-                <span class="string">"sync"</span>
-
-                <span class="string">"time"</span>
-
-            )
-
-            
-
-            <span class="comment">// 基础缓存结构</span>
-
-            <span class="keyword">type</span> Cache <span class="keyword">struct</span> {
-
-                data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (c *Cache) <span class="function">Get</span>(key <span class="keyword">string</span>) (<span class="keyword">string</span>, <span class="keyword">bool</span>) {
-
-                val, ok := c.data[key]
-
-                <span class="keyword">return</span> val, ok
-
-            }
-
-            
-
-            <span class="function">func</span> (c *Cache) <span class="function">Set</span>(key, value <span class="keyword">string</span>) {
-
-                c.data[key] = value
-
-            }
-
-            
-
-            <span class="comment">// 嵌入并添加并发安全</span>
-
-            <span class="keyword">type</span> SafeCache <span class="keyword">struct</span> {
-
-                Cache
-
-                mu sync.RWMutex
-
-            }
-
-            
-
-            <span class="function">func</span> (sc *SafeCache) <span class="function">Get</span>(key <span class="keyword">string</span>) (<span class="keyword">string</span>, <span class="keyword">bool</span>) {
-
-                sc.mu.RLock()
-
-                <span class="keyword">defer</span> sc.mu.RUnlock()
-
-                <span class="keyword">return</span> sc.Cache.<span class="function">Get</span>(key)
-
-            }
-
-            
-
-            <span class="function">func</span> (sc *SafeCache) <span class="function">Set</span>(key, value <span class="keyword">string</span>) {
-
-                sc.mu.Lock()
-
-                <span class="keyword">defer</span> sc.mu.Unlock()
-
-                sc.Cache.<span class="function">Set</span>(key, value)
-
-            }
-
-            
-
-            <span class="function">func</span> <span class="function">main</span>() {
-
-                cache := &SafeCache{
-
-                    Cache: Cache{data: <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>)},
-
-                }
-
-                
-
-                <span class="comment">// 并发测试</span>
-
-                <span class="keyword">var</span> wg sync.WaitGroup
-
-                
-
-                <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">10</span>; i++ {
-
-                    wg.<span class="function">Add</span>(<span class="number">1</span>)
-
-                    <span class="keyword">go</span> <span class="function">func</span>(n <span class="keyword">int</span>) {
-
-                        <span class="keyword">defer</span> wg.<span class="function">Done</span>()
-
-                        key := fmt.<span class="function">Sprintf</span>(<span class="string">"key%d"</span>, n)
-
-                        value := fmt.<span class="function">Sprintf</span>(<span class="string">"value%d"</span>, n)
-
-                        cache.<span class="function">Set</span>(key, value)
-
-                        fmt.<span class="function">Printf</span>(<span class="string">"设置: %s = %s\n"</span>, key, value)
-
-                    }(i)
-
-                }
-
-                
-
-                wg.<span class="function">Wait</span>()
-
-                
-
-                <span class="comment">// 读取数据</span>
-
-                <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">10</span>; i++ {
-
-                    key := fmt.<span class="function">Sprintf</span>(<span class="string">"key%d"</span>, i)
-
-                    <span class="keyword">if</span> val, ok := cache.<span class="function">Get</span>(key); ok {
-
-                        fmt.<span class="function">Printf</span>(<span class="string">"读取: %s = %s\n"</span>, key, val)
-
-                    }
-
-                }
-
-            }</code></pre>
-
-            
-
-                            <p><strong>9. 嵌入与测试（Testing）：</strong></p>
-
-                            <pre><code><span class="keyword">package</span> main
-
-            
-
-            <span class="keyword">import</span> <span class="string">"fmt"</span>
-
-            
-
-            <span class="comment">// 数据库接口</span>
-
-            <span class="keyword">type</span> Database <span class="keyword">interface</span> {
-
-                <span class="function">Query</span>(sql <span class="keyword">string</span>) ([]<span class="keyword">string</span>, <span class="keyword">error</span>)
-
-                <span class="function">Execute</span>(sql <span class="keyword">string</span>) <span class="keyword">error</span>
-
-            }
-
-            
-
-            <span class="comment">// 真实数据库实现</span>
-
-            <span class="keyword">type</span> RealDB <span class="keyword">struct</span> {
-
-                connectionString <span class="keyword">string</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (db *RealDB) <span class="function">Query</span>(sql <span class="keyword">string</span>) ([]<span class="keyword">string</span>, <span class="keyword">error</span>) {
-
-                fmt.<span class="function">Printf</span>(<span class="string">"执行查询: %s\n"</span>, sql)
-
-                <span class="keyword">return</span> []<span class="keyword">string</span>{<span class="string">"result1"</span>, <span class="string">"result2"</span>}, <span class="keyword">nil</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (db *RealDB) <span class="function">Execute</span>(sql <span class="keyword">string</span>) <span class="keyword">error</span> {
-
-                fmt.<span class="function">Printf</span>(<span class="string">"执行SQL: %s\n"</span>, sql)
-
-                <span class="keyword">return</span> <span class="keyword">nil</span>
-
-            }
-
-            
-
-            <span class="comment">// 测试用的模拟数据库</span>
-
-            <span class="keyword">type</span> MockDB <span class="keyword">struct</span> {
-
-                queries []<span class="keyword">string</span>
-
-                results [][]<span class="keyword">string</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (m *MockDB) <span class="function">Query</span>(sql <span class="keyword">string</span>) ([]<span class="keyword">string</span>, <span class="keyword">error</span>) {
-
-                m.queries = <span class="function">append</span>(m.queries, sql)
-
-                <span class="keyword">return</span> m.results[<span class="function">len</span>(m.results)-<span class="number">1</span>], <span class="keyword">nil</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (m *MockDB) <span class="function">Execute</span>(sql <span class="keyword">string</span>) <span class="keyword">error</span> {
-
-                m.queries = <span class="function">append</span>(m.queries, sql)
-
-                <span class="keyword">return</span> <span class="keyword">nil</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (m *MockDB) <span class="function">GetQueries</span>() []<span class="keyword">string</span> {
-
-                <span class="keyword">return</span> m.queries
-
-            }
-
-            
-
-            <span class="comment">// 使用嵌入的服务</span>
-
-            <span class="keyword">type</span> UserService <span class="keyword">struct</span> {
-
-                Database
-
-            }
-
-            
-
-            <span class="function">func</span> (s *UserService) <span class="function">GetUsers</span>() ([]<span class="keyword">string</span>, <span class="keyword">error</span>) {
-
-                <span class="keyword">return</span> s.<span class="function">Query</span>(<span class="string">"SELECT * FROM users"</span>)
-
-            }
-
-            
-
-            <span class="function">func</span> (s *UserService) <span class="function">CreateUser</span>(name <span class="keyword">string</span>) <span class="keyword">error</span> {
-
-                sql := fmt.<span class="function">Sprintf</span>(<span class="string">"INSERT INTO users (name) VALUES ('%s')"</span>, name)
-
-                <span class="keyword">return</span> s.<span class="function">Execute</span>(sql)
-
-            }
-
-            
-
-            <span class="function">func</span> <span class="function">main</span>() {
-
-                <span class="comment">// 使用真实数据库</span>
-
-                realDB := &RealDB{connectionString: <span class="string">"localhost:3306"</span>}
-
-                realService := &UserService{Database: realDB}
-
-                
-
-                realService.<span class="function">CreateUser</span>(<span class="string">"张三"</span>)
-
-                users, _ := realService.<span class="function">GetUsers</span>()
-
-                fmt.<span class="function">Println</span>(<span class="string">"用户列表:"</span>, users)
-
-                
-
-                <span class="comment">// 使用模拟数据库（测试场景）</span>
-
-                mockDB := &MockDB{
-
-                    results: [][]<span class="keyword">string</span>{{<span class="string">"user1"</span>, <span class="string">"user2"</span>}},
-
-                }
-
-                mockService := &UserService{Database: mockDB}
-
-                
-
-                mockService.<span class="function">CreateUser</span>(<span class="string">"李四"</span>)
-
-                mockUsers, _ := mockService.<span class="function">GetUsers</span>()
-
-                fmt.<span class="function">Println</span>(<span class="string">"模拟用户列表:"</span>, mockUsers)
-
-                fmt.<span class="function">Println</span>(<span class="string">"执行的查询:"</span>, mockDB.<span class="function">GetQueries</span>())
-
-            }</code></pre>
-
-            
-
-                            <p><strong>10. 嵌入与中间件（Middleware）：</strong></p>
-
-                            <pre><code><span class="keyword">package</span> main
-
-            
-
-            <span class="keyword">import</span> <span class="string">"fmt"</span>
-
-            
-
-            <span class="comment">// 基础处理器</span>
-
-            <span class="keyword">type</span> Handler <span class="keyword">interface</span> {
-
-                <span class="function">Handle</span>(<span class="keyword">string</span>) <span class="keyword">string</span>
-
-            }
-
-            
-
-            <span class="keyword">type</span> BaseHandler <span class="keyword">struct</span>{}
-
-            
-
-            <span class="function">func</span> (h BaseHandler) <span class="function">Handle</span>(request <span class="keyword">string</span>) <span class="keyword">string</span> {
-
-                <span class="keyword">return</span> <span class="string">"处理: "</span> + request
-
-            }
-
-            
-
-            <span class="comment">// 日志中间件</span>
-
-            <span class="keyword">type</span> LoggingMiddleware <span class="keyword">struct</span> {
-
-                Handler
-
-            }
-
-            
-
-            <span class="function">func</span> (l *LoggingMiddleware) <span class="function">Handle</span>(request <span class="keyword">string</span>) <span class="keyword">string</span> {
-
-                fmt.<span class="function">Printf</span>(<span class="string">"日志: 收到请求 - %s\n"</span>, request)
-
-                result := l.Handler.<span class="function">Handle</span>(request)
-
-                fmt.<span class="function">Printf</span>(<span class="string">"日志: 返回结果 - %s\n"</span>, result)
-
-                <span class="keyword">return</span> result
-
-            }
-
-            
-
-            <span class="comment">// 认证中间件</span>
-
-            <span class="keyword">type</span> AuthMiddleware <span class="keyword">struct</span> {
-
-                Handler
-
-                token <span class="keyword">string</span>
-
-            }
-
-            
-
-            <span class="function">func</span> (a *AuthMiddleware) <span class="function">Handle</span>(request <span class="keyword">string</span>) <span class="keyword">string</span> {
-
-                fmt.<span class="function">Printf</span>(<span class="string">"认证: 验证令牌\n"</span>)
-
-                <span class="keyword">return</span> a.Handler.<span class="function">Handle</span>(request)
-
-            }
-
-            
-
-            <span class="function">func</span> <span class="function">main</span>() {
-
-                <span class="comment">// 组合中间件</span>
-
-                base := BaseHandler{}
-
-                withLogging := &LoggingMiddleware{Handler: base}
-
-                withAuth := &AuthMiddleware{Handler: withLogging, token: <span class="string">"secret"</span>}
-
-                
-
-                result := withAuth.<span class="function">Handle</span>(<span class="string">"GET /users"</span>)
-
-                fmt.<span class="function">Println</span>(<span class="string">"最终结果:"</span>, result)
-
-            }</code></pre>
-
-            
-
-                            <p><strong>11. 嵌入的最佳实践：</strong></p>
-
-            
-
-                                                        <ul>
-
-            
-
-                                                            <li><strong>优先使用组合而非继承</strong>：Go 不支持继承，嵌入是实现代码复用的最佳方式</li>
-
-            
-
-                                                            <li><strong>明确嵌入的意图</strong>：嵌入应该是"is-a"关系，而不是"has-a"关系</li>
-
-            
-
-                                                            <li><strong>避免过度嵌入</strong>：过多的嵌套会使代码难以理解和维护</li>
-
-            
-
-                                                            <li><strong>文档化嵌入行为</strong>：明确说明嵌入的字段和方法的使用方式</li>
-
-            
-
-                                                            <li><strong>考虑接口嵌入</strong>：接口嵌入可以创建更灵活的组合方式</li>
-
-            
-
-                                                        </ul>
-
-            
-
-                                                    </div>
-
-            
-
-                            
-
-            
-
-                                        
-
-                                        <h2 id="tags">结构体标签</h2>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"encoding/json"</span>
-    <span class="string">"fmt"</span>
-    <span class="string">"reflect"</span>
-)
-
-<span class="keyword">type</span> User <span class="keyword">struct</span> {
-    ID       <span class="keyword">int</span>    `json:"id"`
-    Name     <span class="keyword">string</span> `json:"name"`
-    Email    <span class="keyword">string</span> `json:"email"`
-    Password <span class="keyword">string</span> `json:"-"` <span class="comment">// 不进行 JSON 序列化</span>
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    user := User{
-        ID:       <span class="number">1</span>,
-        Name:     <span class="string">"张三"</span>,
-        Email:    <span class="string">"zhangsan@example.com"</span>,
-        Password: <span class="string">"secret"</span>,
-    }
-
-    <span class="comment">// JSON 序列化</span>
-    jsonData, _ := json.<span class="function">Marshal</span>(user)
-    fmt.<span class="function">Println</span>(<span class="string">"JSON:"</span>, <span class="keyword">string</span>(jsonData))
-
-    <span class="comment">// 反射获取标签</span>
-    t := reflect.<span class="function">TypeOf</span>(user)
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < t.<span class="function">NumField</span>(); i++ {
-        field := t.<span class="function">Field</span>(i)
-        fmt.<span class="function">Printf</span>(<span class="string">"字段: %s, 标签: %s\n"</span>, field.Name, field.Tag.<span class="function">Get</span>(<span class="string">"json"</span>))
-    }
-}</code></pre>
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="structs-nested.html">嵌套与嵌入</a></li>
+                    <li><a href="structs-tags.html">Struct Tag</a></li>
+                    <li><a href="structs-interface.html">接口 Interface</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

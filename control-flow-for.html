@@ -4,112 +4,268 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>for 循环 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>for 循环 - Go 流程控制</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="control-flow.html" class="back-link">← 返回 control-flow</a>
-            <h1>for 循环</h1>
-            <p class="intro">Go 语言只有一种循环结构 for，但它的形式灵活多变。</p>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="control-flow-if.html" class="back-link">← if 条件</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="control-flow-switch.html" class="back-link">switch 分支 →</a>
 
+            <h1>for 循环 - Go 流程控制</h1>
+            <p class="intro">for 是 Go 唯一的循环语句，功能强大且灵活。掌握 for 循环的各种用法是编写高效 Go 代码的基础。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
             <div class="feature-grid">
-                <div class="feature-card">
+                <div class="feature-card highlight">
                     <div class="icon">🔄</div>
-                    <h4>标准形式</h4>
-                    <p>类似其他语言的 for</p>
+                    <h4>三种形式</h4>
+                    <p>条件/计数/无限</p>
+                    <code class="tag">for</code>
                 </div>
                 <div class="feature-card">
-                    <div class="icon">♾️</div>
-                    <h4>While 形式</h4>
-                    <p>省略初始化和更新</p>
+                    <div class="icon">📚</div>
+                    <h4>range</h4>
+                    <p>遍历集合</p>
+                    <code class="tag">range</code>
                 </div>
                 <div class="feature-card">
-                    <div class="icon">🔁</div>
-                    <h4>无限循环</h4>
-                    <p>for {} 无限循环</p>
+                    <div class="icon">⏭️</div>
+                    <h4>控制语句</h4>
+                    <p>break/continue</p>
+                    <code class="tag">跳转控制</code>
                 </div>
                 <div class="feature-card">
-                    <div class="icon">↩️</div>
-                    <h4>Range 遍历</h4>
-                    <p>遍历数组、切片、map</p>
+                    <div class="icon">🏷️</div>
+                    <h4>标签</h4>
+                    <p>跳出嵌套循环</p>
+                    <code class="tag">label</code>
                 </div>
             </div>
 
-            <h2 id="for">for 循环</h2>
-            <p>Go 语言只有一种循环结构：<code>for</code> 循环。</p>
+            <!-- 基础用法 -->
+            <h2 id="basic">基础用法</h2>
 
-            <pre><code><span class="keyword">package</span> main
+            <div class="example-box">
+                <h3>📝 for 循环三种形式</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 标准 for 循环</span>
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">5</span>; i++ {
-        fmt.<span class="function">Println</span>(i)
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 形式 1: 完整形式 (初始化; 条件; 后置)</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ {
+        fmt.<span class="function">Printf</span>(<span class="string">"%d "</span>, i)
     }
-
-    <span class="comment">// while 风格（只有条件）</span>
-    i := <span class="number">0</span>
-    <span class="keyword">for</span> i < <span class="number">5</span> {
-        fmt.<span class="function">Println</span>(i)
-        i++
+    <span class="comment">// 输出：0 1 2 3 4</span>
+    
+    <span class="comment">// 形式 2: 只有条件 (类似 while)</span>
+    j := <span class="number">0</span>
+    <span class="keyword">for</span> j &lt; <span class="number">5</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"%d "</span>, j)
+        j++
     }
-
-    <span class="comment">// 无限循环</span>
-    <span class="comment">// for {
-    //     fmt.Println("无限循环")
-    // }</span>
-
-    <span class="comment">// 遍历切片/数组</span>
-    numbers := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>}
-    <span class="keyword">for</span> index, value := <span class="keyword">range</span> numbers {
-        fmt.<span class="function">Printf</span>(<span class="string">"索引 %d: 值 %d\n"</span>, index, value)
-    }
-
-    <span class="comment">// 只需要值</span>
-    <span class="keyword">for</span> _, value := <span class="keyword">range</span> numbers {
-        fmt.<span class="function">Println</span>(<span class="string">"值:"</span>, value)
-    }
-
-    <span class="comment">// 遍历 map</span>
-    colors := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>{
-        <span class="string">"red"</span>:   <span class="string">"#FF0000"</span>,
-        <span class="string">"green"</span>: <span class="string">"#00FF00"</span>,
-        <span class="string">"blue"</span>:  <span class="string">"#0000FF"</span>,
-    }
-    <span class="keyword">for</span> key, value := <span class="keyword">range</span> colors {
-        fmt.<span class="function">Printf</span>(<span class="string">"%s: %s\n"</span>, key, value)
-    }
-
-    <span class="comment">// 遍历字符串</span>
-    str := <span class="string">"Hello"</span>
-    <span class="keyword">for</span> index, char := <span class="keyword">range</span> str {
-        fmt.<span class="Function">Printf</span>(<span class="string">"位置 %d: %c\n"</span>, index, char)
-    }
-
-    <span class="comment">// break 和 continue</span>
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">10</span>; i++ {
-        <span class="keyword">if</span> i == <span class="number">3</span> {
-            <span class="keyword">continue</span> <span class="comment">// 跳过本次迭代</span>
+    <span class="comment">// 输出：0 1 2 3 4</span>
+    
+    <span class="comment">// 形式 3: 无限循环</span>
+    count := <span class="number">0</span>
+    <span class="keyword">for</span> {
+        <span class="keyword">if</span> count &gt;= <span class="number">5</span> {
+            <span class="keyword">break</span>
         }
-        <span class="keyword">if</span> i == <span class="number">7</span> {
-            <span class="keyword">break</span> <span class="comment">// 退出循环</span>
-        }
-        fmt.<span class="function">Println</span>(i)
+        fmt.<span class="function">Printf</span>(<span class="string">"%d "</span>, count)
+        count++
+    }
+    <span class="comment">// 输出：0 1 2 3 4</span>
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <h3>💡 for 循环要点</h3>
+                <ul>
+                    <li><strong>唯一循环</strong>: Go 只有 for 一种循环语句</li>
+                    <li><strong>括号可选</strong>: 条件不需要括号</li>
+                    <li><strong>作用域</strong>: 初始化语句中的变量只在循环内有效</li>
+                    <li><strong>分号必需</strong>: 完整形式中分号不能省略</li>
+                </ul>
+            </div>
+
+            <!-- range 遍历 -->
+            <h2 id="range">range 遍历</h2>
+
+            <div class="example-box">
+                <h3>📝 range 各种用法</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 遍历数组</span>
+    arr := [<span class="number">3</span>]<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}
+    <span class="keyword">for</span> i, v := <span class="keyword">range</span> arr {
+        fmt.<span class="function">Printf</span>(<span class="string">"arr[%d]=%d\n"</span>, i, v)
+    }
+    
+    <span class="comment">// 遍历切片</span>
+    slice := []<span class="keyword">string</span>{<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>}
+    <span class="keyword">for</span> i, v := <span class="keyword">range</span> slice {
+        fmt.<span class="function">Printf</span>(<span class="string">"slice[%d]=%s\n"</span>, i, v)
+    }
+    
+    <span class="comment">// 遍历 Map (无序)</span>
+    m := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>{<span class="string">"a"</span>: <span class="number">1</span>, <span class="string">"b"</span>: <span class="number">2</span>}
+    <span class="keyword">for</span> k, v := <span class="keyword">range</span> m {
+        fmt.<span class="function">Printf</span>(<span class="string">"m[%s]=%d\n"</span>, k, v)
+    }
+    
+    <span class="comment">// 只获取索引</span>
+    <span class="keyword">for</span> i := <span class="keyword">range</span> slice {
+        fmt.<span class="function">Printf</span>(<span class="string">"index: %d\n"</span>, i)
+    }
+    
+    <span class="comment">// 只获取值 (忽略索引)</span>
+    <span class="keyword">for</span> _, v := <span class="keyword">range</span> slice {
+        fmt.<span class="function">Printf</span>(<span class="string">"value: %s\n"</span>, v)
+    }
+    
+    <span class="comment">// 遍历字符串 (按 rune)</span>
+    str := <span class="string">"你好"</span>
+    <span class="keyword">for</span> i, r := <span class="keyword">range</span> str {
+        fmt.<span class="function">Printf</span>(<span class="string">"pos %d: %c\n"</span>, i, r)
     }
 }</code></pre>
+            </div>
 
-            
+            <!-- 控制语句 -->
+            <h2 id="control">break 和 continue</h2>
+            <div class="example-box">
+                <h3>📝 循环控制</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// continue: 跳过本次迭代</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ {
+        <span class="keyword">if</span> i%<span class="number">2</span> == <span class="number">0</span> {
+            <span class="keyword">continue</span> <span class="comment">// 跳过偶数</span>
+        }
+        fmt.<span class="function">Printf</span>(<span class="string">"%d "</span>, i)
+    }
+    <span class="comment">// 输出：1 3 5 7 9</span>
+    
+    <span class="comment">// break: 提前退出循环</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ {
+        <span class="keyword">if</span> i == <span class="number">5</span> {
+            <span class="keyword">break</span> <span class="comment">// 找到 5 就退出</span>
+        }
+        fmt.<span class="function">Printf</span>(<span class="string">"%d "</span>, i)
+    }
+    <span class="comment">// 输出：0 1 2 3 4</span>
+    
+    <span class="comment">// 标签：跳出嵌套循环</span>
+    OuterLoop:
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">3</span>; i++ {
+        <span class="keyword">for</span> j := <span class="number">0</span>; j &lt; <span class="number">3</span>; j++ {
+            <span class="keyword">if</span> i == <span class="number">1</span> && j == <span class="number">1</span> {
+                <span class="keyword">break</span> OuterLoop <span class="comment">// 跳出外层循环</span>
+            }
+            fmt.<span class="function">Printf</span>(<span class="string">"i=%d, j=%d\n"</span>, i, j)
+        }
+    }
+}</code></pre>
+            </div>
+
+            <!-- 实用模式 -->
+            <h2 id="patterns">实用模式</h2>
+
+            <h3>1. 索引遍历</h3>
+            <div class="example-box">
+                <h3>📝 常见遍历模式</h3>
+                <pre><code><span class="comment">// 正向遍历</span>
+<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="function">len</span>(slice); i++ {
+    fmt.<span class="function">Println</span>(slice[i])
+}
+
+<span class="comment">// 反向遍历</span>
+<span class="keyword">for</span> i := <span class="function">len</span>(slice) - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i-- {
+    fmt.<span class="function">Println</span>(slice[i])
+}
+
+<span class="comment">// 步长遍历</span>
+<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="function">len</span>(slice); i += <span class="number">2</span> {
+    fmt.<span class="function">Println</span>(slice[i])
+}
+
+<span class="comment">// range 遍历 (推荐)</span>
+<span class="keyword">for</span> i, v := <span class="keyword">range</span> slice {
+    fmt.<span class="function">Printf</span>(<span class="string">"[%d] = %v\n"</span>, i, v)
+}
+
+<span class="comment">// 只遍历索引</span>
+<span class="keyword">for</span> i := <span class="keyword">range</span> slice {
+    fmt.<span class="function">Println</span>(slice[i])
+}</code></pre>
+            </div>
+
+            <h3>2. 条件循环</h3>
+            <div class="example-box">
+                <h3>📝 while 风格循环</h3>
+                <pre><code><span class="comment">// 读取直到条件不满足</span>
+<span class="keyword">var</span> sum <span class="keyword">int</span>
+<span class="keyword">for</span> sum &lt; <span class="number">100</span> {
+    sum += <span class="function">getNextValue</span>()
+}
+
+<span class="comment">// 读取用户输入</span>
+<span class="keyword">for</span> {
+    input := <span class="function">readInput</span>()
+    <span class="keyword">if</span> input == <span class="string">"quit"</span> {
+        <span class="keyword">break</span>
+    }
+    <span class="function">process</span>(input)
+}
+
+<span class="comment">// 带超时的重试</span>
+<span class="keyword">var</span> err <span class="keyword">error</span>
+<span class="keyword">for</span> attempt := <span class="number">0</span>; attempt &lt; <span class="number">3</span>; attempt++ {
+    err = <span class="function">doSomething</span>()
+    <span class="keyword">if</span> err == <span class="keyword">nil</span> {
+        <span class="keyword">break</span>
+    }
+    time.<span class="function">Sleep</span>(time.Second)
+}</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ for 循环使用建议</h3>
+                <ul>
+                    <li><strong>优先 range</strong>: 遍历集合优先使用 range</li>
+                    <li><strong>避免索引</strong>: 不需要索引时用 _ 忽略</li>
+                    <li><strong>标签慎用</strong>: 嵌套循环尽量用函数替代</li>
+                    <li><strong>作用域清晰</strong>: 循环变量只在循环内有效</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="control-flow-if.html">if 条件</a></li>
+                    <li><a href="control-flow-switch.html">switch 分支</a></li>
+                    <li><a href="control-flow-defer.html">defer 延迟</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

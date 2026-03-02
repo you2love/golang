@@ -4,46 +4,414 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>泛型函数 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>泛型函数 - Go 类型参数函数</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="generics.html" class="back-link">← 返回 generics</a>
-            <h2 id="functions">泛型函数</h2>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="generics.html" class="back-link">← 泛型概览</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="generics-types.html" class="back-link">泛型类型 →</a>
+
+            <h1>泛型函数 - 类型参数函数</h1>
+            <p class="intro">泛型函数是带有类型参数的函数，可以适用于多种类型。本节深入讲解泛型函数的定义、约束、推断以及实际应用场景。</p>
+
+            <!-- 核心模式 -->
+            <h2 id="patterns">泛型函数核心模式</h2>
+
+            <h3>1. 转换函数</h3>
+            <div class="example-box">
+                <h3>📝 类型转换与映射</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"strconv"</span>
+)
+
+<span class="comment">// Map: 将一种类型转换为另一种</span>
+<span class="keyword">func</span> <span class="function">Map</span>[T, U <span class="keyword">any</span>](slice []T, fn <span class="keyword">func</span>(T) U) []U {
+    result := <span class="function">make</span>([]U, <span class="function">len</span>(slice))
+    <span class="keyword">for</span> i, v := <span class="keyword">range</span> slice {
+        result[i] = <span class="function">fn</span>(v)
+    }
+    <span class="keyword">return</span> result
+}
+
+<span class="comment">// Filter: 过滤满足条件的元素</span>
+<span class="keyword">func</span> <span class="function">Filter</span>[T <span class="keyword">any</span>](slice []T, predicate <span class="keyword">func</span>(T) <span class="keyword">bool</span>) []T {
+    result := []T{}
+    <span class="keyword">for</span> _, v := <span class="keyword">range</span> slice {
+        <span class="keyword">if</span> <span class="function">predicate</span>(v) {
+            result = <span class="function">append</span>(result, v)
+        }
+    }
+    <span class="keyword">return</span> result
+}
+
+<span class="comment">// Reduce: 归约操作</span>
+<span class="keyword">func</span> <span class="function">Reduce</span>[T <span class="keyword">any</span>, R <span class="keyword">any</span>](slice []T, initial R, fn <span class="keyword">func</span>(R, T) R) R {
+    result := initial
+    <span class="keyword">for</span> _, v := <span class="keyword">range</span> slice {
+        result = <span class="function">fn</span>(result, v)
+    }
+    <span class="keyword">return</span> result
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    nums := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>}
+    
+    <span class="comment">// Map: int → string</span>
+    strs := <span class="function">Map</span>(nums, <span class="keyword">func</span>(n <span class="keyword">int</span>) <span class="keyword">string</span> {
+        <span class="keyword">return</span> strconv.<span class="function">Itoa</span>(n)
+    })
+    fmt.<span class="function">Println</span>(strs) <span class="comment">// [1 2 3 4 5]</span>
+    
+    <span class="comment">// Filter: 只保留偶数</span>
+    evens := <span class="function">Filter</span>(nums, <span class="keyword">func</span>(n <span class="keyword">int</span>) <span class="keyword">bool</span> {
+        <span class="keyword">return</span> n%<span class="number">2</span> == <span class="number">0</span>
+    })
+    fmt.<span class="function">Println</span>(evens) <span class="comment">// [2 4]</span>
+    
+    <span class="comment">// Reduce: 求和</span>
+    sum := <span class="function">Reduce</span>(nums, <span class="number">0</span>, <span class="keyword">func</span>(acc, n <span class="keyword">int</span>) <span class="keyword">int</span> {
+        <span class="keyword">return</span> acc + n
+    })
+    fmt.<span class="function">Println</span>(sum) <span class="comment">// 15</span>
+}</code></pre>
+            </div>
+
+            <h3>2. 数值计算函数</h3>
+            <div class="example-box">
+                <h3>📝 泛型数值运算</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"golang.org/x/exp/constraints"</span>
+)
+
+<span class="comment">// Sum: 数值类型求和</span>
+<span class="keyword">func</span> <span class="function">Sum</span>[T <span class="keyword">constraints</span>.Numeric](nums ...T) T {
+    <span class="keyword">var</span> sum T
+    <span class="keyword">for</span> _, n := <span class="keyword">range</span> nums {
+        sum += n
+    }
+    <span class="keyword">return</span> sum
+}
+
+<span class="comment">// Average: 计算平均值</span>
+<span class="keyword">func</span> <span class="function">Average</span>[T <span class="keyword">constraints</span>.Float | <span class="keyword">constraints</span>.Integer](nums []T) <span class="keyword">float64</span> {
+    <span class="keyword">if</span> <span class="function">len</span>(nums) == <span class="number">0</span> {
+        <span class="keyword">return</span> <span class="number">0</span>
+    }
+    sum := <span class="function">Sum</span>(nums...)
+    <span class="keyword">return</span> <span class="keyword">float64</span>(sum) / <span class="keyword">float64</span>(<span class="function">len</span>(nums))
+}
+
+<span class="comment">// Min/Max: 查找最值</span>
+<span class="keyword">func</span> <span class="function">Min</span>[T <span class="keyword">constraints</span>.Ordered](nums ...T) T {
+    <span class="keyword">if</span> <span class="function">len</span>(nums) == <span class="number">0</span> {
+        <span class="keyword">var</span> zero T
+        <span class="keyword">return</span> zero
+    }
+    min := nums[<span class="number">0</span>]
+    <span class="keyword">for</span> _, n := <span class="keyword">range</span> nums[<span class="number">1</span>:] {
+        <span class="keyword">if</span> n &lt; min {
+            min = n
+        }
+    }
+    <span class="keyword">return</span> min
+}
+
+<span class="keyword">func</span> <span class="function">Max</span>[T <span class="keyword">constraints</span>.Ordered](nums ...T) T {
+    <span class="keyword">if</span> <span class="function">len</span>(nums) == <span class="number">0</span> {
+        <span class="keyword">var</span> zero T
+        <span class="keyword">return</span> zero
+    }
+    max := nums[<span class="number">0</span>]
+    <span class="keyword">for</span> _, n := <span class="keyword">range</span> nums[<span class="number">1</span>:] {
+        <span class="keyword">if</span> n &gt; max {
+            max = n
+        }
+    }
+    <span class="keyword">return</span> max
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 整数运算</span>
+    fmt.<span class="function">Println</span>(<span class="function">Sum</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>))        <span class="comment">// 15</span>
+    fmt.<span class="function">Println</span>(<span class="function">Average</span>([]<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>})) <span class="comment">// 3.0</span>
+    fmt.<span class="function">Println</span>(<span class="function">Min</span>(<span class="number">10</span>, <span class="number">5</span>, <span class="number">8</span>, <span class="number">3</span>, <span class="number">9</span>))         <span class="comment">// 3</span>
+    fmt.<span class="function">Println</span>(<span class="function">Max</span>(<span class="number">10</span>, <span class="number">5</span>, <span class="number">8</span>, <span class="number">3</span>, <span class="number">9</span>))         <span class="comment">// 10</span>
+    
+    <span class="comment">// 浮点数运算</span>
+    fmt.<span class="function">Println</span>(<span class="function">Sum</span>(<span class="number">1.5</span>, <span class="number">2.5</span>, <span class="number">3.0</span>))         <span class="comment">// 7.0</span>
+    fmt.<span class="function">Println</span>(<span class="function">Min</span>(<span class="number">3.14</span>, <span class="number">2.71</span>, <span class="number">1.41</span>))      <span class="comment">// 1.41</span>
+    
+    <span class="comment">// 字符串比较</span>
+    fmt.<span class="function">Println</span>(<span class="function">Min</span>(<span class="string">"banana"</span>, <span class="string">"apple"</span>, <span class="string">"cherry"</span>)) <span class="comment">// "apple"</span>
+}</code></pre>
+            </div>
+
+            <h3>3. 集合操作函数</h3>
+            <div class="example-box">
+                <h3>📝 泛型集合操作</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
-<span class="comment">// 泛型函数：使用类型参数</span>
-<span class="function">func</span> <span class="function">Min</span>[T <span class="keyword">cmp.Ordered</span>](x, y T) T {
-    <span class="keyword">if</span> x < y {
-        <span class="keyword">return</span> x
-    }
-    <span class="keyword">return</span> y
+<span class="comment">// 泛型集合</span>
+<span class="keyword">type</span> Set[T <span class="keyword">comparable</span>] <span class="keyword">map</span>[T]<span class="keyword">struct</span>{}
+
+<span class="keyword">func</span> <span class="function">NewSet</span>[T <span class="keyword">comparable</span>]() Set[T] {
+    <span class="keyword">return</span> <span class="function">make</span>(Set[T])
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 使用整数</span>
-    fmt.<span class="function">Println</span>(<span class="function">Min</span>(<span class="number">5</span>, <span class="number">3</span>))  <span class="comment">// 3</span>
+<span class="keyword">func</span> (s Set[T]) <span class="function">Add</span>(v T) {
+    s[v] = <span class="keyword">struct</span>{}{}
+}
 
-    <span class="comment">// 使用浮点数</span>
-    fmt.<span class="function">Println</span>(<span class="function">Min</span>(<span class="number">3.14</span>, <span class="number">2.71</span>))  <span class="comment">// 2.71</span>
+<span class="keyword">func</span> (s Set[T]) <span class="function">Has</span>(v T) <span class="keyword">bool</span> {
+    _, ok := s[v]
+    <span class="keyword">return</span> ok
+}
 
-    <span class="comment">// 使用字符串</span>
-    fmt.<span class="function">Println</span>(<span class="function">Min</span>(<span class="string">"apple"</span>, <span class="string">"banana"</span>))  <span class="comment">// apple</span>
+<span class="keyword">func</span> (s Set[T]) <span class="function">Delete</span>(v T) {
+    <span class="function">delete</span>(s, v)
+}
+
+<span class="keyword">func</span> (s Set[T]) <span class="function">Size</span>() <span class="keyword">int</span> {
+    <span class="keyword">return</span> <span class="function">len</span>(s)
+}
+
+<span class="comment">// 集合运算</span>
+<span class="keyword">func</span> <span class="function">Union</span>[T <span class="keyword">comparable</span>](sets ...Set[T]) Set[T] {
+    result := <span class="function">NewSet</span>[T]()
+    <span class="keyword">for</span> _, s := <span class="keyword">range</span> sets {
+        <span class="keyword">for</span> v := <span class="keyword">range</span> s {
+            result.<span class="function">Add</span>(v)
+        }
+    }
+    <span class="keyword">return</span> result
+}
+
+<span class="keyword">func</span> <span class="function">Intersect</span>[T <span class="keyword">comparable</span>](sets ...Set[T]) Set[T] {
+    <span class="keyword">if</span> <span class="function">len</span>(sets) == <span class="number">0</span> {
+        <span class="keyword">return</span> <span class="function">NewSet</span>[T]()
+    }
+    
+    result := <span class="function">NewSet</span>[T]()
+    <span class="keyword">for</span> v := <span class="keyword">range</span> sets[<span class="number">0</span>] {
+        allHave := <span class="keyword">true</span>
+        <span class="keyword">for</span> _, s := <span class="keyword">range</span> sets[<span class="number">1</span>:] {
+            <span class="keyword">if</span> !s.<span class="function">Has</span>(v) {
+                allHave = <span class="keyword">false</span>
+                <span class="keyword">break</span>
+            }
+        }
+        <span class="keyword">if</span> allHave {
+            result.<span class="function">Add</span>(v)
+        }
+    }
+    <span class="keyword">return</span> result
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    s1 := <span class="function">NewSet</span>[<span class="keyword">int</span>]()
+    s1.<span class="function">Add</span>(<span class="number">1</span>)
+    s1.<span class="function">Add</span>(<span class="number">2</span>)
+    s1.<span class="function">Add</span>(<span class="number">3</span>)
+    
+    s2 := <span class="function">NewSet</span>[<span class="keyword">int</span>]()
+    s2.<span class="function">Add</span>(<span class="number">2</span>)
+    s2.<span class="function">Add</span>(<span class="number">3</span>)
+    s2.<span class="function">Add</span>(<span class="number">4</span>)
+    
+    fmt.<span class="function">Println</span>(<span class="function">Union</span>(s1, s2).<span class="function">Size</span>())         <span class="comment">// 4</span>
+    fmt.<span class="function">Println</span>(<span class="function">Intersect</span>(s1, s2).<span class="function">Size</span>())     <span class="comment">// 2</span>
 }</code></pre>
+            </div>
 
-            
+            <!-- 高级技巧 -->
+            <h2 id="advanced">高级技巧</h2>
+
+            <h3>方法集上的泛型</h3>
+            <div class="example-box">
+                <h3>📝 泛型方法</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// 泛型结构体</span>
+<span class="keyword">type</span> Container[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
+    items []T
+}
+
+<span class="keyword">func</span> <span class="function">NewContainer</span>[T <span class="keyword">any</span>]() *Container[T] {
+    <span class="keyword">return</span> &Container[T]{items: <span class="function">make</span>([]T, <span class="number">0</span>)}
+}
+
+<span class="comment">// 泛型方法</span>
+<span class="keyword">func</span> (c *Container[T]) <span class="function">Add</span>(item T) {
+    c.items = <span class="function">append</span>(c.items, item)
+}
+
+<span class="keyword">func</span> (c *Container[T]) <span class="function">Get</span>(index <span class="keyword">int</span>) (T, <span class="keyword">bool</span>) {
+    <span class="keyword">var</span> zero T
+    <span class="keyword">if</span> index &lt; <span class="number">0</span> || index &gt;= <span class="function">len</span>(c.items) {
+        <span class="keyword">return</span> zero, <span class="keyword">false</span>
+    }
+    <span class="keyword">return</span> c.items[index], <span class="keyword">true</span>
+}
+
+<span class="keyword">func</span> (c *Container[T]) <span class="function">ForEach</span>(fn <span class="keyword">func</span>(T)) {
+    <span class="keyword">for</span> _, item := <span class="keyword">range</span> c.items {
+        <span class="function">fn</span>(item)
+    }
+}
+
+<span class="comment">// 方法也可以是泛型的</span>
+<span class="keyword">func</span> (c *Container[T]) <span class="function">Transform</span>[U <span class="keyword">any</span>](fn <span class="keyword">func</span>(T) U) *Container[U] {
+    result := <span class="function">NewContainer</span>[U]()
+    <span class="keyword">for</span> _, item := <span class="keyword">range</span> c.items {
+        result.<span class="function">Add</span>(<span class="function">fn</span>(item))
+    }
+    <span class="keyword">return</span> result
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 整数容器</span>
+    intContainer := <span class="function">NewContainer</span>[<span class="keyword">int</span>]()
+    intContainer.<span class="function">Add</span>(<span class="number">1</span>)
+    intContainer.<span class="function">Add</span>(<span class="number">2</span>)
+    intContainer.<span class="function">Add</span>(<span class="number">3</span>)
+    
+    <span class="keyword">if</span> val, ok := intContainer.<span class="function">Get</span>(<span class="number">1</span>); ok {
+        fmt.<span class="function">Println</span>(val) <span class="comment">// 2</span>
+    }
+    
+    <span class="comment">// Transform: int → string</span>
+    strContainer := intContainer.<span class="function">Transform</span>(<span class="keyword">func</span>(n <span class="keyword">int</span>) <span class="keyword">string</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"num-%d"</span>, n)
+    })
+    
+    strContainer.<span class="function">ForEach</span>(<span class="keyword">func</span>(s <span class="keyword">string</span>) {
+        fmt.<span class="function">Println</span>(s)
+    })
+}</code></pre>
+            </div>
+
+            <h3>泛型与接口结合</h3>
+            <div class="example-box">
+                <h3>📝 泛型接口</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// 泛型接口</span>
+<span class="keyword">type</span> Processor[T <span class="keyword">any</span>] <span class="keyword">interface</span> {
+    <span class="function">Process</span>(T) T
+}
+
+<span class="comment">// 实现泛型接口</span>
+<span class="keyword">type</span> Doubler[T <span class="keyword">constraints</span>.Numeric] <span class="keyword">struct</span>{}
+
+<span class="keyword">func</span> (d Doubler[T]) <span class="function">Process</span>(v T) T {
+    <span class="keyword">return</span> v * <span class="number">2</span>
+}
+
+<span class="keyword">type</span> UpperCaser <span class="keyword">struct</span>{}
+
+<span class="keyword">func</span> (u UpperCaser) <span class="function">Process</span>(s <span class="keyword">string</span>) <span class="keyword">string</span> {
+    <span class="keyword">return</span> strings.<span class="function">ToUpper</span>(s)
+}
+
+<span class="comment">// 使用泛型接口</span>
+<span class="keyword">func</span> <span class="function">ProcessAll</span>[T <span class="keyword">any</span>](processor Processor[T], items []T) []T {
+    results := <span class="function">make</span>([]T, <span class="function">len</span>(items))
+    <span class="keyword">for</span> i, item := <span class="keyword">range</span> items {
+        results[i] = processor.<span class="function">Process</span>(item)
+    }
+    <span class="keyword">return</span> results
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 数值处理</span>
+    doubler := Doubler[<span class="keyword">int</span>]{}
+    nums := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}
+    doubled := <span class="function">ProcessAll</span>(doubler, nums)
+    fmt.<span class="function">Println</span>(doubled) <span class="comment">// [2 4 6]</span>
+}</code></pre>
+            </div>
+
+            <!-- 陷阱与注意 -->
+            <h2 id="pitfalls">陷阱与注意事项</h2>
+
+            <div class="warning-box">
+                <h3>⚠️ 常见陷阱</h3>
+                <pre><code><span class="comment">// 陷阱 1: 零值问题</span>
+<span class="keyword">func</span> <span class="function">First</span>[T <span class="keyword">any</span>](slice []T) T {
+    <span class="keyword">if</span> <span class="function">len</span>(slice) == <span class="number">0</span> {
+        <span class="keyword">var</span> zero T  <span class="comment">// 返回零值</span>
+        <span class="keyword">return</span> zero
+    }
+    <span class="keyword">return</span> slice[<span class="number">0</span>]
+}
+<span class="comment">// 问题：调用者无法区分空切片和包含零值的切片</span>
+<span class="comment">// 解决：返回 (T, bool)</span>
+
+<span class="comment">// 陷阱 2: 方法接收者类型</span>
+<span class="keyword">type</span> MyType[T <span class="keyword">any</span>] <span class="keyword">struct</span>{}
+
+<span class="comment">// ✅ 正确：接收者带类型参数</span>
+<span class="keyword">func</span> (m MyType[T]) <span class="function">Method</span>(v T) {}
+
+<span class="comment">// ❌ 错误：方法不能有额外的类型参数</span>
+<span class="comment">// func (m MyType[T]) Method[U any](v U) {}</span>
+
+<span class="comment">// 陷阱 3: 泛型不能用于某些场景</span>
+<span class="comment">// - 不能用于嵌入字段</span>
+<span class="comment">// - 不能用于别名</span>
+<span class="comment">// - 不能用于方法参数</span>
+
+<span class="comment">// 陷阱 4: 类型推断失败</span>
+<span class="keyword">func</span> <span class="function">Make</span>[T <span class="keyword">any</span>]() []T {
+    <span class="keyword">return</span> <span class="function">make</span>([]T, <span class="number">0</span>)
+}
+<span class="comment">// Make()  // ❌ 无法推断 T</span>
+<span class="comment">// Make[int]()  // ✅ 必须显式指定</span></code></pre>
+            </div>
+
+            <!-- 总结 -->
+            <h2 id="summary">总结</h2>
+
+            <div class="success-box">
+                <h3>✅ 核心要点</h3>
+                <ul>
+                    <li><strong>Map/Filter/Reduce</strong>: 函数式编程核心模式</li>
+                    <li><strong>数值约束</strong>: constraints.Numeric/Ordered</li>
+                    <li><strong>集合操作</strong>: 泛型 Set 实现</li>
+                    <li><strong>泛型方法</strong>: 结构体方法可以是泛型</li>
+                    <li><strong>类型推断</strong>: 优先让编译器推断类型</li>
+                    <li><strong>零值处理</strong>: 注意空情况的返回值</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="generics-types.html">泛型类型</a></li>
+                    <li><a href="generics-constraints.html">类型约束详解</a></li>
+                    <li><a href="generics-inference.html">类型推断</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

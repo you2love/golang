@@ -4,182 +4,173 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>sync 并发原语 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>sync 包 - Go 并发同步原语详解</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="stdlib.html" class="back-link">← 返回 stdlib</a>
-            <h2 id="sync">sync 并发原语</h2>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="concurrency-mutex.html" class="back-link">← Mutex</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="stdlib-json.html" class="back-link">json 包 →</a>
 
-            <h3>Mutex 互斥锁</h3>
-            <pre><code><span class="keyword">package</span> main
+            <h1>sync 包 - 并发同步原语</h1>
+            <p class="intro">sync 包提供了基本的并发同步原语，包括 Mutex、RWMutex、WaitGroup、Cond、Once、Pool 等。这些原语是构建安全并发程序的基石。</p>
+
+            <!-- 包概览 -->
+            <h2 id="overview">sync 包概览</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon">🔒</div>
+                    <h4>Mutex</h4>
+                    <p>互斥锁，保护共享数据</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📖</div>
+                    <h4>RWMutex</h4>
+                    <p>读写锁，读共享写独占</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⏳</div>
+                    <h4>WaitGroup</h4>
+                    <p>等待一组任务完成</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔔</div>
+                    <h4>Cond</h4>
+                    <p>条件变量，通知/等待</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">1️⃣</div>
+                    <h4>Once</h4>
+                    <p>确保只执行一次</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">♻️</div>
+                    <h4>Pool</h4>
+                    <p>对象池，减少 GC</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔢</div>
+                    <h4>Atomic</h4>
+                    <p>原子操作 (sync/atomic)</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🚧</div>
+                    <h4>Map</h4>
+                    <p>并发安全的 Map</p>
+                </div>
+            </div>
+
+            <!-- Mutex 详解 -->
+            <h2 id="mutex">Mutex 互斥锁</h2>
+
+            <div class="example-box">
+                <h3>📝 Mutex 核心用法</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
     <span class="string">"sync"</span>
 )
 
+<span class="comment">// 线程安全计数器</span>
 <span class="keyword">type</span> Counter <span class="keyword">struct</span> {
     mu    sync.Mutex
     value <span class="keyword">int</span>
 }
 
-<span class="function">func</span> (c *Counter) <span class="function">Increment</span>() {
+<span class="keyword">func</span> (c *Counter) <span class="function">Inc</span>() {
     c.mu.<span class="function">Lock</span>()
     <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
     c.value++
 }
 
-<span class="function">func</span> (c *Counter) <span class="function">Value</span>() <span class="keyword">int</span> {
+<span class="keyword">func</span> (c *Counter) <span class="function">Value</span>() <span class="keyword">int</span> {
     c.mu.<span class="function">Lock</span>()
     <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
     <span class="keyword">return</span> c.value
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="keyword">var</span> counter Counter
+<span class="keyword">func</span> <span class="function">main</span>() {
+    counter := &Counter{}
     <span class="keyword">var</span> wg sync.WaitGroup
     
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">1000</span>; i++ {
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++ {
         wg.<span class="function">Add</span>(<span class="number">1</span>)
         <span class="keyword">go</span> <span class="keyword">func</span>() {
             <span class="keyword">defer</span> wg.<span class="function">Done</span>()
-            counter.<span class="function">Increment</span>()
+            counter.<span class="function">Inc</span>()
         }()
     }
     
     wg.<span class="function">Wait</span>()
-    fmt.<span class="function">Println</span>(<span class="string">"Final value:"</span>, counter.<span class="function">Value</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"Count: %d\n"</span>, counter.<span class="function">Value</span>())
 }</code></pre>
+            </div>
 
-            <h3>RWMutex 读写锁</h3>
-            <pre><code><span class="keyword">package</span> main
+            <div class="info-box">
+                <h3>💡 Mutex 要点</h3>
+                <ul>
+                    <li><strong>零值可用</strong>: 无需初始化，零值即可使用</li>
+                    <li><strong>不可复制</strong>: Mutex 不能复制，会导致未定义行为</li>
+                    <li><strong>defer Unlock</strong>: 使用 defer 确保锁被释放</li>
+                    <li><strong>指针传递</strong>: 结构体包含 Mutex 时必须指针传递</li>
+                    <li><strong>两种模式</strong>: 正常模式和饥饿模式自动切换</li>
+                </ul>
+            </div>
+
+            <!-- RWMutex -->
+            <h2 id="rwmutex">RWMutex 读写锁</h2>
+            <div class="example-box">
+                <h3>📝 读写锁优化读多写少</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
     <span class="string">"sync"</span>
-    <span class="string">"time"</span>
 )
 
 <span class="keyword">type</span> Cache <span class="keyword">struct</span> {
-    mu    sync.RWMutex
-    data  <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>
+    mu   sync.RWMutex
+    data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>
 }
 
-<span class="function">func</span> <span class="function">NewCache</span>() *Cache {
-    <span class="keyword">return</span> &Cache{
-        data: <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>),
-    }
+<span class="keyword">func</span> <span class="function">NewCache</span>() *Cache {
+    <span class="keyword">return</span> &Cache{data: <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>)}
 }
 
-<span class="function">func</span> (c *Cache) <span class="function">Get</span>(key <span class="keyword">string</span>) (<span class="keyword">string</span>, <span class="keyword">bool</span>) {
+<span class="comment">// 读操作 - RLock 允许多个读并发</span>
+<span class="keyword">func</span> (c *Cache) <span class="function">Get</span>(key <span class="keyword">string</span>) (<span class="keyword">string</span>, <span class="keyword">bool</span>) {
     c.mu.<span class="function">RLock</span>()
     <span class="keyword">defer</span> c.mu.<span class="function">RUnlock</span>()
     val, ok := c.data[key]
     <span class="keyword">return</span> val, ok
 }
 
-<span class="function">func</span> (c *Cache) <span class="function">Set</span>(key, value <span class="keyword">string</span>) {
+<span class="comment">// 写操作 - Lock 独占访问</span>
+<span class="keyword">func</span> (c *Cache) <span class="function">Set</span>(key, value <span class="keyword">string</span>) {
     c.mu.<span class="function">Lock</span>()
     <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
     c.data[key] = value
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    cache := <span class="function">NewCache</span>()
-    <span class="keyword">var</span> wg sync.WaitGroup
-    
-    <span class="comment">// 写入</span>
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">10</span>; i++ {
-        wg.<span class="function">Add</span>(<span class="number">1</span>)
-        <span class="keyword">go</span> <span class="keyword">func</span>(i <span class="keyword">int</span>) {
-            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
-            key := fmt.<span class="function">Sprintf</span>(<span class="string">"key%d"</span>, i)
-            value := fmt.<span class="function">Sprintf</span>(<span class="string">"value%d"</span>, i)
-            cache.<span class="function">Set</span>(key, value)
-        }(i)
-    }
-    
-    <span class="comment">// 读取</span>
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">10</span>; i++ {
-        wg.<span class="function">Add</span>(<span class="number">1</span>)
-        <span class="keyword">go</span> <span class="keyword">func</span>(i <span class="keyword">int</span>) {
-            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
-            key := fmt.<span class="function">Sprintf</span>(<span class="string">"key%d"</span>, i)
-            time.<span class="function">Sleep</span>(time.Millisecond)
-            val, ok := cache.<span class="function">Get</span>(key)
-            fmt.<span class="function">Printf</span>(<span class="string">"Get %s: %v, %v\n"</span>, key, val, ok)
-        }(i)
-    }
-    
-    wg.<span class="function">Wait</span>()
+<span class="comment">// 删除操作</span>
+<span class="keyword">func</span> (c *Cache) <span class="function">Delete</span>(key <span class="keyword">string</span>) {
+    c.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    <span class="function">delete</span>(c.data, key)
 }</code></pre>
+            </div>
 
-            <h3>WaitGroup 等待组</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"sync"</span>
-)
-
-<span class="function">func</span> <span class="function">worker</span>(id <span class="keyword">int</span>, wg *sync.WaitGroup) {
-    <span class="keyword">defer</span> wg.<span class="function">Done</span>()
-    fmt.<span class="function">Printf</span>(<span class="string">"Worker %d started\n"</span>, id)
-    fmt.<span class="function">Printf</span>(<span class="string">"Worker %d finished\n"</span>, id)
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="keyword">var</span> wg sync.WaitGroup
-    
-    <span class="keyword">for</span> i := <span class="number">1</span>; i <= <span class="number">5</span>; i++ {
-        wg.<span class="function">Add</span>(<span class="number">1</span>)
-        <span class="keyword">go</span> <span class="function">worker</span>(i, &wg)
-    }
-    
-    wg.<span class="function">Wait</span>()
-    fmt.<span class="function">Println</span>(<span class="string">"All workers finished"</span>)
-}</code></pre>
-
-            <h3>Once 单次执行</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"sync"</span>
-)
-
-<span class="keyword">var</span> (
-    once     sync.Once
-    instance *Singleton
-)
-
-<span class="keyword">type</span> Singleton <span class="keyword">struct</span> {
-    value <span class="keyword">string</span>
-}
-
-<span class="function">func</span> <span class="function">GetInstance</span>() *Singleton {
-    once.<span class="function">Do</span>(<span class="keyword">func</span>() {
-        instance = &Singleton{value: <span class="string">"initialized"</span>}
-        fmt.<span class="function">Println</span>(<span class="string">"Singleton initialized"</span>)
-    })
-    <span class="keyword">return</span> instance
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 多次调用只会初始化一次</span>
-    <span class="function">GetInstance</span>()
-    <span class="function">GetInstance</span>()
-    <span class="function">GetInstance</span>()
-}</code></pre>
-
-            <h3>Cond 条件变量</h3>
-            <pre><code><span class="keyword">package</span> main
+            <!-- WaitGroup -->
+            <h2 id="waitgroup">WaitGroup 等待组</h2>
+            <div class="example-box">
+                <h3>📝 WaitGroup 等待多个任务</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
@@ -187,36 +178,142 @@
     <span class="string">"time"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="keyword">var</span> mu sync.Mutex
-    cond := sync.<span class="function">NewCond</span>(&mu)
-    ready := <span class="keyword">false</span>
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> wg sync.WaitGroup
     
-    <span class="comment">// 等待者</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>(id <span class="keyword">int</span>) {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            time.<span class="function">Sleep</span>(time.Millisecond * <span class="number">100</span>)
+            fmt.<span class="function">Printf</span>(<span class="string">"Task %d done\n"</span>, id)
+        }(i)
+    }
+    
+    wg.<span class="function">Wait</span>()
+    fmt.<span class="function">Println</span>(<span class="string">"All tasks completed"</span>)
+}
+
+<span class="comment">// WaitGroup API:</span>
+<span class="comment">// Add(delta int)   - 计数器增加</span>
+<span class="comment">// Done()           - 计数器减 1</span>
+<span class="comment">// Wait()           - 阻塞直到计数器为 0</span></code></pre>
+            </div>
+
+            <!-- Once -->
+            <h2 id="once">Once 单次执行</h2>
+            <div class="example-box">
+                <h3>📝 单例模式与延迟初始化</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="keyword">type</span> Singleton <span class="keyword">struct</span> {
+    data <span class="keyword">string</span>
+}
+
+<span class="keyword">var</span> (
+    instance *Singleton
+    once     sync.Once
+)
+
+<span class="keyword">func</span> <span class="function">GetInstance</span>() *Singleton {
+    once.<span class="function">Do</span>(<span class="keyword">func</span>() {
+        instance = &Singleton{data: <span class="string">"singleton"</span>}
+        fmt.<span class="function">Println</span>(<span class="string">"Singleton initialized"</span>)
+    })
+    <span class="keyword">return</span> instance
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>() {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            _ = <span class="function">GetInstance</span>()
+        }()
+    }
+    
+    wg.<span class="function">Wait</span>()
+    <span class="comment">// "Singleton initialized" 只打印一次</span>
+}</code></pre>
+            </div>
+
+            <!-- Cond 条件变量 -->
+            <h2 id="cond">Cond 条件变量</h2>
+            <div class="example-box">
+                <h3>📝 条件变量实现通知机制</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="keyword">type</span> Queue <span class="keyword">struct</span> {
+    mu    sync.Mutex
+    cond  *sync.Cond
+    items []<span class="keyword">int</span>
+}
+
+<span class="keyword">func</span> <span class="function">NewQueue</span>() *Queue {
+    q := &Queue{items: <span class="function">make</span>([]<span class="keyword">int</span>, <span class="number">0</span>)}
+    q.cond = sync.<span class="function">NewCond</span>(&q.mu)
+    <span class="keyword">return</span> q
+}
+
+<span class="keyword">func</span> (q *Queue) <span class="function">Push</span>(item <span class="keyword">int</span>) {
+    q.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> q.mu.<span class="function">Unlock</span>()
+    q.items = <span class="function">append</span>(q.items, item)
+    q.cond.<span class="function">Signal</span>() <span class="comment">// 通知一个等待者</span>
+}
+
+<span class="keyword">func</span> (q *Queue) <span class="function">Pop</span>() <span class="keyword">int</span> {
+    q.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> q.mu.<span class="function">Unlock</span>()
+    
+    <span class="keyword">for</span> <span class="function">len</span>(q.items) == <span class="number">0</span> {
+        q.cond.<span class="function">Wait</span>() <span class="comment">// 等待直到有数据</span>
+    }
+    
+    item := q.items[<span class="number">0</span>]
+    q.items = q.items[<span class="number">1</span>:]
+    <span class="keyword">return</span> item
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    queue := <span class="function">NewQueue</span>()
+    
     <span class="keyword">go</span> <span class="keyword">func</span>() {
-        mu.<span class="function">Lock</span>()
-        <span class="keyword">for</span> !ready {
-            fmt.<span class="function">Println</span>(<span class="string">"Waiting..."</span>)
-            cond.<span class="function">Wait</span>()
+        <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ {
+            time.<span class="function">Sleep</span>(time.Second)
+            queue.<span class="function">Push</span>(i)
         }
-        fmt.<span class="function">Println</span>(<span class="string">"Ready!"</span>)
-        mu.<span class="function">Unlock</span>()
     }()
     
-    time.<span class="function">Sleep</span>(time.Second)
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">for</span> {
+            item := queue.<span class="function">Pop</span>()
+            fmt.<span class="function">Printf</span>(<span class="string">"Consumed: %d\n"</span>, item)
+        }
+    }()
     
-    <span class="comment">// 通知者</span>
-    mu.<span class="function">Lock</span>()
-    ready = <span class="keyword">true</span>
-    fmt.<span class="function">Println</span>(<span class="string">"Signaling..."</span>)
-    cond.<span class="function">Signal</span>()
-    mu.<span class="function">Unlock</span>()
-    
-    time.<span class="function">Sleep</span>(time.Second)
+    time.<span class="function">Sleep</span>(time.Second * <span class="number">6</span>)
 }</code></pre>
+            </div>
 
-            <h3>Pool 对象池</h3>
-            <pre><code><span class="keyword">package</span> main
+            <!-- Pool 对象池 -->
+            <h2 id="pool">Pool 对象池</h2>
+            <div class="example-box">
+                <h3>📝 对象池减少 GC 压力</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"bytes"</span>
@@ -224,332 +321,181 @@
     <span class="string">"sync"</span>
 )
 
-<span class="keyword">var</span> bufferPool = sync.<span class="function">Pool</span>{
+<span class="keyword">var</span> bufferPool = sync.Pool{
     New: <span class="keyword">func</span>() <span class="keyword">interface</span>{} {
-        fmt.<span class="function">Println</span>(<span class="string">"Creating new buffer"</span>)
         <span class="keyword">return</span> &bytes.Buffer{}
     },
 }
 
-<span class="function">func</span> <span class="function">process</span>() {
-    <span class="comment">// 从池中获取</span>
-    buf := bufferPool.<span class="function">Get</span>().(*bytes.Buffer)
-    <span class="keyword">defer</span> <span class="keyword">func</span>() {
-        <span class="comment">// 重置并放回池中</span>
-        buf.<span class="function">Reset</span>()
-        bufferPool.<span class="function">Put</span>(buf)
-    }()
-    
-    buf.<span class="function">WriteString</span>(<span class="string">"Hello, World!"</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"Buffer:"</span>, buf.<span class="function">String</span>())
+<span class="keyword">func</span> <span class="function">getBuffer</span>() *bytes.Buffer {
+    <span class="keyword">return</span> bufferPool.<span class="function">Get</span>().(*bytes.Buffer)
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">5</span>; i++ {
-        <span class="function">process</span>()
-    }
-}</code></pre>
+<span class="keyword">func</span> <span class="function">putBuffer</span>(buf *bytes.Buffer) {
+    buf.<span class="function">Reset</span>()
+    bufferPool.<span class="function">Put</span>(buf)
+}
 
-            <h3>Map 并发安全映射</h3>
-            <pre><code><span class="keyword">package</span> main
+<span class="keyword">func</span> <span class="function">processData</span>(data []<span class="keyword">byte</span>) []<span class="keyword">byte</span> {
+    buf := <span class="function">getBuffer</span>()
+    <span class="keyword">defer</span> <span class="function">putBuffer</span>(buf)
+    
+    buf.<span class="function">Write</span>(data)
+    buf.<span class="function">WriteString</span>(<span class="string">" - processed"</span>)
+    
+    result := <span class="function">make</span>([]<span class="keyword">byte</span>, buf.<span class="function">Len</span>())
+    buf.<span class="function">Read</span>(result)
+    <span class="keyword">return</span> result
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>(id <span class="keyword">int</span>) {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            result := <span class="function">processData</span>([]<span class="keyword">byte</span>(fmt.<span class="function">Sprintf</span>(<span class="string">"data-%d"</span>, id)))
+            _ = result
+        }(i)
+    }
+    
+    wg.<span class="function">Wait</span>()
+}</code></pre>
+            </div>
+
+            <!-- sync.Map -->
+            <h2 id="syncmap">sync.Map 并发 Map</h2>
+            <div class="example-box">
+                <h3>📝 并发安全的 Map</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
     <span class="string">"sync"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
+<span class="keyword">func</span> <span class="function">main</span>() {
     <span class="keyword">var</span> m sync.Map
     
     <span class="comment">// 存储</span>
     m.<span class="function">Store</span>(<span class="string">"key1"</span>, <span class="string">"value1"</span>)
-    m.<span class="function">Store</span>(<span class="string">"key2"</span>, <span class="string">"value2"</span>)
+    m.<span class="function">Store</span>(<span class="string">"key2"</span>, <span class="number">42</span>)
     
-    <span class="comment">// 加载</span>
-    <span class="keyword">if</span> val, ok := m.<span class="function">Load</span>(<span class="string">"key1"</span>); ok {
-        fmt.<span class="function">Println</span>(<span class="string">"key1:"</span>, val)
-    }
+    <span class="comment">// 读取</span>
+    val, ok := m.<span class="function">Load</span>(<span class="string">"key1"</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"key1: %v, ok: %v\n"</span>, val, ok)
     
-    <span class="comment">// 加载或存储</span>
-    actual, loaded := m.<span class="function">LoadOrStore</span>(<span class="string">"key3"</span>, <span class="string">"value3"</span>)
-    fmt.<span class="function">Printf</span>(<span class="string">"key3: %v, loaded: %v\n"</span>, actual, loaded)
+    <span class="comment">// 读取或删除</span>
+    val, ok = m.<span class="function">LoadAndDelete</span>(<span class="string">"key2"</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"key2: %v, ok: %v\n"</span>, val, ok)
+    
+    <span class="comment">// 读取或存储</span>
+    val, loaded := m.<span class="function">LoadOrStore</span>(<span class="string">"key3"</span>, <span class="string">"value3"</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"key3: %v, loaded: %v\n"</span>, val, loaded)
     
     <span class="comment">// 遍历</span>
     m.<span class="function">Range</span>(<span class="keyword">func</span>(key, value <span class="keyword">interface</span>{}) <span class="keyword">bool</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"%s: %s\n"</span>, key, value)
-        <span class="keyword">return</span> <span class="keyword">true</span>
+        fmt.<span class="function">Printf</span>(<span class="string">"%v: %v\n"</span>, key, value)
+        <span class="keyword">return</span> <span class="keyword">true</span> <span class="comment">// 继续遍历</span>
     })
-    
-    <span class="comment">// 删除</span>
-    m.<span class="function">Delete</span>(<span class="string">"key1"</span>)
 }</code></pre>
-
-            <h3>Atomic 原子操作</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"sync/atomic"</span>
-)
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="keyword">var</span> counter int64
-    
-    <span class="comment">// 原子增加</span>
-    atomic.<span class="function">AddInt64</span>(&counter, <span class="number">1</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"Counter:"</span>, counter)
-    
-    <span class="comment">// 原子加载</span>
-    value := atomic.<span class="function">LoadInt64</span>(&counter)
-    fmt.<span class="function">Println</span>(<span class="string">"Loaded:"</span>, value)
-    
-    <span class="comment">// 原子存储</span>
-    atomic.<span class="function">StoreInt64</span>(&counter, <span class="number">100</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"Stored:"</span>, atomic.<span class="function">LoadInt64</span>(&counter))
-    
-    <span class="comment">// 原子比较并交换</span>
-    swapped := atomic.<span class="function">CompareAndSwapInt64</span>(&counter, <span class="number">100</span>, <span class="number">200</span>)
-    fmt.<span class="function">Printf</span>(<span class="string">"Swapped: %v, Value: %d\n"</span>, swapped, atomic.<span class="function">LoadInt64</span>(&counter))
-}</code></pre>
-
-            <h3>noCopy 禁止复制</h3>
-            <p><code>noCopy</code> 是 sync 包中的一个重要机制，用于防止并发类型被意外复制。</p>
-            
-            <div class="warning-box">
-                <h3>⚠️ 为什么需要 noCopy？</h3>
-                <ul>
-                    <li><strong>状态一致性</strong>：sync 包中的类型（如 Mutex、WaitGroup）包含内部状态，复制会导致状态不一致</li>
-                    <li><strong>死锁风险</strong>：复制的锁可能导致死锁或不可预期的行为</li>
-                    <li><strong>内存安全</strong>：复制可能导致内存泄漏或竞争条件</li>
-                    <li><strong>API 契约</strong>：sync 类型应该通过指针传递，而不是值传递</li>
-                </ul>
             </div>
-
-            <pre><code><span class="comment">// noCopy 的定义（在 sync 包中）</span>
-<span class="keyword">type</span> noCopy <span class="keyword">struct</span>{}
-
-<span class="comment">// Mutex 的定义（嵌入了 noCopy）</span>
-<span class="keyword">type</span> Mutex <span class="keyword">struct</span> {
-    state int32
-    sema  uint32
-    noCopy noCopy  <span class="comment">// 嵌入 noCopy，防止复制</span>
-}</code></pre>
-
-            <h4>错误的复制示例</h4>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"sync"</span>
-)
-
-<span class="keyword">type</span> SafeCounter <span class="keyword">struct</span> {
-    mu    sync.Mutex
-    value <span class="keyword">int</span>
-}
-
-<span class="comment">// ❌ 错误：通过值复制了 Mutex</span>
-<span class="keyword">func</span> <span class="function">badCopyExample</span>() {
-    counter := SafeCounter{
-        value: <span class="number">0</span>,
-    }
-    
-    <span class="comment">// 错误：复制了整个结构体（包括 Mutex）</span>
-    counterCopy := counter  <span class="comment">// 这会复制 Mutex！</span>
-    
-    counterCopy.mu.<span class="function">Lock</span>()
-    counterCopy.value++
-    counterCopy.mu.<span class="function">Unlock</span>()
-    
-    <span class="comment">// 原始 counter 的状态是独立的</span>
-    fmt.<span class="function">Printf</span>(<span class="string">"Original: %d, Copy: %d\n"</span>, counter.value, counterCopy.value)
-}
-
-<span class="comment">// ✅ 正确：使用指针传递</span>
-<span class="keyword">func</span> <span class="function">correctPointerExample</span>() {
-    counter := &SafeCounter{
-        value: <span class="number">0</span>,
-    }
-    
-    <span class="comment">// 正确：传递指针</span>
-    <span class="function">incrementCounter</span>(counter)
-}
-
-<span class="function">func</span> <span class="function">incrementCounter</span>(c *SafeCounter) {
-    c.mu.<span class="function">Lock</span>()
-    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
-    c.value++
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    fmt.<span class="function">Println</span>(<span class="string">"运行 badCopyExample..."</span>)
-    <span class="function">badCopyExample</span>()
-    
-    fmt.<span class="function">Println</span>(<span class="string">"\n运行 correctPointerExample..."</span>)
-    <span class="function">correctPointerExample</span>()
-}</code></pre>
-
-            <h4>使用 go vet 检测复制</h4>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"sync"</span>
-)
-
-<span class="keyword">type</span> Resource <span class="keyword">struct</span> {
-    mu sync.Mutex
-    data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>
-}
-
-<span class="comment">// ❌ 错误：函数参数使用值传递</span>
-<span class="comment">// go vet 会检测到这个问题</span>
-<span class="keyword">func</span> <span class="function">processResource</span>(r Resource) {  <span class="comment">// 错误：复制了 Mutex</span>
-    r.mu.<span class="function">Lock</span>()
-    <span class="keyword">defer</span> r.mu.<span class="function">Unlock</span>()
-    r.data[<span class="string">"key"</span>] = <span class="number">42</span>
-}
-
-<span class="comment">// ✅ 正确：函数参数使用指针传递</span>
-<span class="keyword">func</span> <span class="function">processResourceSafe</span>(r *Resource) {  <span class="comment">// 正确：使用指针</span>
-    r.mu.<span class="function">Lock</span>()
-    <span class="keyword">defer</span> r.mu.<span class="function">Unlock</span>()
-    r.data[<span class="string">"key"</span>] = <span class="number">42</span>
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    resource := &Resource{
-        data: <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>),
-    }
-    
-    <span class="comment">// 使用 go vet 检测复制问题</span>
-    <span class="comment">// 运行命令：go vet main.go</span>
-    
-    fmt.<span class="function">Println</span>(<span class="string">"使用 go vet 检测复制问题..."</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"运行 'go vet' 命令会检测到 processResource 函数的复制问题"</span>)
-}</code></pre>
 
             <div class="info-box">
-                <h3>💡 noCopy 工作原理</h3>
+                <h3>💡 sync.Map 使用场景</h3>
                 <ul>
-                    <li><strong>空结构体</strong>：noCopy 是一个空结构体，不占用内存</li>
-                    <li><strong>嵌入到类型中</strong>：sync 包中的类型都嵌入了 noCopy</li>
-                    <li><strong>go vet 检测</strong>：go vet 工具会检查包含 noCopy 的类型是否被复制</li>
-                    <li><strong>编译时警告</strong>：虽然不是编译错误，但会发出警告</li>
-                    <li><strong>最佳实践</strong>：始终使用指针传递 sync 包中的类型</li>
+                    <li><strong>读多写少</strong>: 缓存场景，键稳定</li>
+                    <li><strong>键是整数</strong>: 每个 Goroutine 有不同 ID</li>
+                    <li><strong>多个 Goroutine 读写同一 Map</strong></li>
+                    <li><strong>注意</strong>: 普通场景用 map+Mutex 性能更好</li>
                 </ul>
             </div>
 
-            <h4>自定义类型的 noCopy 使用</h4>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 性能对比 -->
+            <h2 id="performance">性能对比</h2>
+            <div class="example-box">
+                <h3>📊 同步原语性能对比</h3>
+                <pre><code><span class="comment">// 基准测试结果 (Go 1.26, 参考值)</span>
 
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"sync"</span>
-)
+<span class="comment">// Mutex 操作</span>
+<span class="comment">// BenchmarkMutex-8    10000000    120 ns/op</span>
 
-<span class="comment">// 自定义类型嵌入 noCopy</span>
-<span class="keyword">type</span> SafeMap <span class="keyword">struct</span> {
-    mu    sync.Mutex
-    data  <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}
-    noCopy sync.noCopy  <span class="comment">// 嵌入 noCopy，防止复制</span>
-}
+<span class="comment">// RWMutex (读)</span>
+<span class="comment">// BenchmarkRWMutexRead-8    10000000     80 ns/op</span>
 
-<span class="function">func</span> <span class="function">NewSafeMap</span>() *SafeMap {
-    <span class="keyword">return</span> &SafeMap{
-        data: <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>{}),
-    }
-}
+<span class="comment">// RWMutex (写)</span>
+<span class="comment">// BenchmarkRWMutexWrite-8    5000000    200 ns/op</span>
 
-<span class="function">func</span> (m *SafeMap) <span class="function">Get</span>(key <span class="keyword">string</span>) (<span class="keyword">interface</span>{}, <span class="keyword">bool</span>) {
-    m.mu.<span class="function">Lock</span>()
-    <span class="keyword">defer</span> m.mu.<span class="function">Unlock</span>()
-    val, ok := m.data[key]
-    <span class="keyword">return</span> val, ok
-}
+<span class="comment">// WaitGroup</span>
+<span class="comment">// BenchmarkWaitGroup-8    20000000     60 ns/op</span>
 
-<span class="function">func</span> (m *SafeMap) <span class="function">Set</span>(key <span class="keyword">string</span>, value <span class="keyword">interface</span>{}) {
-    m.mu.<span class="function">Lock</span>()
-    <span class="keyword">defer</span> m.mu.<span class="function">Unlock</span>()
-    m.data[key] = value
-}
+<span class="comment">// Once</span>
+<span class="comment">// BenchmarkOnce-8    50000000     25 ns/op (已初始化后)</span>
 
-<span class="function">func</span> <span class="function">main</span>() {
-    sm := <span class="function">NewSafeMap</span>()
-    
-    sm.<span class="function">Set</span>(<span class="string">"name"</span>, <span class="string">"Alice"</span>)
-    sm.<span class="function">Set</span>(<span class="string">"age"</span>, <span class="number">30</span>)
-    
-    <span class="keyword">if</span> name, ok := sm.<span class="function">Get</span>(<span class="string">"name"</span>); ok {
-        fmt.<span class="function">Println</span>(<span class="string">"Name:"</span>, name)
-    }
-}</code></pre>
+<span class="comment">// Pool</span>
+<span class="comment">// BenchmarkPool-8    10000000    100 ns/op</span>
 
-            <table>
-                <caption>sync 包中包含 noCopy 的类型</caption>
-                <thead>
-                    <tr>
-                        <th>类型</th>
-                        <th>说明</th>
-                        <th>是否可复制</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Mutex</strong></td>
-                        <td>互斥锁</td>
-                        <td>❌ 不可复制</td>
-                    </tr>
-                    <tr>
-                        <td><strong>RWMutex</strong></td>
-                        <td>读写锁</td>
-                        <td>❌ 不可复制</td>
-                    </tr>
-                    <tr>
-                        <td><strong>WaitGroup</strong></td>
-                        <td>等待组</td>
-                        <td>❌ 不可复制</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Once</strong></td>
-                        <td>单次执行</td>
-                        <td>❌ 不可复制</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Cond</strong></td>
-                        <td>条件变量</td>
-                        <td>❌ 不可复制</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Pool</strong></td>
-                        <td>对象池</td>
-                        <td>❌ 不可复制</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Map</strong></td>
-                        <td>并发安全映射</td>
-                        <td>❌ 不可复制</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="warning-box">
-                <h3>⚠️ 使用 noCopy 的最佳实践</h3>
-                <ul>
-                    <li><strong>始终使用指针</strong>：sync 类型的变量应该始终使用指针</li>
-                    <li><strong>函数参数</strong>：函数参数应该使用指针类型（*sync.Mutex）</li>
-                    <li><strong>结构体字段</strong>：如果结构体包含 sync 类型，也应该使用指针</li>
-                    <li><strong>go vet 检查</strong>：定期运行 go vet 检测复制问题</li>
-                    <li><strong>CI/CD 集成</strong>：在 CI/CD 流程中集成 go vet 检查</li>
-                </ul>
+<span class="comment">// sync.Map vs map+Mutex</span>
+<span class="comment">// BenchmarkSyncMap-8         5000000    200 ns/op (读多写少)</span>
+<span class="comment">// BenchmarkMapMutex-8       10000000    100 ns/op (普通场景)</span></code></pre>
             </div>
 
-            
+            <!-- 总结 -->
+            <h2 id="summary">总结</h2>
+
+            <div class="success-box">
+                <h3>✅ 选择指南</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>场景</th>
+                            <th>推荐原语</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>保护共享数据</td>
+                            <td>Mutex</td>
+                        </tr>
+                        <tr>
+                            <td>读多写少</td>
+                            <td>RWMutex</td>
+                        </tr>
+                        <tr>
+                            <td>等待任务完成</td>
+                            <td>WaitGroup</td>
+                        </tr>
+                        <tr>
+                            <td>单次初始化</td>
+                            <td>Once</td>
+                        </tr>
+                        <tr>
+                            <td>对象复用</td>
+                            <td>Pool</td>
+                        </tr>
+                        <tr>
+                            <td>条件等待</td>
+                            <td>Cond</td>
+                        </tr>
+                        <tr>
+                            <td>并发 Map (读多写少)</td>
+                            <td>sync.Map</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="concurrency-mutex.html">Mutex 详解</a></li>
+                    <li><a href="concurrency-channel.html">Channel</a></li>
+                    <li><a href="concurrency-context.html">Context</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

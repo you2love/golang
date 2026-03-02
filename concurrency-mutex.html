@@ -4,44 +4,69 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mutex - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>Mutex - Go 互斥锁与同步原语</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="concurrency.html" class="back-link">← 返回 concurrency</a>
-            <h1>互斥锁 (Mutex)</h1>
-            <p class="intro">Mutex 用于保护共享资源，确保同一时刻只有一个 goroutine 访问。</p>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="concurrency-select.html" class="back-link">← Select</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="concurrency-context.html" class="back-link">Context →</a>
 
+            <h1>Mutex - Go 互斥锁与同步原语</h1>
+            <p class="intro">Mutex（互斥锁）是 Go 中最基础的同步原语，用于保护共享数据免受并发访问。sync 包提供了 Mutex、RWMutex、WaitGroup、Cond、Once、Pool 等多种同步工具。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
             <div class="feature-grid">
-                <div class="feature-card">
+                <div class="feature-card highlight">
                     <div class="icon">🔒</div>
-                    <h4>Lock/Unlock</h4>
-                    <p>加锁/解锁</p>
+                    <h4>Mutex</h4>
+                    <p>互斥锁，独占访问</p>
+                    <code class="tag">Lock/Unlock</code>
                 </div>
                 <div class="feature-card">
                     <div class="icon">📖</div>
-                    <h4>RLock</h4>
-                    <p>读锁并发</p>
+                    <h4>RWMutex</h4>
+                    <p>读写锁，读共享写独占</p>
+                    <code class="tag">RLock/Lock</code>
                 </div>
                 <div class="feature-card">
-                    <div class="icon">⚠️</div>
-                    <h4>避免死锁</h4>
-                    <p>正确加锁顺序</p>
+                    <div class="icon">⏳</div>
+                    <h4>WaitGroup</h4>
+                    <p>等待一组 Goroutine 完成</p>
+                    <code class="tag">Add/Done/Wait</code>
                 </div>
                 <div class="feature-card">
-                    <div class="icon">💡</div>
-                    <h4>sync.Mutex</h4>
-                    <p>标准库实现</p>
+                    <div class="icon">🔄</div>
+                    <h4>Cond</h4>
+                    <p>条件变量，等待信号</p>
+                    <code class="tag">Wait/Signal</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">1️⃣</div>
+                    <h4>Once</h4>
+                    <p>只执行一次</p>
+                    <code class="tag">Do(func)</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">♻️</div>
+                    <h4>Pool</h4>
+                    <p>对象池，减少 GC 压力</p>
+                    <code class="tag">Get/Put</code>
                 </div>
             </div>
 
-            <h2 id="mutex">互斥锁（Mutex）</h2>
-            <pre><code><span class="keyword">package</span> main
+            <!-- Mutex 详解 -->
+            <h2 id="mutex">Mutex 互斥锁</h2>
+
+            <div class="example-box">
+                <h3>📝 Mutex 基础用法</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
@@ -49,43 +74,621 @@
     <span class="string">"time"</span>
 )
 
-<span class="comment">// SafeCounter 是并发安全的计数器</span>
-<span class="keyword">type</span> SafeCounter <span class="keyword">struct</span> {
-    mu sync.Mutex
-    v  <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>
+<span class="comment">// Counter 线程安全的计数器</span>
+<span class="keyword">type</span> Counter <span class="keyword">struct</span> {
+    mu    sync.Mutex
+    value <span class="keyword">int</span>
 }
 
-<span class="function">func</span> (c *SafeCounter) <span class="function">Inc</span>(key <span class="keyword">string</span>) {
+<span class="keyword">func</span> (c *Counter) <span class="function">Increment</span>() {
     c.mu.<span class="function">Lock</span>()
-    <span class="comment">// Lock 之后同一时刻只有一个 goroutine 能访问 c.v</span>
-    c.v[key]++
-    c.mu.<span class="function">Unlock</span>()
-}
-
-<span class="function">func</span> (c *SafeCounter) <span class="function">Value</span>(key <span class="keyword">string</span>) <span class="keyword">int</span> {
-    c.mu.<span class="function">Lock</span>()
-    <span class="comment">// Lock 之后同一时刻只有一个 goroutine 能访问 c.v</span>
     <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
-    <span class="keyword">return</span> c.v[key]
+    c.value++
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    c := SafeCounter{v: <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>)}
+<span class="keyword">func</span> (c *Counter) <span class="function">Value</span>() <span class="keyword">int</span> {
+    c.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    <span class="keyword">return</span> c.value
+}
 
-    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++ {
-        <span class="keyword">go</span> c.<span class="function">Inc</span>(<span class="string">"somekey"</span>)
+<span class="keyword">func</span> <span class="function">main</span>() {
+    counter := &Counter{}
+    
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="comment">// 启动 100 个 Goroutine 并发增加</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">100</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>() {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            <span class="keyword">for</span> j := <span class="number">0</span>; j &lt; <span class="number">1000</span>; j++ {
+                counter.<span class="function">Increment</span>()
+            }
+        }()
     }
-
-    time.<span class="function">Sleep</span>(time.Second)
-    fmt.<span class="function">Println</span>(c.<span class="function">Value</span>(<span class="string">"somekey"</span>))
+    
+    wg.<span class="function">Wait</span>()
+    fmt.<span class="function">Printf</span>(<span class="string">"Final count: %d\n"</span>, counter.<span class="function">Value</span>())
+    <span class="comment">// 输出：Final count: 100000</span>
 }</code></pre>
+            </div>
 
+            <div class="info-box">
+                <h3>💡 Mutex 使用原则</h3>
+                <ul>
+                    <li><strong>指针传递</strong>: Mutex 必须与数据一起传递，使用指针</li>
+                    <li><strong>defer Unlock</strong>: 使用 defer 确保锁被释放</li>
+                    <li><strong>临界区最小化</strong>: 锁住尽可能少的代码</li>
+                    <li><strong>避免死锁</strong>: 不要重复加锁，注意锁的顺序</li>
+                    <li><strong>零值可用</strong>: sync.Mutex 零值即可使用，无需初始化</li>
+                </ul>
+            </div>
+
+            <h3>Mutex 底层实现</h3>
+            <div class="example-box">
+                <h3>📖 runtime 中的 Mutex 实现</h3>
+                <pre><code><span class="comment">// sync/mutex.go - Mutex 结构</span>
+<span class="keyword">type</span> Mutex <span class="keyword">struct</span> {
+    state <span class="keyword">int32</span>
+    sema  <span class="keyword">uint32</span>
+}
+
+<span class="comment">// 状态位定义</span>
+<span class="keyword">const</span> (
+    mutexLocked      = <span class="number">1</span> &lt;&lt; <span class="number">0</span> <span class="comment">// 锁被持有</span>
+    mutexWoken       = <span class="number">1</span> &lt;&lt; <span class="number">1</span> <span class="comment">// 有等待者被唤醒</span>
+    mutexStarving    = <span class="number">1</span> &lt;&lt; <span class="number">2</span> <span class="comment">// 饥饿模式</span>
+    mutexWaiterShift = <span class="number">3</span>       <span class="comment">// 等待者数量偏移</span>
+)
+
+<span class="comment">// Lock 实现 (简化)</span>
+<span class="keyword">func</span> (m *Mutex) <span class="function">Lock</span>() {
+    <span class="keyword">if</span> atomic.<span class="function">CompareAndSwapInt32</span>(&m.state, <span class="number">0</span>, mutexLocked) {
+        <span class="keyword">return</span> <span class="comment">// 快速路径：直接获取锁</span>
+    }
+    
+    <span class="comment">// 慢速路径：进入等待队列</span>
+    m.<span class="function">lockSlow</span>()
+}
+
+<span class="comment">// Unlock 实现</span>
+<span class="keyword">func</span> (m *Mutex) <span class="function">Unlock</span>() {
+    new := atomic.<span class="function">AddInt32</span>(&m.state, -mutexLocked)
+    
+    <span class="keyword">if</span> new&mutexWoken != <span class="number">0</span> {
+        <span class="comment">// 唤醒等待者</span>
+        runtime.<span class="function">semawakeup</span>(&m.sema)
+    }
+}
+
+<span class="comment">// 两种模式：</span>
+<span class="comment">// 1. 正常模式：FIFO，等待者按顺序获取锁</span>
+<span class="comment">// 2. 饥饿模式：防止饿死，直接传递给等待最久的 Goroutine</span></code></pre>
+            </div>
+
+            <!-- RWMutex -->
+            <h2 id="rwmutex">RWMutex 读写锁</h2>
+            <div class="example-box">
+                <h3>📝 读写锁使用场景</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="comment">// Cache 使用 RWMutex 优化读多写少场景</span>
+<span class="keyword">type</span> Cache <span class="keyword">struct</span> {
+    mu   sync.RWMutex
+    data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>
+}
+
+<span class="keyword">func</span> <span class="function">NewCache</span>() *Cache {
+    <span class="keyword">return</span> &Cache{data: <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>)}
+}
+
+<span class="comment">// 读操作 - 使用 RLock，允许多个读并发</span>
+<span class="keyword">func</span> (c *Cache) <span class="function">Get</span>(key <span class="keyword">string</span>) (<span class="keyword">string</span>, <span class="keyword">bool</span>) {
+    c.mu.<span class="function">RLock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">RUnlock</span>()
+    val, ok := c.data[key]
+    <span class="keyword">return</span> val, ok
+}
+
+<span class="comment">// 写操作 - 使用 Lock，独占访问</span>
+<span class="keyword">func</span> (c *Cache) <span class="function">Set</span>(key, value <span class="keyword">string</span>) {
+    c.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    c.data[key] = value
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    cache := <span class="function">NewCache</span>()
+    
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="comment">// 多个读 Goroutine</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>(id <span class="keyword">int</span>) {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            <span class="keyword">for</span> j := <span class="number">0</span>; j &lt; <span class="number">100</span>; j++ {
+                cache.<span class="function">Get</span>(<span class="string">"key"</span>)
+            }
+        }(i)
+    }
+    
+    <span class="comment">// 少量写 Goroutine</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">2</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>(id <span class="keyword">int</span>) {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            <span class="keyword">for</span> j := <span class="number">0</span>; j &lt; <span class="number">10</span>; j++ {
+                cache.<span class="function">Set</span>(fmt.<span class="function">Sprintf</span>(<span class="string">"key-%d"</span>, j), fmt.<span class="function">Sprintf</span>(<span class="string">"value-%d"</span>, j))
+            }
+        }(i)
+    }
+    
+    wg.<span class="function">Wait</span>()
+    fmt.<span class="function">Println</span>(<span class="string">"Cache operations completed"</span>)
+}</code></pre>
+            </div>
+
+            <div class="warning-box">
+                <h3>⚠️ RWMutex 注意事项</h3>
+                <ul>
+                    <li><strong>读多写少</strong>: 只在读远多于写时使用 RWMutex</li>
+                    <li><strong>写锁饥饿</strong>: 大量读可能导致写操作饥饿</li>
+                    <li><strong>临界区短</strong>: 持有锁的时间要尽可能短</li>
+                    <li><strong>不要升级</strong>: RLock 不能升级为 Lock，会死锁</li>
+                </ul>
+            </div>
+
+            <!-- WaitGroup -->
+            <h2 id="waitgroup">WaitGroup 等待组</h2>
+            <div class="example-box">
+                <h3>📝 WaitGroup 基础用法</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="comment">// 启动 5 个 Goroutine</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>(id <span class="keyword">int</span>) {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
             
+            fmt.<span class="function">Printf</span>(<span class="string">"Goroutine %d starting\n"</span>, id)
+            time.<span class="function">Sleep</span>(time.Millisecond * <span class="number">100</span>)
+            fmt.<span class="function">Printf</span>(<span class="string">"Goroutine %d done\n"</span>, id)
+        }(i)
+    }
+    
+    <span class="comment">// 等待所有 Goroutine 完成</span>
+    wg.<span class="function">Wait</span>()
+    fmt.<span class="function">Println</span>(<span class="string">"All goroutines completed"</span>)
+}
+
+<span class="comment">// WaitGroup 内部实现 (简化)</span>
+<span class="comment">// type WaitGroup struct {</span>
+<span class="comment">//     state [3]int32  // 计数器、信号量、状态</span>
+<span class="comment">// }</span>
+<span class="comment">//</span>
+<span class="comment">// Add(delta int): 计数器 += delta</span>
+<span class="comment">// Done(): 计数器 -= 1</span>
+<span class="comment">// Wait(): 阻塞直到计数器为 0</span></code></pre>
+            </div>
+
+            <h3>WaitGroup 常见模式</h3>
+            <div class="example-box">
+                <h3>📝 WaitGroup 实用模式</h3>
+                <pre><code><span class="comment">// 模式 1: 批处理任务</span>
+<span class="keyword">func</span> <span class="function">batchProcess</span>(items []<span class="keyword">string</span>, concurrency <span class="keyword">int</span>) {
+    sem := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>{}, concurrency)
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="keyword">for</span> _, item := <span class="keyword">range</span> items {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        sem &lt;- <span class="keyword">struct</span>{}{} <span class="comment">// 获取信号量</span>
+        
+        <span class="keyword">go</span> <span class="keyword">func</span>(item <span class="keyword">string</span>) {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            <span class="keyword">defer</span> <span class="keyword">func</span>() { &lt;-sem }() <span class="comment">// 释放信号量</span>
+            
+            <span class="function">process</span>(item)
+        }(item)
+    }
+    
+    wg.<span class="function">Wait</span>()
+}
+
+<span class="comment">// 模式 2: 带超时的等待</span>
+<span class="keyword">func</span> <span class="function">waitWithTimeout</span>(wg *sync.WaitGroup, timeout time.Duration) <span class="keyword">bool</span> {
+    done := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>{})
+    
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        wg.<span class="function">Wait</span>()
+        <span class="function">close</span>(done)
+    }()
+    
+    <span class="keyword">select</span> {
+    <span class="keyword">case</span> &lt;-done:
+        <span class="keyword">return</span> <span class="keyword">true</span>
+    <span class="keyword">case</span> &lt;-time.<span class="function">After</span>(timeout):
+        <span class="keyword">return</span> <span class="keyword">false</span>
+    }
+}
+
+<span class="comment">// 模式 3: 错误收集</span>
+<span class="keyword">type</span> Result <span class="keyword">struct</span> {
+    ID  <span class="keyword">int</span>
+    Err <span class="keyword">error</span>
+}
+
+<span class="keyword">func</span> <span class="function">parallelWithErrors</span>(ids []<span class="keyword">int</span>) []Result {
+    <span class="keyword">var</span> wg sync.WaitGroup
+    results := <span class="function">make</span>([]Result, <span class="function">len</span>(ids))
+    
+    <span class="keyword">for</span> i, id := <span class="keyword">range</span> ids {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>(idx, id <span class="keyword">int</span>) {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            results[idx] = Result{
+                ID:  id,
+                Err: <span class="function">process</span>(id),
+            }
+        }(i, id)
+    }
+    
+    wg.<span class="function">Wait</span>()
+    <span class="keyword">return</span> results
+}</code></pre>
+            </div>
+
+            <!-- Once 和 Cond -->
+            <h2 id="once-cond">Once 和 Cond</h2>
+
+            <h3>sync.Once - 只执行一次</h3>
+            <div class="example-box">
+                <h3>📝 单例模式与延迟初始化</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="comment">// 单例模式</span>
+<span class="keyword">type</span> Singleton <span class="keyword">struct</span> {
+    data <span class="keyword">string</span>
+}
+
+<span class="keyword">var</span> (
+    instance *Singleton
+    once     sync.Once
+)
+
+<span class="keyword">func</span> <span class="function">GetInstance</span>() *Singleton {
+    once.<span class="function">Do</span>(<span class="keyword">func</span>() {
+        instance = &Singleton{data: <span class="string">"singleton data"</span>}
+        fmt.<span class="function">Println</span>(<span class="string">"Singleton initialized"</span>)
+    })
+    <span class="keyword">return</span> instance
+}
+
+<span class="comment">// 延迟初始化配置</span>
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    mu   sync.Mutex
+    once sync.Once
+    data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>
+}
+
+<span class="keyword">func</span> (c *Config) <span class="function">init</span>() {
+    c.data = <span class="function">loadConfigFromFile</span>()
+}
+
+<span class="keyword">func</span> (c *Config) <span class="function">Get</span>(key <span class="keyword">string</span>) <span class="keyword">string</span> {
+    c.once.<span class="function">Do</span>(c.init) <span class="comment">// 延迟初始化</span>
+    c.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    <span class="keyword">return</span> c.data[key]
+}
+
+<span class="keyword">func</span> <span class="function">loadConfigFromFile</span>() <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span> {
+    fmt.<span class="function">Println</span>(<span class="string">"Loading config..."</span>)
+    <span class="keyword">return</span> <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>)
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="comment">// 多个 Goroutine 并发获取单例</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>() {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            _ = <span class="function">GetInstance</span>()
+        }()
+    }
+    
+    wg.<span class="function">Wait</span>()
+    <span class="comment">// "Singleton initialized" 只打印一次</span>
+}</code></pre>
+            </div>
+
+            <h3>sync.Cond - 条件变量</h3>
+            <div class="example-box">
+                <h3>📝 条件变量实现通知机制</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="keyword">type</span> Queue <span class="keyword">struct</span> {
+    mu    sync.Mutex
+    cond  *sync.Cond
+    items []<span class="keyword">int</span>
+}
+
+<span class="keyword">func</span> <span class="function">NewQueue</span>() *Queue {
+    q := &Queue{items: <span class="function">make</span>([]<span class="keyword">int</span>, <span class="number">0</span>)}
+    q.cond = sync.<span class="function">NewCond</span>(&q.mu)
+    <span class="keyword">return</span> q
+}
+
+<span class="comment">// 入队</span>
+<span class="keyword">func</span> (q *Queue) <span class="function">Push</span>(item <span class="keyword">int</span>) {
+    q.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> q.mu.<span class="function">Unlock</span>()
+    
+    q.items = <span class="function">append</span>(q.items, item)
+    q.cond.<span class="function">Signal</span>() <span class="comment">// 通知一个等待者</span>
+}
+
+<span class="comment">// 出队 (阻塞)</span>
+<span class="keyword">func</span> (q *Queue) <span class="function">Pop</span>() <span class="keyword">int</span> {
+    q.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> q.mu.<span class="function">Unlock</span>()
+    
+    <span class="keyword">for</span> <span class="function">len</span>(q.items) == <span class="number">0</span> {
+        q.cond.<span class="function">Wait</span>() <span class="comment">// 等待直到有数据</span>
+    }
+    
+    item := q.items[<span class="number">0</span>]
+    q.items = q.items[<span class="number">1</span>:]
+    <span class="keyword">return</span> item
+}
+
+<span class="comment">// 广播通知所有等待者</span>
+<span class="keyword">func</span> (q *Queue) <span class="function">Close</span>() {
+    q.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> q.mu.<span class="function">Unlock</span>()
+    q.cond.<span class="function">Broadcast</span>()
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    queue := <span class="function">NewQueue</span>()
+    
+    <span class="comment">// 消费者</span>
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">for</span> {
+            item := queue.<span class="function">Pop</span>()
+            fmt.<span class="function">Printf</span>(<span class="string">"Consumed: %d\n"</span>, item)
+        }
+    }()
+    
+    <span class="comment">// 生产者</span>
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ {
+            time.<span class="function">Sleep</span>(time.Second)
+            queue.<span class="function">Push</span>(i)
+        }
+    }()
+    
+    time.<span class="function">Sleep</span>(time.Second * <span class="number">6</span>)
+}</code></pre>
+            </div>
+
+            <!-- sync.Pool -->
+            <h2 id="pool">sync.Pool 对象池</h2>
+            <div class="example-box">
+                <h3>📝 对象池减少 GC 压力</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"bytes"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="comment">// 创建 bytes.Buffer 对象池</span>
+<span class="keyword">var</span> bufferPool = sync.Pool{
+    New: <span class="keyword">func</span>() <span class="keyword">interface</span>{} {
+        <span class="keyword">return</span> &bytes.Buffer{}
+    },
+}
+
+<span class="comment">// 从池中获取 Buffer</span>
+<span class="keyword">func</span> <span class="function">getBuffer</span>() *bytes.Buffer {
+    <span class="keyword">return</span> bufferPool.<span class="function">Get</span>().(*bytes.Buffer)
+}
+
+<span class="comment">// 归还 Buffer 到池中</span>
+<span class="keyword">func</span> <span class="function">putBuffer</span>(buf *bytes.Buffer) {
+    buf.<span class="function">Reset</span>() <span class="comment">// 重置后再归还</span>
+    bufferPool.<span class="function">Put</span>(buf)
+}
+
+<span class="keyword">func</span> <span class="function">processData</span>(data []<span class="keyword">byte</span>) []<span class="keyword">byte</span> {
+    buf := <span class="function">getBuffer</span>()
+    <span class="keyword">defer</span> <span class="function">putBuffer</span>(buf)
+    
+    buf.<span class="function">Write</span>(data)
+    buf.<span class="function">WriteString</span>(<span class="string">" - processed"</span>)
+    
+    <span class="comment">// 返回副本，因为 Buffer 要归还</span>
+    result := <span class="function">make</span>([]<span class="keyword">byte</span>, buf.<span class="function">Len</span>())
+    buf.<span class="function">Read</span>(result)
+    <span class="keyword">return</span> result
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="comment">// 高并发场景使用对象池</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>(id <span class="keyword">int</span>) {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            result := <span class="function">processData</span>([]<span class="keyword">byte</span>(fmt.<span class="function">Sprintf</span>(<span class="string">"data-%d"</span>, id)))
+            _ = result
+        }(i)
+    }
+    
+    wg.<span class="function">Wait</span>()
+    fmt.<span class="function">Println</span>(<span class="string">"Processing complete"</span>)
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <h3>💡 sync.Pool 使用场景</h3>
+                <ul>
+                    <li><strong>频繁分配</strong>: 频繁创建和销毁的对象</li>
+                    <li><strong>大对象</strong>: 占用大量内存的对象</li>
+                    <li><strong>高并发</strong>: 高并发场景减少 GC 压力</li>
+                    <li><strong>注意</strong>: Pool 中的对象可能被 GC 随时回收</li>
+                </ul>
+            </div>
+
+            <!-- 性能对比 -->
+            <h2 id="performance">性能对比与最佳实践</h2>
+
+            <h3>锁性能对比</h3>
+            <div class="example-box">
+                <h3>📊 不同同步原语性能对比</h3>
+                <pre><code><span class="comment">// 基准测试结果 (参考值，Go 1.26)</span>
+
+<span class="comment">// 1. Mutex vs RWMutex (读多写少场景)</span>
+<span class="comment">// BenchmarkMutex-8          10000000    120 ns/op</span>
+<span class="comment">// BenchmarkRWMutex-8        10000000     80 ns/op  (读操作)</span>
+<span class="comment">// RWMutex 读性能提升 ~33%</span>
+
+<span class="comment">// 2. Mutex vs Channel (计数器场景)</span>
+<span class="comment">// BenchmarkMutex-8          10000000    120 ns/op</span>
+<span class="comment">// BenchmarkChannel-8         5000000    250 ns/op</span>
+<span class="comment">// Mutex 性能提升 ~50%</span>
+
+<span class="comment">// 3. WaitGroup vs Channel (等待完成)</span>
+<span class="comment">// BenchmarkWaitGroup-8      20000000     60 ns/op</span>
+<span class="comment">// BenchmarkChannelWait-8     5000000    200 ns/op</span>
+<span class="comment">// WaitGroup 性能提升 ~70%</span>
+
+<span class="comment">// 4. sync.Pool 效果</span>
+<span class="comment">// BenchmarkNoPool-8          1000000   1200 ns/op    500 B/op</span>
+<span class="comment">// BenchmarkWithPool-8        5000000    200 ns/op     50 B/op</span>
+<span class="comment">// 性能提升 83%，内存减少 90%</span></code></pre>
+            </div>
+
+            <div class="success-box">
+                <h3>✅ 同步原语选择指南</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>场景</th>
+                            <th>推荐原语</th>
+                            <th>理由</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>保护共享数据</td>
+                            <td>Mutex</td>
+                            <td>简单高效</td>
+                        </tr>
+                        <tr>
+                            <td>读多写少</td>
+                            <td>RWMutex</td>
+                            <td>读并发，提升性能</td>
+                        </tr>
+                        <tr>
+                            <td>等待 Goroutine 完成</td>
+                            <td>WaitGroup</td>
+                            <td>专为等待设计</td>
+                        </tr>
+                        <tr>
+                            <td>单次初始化</td>
+                            <td>Once</td>
+                            <td>线程安全，简单</td>
+                        </tr>
+                        <tr>
+                            <td>对象复用</td>
+                            <td>Pool</td>
+                            <td>减少 GC 压力</td>
+                        </tr>
+                        <tr>
+                            <td>条件等待</td>
+                            <td>Cond</td>
+                            <td>通知/等待模式</td>
+                        </tr>
+                        <tr>
+                            <td>Goroutine 通信</td>
+                            <td>Channel</td>
+                            <td>CSP 模型，数据传递</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="warning-box">
+                <h3>🚨 常见陷阱</h3>
+                <ul>
+                    <li><strong>复制 Mutex</strong>: Mutex 不能复制，会导致未定义行为</li>
+                    <li><strong>死锁</strong>: 重复加锁或锁顺序不一致</li>
+                    <li><strong>锁竞争</strong>: 临界区过大导致性能下降</li>
+                    <li><strong>忘记 Unlock</strong>: 使用 defer 确保释放</li>
+                    <li><strong>Pool 对象被回收</strong>: 不要依赖 Pool 长期保存对象</li>
+                </ul>
+            </div>
+
+            <!-- 总结 -->
+            <h2 id="summary">总结</h2>
+
+            <div class="success-box">
+                <h3>✅ 核心要点</h3>
+                <ul>
+                    <li><strong>Mutex</strong>: 基础互斥锁，保护共享数据</li>
+                    <li><strong>RWMutex</strong>: 读多写少场景，读并发写独占</li>
+                    <li><strong>WaitGroup</strong>: 等待一组 Goroutine 完成</li>
+                    <li><strong>Once</strong>: 确保只执行一次，单例模式</li>
+                    <li><strong>Cond</strong>: 条件变量，通知/等待模式</li>
+                    <li><strong>Pool</strong>: 对象池，减少 GC 压力</li>
+                    <li><strong>选择原则</strong>: 简单场景用 Mutex，通信用 Channel</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="concurrency-goroutine.html">Goroutine - 并发基石</a></li>
+                    <li><a href="concurrency-channel.html">Channel - 并发通信</a></li>
+                    <li><a href="concurrency-context.html">Context - 上下文控制</a></li>
+                    <li><a href="stdlib-sync.html">sync 包详解</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

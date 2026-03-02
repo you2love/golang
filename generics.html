@@ -4,483 +4,452 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>泛型 - Go 语言学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    <script src="scroll.js"></script>
-    </head>
+    <title>泛型 Generics - Go 类型参数详解</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
         <div class="content">
-            <a href="index.html" class="back-link">← 返回首页</a>
-            <h1>泛型（Generics）- Go 1.26</h1>
+            <a href="structs-interface.html" class="back-link">← 接口</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="generics-functions.html" class="back-link">泛型函数 →</a>
 
-            <h2 id="intro">什么是泛型？</h2>
-            <p>泛型是 Go 1.18 引入的重要特性，允许编写可以处理多种类型的代码，而不需要为每种类型重复编写相同的逻辑。泛型提高了代码的复用性和类型安全性。</p>
-            
-            <!-- 泛型优势对比 -->
+            <h1>泛型 Generics - Go 类型参数</h1>
+            <p class="intro">泛型是 Go 1.18 引入的重大特性，允许编写可复用且类型安全的代码。通过类型参数，我们可以编写适用于多种类型的函数和数据结构，同时保持编译期类型检查。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
             <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="icon">🛡️</div>
-                    <h4>类型安全</h4>
-                    <p>编译时检查，避免运行时类型错误</p>
+                <div class="feature-card highlight">
+                    <div class="icon">🎭</div>
+                    <h4>类型参数</h4>
+                    <p>函数/类型的参数化</p>
+                    <code class="tag">[T any]</code>
                 </div>
                 <div class="feature-card">
-                    <div class="icon">♻️</div>
-                    <h4>代码复用</h4>
-                    <p>一次编写，支持多种类型</p>
+                    <div class="icon">🔗</div>
+                    <h4>类型约束</h4>
+                    <p>限制类型参数范围</p>
+                    <code class="tag">[T constraints]</code>
                 </div>
                 <div class="feature-card">
-                    <div class="icon">⚡</div>
-                    <h4>零运行时开销</h4>
-                    <p>编译时实例化，无性能损失</p>
+                    <div class="icon">📦</div>
+                    <h4>泛型类型</h4>
+                    <p>参数化的数据结构</p>
+                    <code class="tag">type List[T]</code>
                 </div>
                 <div class="feature-card">
-                    <div class="icon">🔄</div>
-                    <h4>自引用泛型 (1.26)</h4>
-                    <p>支持递归类型约束</p>
+                    <div class="icon">✅</div>
+                    <h4>类型推断</h4>
+                    <p>自动推导类型参数</p>
+                    <code class="tag">无需显式指定</code>
                 </div>
             </div>
 
-            <!-- 类型约束层级 -->
-            <h3>类型约束层级</h3>
-            <div class="type-hierarchy">
-                <div class="hierarchy-level">
-                    <div class="hierarchy-node">any</div>
-                    <span class="hierarchy-arrow">←</span>
-                    <div class="hierarchy-node">所有类型 (空约束)</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="hierarchy-node">comparable</div>
-                    <span class="hierarchy-arrow">←</span>
-                    <div class="hierarchy-node">可比较类型 (==, !=)</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="hierarchy-node">cmp.Ordered</div>
-                    <span class="hierarchy-arrow">←</span>
-                    <div class="hierarchy-node">可排序类型 (&lt;, &gt;, &lt;=, &gt;=)</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="hierarchy-node highlight">自定义约束</div>
-                    <span class="hierarchy-arrow">←</span>
-                    <div class="hierarchy-node">interface { ~int | float64 }</div>
-                </div>
+            <!-- 为什么需要泛型 -->
+            <h2 id="why">为什么需要泛型</h2>
+
+            <div class="example-box">
+                <h3>📝 泛型解决的问题</h3>
+                <pre><code><span class="comment">// 问题 1: 空接口失去类型安全</span>
+<span class="keyword">func</span> <span class="function">PrintSlice</span>(s []<span class="keyword">interface</span>{}) {
+    <span class="keyword">for</span> _, v := <span class="keyword">range</span> s {
+        fmt.<span class="function">Println</span>(v)
+    }
+}
+
+<span class="comment">// ❌ 可以传入任何类型，失去类型检查</span>
+<span class="function">PrintSlice</span>([]<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>})        <span class="comment">// 需要转换</span>
+<span class="function">PrintSlice</span>([]<span class="keyword">string</span>{<span class="string">"a"</span>, <span class="string">"b"</span>})   <span class="comment">// 需要转换</span>
+
+<span class="comment">// 问题 2: 代码重复</span>
+<span class="keyword">func</span> <span class="function">SumInt</span>(nums []<span class="keyword">int</span>) <span class="keyword">int</span> {
+    sum := <span class="number">0</span>
+    <span class="keyword">for</span> _, n := <span class="keyword">range</span> nums {
+        sum += n
+    }
+    <span class="keyword">return</span> sum
+}
+
+<span class="keyword">func</span> <span class="function">SumFloat64</span>(nums []<span class="keyword">float64</span>) <span class="keyword">float64</span> {
+    sum := <span class="number">0.0</span>
+    <span class="keyword">for</span> _, n := <span class="keyword">range</span> nums {
+        sum += n
+    }
+    <span class="keyword">return</span> sum
+}
+
+<span class="comment">// ❌ 代码重复，只是类型不同</span>
+
+<span class="comment">// ✅ 泛型解决方案</span>
+<span class="keyword">func</span> <span class="function">Sum</span>[T <span class="keyword">constraints</span>.Integer | <span class="keyword">constraints</span>.Float](nums []T) T {
+    <span class="keyword">var</span> sum T
+    <span class="keyword">for</span> _, n := <span class="keyword">range</span> nums {
+        sum += n
+    }
+    <span class="keyword">return</span> sum
+}
+
+<span class="comment">// ✅ 类型安全，代码复用</span>
+<span class="function">Sum</span>([]<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>})      <span class="comment">// T = int</span>
+<span class="function">Sum</span>([]<span class="keyword">float64</span>{<span class="number">1.1</span>, <span class="number">2.2</span>})  <span class="comment">// T = float64</span></code></pre>
             </div>
 
-            <h2 id="functions">泛型函数</h2>
-            <pre><code><span class="keyword">package</span> main
+            <div class="info-box">
+                <h3>💡 泛型的优势</h3>
+                <ul>
+                    <li><strong>类型安全</strong>: 编译期类型检查，避免运行时错误</li>
+                    <li><strong>代码复用</strong>: 一套代码适用于多种类型</li>
+                    <li><strong>性能优化</strong>: 避免接口转换和反射开销</li>
+                    <li><strong>代码清晰</strong>: 类型意图明确，易于理解</li>
+                </ul>
+            </div>
 
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-<span class="keyword">import</span> <span class="string">"cmp"</span>
+            <!-- 基础语法 -->
+            <h2 id="syntax">基础语法</h2>
 
-<span class="comment">// 泛型函数：使用 cmp.Ordered 约束</span>
-<span class="function">func</span> <span class="function">Min</span>[T <span class="keyword">cmp.Ordered</span>](x, y T) T {
-    <span class="keyword">if</span> x &lt; y {
-        <span class="keyword">return</span> x
-    }
-    <span class="keyword">return</span> y
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 使用整数</span>
-    fmt.<span class="function">Println</span>(<span class="function">Min</span>(<span class="number">5</span>, <span class="number">3</span>))  <span class="comment">// 3</span>
-
-    <span class="comment">// 使用浮点数</span>
-    fmt.<span class="function">Println</span>(<span class="function">Min</span>(<span class="number">3.14</span>, <span class="number">2.71</span>))  <span class="comment">// 2.71</span>
-
-    <span class="comment">// 使用字符串</span>
-    fmt.<span class="function">Println</span>(<span class="function">Min</span>(<span class="string">"apple"</span>, <span class="string">"banana"</span>))  <span class="comment">// apple</span>
-}</code></pre>
-
-            <h2 id="constraints">类型约束</h2>
-            <pre><code><span class="keyword">package</span> main
+            <h3>类型参数声明</h3>
+            <div class="example-box">
+                <h3>📝 泛型函数定义</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
-<span class="comment">// 自定义类型约束</span>
-<span class="keyword">type</span> Number <span class="keyword">interface</span> {
-    <span class="keyword">int</span> | <span class="keyword">int64</span> | <span class="keyword">float64</span>
+<span class="comment">// 泛型函数：[T any] 表示 T 可以是任何类型</span>
+<span class="keyword">func</span> <span class="function">Identity</span>[T <span class="keyword">any</span>](v T) T {
+    <span class="keyword">return</span> v
 }
 
-<span class="comment">// ~ 表示底层类型</span>
-<span class="keyword">type</span> SignedNumber <span class="keyword">interface</span> {
-    ~<span class="keyword">int</span> | ~<span class="keyword">int64</span> | ~<span class="keyword">int32</span>
+<span class="comment">// 多个类型参数</span>
+<span class="keyword">func</span> <span class="function">Pair</span>[T1 <span class="keyword">any</span>, T2 <span class="keyword">any</span>](a T1, b T2) (T1, T2) {
+    <span class="keyword">return</span> a, b
 }
 
-<span class="function">func</span> <span class="function">Sum</span>[T Number](numbers []T) T {
-    <span class="keyword">var</span> total T
-    <span class="keyword">for</span> _, num := <span class="keyword">range</span> numbers {
-        total += num
-    }
-    <span class="keyword">return</span> total
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    ints := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>}
-    floats := []<span class="keyword">float64</span>{<span class="number">1.1</span>, <span class="number">2.2</span>, <span class="number">3.3</span>}
-
-    fmt.<span class="function">Println</span>(<span class="string">"整数和:"</span>, <span class="function">Sum</span>(ints))
-    fmt.<span class="function">Println</span>(<span class="string">"浮点数和:"</span>, <span class="function">Sum</span>(floats))
+<span class="comment">// 类型推断：无需显式指定类型参数</span>
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 显式指定类型</span>
+    v1 := <span class="function">Identity</span>[<span class="keyword">int</span>](<span class="number">42</span>)
+    v2 := <span class="function">Identity</span>[<span class="keyword">string</span>](<span class="string">"hello"</span>)
+    
+    <span class="comment">// 类型推断 (推荐)</span>
+    v3 := <span class="function">Identity</span>(<span class="number">100</span>)      <span class="comment">// T 推断为 int</span>
+    v4 := <span class="function">Identity</span>(<span class="string">"world"</span>)   <span class="comment">// T 推断为 string</span>
+    
+    fmt.<span class="function">Println</span>(v1, v2, v3, v4)
+    
+    <span class="comment">// 多参数类型推断</span>
+    a, b := <span class="function">Pair</span>(<span class="number">1</span>, <span class="string">"one"</span>)  <span class="comment">// T1=int, T2=string</span>
+    fmt.<span class="function">Println</span>(a, b)
 }</code></pre>
+            </div>
 
-            <h2 id="constraints">类型约束</h2>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="comment">// 自定义类型约束</span>
-<span class="keyword">type</span> Number <span class="keyword">interface</span> {
-    <span class="keyword">int</span> | <span class="keyword">int64</span> | <span class="keyword">float64</span>
-}
-
-<span class="function">func</span> <span class="function">Sum</span>[T Number](numbers []T) T {
-    <span class="keyword">var</span> total T
-    <span class="keyword">for</span> _, num := <span class="keyword">range</span> numbers {
-        total += num
-    }
-    <span class="keyword">return</span> total
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    ints := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>}
-    floats := []<span class="keyword">float64</span>{<span class="number">1.1</span>, <span class="number">2.2</span>, <span class="number">3.3</span>}
-
-    fmt.<span class="function">Println</span>(<span class="string">"整数和:"</span>, <span class="function">Sum</span>(ints))
-    fmt.<span class="function">Println</span>(<span class="string">"浮点数和:"</span>, <span class="function">Sum</span>(floats))
-}</code></pre>
-
-            <h2 id="types">泛型类型</h2>
-            <pre><code><span class="keyword">package</span> main
+            <h3>泛型类型定义</h3>
+            <div class="example-box">
+                <h3>📝 泛型数据结构</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
 <span class="comment">// 泛型结构体</span>
-<span class="keyword">type</span> Stack[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
-    items []T
+<span class="keyword">type</span> Box[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
+    value T
 }
 
-<span class="function">func</span> (s *Stack[T]) <span class="function">Push</span>(item T) {
-    s.items = <span class="function">append</span>(s.items, item)
+<span class="keyword">func</span> <span class="function">NewBox</span>[T <span class="keyword">any</span>](v T) *Box[T] {
+    <span class="keyword">return</span> &Box[T]{value: v}
 }
 
-<span class="function">func</span> (s *Stack[T]) <span class="function">Pop</span>() (T, <span class="keyword">bool</span>) {
-    <span class="keyword">if</span> <span class="function">len</span>(s.items) == <span class="number">0</span> {
-        <span class="keyword">var</span> zero T
-        <span class="keyword">return</span> zero, <span class="keyword">false</span>
-    }
-    index := <span class="function">len</span>(s.items) - <span class="number">1</span>
-    item := s.items[index]
-    s.items = s.items[:index]
-    <span class="keyword">return</span> item, <span class="keyword">true</span>
+<span class="keyword">func</span> (b *Box[T]) <span class="function">Get</span>() T {
+    <span class="keyword">return</span> b.value
 }
 
-<span class="function">func</span> (s *Stack[T]) <span class="function">IsEmpty</span>() <span class="keyword">bool</span> {
-    <span class="keyword">return</span> <span class="function">len</span>(s.items) == <span class="number">0</span>
+<span class="keyword">func</span> (b *Box[T]) <span class="function">Set</span>(v T) {
+    b.value = v
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 整数栈</span>
-    intStack := Stack[<span class="keyword">int</span>]{}
-    intStack.<span class="function">Push</span>(<span class="number">1</span>)
-    intStack.<span class="function">Push</span>(<span class="number">2</span>)
-    intStack.<span class="function">Push</span>(<span class="number">3</span>)
-
-    <span class="keyword">for</span> !intStack.<span class="function">IsEmpty</span>() {
-        val, _ := intStack.<span class="function">Pop</span>()
-        fmt.<span class="function">Println</span>(<span class="string">"弹出:"</span>, val)
-    }
-
-    <span class="comment">// 字符串栈</span>
-    strStack := Stack[<span class="keyword">string</span>]{}
-    strStack.<span class="function">Push</span>(<span class="string">"Hello"</span>)
-    strStack.<span class="function">Push</span>(<span class="string">"World"</span>)
-
-    <span class="keyword">for</span> !strStack.<span class="function">IsEmpty</span>() {
-        val, _ := strStack.<span class="function">Pop</span>()
-        fmt.<span class="function">Println</span>(<span class="string">"弹出:"</span>, val)
-    }
-}</code></pre>
-
-            <h2 id="interfaces">泛型接口</h2>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="comment">// 泛型接口</span>
-<span class="keyword">type</span> Container[T <span class="keyword">any</span>] <span class="keyword">interface</span> {
-    <span class="function">Add</span>(item T)
-    <span class="function">Get</span>(index <span class="keyword">int</span>) T
-    <span class="function">Size</span>() <span class="keyword">int</span>
+<span class="comment">// 泛型链表</span>
+<span class="keyword">type</span> Node[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
+    value T
+    next  *Node[T]
 }
 
 <span class="keyword">type</span> List[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
-    items []T
+    head *Node[T]
 }
 
-<span class="function">func</span> (l *List[T]) <span class="function">Add</span>(item T) {
-    l.items = <span class="function">append</span>(l.items, item)
+<span class="keyword">func</span> <span class="function">NewList</span>[T <span class="keyword">any</span>]() *List[T] {
+    <span class="keyword">return</span> &List[T]{}
 }
 
-<span class="function">func</span> (l *List[T]) <span class="function">Get</span>(index <span class="keyword">int</span>) T {
-    <span class="keyword">return</span> l.items[index]
+<span class="keyword">func</span> (l *List[T]) <span class="function">Prepend</span>(v T) {
+    l.head = &Node[T]{value: v, next: l.head}
 }
 
-<span class="function">func</span> (l *List[T]) <span class="function">Size</span>() <span class="keyword">int</span> {
-    <span class="keyword">return</span> <span class="function">len</span>(l.items)
-}
-
-<span class="function">func</span> <span class="function">PrintContainer</span>[T <span class="keyword">any</span>](c Container[T]) {
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < c.<span class="function">Size</span>(); i++ {
-        fmt.<span class="function">Println</span>(c.<span class="function">Get</span>(i))
+<span class="keyword">func</span> (l *List[T]) <span class="function">Print</span>() {
+    <span class="keyword">for</span> curr := l.head; curr != <span class="keyword">nil</span>; curr = curr.next {
+        fmt.<span class="function">Printf</span>(<span class="string">"%v → "</span>, curr.value)
     }
+    fmt.<span class="function">Println</span>(<span class="string">"nil"</span>)
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    list := List[<span class="keyword">int</span>]{}
-    list.<span class="function">Add</span>(<span class="number">10</span>)
-    list.<span class="function">Add</span>(<span class="number">20</span>)
-    list.<span class="function">Add</span>(<span class="number">30</span>)
-
-    <span class="function">PrintContainer</span>(&list)
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 使用泛型 Box</span>
+    intBox := <span class="function">NewBox</span>(<span class="number">42</span>)
+    strBox := <span class="function">NewBox</span>(<span class="string">"hello"</span>)
+    
+    fmt.<span class="function">Println</span>(intBox.<span class="function">Get</span>())
+    fmt.<span class="function">Println</span>(strBox.<span class="function">Get</span>())
+    
+    <span class="comment">// 使用泛型 List</span>
+    intList := <span class="function">NewList</span>[<span class="keyword">int</span>]()
+    intList.<span class="function">Prepend</span>(<span class="number">3</span>)
+    intList.<span class="function">Prepend</span>(<span class="number">2</span>)
+    intList.<span class="function">Prepend</span>(<span class="number">1</span>)
+    intList.<span class="function">Print</span>() <span class="comment">// 1 → 2 → 3 → nil</span>
 }</code></pre>
+            </div>
 
-            <h2 id="methods">泛型方法</h2>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 类型约束 -->
+            <h2 id="constraints">类型约束</h2>
+
+            <h3>内置约束</h3>
+            <div class="example-box">
+                <h3>📖 Go 内置类型约束</h3>
+                <pre><code><span class="comment">// any: 任何类型 (interface{} 的别名)</span>
+<span class="keyword">func</span> <span class="function">Print</span>[T <span class="keyword">any</span>](v T) {
+    fmt.<span class="function">Println</span>(v)
+}
+
+<span class="comment">// comparable: 可比较的类型 (可用 == 和 !=)</span>
+<span class="keyword">func</span> <span class="function">Contains</span>[T <span class="keyword">comparable</span>](slice []T, target T) <span class="keyword">bool</span> {
+    <span class="keyword">for</span> _, v := <span class="keyword">range</span> slice {
+        <span class="keyword">if</span> v == target {
+            <span class="keyword">return</span> <span class="keyword">true</span>
+        }
+    }
+    <span class="keyword">return</span> <span class="keyword">false</span>
+}
+
+<span class="comment">// 有序类型约束 (Go 1.21+)</span>
+<span class="comment">// constraints.Ordered: int, int8, ..., float32, float64, string</span>
+<span class="keyword">func</span> <span class="function">Min</span>[T <span class="keyword">constraints</span>.Ordered](a, b T) T {
+    <span class="keyword">if</span> a &lt; b {
+        <span class="keyword">return</span> a
+    }
+    <span class="keyword">return</span> b
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="function">Print</span>(<span class="number">42</span>)
+    <span class="function">Print</span>(<span class="string">"hello"</span>)
+    
+    fmt.<span class="function">Println</span>(<span class="function">Contains</span>([]<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}, <span class="number">2</span>))  <span class="comment">// true</span>
+    fmt.<span class="function">Println</span>(<span class="function">Contains</span>([]<span class="keyword">string</span>{<span class="string">"a"</span>, <span class="string">"b"</span>}, <span class="string">"c"</span>)) <span class="comment">// false</span>
+    
+    fmt.<span class="function">Println</span>(<span class="function">Min</span>(<span class="number">10</span>, <span class="number">20</span>))      <span class="comment">// 10</span>
+    fmt.<span class="function">Println</span>(<span class="function">Min</span>(<span class="number">3.14</span>, <span class="number">2.71</span>))  <span class="comment">// 2.71</span>
+    fmt.<span class="function">Println</span>(<span class="function">Min</span>(<span class="string">"apple"</span>, <span class="string">"banana"</span>)) <span class="comment">// "apple"</span>
+}</code></pre>
+            </div>
+
+            <h3>自定义约束</h3>
+            <div class="example-box">
+                <h3>📝 定义和使用自定义约束</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"golang.org/x/exp/constraints"</span>
+)
+
+<span class="comment">// 自定义约束：定义接口作为约束</span>
+<span class="keyword">type</span> Stringer <span class="keyword">interface</span> {
+    <span class="function">String</span>() <span class="keyword">string</span>
+}
+
+<span class="comment">// 约束：实现 Stringer 接口的类型</span>
+<span class="keyword">func</span> <span class="function">PrintStringer</span>[T Stringer](v T) {
+    fmt.<span class="function">Println</span>(v.<span class="function">String</span>())
+}
+
+<span class="comment">// 自定义类型实现约束</span>
+<span class="keyword">type</span> Person <span class="keyword">struct</span> {
+    Name <span class="keyword">string</span>
+    Age  <span class="keyword">int</span>
+}
+
+<span class="keyword">func</span> (p Person) <span class="function">String</span>() <span class="keyword">string</span> {
+    <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%s(%d)"</span>, p.Name, p.Age)
+}
+
+<span class="comment">// 联合约束：多种类型的并集</span>
+<span class="keyword">type</span> Number <span class="keyword">interface</span> {
+    <span class="keyword">constraints</span>.Integer | <span class="keyword">constraints</span>.Float
+}
+
+<span class="comment">// 使用联合约束</span>
+<span class="keyword">func</span> <span class="function">Add</span>[T Number](a, b T) T {
+    <span class="keyword">return</span> a + b
+}
+
+<span class="comment">// 带方法的约束</span>
+<span class="keyword">type</span> Adder[T <span class="keyword">constraints</span>.Integer | <span class="keyword">constraints</span>.Float] <span class="keyword">interface</span> {
+    ~[]T <span class="comment">// 底层类型是 []T</span>
+}
+
+<span class="keyword">func</span> <span class="function">SumSlice</span>[T <span class="keyword">constraints</span>.Numeric](slice []T) T {
+    <span class="keyword">var</span> sum T
+    <span class="keyword">for</span> _, v := <span class="keyword">range</span> slice {
+        sum += v
+    }
+    <span class="keyword">return</span> sum
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    p := Person{Name: <span class="string">"Alice"</span>, Age: <span class="number">30</span>}
+    <span class="function">PrintStringer</span>(p) <span class="comment">// Alice(30)</span>
+    
+    fmt.<span class="function">Println</span>(<span class="function">Add</span>(<span class="number">10</span>, <span class="number">20</span>))      <span class="comment">// 30</span>
+    fmt.<span class="function">Println</span>(<span class="function">Add</span>(<span class="number">3.14</span>, <span class="number">2.71</span>))  <span class="comment">// 5.85</span>
+    
+    nums := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>}
+    fmt.<span class="function">Println</span>(<span class="function">SumSlice</span>(nums)) <span class="comment">// 15</span>
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <h3>💡 约束符号说明</h3>
+                <ul>
+                    <li><strong>~T</strong>: 底层类型是 T 的所有类型（包括 T 本身）</li>
+                    <li><strong>A | B</strong>: A 或 B（联合类型）</li>
+                    <li><strong>constraints.Integer</strong>: 所有整数类型</li>
+                    <li><strong>constraints.Float</strong>: 所有浮点数类型</li>
+                    <li><strong>constraints.Numeric</strong>: 所有数值类型</li>
+                    <li><strong>constraints.Ordered</strong>: 可比较大小的类型</li>
+                </ul>
+            </div>
+
+            <!-- 类型推断 -->
+            <h2 id="inference">类型推断</h2>
+            <div class="example-box">
+                <h3>📝 Go 的类型推断规则</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
-<span class="keyword">type</span> Processor <span class="keyword">struct</span> {
-    name <span class="keyword">string</span>
+<span class="comment">// 1. 从函数参数推断</span>
+<span class="keyword">func</span> <span class="function">Wrap</span>[T <span class="keyword">any</span>](v T) []T {
+    <span class="keyword">return</span> []T{v}
 }
 
-<span class="comment">// 泛型方法</span>
-<span class="function">func</span> (p Processor) <span class="function">Process</span>[T <span class="keyword">any</span>](items []T, fn <span class="function">func</span>(T) T) []T {
-    result := <span class="function">make</span>([]T, <span class="function">len</span>(items))
-    <span class="keyword">for</span> i, item := <span class="keyword">range</span> items {
-        result[i] = fn(item)
+<span class="comment">// 2. 从返回类型推断 (Go 1.22+)</span>
+<span class="keyword">func</span> <span class="function">MakeSlice</span>[T <span class="keyword">any</span>](n <span class="keyword">int</span>) []T {
+    <span class="keyword">return</span> <span class="function">make</span>([]T, n)
+}
+
+<span class="comment">// 3. 多个类型参数的推断</span>
+<span class="keyword">func</span> <span class="function">Map</span>[T, U <span class="keyword">any</span>](slice []T, fn <span class="keyword">func</span>(T) U) []U {
+    result := <span class="function">make</span>([]U, <span class="function">len</span>(slice))
+    <span class="keyword">for</span> i, v := <span class="keyword">range</span> slice {
+        result[i] = <span class="function">fn</span>(v)
     }
     <span class="keyword">return</span> result
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    processor := Processor{name: <span class="string">"MyProcessor"</span>}
-
-    <span class="comment">// 处理整数</span>
-    numbers := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}
-    doubled := processor.<span class="function">Process</span>(numbers, <span class="function">func</span>(n <span class="keyword">int</span>) <span class="keyword">int</span> {
-        <span class="keyword">return</span> n * <span class="number">2</span>
-    })
-    fmt.<span class="function">Println</span>(<span class="string">"加倍:"</span>, doubled)
-
-    <span class="comment">// 处理字符串</span>
-    words := []<span class="keyword">string</span>{<span class="string">"hello"</span>, <span class="string">"world"</span>}
-    upper := processor.<span class="function">Process</span>(words, <span class="function">func</span>(s <span class="keyword">string</span>) <span class="keyword">string</span> {
-        <span class="keyword">return</span> s + <span class="string">"!"</span>
-    })
-    fmt.<span class="function">Println</span>(<span class="string">"添加感叹号:"</span>, upper)
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 完整类型推断</span>
+    w1 := <span class="function">Wrap</span>(<span class="number">42</span>)           <span class="comment">// T = int</span>
+    w2 := <span class="function">Wrap</span>(<span class="string">"hello"</span>)       <span class="comment">// T = string</span>
+    
+    <span class="comment">// 部分推断 + 显式指定</span>
+    <span class="comment">// s1 := MakeSlice[int](5)  // 需要显式指定</span>
+    
+    <span class="comment">// Map 函数：从 slice 和 fn 推断</span>
+    nums := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}
+    strs := <span class="function">Map</span>(nums, <span class="keyword">func</span>(n <span class="keyword">int</span>) <span class="keyword">string</span> {
+        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"num-%d"</span>, n)
+    }) <span class="comment">// T = int, U = string</span>
+    
+    fmt.<span class="function">Println</span>(w1, w2)
+    fmt.<span class="function">Println</span>(strs)
 }</code></pre>
-
-            <h2 id="inference">类型推断</h2>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="function">func</span> <span class="function">Print</span>[T <span class="keyword">any</span>](value T) {
-    fmt.<span class="function">Println</span>(value)
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 类型推断：编译器自动推断类型</span>
-    <span class="function">Print</span>(<span class="number">42</span>)      <span class="comment">// T 推断为 int</span>
-    <span class="function">Print</span>(<span class="string">"hello"</span>)  <span class="comment">// T 推断为 string</span>
-    <span class="function">Print</span>(<span class="number">3.14</span>)     <span class="comment">// T 推断为 float64</span>
-
-    <span class="comment">// 显式指定类型</span>
-    <span class="function">Print</span>[<span class="keyword">int</span>](<span class="number">100</span>)
-}</code></pre>
-
-            <h2 id="multiple">多个类型参数</h2>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="comment">// 两个类型参数</span>
-<span class="function">func</span> <span class="function">Pair</span>[K, V <span class="keyword">any</span>](key K, value V) <span class="keyword">map</span>[K]V {
-    <span class="keyword">return</span> <span class="keyword">map</span>[K]V{key: value}
-}
-
-<span class="comment">// 三个类型参数</span>
-<span class="function">func</span> <span class="function">Transform</span>[T, U, V <span class="keyword">any</span>](t T, u U, fn <span class="function">func</span>(T, U) V) V {
-    <span class="keyword">return</span> fn(t, u)
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 使用 Pair</span>
-    m := <span class="function">Pair</span>(<span class="string">"name"</span>, <span class="string">"Go"</span>)
-    fmt.<span class="function">Println</span>(m)
-
-    <span class="comment">// 使用 Transform</span>
-    result := <span class="function">Transform</span>(<span class="number">10</span>, <span class="number">5</span>, <span class="function">func</span>(a, b <span class="keyword">int</span>) <span class="keyword">int</span> {
-        <span class="keyword">return</span> a + b
-    })
-    fmt.<span class="function">Println</span>(<span class="string">"结果:"</span>, result)
-}</code></pre>
-
-            <h2 id="tilde">Go 1.26 新特性：自引用泛型</h2>
-            <div class="info-box">
-                <h3>⭐ Go 1.26 新增：自引用泛型</h3>
-                <p>Go 1.26 解除了泛型类型不能在其自身类型参数列表中引用自己的限制。这使得实现复杂的递归数据结构成为可能。</p>
             </div>
-            <pre><code><span class="keyword">package</span> main
 
-<span class="keyword">import</span> <span class="string">"fmt"</span>
+            <div class="warning-box">
+                <h3>⚠️ 类型推断限制</h3>
+                <ul>
+                    <li><strong>无法推断</strong>: 没有函数参数时无法推断类型</li>
+                    <li><strong>歧义情况</strong>: 多个参数类型冲突时推断失败</li>
+                    <li><strong>需要显式指定</strong>: 推断失败时必须显式指定类型参数</li>
+                </ul>
+            </div>
 
-<span class="comment">// Go 1.26: 自引用泛型 - 递归约束</span>
-<span class="comment">// Adder 类型约束要求 A 必须实现 Add(A) A 方法</span>
-<span class="keyword">type</span> Adder[A Adder[A]] <span class="keyword">interface</span> {
-    <span class="function">Add</span>(A) A
-}
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
 
-<span class="keyword">type</span> MyInt <span class="keyword">int</span>
-
-<span class="keyword">func</span> (m MyInt) <span class="function">Add</span>(other MyInt) MyInt {
-    <span class="keyword">return</span> m + other
-}
-
-<span class="keyword">func</span> <span class="function">sum</span>[A Adder[A]](x, y A) A {
-    <span class="keyword">return</span> x.<span class="function">Add</span>(y)
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    x, y := MyInt(<span class="number">10</span>), MyInt(<span class="number">20</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"Sum:"</span>, <span class="function">sum</span>(x, y))  <span class="comment">// 30</span>
-}</code></pre>
-
-            <h2 id="new">Go 1.26 新特性：new() 表达式增强</h2>
             <div class="success-box">
-                <h3>⭐ Go 1.26: new() 函数增强</h3>
-                <p>new() 函数现在可以接受表达式作为初始值，简化了代码。</p>
+                <h3>✅ 泛型使用建议</h3>
+                <ul>
+                    <li><strong>优先类型推断</strong>: 让编译器推断类型，代码更简洁</li>
+                    <li><strong>合理约束</strong>: 使用最宽松的约束满足需求</li>
+                    <li><strong>避免过度泛型</strong>: 不是所有代码都需要泛型</li>
+                    <li><strong>文档说明</strong>: 为泛型函数添加清晰的文档</li>
+                    <li><strong>测试覆盖</strong>: 测试多种类型参数组合</li>
+                </ul>
             </div>
-            <pre><code><span class="keyword">package</span> main
 
-<span class="keyword">import</span> <span class="string">"encoding/json"</span>
-
-<span class="keyword">type</span> Config <span class="keyword">struct</span> {
-    MaxRetries *<span class="keyword">int</span>  <span class="string">`json:"max_retries,omitempty"`</span>
-    Timeout    *<span class="keyword">int</span>     <span class="string">`json:"timeout,omitempty"`</span>
-}
-
-<span class="comment">// Go 1.26 之前的写法</span>
-<span class="keyword">func</span> <span class="function">oldWay</span>() Config {
-    n := <span class="number">3</span>
-    t := <span class="number">30</span>
-    <span class="keyword">return</span> Config{
-        MaxRetries: &n,
-        Timeout:    &t,
+            <h3>泛型 vs 接口 vs 代码生成</h3>
+            <div class="example-box">
+                <h3>📊 技术方案对比</h3>
+                <pre><code><span class="comment">// 方案 1: 泛型 (推荐用于类型安全场景)</span>
+<span class="keyword">func</span> <span class="function">Filter</span>[T <span class="keyword">any</span>](slice []T, fn <span class="keyword">func</span>(T) <span class="keyword">bool</span>) []T {
+    result := []T{}
+    <span class="keyword">for</span> _, v := <span class="keyword">range</span> slice {
+        <span class="keyword">if</span> <span class="function">fn</span>(v) {
+            result = <span class="function">append</span>(result, v)
+        }
     }
+    <span class="keyword">return</span> result
 }
 
-<span class="comment">// Go 1.26: 简化写法</span>
-<span class="keyword">func</span> <span class="function">newWay</span>() Config {
-    <span class="keyword">return</span> Config{
-        MaxRetries: <span class="function">new</span>(<span class="number">3</span>),   <span class="comment">// 直接 new(表达式)</span>
-        Timeout:    <span class="function">new</span>(<span class="number">30</span>),
+<span class="comment">// 方案 2: 接口 (推荐用于多态场景)</span>
+<span class="keyword">type</span> FilterFunc <span class="keyword">interface</span> {
+    <span class="function">Match</span>(<span class="keyword">interface</span>{}) <span class="keyword">bool</span>
+}
+
+<span class="keyword">func</span> <span class="function">FilterInterface</span>(slice []<span class="keyword">interface</span>{}, fn FilterFunc) []<span class="keyword">interface</span>{} {
+    result := []<span class="keyword">interface</span>{}{}
+    <span class="keyword">for</span> _, v := <span class="keyword">range</span> slice {
+        <span class="keyword">if</span> fn.<span class="function">Match</span>(v) {
+            result = <span class="function">append</span>(result, v)
+        }
     }
+    <span class="keyword">return</span> result
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    c := <span class="function">newWay</span>()
-    jsonBytes, _ := json.<span class="function">Marshal</span>(c)
-    fmt.<span class="function">Println</span>(<span class="string">string</span>(jsonBytes))
-}</code></pre>
+<span class="comment">// 方案 3: 代码生成 (不推荐，维护成本高)</span>
+<span class="comment">// go generate 生成多个类型的代码</span>
 
-            <h2 id="bestpractices">泛型最佳实践</h2>
+<span class="comment">// 选择建议：</span>
+<span class="comment">// - 需要类型安全 + 代码复用 → 泛型</span>
+<span class="comment">// - 需要运行时多态 → 接口</span>
+<span class="comment">// - 性能极致要求 → 手写具体类型代码</span></code></pre>
+            </div>
 
             <div class="note-box">
-                <h3>何时使用泛型</h3>
+                <h3>📖 延伸阅读</h3>
                 <ul>
-                    <li>当需要为多种类型实现相同逻辑时</li>
-                    <li>当类型安全比代码简洁更重要时</li>
-                    <li>当需要构建通用数据结构时（如栈、队列、树等）</li>
+                    <li><a href="generics-functions.html">泛型函数</a></li>
+                    <li><a href="generics-types.html">泛型类型</a></li>
+                    <li><a href="generics-constraints.html">类型约束详解</a></li>
+                    <li><a href="generics-inference.html">类型推断</a></li>
                 </ul>
             </div>
-
-            <div class="example-box">
-                <h3>何时不使用泛型</h3>
-                <ul>
-                    <li>当只需要处理一种特定类型时</li>
-                    <li>当使用接口更简单时</li>
-                    <li>当泛型会让代码更难理解时</li>
-                </ul>
-            </div>
-
-            <h2 id="example">实际应用示例：泛型缓存</h2>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"sync"</span>
-    <span class="string">"time"</span>
-)
-
-<span class="keyword">type</span> CacheItem[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
-    value      T
-    expiration time.Time
-}
-
-<span class="keyword">type</span> Cache[K <span class="keyword">comparable</span>, V <span class="keyword">any</span>] <span class="keyword">struct</span> {
-    items <span class="keyword">map</span>[K]CacheItem[V]
-    mu    sync.RWMutex
-}
-
-<span class="function">func</span> <span class="function">NewCache</span>[K <span class="keyword">comparable</span>, V <span class="keyword">any</span>() *Cache[K, V] {
-    <span class="keyword">return</span> &Cache[K, V]{
-        items: <span class="function">make</span>(<span class="keyword">map</span>[K]CacheItem[V]),
-    }
-}
-
-<span class="function">func</span> (c *Cache[K, V]) <span class="function">Set</span>(key K, value V, ttl time.Duration) {
-    c.mu.<span class="function">Lock</span>()
-    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
-
-    c.items[key] = CacheItem[V]{
-        value:      value,
-        expiration: time.<span class="function">Now</span>().<span class="function">Add</span>(ttl),
-    }
-}
-
-<span class="function">func</span> (c *Cache[K, V]) <span class="function">Get</span>(key K) (V, <span class="keyword">bool</span>) {
-    c.mu.<span class="function">RLock</span>()
-    <span class="keyword">defer</span> c.mu.<span class="function">RUnlock</span>()
-
-    item, exists := c.items[key]
-    <span class="keyword">if</span> !exists || time.<span class="function">Now</span>().<span class="function">After</span>(item.expiration) {
-        <span class="keyword">var</span> zero V
-        <span class="keyword">return</span> zero, <span class="keyword">false</span>
-    }
-    <span class="keyword">return</span> item.value, <span class="keyword">true</span>
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 字符串缓存</span>
-    stringCache := <span class="function">NewCache</span>[<span class="keyword">string</span>, <span class="keyword">string</span>]()
-    stringCache.<span class="function">Set</span>(<span class="string">"key1"</span>, <span class="string">"value1"</span>, <span class="number">10</span>*time.Second)
-    val, ok := stringCache.<span class="function">Get</span>(<span class="string">"key1"</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"字符串缓存:"</span>, val, ok)
-
-    <span class="comment">// 整数缓存</span>
-    intCache := <span class="function">NewCache</span>[<span class="keyword">string</span>, <span class="keyword">int</span>]()
-    intCache.<span class="function">Set</span>(<span class="string">"counter"</span>, <span class="number">42</span>, <span class="number">10</span>*time.Second)
-    count, ok := intCache.<span class="function">Get</span>(<span class="string">"counter"</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"整数缓存:"</span>, count, ok)
-}</code></pre>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

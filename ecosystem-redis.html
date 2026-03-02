@@ -4,170 +4,343 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redis 客户端 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>Redis - Go Redis 客户端</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
-            <h2 id="redis">Redis 客户端</h2>
-            <p>Redis 是一个高性能的键值存储数据库，Go 中常用 go-redis 库进行操作。</p>
-            
-            <h3>快速开始</h3>
-            <pre><code><span class="keyword">go get</span> github.com/redis/go-redis/v9</code></pre>
-            
-            <h3>基本操作</h3>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="ecosystem-mysql.html" class="back-link">← MySQL</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="ecosystem-etcd.html" class="back-link">Etcd →</a>
+
+            <h1>Redis - Go Redis 客户端</h1>
+            <p class="intro">Redis 是高性能的键值存储数据库，广泛用于缓存、会话管理、消息队列等场景。go-redis 是 Go 最流行的 Redis 客户端库。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">⚡</div>
+                    <h4>高性能</h4>
+                    <p>内存存储</p>
+                    <code class="tag">10 万 + QPS</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔑</div>
+                    <h4>数据结构</h4>
+                    <p>String/Hash/List/Set</p>
+                    <code class="tag">多种类型</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔔</div>
+                    <h4>发布订阅</h4>
+                    <p>Pub/Sub 消息</p>
+                    <code class="tag">实时通信</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔒</div>
+                    <h4>分布式锁</h4>
+                    <p>Redlock 实现</p>
+                    <code class="tag">并发控制</code>
+                </div>
+            </div>
+
+            <!-- 快速开始 -->
+            <h2 id="quickstart">快速开始</h2>
+
+            <div class="example-box">
+                <h3>📝 连接 Redis</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"context"</span>
     <span class="string">"fmt"</span>
-    <span class="string">"time"</span>
-    <span class="string">"github.com/redis/go-redis/v9"</span>
+    <span class="string">"github.com/go-redis/redis/v8"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
+<span class="keyword">func</span> <span class="function">main</span>() {
     <span class="comment">// 创建客户端</span>
     rdb := redis.<span class="function">NewClient</span>(&redis.Options{
         Addr:     <span class="string">"localhost:6379"</span>,
-        Password: <span class="string">""</span>,
-        DB:       0,
+        Password: <span class="string">""</span>, <span class="comment">// 无密码</span>
+        DB:       <span class="number">0</span>,   <span class="comment">// 默认数据库</span>
     })
     
     ctx := context.<span class="function">Background</span>()
     
-    <span class="comment">// 设置键值</span>
-    err := rdb.<span class="function">Set</span>(ctx, <span class="string">"key"</span>, <span class="string">"value"</span>, 0).<span class="function">Err</span>()
+    <span class="comment">// 测试连接</span>
+    err := rdb.<span class="function">Ping</span>(ctx).<span class="function">Err</span>()
     <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        <span class="keyword">panic</span>(err)
+        <span class="function">panic</span>(err)
     }
+    fmt.<span class="function">Println</span>(<span class="string">"Redis connected!"</span>)
     
-    <span class="comment">// 获取键值</span>
-    val, err := rdb.<span class="function">Get</span>(ctx, <span class="string">"key"</span>).<span class="function">Result</span>()
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        <span class="keyword">panic</span>(err)
-    }
-    fmt.<span class="function">Println</span>(<span class="string">"key:"</span>, val)
+    <span class="comment">// 设置值</span>
+    rdb.<span class="function">Set</span>(ctx, <span class="string">"name"</span>, <span class="string">"Alice"</span>, <span class="number">0</span>)
     
-    <span class="comment">// 设置过期时间</span>
-    rdb.<span class="function">Set</span>(ctx, <span class="string">"key"</span>, <span class="string">"value"</span>, 10*time.Minute)
+    <span class="comment">// 获取值</span>
+    name, _ := rdb.<span class="function">Get</span>(ctx, <span class="string">"name"</span>).<span class="function">Result</span>()
+    fmt.<span class="function">Printf</span>(<span class="string">"Name: %s\n"</span>, name)
     
-    <span class="comment">// 删除键</span>
-    rdb.<span class="function">Del</span>(ctx, <span class="string">"key"</span>)
-}</code></pre>
-            
-            <h3>数据结构操作</h3>
-            <pre><code><span class="comment">// 1. Hash 操作</span>
-rdb.<span class="function">HSet</span>(ctx, <span class="string">"user:1"</span>, <span class="string">"name"</span>, <span class="string">"张三"</span>)
-rdb.<span class="function">HSet</span>(ctx, <span class="string">"user:1"</span>, <span class="string">"email"</span>, <span class="string">"zhangsan@example.com"</span>)
-name, _ := rdb.<span class="function">HGet</span>(ctx, <span class="string">"user:1"</span>, <span class="string">"name"</span>).<span class="function">Result</span>()
-
-<span class="comment">// 2. List 操作</span>
-rdb.<span class="function">LPush</span>(ctx, <span class="string">"list"</span>, <span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>)
-val, _ := rdb.<span class="function">RPop</span>(ctx, <span class="string">"list"</span>).<span class="function">Result</span>()
-
-<span class="comment">// 3. Set 操作</span>
-rdb.<span class="function">SAdd</span>(ctx, <span class="string">"set"</span>, <span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>)
-members, _ := rdb.<span class="function">SMembers</span>(ctx, <span class="string">"set"</span>).<span class="function">Result</span>()
-
-<span class="comment">// 4. Sorted Set 操作</span>
-rdb.<span class="function">ZAdd</span>(ctx, <span class="string">"zset"</span>, redis.Z{Score: 1, Member: <span class="string">"a"</span>})
-rdb.<span class="function">ZAdd</span>(ctx, <span class="string">"zset"</span>, redis.Z{Score: 2, Member: <span class="string">"b"</span>})
-result, _ := rdb.<span class="function">ZRangeWithScores</span>(ctx, <span class="string">"zset"</span>, 0, -1).<span class="function">Result</span>()</code></pre>
-            
-            <h3>发布订阅</h3>
-            <pre><code><span class="comment">// 发布消息</span>
-err := rdb.<span class="function">Publish</span>(ctx, <span class="string">"channel"</span>, <span class="string">"message"</span>).<span class="function">Err</span>()
-
-<span class="comment">// 订阅消息</span>
-pubsub := rdb.<span class="function">Subscribe</span>(ctx, <span class="string">"channel"</span>)
-<span class="keyword">defer</span> pubsub.<span class="function">Close</span>()
-
-<span class="keyword">for</span> {
-    msg, err := pubsub.<span class="function">ReceiveMessage</span>(ctx)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        <span class="keyword">panic</span>(err)
-    }
-    fmt.<span class="function">Println</span>(<span class="string">"收到消息:"</span>, msg.Payload)
-}</code></pre>
-            
-            <h3>事务</h3>
-            <pre><code><span class="comment">// 使用事务</span>
-<span class="function">func</span> <span class="function">transfer</span>(from, to <span class="keyword">string</span>, amount <span class="keyword">int64</span>) <span class="keyword">error</span> {
-    tx := rdb.<span class="function">TxPipeline</span>()
-    
-    err := tx.<span class="function">DecrBy</span>(ctx, from, amount).<span class="function">Err</span>()
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        <span class="keyword">return</span> err
-    }
-    
-    tx.<span class="function">IncrBy</span>(ctx, to, amount)
-    
-    _, err = tx.<span class="function">Exec</span>(ctx)
-    <span class="keyword">return</span> err
-}</code></pre>
-            
-            <h3>Redis 最佳实践</h3>
-            <div class="note-box">
-                <h4>1. 连接池配置</h4>
-                <pre><code>rdb := redis.<span class="function">NewClient</span>(&redis.Options{
-    Addr:         <span class="string">"localhost:6379"</span>,
-    Password:     <span class="string">""</span>,
-    DB:           0,
-    PoolSize:     10,   <span class="comment">// 连接池大小</span>
-    MinIdleConns: 5,    <span class="comment">// 最小空闲连接</span>
-    MaxRetries:   3,    <span class="comment">// 最大重试次数</span>
-})</code></pre>
-                
-                <h4>2. 使用 Pipeline</h4>
-                <pre><code><span class="comment">// 批量操作使用 Pipeline</span>
-pipe := rdb.<span class="function">Pipeline</span>()
-pipe.<span class="function">Set</span>(ctx, <span class="string">"key1"</span>, <span class="string">"value1"</span>, 0)
-pipe.<span class="function">Set</span>(ctx, <span class="string">"key2"</span>, <span class="string">"value2"</span>, 0)
-pipe.<span class="function">Set</span>(ctx, <span class="string">"key3"</span>, <span class="string">"value3"</span>, 0)
-cmds, err := pipe.<span class="function">Exec</span>(ctx)</code></pre>
-                
-                <h4>3. 键命名规范</h4>
-                <pre><code><span class="comment">// 使用冒号分隔的层次结构</span>
-<span class="string">"user:1:name"</span>
-<span class="string">"user:1:email"</span>
-<span class="string">"session:abc123"</span>
-<span class="string">"cache:product:123"</span></code></pre>
-                
-                <h4>4. 缓存策略</h4>
-                <pre><code><span class="comment">// Cache-Aside 模式</span>
-<span class="function">func</span> <span class="function">getUser</span>(id <span class="keyword">int64</span>) (*User, <span class="keyword">error</span>) {
-    <span class="comment">// 1. 先查缓存</span>
-    key := fmt.<span class="function">Sprintf</span>(<span class="string">"user:%d"</span>, id)
-    val, err := rdb.<span class="function">Get</span>(ctx, key).<span class="function">Result</span>()
-    <span class="keyword">if</span> err == <span class="keyword">nil</span> {
-        <span class="keyword">return</span> <span class="function">unmarshalUser</span>(val)
-    }
-    
-    <span class="comment">// 2. 查数据库</span>
-    user, err := db.<span class="function">GetUser</span>(id)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        <span class="keyword">return</span> <span class="keyword">nil</span>, err
-    }
-    
-    <span class="comment">// 3. 写入缓存</span>
-    data, _ := json.<span class="function">Marshal</span>(user)
-    rdb.<span class="function">Set</span>(ctx, key, data, 10*time.Minute)
-    
-    <span class="keyword">return</span> user, <span class="keyword">nil</span>
+    <span class="comment">// 关闭连接</span>
+    <span class="keyword">defer</span> rdb.<span class="function">Close</span>()
 }</code></pre>
             </div>
 
-            
+            <div class="info-box">
+                <h3>💡 Redis 要点</h3>
+                <ul>
+                    <li><strong>Context</strong>: go-redis v8+ 需要 context</li>
+                    <li><strong>连接池</strong>: 客户端内部维护连接池</li>
+                    <li><strong>并发安全</strong>: Client 是并发安全的</li>
+                    <li><strong>自动重连</strong>: 内置重连机制</li>
+                </ul>
+            </div>
+
+            <!-- 字符串操作 -->
+            <h2 id="string">字符串操作</h2>
+
+            <div class="example-box">
+                <h3>📝 String 类型操作</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">stringOperations</span>(ctx context.Context, rdb *redis.Client) {
+    <span class="comment">// 设置</span>
+    rdb.<span class="function">Set</span>(ctx, <span class="string">"counter"</span>, <span class="number">0</span>, <span class="number">0</span>)
+    
+    <span class="comment">// 带过期时间设置</span>
+    rdb.<span class="function">Set</span>(ctx, <span class="string">"session:123"</span>, <span class="string">"user_data"</span>, time.Hour)
+    
+    <span class="comment">// 递增</span>
+    rdb.<span class="function">Incr</span>(ctx, <span class="string">"counter"</span>)
+    rdb.<span class="function">IncrBy</span>(ctx, <span class="string">"counter"</span>, <span class="number">10</span>)
+    
+    <span class="comment">// 递减</span>
+    rdb.<span class="function">Decr</span>(ctx, <span class="string">"counter"</span>)
+    
+    <span class="comment">// 获取</span>
+    val, _ := rdb.<span class="function">Get</span>(ctx, <span class="string">"counter"</span>).<span class="function">Int</span>()
+    fmt.<span class="function">Printf</span>(<span class="string">"Counter: %d\n"</span>, val)
+    
+    <span class="comment">// 批量设置/获取</span>
+    rdb.<span class="function">MSet</span>(ctx, 
+        <span class="string">"key1"</span>, <span class="string">"value1"</span>,
+        <span class="string">"key2"</span>, <span class="string">"value2"</span>,
+    )
+    vals, _ := rdb.<span class="function">MGet</span>(ctx, <span class="string">"key1"</span>, <span class="string">"key2"</span>).<span class="function">Result</span>()
+    fmt.<span class="function">Println</span>(vals)
+    
+    <span class="comment">// 获取并删除</span>
+    val, _ = rdb.<span class="function">GetDel</span>(ctx, <span class="string">"counter"</span>).<span class="function">Int</span>()
+}</code></pre>
+            </div>
+
+            <!-- Hash 操作 -->
+            <h2 id="hash">Hash 类型操作</h2>
+            <div class="example-box">
+                <h3>📝 Hash 类型操作</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">hashOperations</span>(ctx context.Context, rdb *redis.Client) {
+    <span class="comment">// 设置字段</span>
+    rdb.<span class="function">HSet</span>(ctx, <span class="string">"user:1001"</span>, 
+        <span class="string">"name"</span>, <span class="string">"Alice"</span>,
+        <span class="string">"email"</span>, <span class="string">"alice@example.com"</span>,
+        <span class="string">"age"</span>, <span class="number">25</span>,
+    )
+    
+    <span class="comment">// 获取单个字段</span>
+    name, _ := rdb.<span class="function">HGet</span>(ctx, <span class="string">"user:1001"</span>, <span class="string">"name"</span>).<span class="function">Result</span>()
+    
+    <span class="comment">// 获取所有字段</span>
+    all, _ := rdb.<span class="function">HGetAll</span>(ctx, <span class="string">"user:1001"</span>).<span class="function">Result</span>()
+    fmt.<span class="function">Printf</span>(<span class="string">"User: %+v\n"</span>, all)
+    
+    <span class="comment">// 获取多个字段</span>
+    vals, _ := rdb.<span class="function">HMGet</span>(ctx, <span class="string">"user:1001"</span>, <span class="string">"name"</span>, <span class="string">"email"</span>).<span class="function">Result</span>()
+    
+    <span class="comment">// 检查字段存在</span>
+    exists, _ := rdb.<span class="function">HExists</span>(ctx, <span class="string">"user:1001"</span>, <span class="string">"name"</span>).<span class="function">Result</span>()
+    
+    <span class="comment">// 删除字段</span>
+    rdb.<span class="function">HDel</span>(ctx, <span class="string">"user:1001"</span>, <span class="string">"age"</span>)
+    
+    <span class="comment">// 获取字段数</span>
+    count, _ := rdb.<span class="function">HLen</span>(ctx, <span class="string">"user:1001"</span>).<span class="function">Result</span>()
+}</code></pre>
+            </div>
+
+            <!-- List/Set 操作 -->
+            <h2 id="list-set">List 和 Set 操作</h2>
+            <div class="example-box">
+                <h3>📝 List 和 Set 操作</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">listSetOperations</span>(ctx context.Context, rdb *redis.Client) {
+    <span class="comment">// List: 左侧推入</span>
+    rdb.<span class="function">LPush</span>(ctx, <span class="string">"tasks"</span>, <span class="string">"task1"</span>, <span class="string">"task2"</span>, <span class="string">"task3"</span>)
+    
+    <span class="comment">// List: 右侧推入</span>
+    rdb.<span class="function">RPush</span>(ctx, <span class="string">"queue"</span>, <span class="string">"item1"</span>, <span class="string">"item2"</span>)
+    
+    <span class="comment">// List: 获取范围</span>
+    items, _ := rdb.<span class="function">LRange</span>(ctx, <span class="string">"tasks"</span>, <span class="number">0</span>, -<span class="number">1</span>).<span class="function">Result</span>()
+    
+    <span class="comment">// List: 弹出</span>
+    task, _ := rdb.<span class="function">LPop</span>(ctx, <span class="string">"tasks"</span>).<span class="function">Result</span>()
+    
+    <span class="comment">// Set: 添加成员</span>
+    rdb.<span class="function">SAdd</span>(ctx, <span class="string">"tags"</span>, <span class="string">"go"</span>, <span class="string">"redis"</span>, <span class="string">"cache"</span>)
+    
+    <span class="comment">// Set: 获取所有成员</span>
+    members, _ := rdb.<span class="function">SMembers</span>(ctx, <span class="string">"tags"</span>).<span class="function">Result</span>()
+    
+    <span class="comment">// Set: 检查成员</span>
+    isMember, _ := rdb.<span class="function">SIsMember</span>(ctx, <span class="string">"tags"</span>, <span class="string">"go"</span>).<span class="function">Result</span>()
+    
+    <span class="comment">// Set: 集合运算</span>
+    rdb.<span class="function">SAdd</span>(ctx, <span class="string">"set1"</span>, <span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>)
+    rdb.<span class="function">SAdd</span>(ctx, <span class="string">"set2"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>)
+    
+    <span class="comment">// 交集</span>
+    inter, _ := rdb.<span class="function">SInter</span>(ctx, <span class="string">"set1"</span>, <span class="string">"set2"</span>).<span class="function">Result</span> <span class="comment">// [b c]</span>
+    
+    <span class="comment">// 并集</span>
+    union, _ := rdb.<span class="function">SUnion</span>(ctx, <span class="string">"set1"</span>, <span class="string">"set2"</span>).<span class="function">Result</span> <span class="comment">// [a b c d]</span>
+}</code></pre>
+            </div>
+
+            <!-- 发布订阅 -->
+            <h2 id="pubsub">发布订阅</h2>
+            <div class="example-box">
+                <h3>📝 Pub/Sub 消息</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">pubSub</span>() {
+    ctx := context.<span class="function">Background</span>()
+    rdb := redis.<span class="function">NewClient</span>(&redis.Options{Addr: <span class="string">"localhost:6379"</span>})
+    
+    <span class="comment">// 订阅者</span>
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        pubsub := rdb.<span class="function">Subscribe</span>(ctx, <span class="string">"channel1"</span>)
+        <span class="keyword">defer</span> pubsub.<span class="function">Close</span>()
+        
+        ch := pubsub.<span class="function">Channel</span>()
+        <span class="keyword">for</span> msg := <span class="keyword">range</span> ch {
+            fmt.<span class="function">Printf</span>(<span class="string">"Received: %s\n"</span>, msg.Payload)
+        }
+    }()
+    
+    <span class="comment">// 发布者</span>
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ {
+            rdb.<span class="function">Publish</span>(ctx, <span class="string">"channel1"</span>, fmt.<span class="function">Sprintf</span>(<span class="string">"Message %d"</span>, i)).<span class="function">Err</span>()
+            time.<span class="function">Sleep</span>(time.Second)
+        }
+    }()
+    
+    time.<span class="function">Sleep</span>(time.Second * <span class="number">6</span>)
+}</code></pre>
+            </div>
+
+            <!-- 分布式锁 -->
+            <h2 id="lock">分布式锁</h2>
+            <div class="example-box">
+                <h3>📝 Redlock 实现</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">distributedLock</span>(ctx context.Context, rdb *redis.Client) {
+    <span class="comment">// 获取锁</span>
+    lock := rdb.<span class="function">Lock</span>(ctx, <span class="string">"mylock"</span>, time.Minute)
+    
+    status, err := lock.<span class="function">Do</span>(ctx)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Failed to acquire lock"</span>)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="keyword">if</span> !status {
+        fmt.<span class="function">Println</span>(<span class="string">"Lock not acquired"</span>)
+        <span class="keyword">return</span>
+    }
+    
+    <span class="keyword">defer</span> lock.<span class="function">Unlock</span>(ctx)
+    
+    <span class="comment">// 临界区代码</span>
+    fmt.<span class="function">Println</span>(<span class="string">"Executing critical section..."</span>)
+    time.<span class="function">Sleep</span>(time.Second * <span class="number">2</span>)
+}
+
+<span class="comment">// 使用 Redis 实现限流</span>
+<span class="keyword">func</span> <span class="function">rateLimit</span>(ctx context.Context, rdb *redis.Client, key <span class="keyword">string</span>) <span class="keyword">bool</span> {
+    <span class="keyword">const</span> limit = <span class="number">100</span> <span class="comment">// 每分钟 100 次</span>
+    
+    <span class="keyword">var</span> mu sync.Mutex
+    mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> mu.<span class="function">Unlock</span>()
+    
+    val, _ := rdb.<span class="function">Get</span>(ctx, key).<span class="function">Int</span>()
+    <span class="keyword">if</span> val &gt;= limit {
+        <span class="keyword">return</span> <span class="keyword">false</span>
+    }
+    
+    rdb.<span class="function">Incr</span>(ctx, key)
+    rdb.<span class="function">Expire</span>(ctx, key, time.Minute)
+    
+    <span class="keyword">return</span> <span class="keyword">true</span>
+}</code></pre>
+            </div>
+
+            <!-- Pipeline -->
+            <h2 id="pipeline">Pipeline 批量操作</h2>
+            <div class="example-box">
+                <h3>📝 Pipeline 和事务</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">pipeline</span>(ctx context.Context, rdb *redis.Client) {
+    <span class="comment">// Pipeline: 批量操作</span>
+    pipe := rdb.<span class="function">Pipeline</span>()
+    
+    pipe.<span class="function">Set</span>(ctx, <span class="string">"key1"</span>, <span class="string">"value1"</span>, <span class="number">0</span>)
+    pipe.<span class="function">Set</span>(ctx, <span class="string">"key2"</span>, <span class="string">"value2"</span>, <span class="number">0</span>)
+    pipe.<span class="function">Get</span>(ctx, <span class="string">"key1"</span>)
+    
+    cmds, _ := pipe.<span class="function">Exec</span>(ctx)
+    
+    <span class="keyword">for</span> _, cmd := <span class="keyword">range</span> cmds {
+        fmt.<span class="function">Println</span>(cmd)
+    }
+    
+    <span class="comment">// 事务 (MULTI/EXEC)</span>
+    err := rdb.<span class="function">Watch</span>(ctx, <span class="keyword">func</span>(tx *redis.Tx) <span class="keyword">error</span> {
+        val, _ := tx.<span class="function">Get</span>(ctx, <span class="string">"counter"</span>).<span class="function">Int</span>()
+        
+        _, err := tx.<span class="function">Pipelined</span>(ctx, <span class="keyword">func</span>(pipe redis.Pipeliner) <span class="keyword">error</span> {
+            pipe.<span class="function">Set</span>(ctx, <span class="string">"counter"</span>, val+<span class="number">1</span>, <span class="number">0</span>)
+            <span class="keyword">return</span> <span class="keyword">nil</span>
+        })
+        
+        <span class="keyword">return</span> err
+    }, <span class="string">"counter"</span>)
+}</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ Redis 使用建议</h3>
+                <ul>
+                    <li><strong>连接复用</strong>: 全局单例 Redis 客户端</li>
+                    <li><strong>设置过期</strong>: 缓存数据设置 TTL</li>
+                    <li><strong>批量操作</strong>: 使用 Pipeline 减少 RTT</li>
+                    <li><strong>键命名</strong>: 使用冒号分隔命名空间</li>
+                    <li><strong>监控</strong>: 监控内存使用和命中率</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="ecosystem-gin.html">Gin Web 框架</a></li>
+                    <li><a href="ecosystem-etcd.html">Etcd 分布式存储</a></li>
+                    <li><a href="concurrency-mutex.html">Mutex 互斥锁</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

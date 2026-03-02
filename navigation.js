@@ -105,6 +105,7 @@ const navigationConfig = [
       { title: "Zap 日志", href: "ecosystem-zap.html", icon: "📝" },
       { title: "Validator 校验", href: "ecosystem-validator.html", icon: "✔️" },
       { title: "Cobra 命令行", href: "ecosystem-cobra.html", icon: "⌨️" },
+      { title: "Lint 工具", href: "ecosystem-lint.html", icon: "🔧" },
       { title: "gRPC", href: "ecosystem-grpc.html", icon: "📡" },
       { title: "Protobuf", href: "ecosystem-protobuf.html", icon: "📄" },
       { title: "Redis", href: "ecosystem-redis.html", icon: "🔴" },

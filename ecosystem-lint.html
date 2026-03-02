@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lint 工具 - Go 代码检查</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="ecosystem-testify.html" class="back-link">← Testify</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="stdlib-scanner.html" class="back-link">词法分析 →</a>
+
+            <h1>Lint 工具 - Go 代码检查</h1>
+            <p class="intro">Lint 工具用于检查 Go 代码中的潜在问题、风格问题和性能问题。使用 lint 工具可以提高代码质量，保持代码风格一致性。</p>
+
+            <!-- 核心工具 -->
+            <h2>📌 核心 Lint 工具</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">🔧</div>
+                    <h4>golangci-lint</h4>
+                    <p>最快的 Go linter 聚合器</p>
+                    <code class="tag">go install golangci-lint</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">✅</div>
+                    <h4>staticcheck</h4>
+                    <p>高级静态分析工具</p>
+                    <code class="tag">honnef.co/go/tools</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔄</div>
+                    <h4>revive</h4>
+                    <p>可配置的 linter</p>
+                    <code class="tag">github.com/mgechev/revive</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📏</div>
+                    <h4>gofmt</h4>
+                    <p>官方代码格式化工具</p>
+                    <code class="tag">go fmt</code>
+                </div>
+            </div>
+
+            <!-- golangci-lint -->
+            <h2 id="golangci-lint">golangci-lint</h2>
+
+            <h3>安装</h3>
+            <div class="example-box">
+                <pre><code><span class="comment"># 使用 go install (推荐)</span>
+<span class="keyword">go</span> install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+<span class="comment"># 使用 Homebrew (macOS)</span>
+brew install golangci-lint
+
+<span class="comment"># 使用 Scoop (Windows)</span>
+scoop install golangci-lint</code></pre>
+            </div>
+
+            <h3>快速开始</h3>
+            <div class="example-box">
+                <h3>📝 基本使用</h3>
+                <pre><code><span class="comment"># 运行所有 linter</span>
+golangci-lint run
+
+<span class="comment"># 运行特定 linter</span>
+golangci-lint run --enable=gofmt,govet,errcheck
+
+<span class="comment"># 自动修复问题</span>
+golangci-lint run --fix
+
+<span class="comment"># 输出为 JSON 格式</span>
+golangci-lint run --out-format=json
+
+<span class="comment"># 显示 linter 执行时间</span>
+golangci-lint run --show-stats
+
+<span class="comment"># 只检查新代码 (相对于 git)</span>
+golangci-lint run --new-from-rev=HEAD~1</code></pre>
+            </div>
+
+            <h3>配置文件</h3>
+            <div class="example-box">
+                <h3>📝 .golangci.yml 配置</h3>
+                <pre><code><span class="comment"># .golangci.yml</span>
+<span class="keyword">run:</span>
+  <span class="comment"># 超时时间</span>
+  timeout: 5m
+  <span class="comment"># 要检查的目录</span>
+  tests: true
+  <span class="comment"># 跳过目录</span>
+  skip-dirs:
+    - vendor
+    - testdata
+
+<span class="keyword">linters:</span>
+  <span class="comment"># 禁用所有默认 linter</span>
+  disable-all: true
+  <span class="comment"># 启用特定 linter</span>
+  enable:
+    - gofmt
+    - govet
+    - errcheck
+    - staticcheck
+    - unused
+    - gosimple
+    - structcheck
+    - varcheck
+    - ineffassign
+    - deadcode
+    - typecheck
+    - gosec
+    - unconvert
+    - goconst
+    - gocyclo
+    - dupl
+    - misspell
+    - unparam
+    - prealloc
+    - exportloopref
+    - exhaustive
+    - nakedret
+    - copyloopvar
+
+<span class="keyword">linters-settings:</span>
+  <span class="comment"># govet 配置</span>
+  govet:
+    check-shadowing: true
+    enable-all: true
+    disable:
+      - fieldalignment
+  
+  <span class="comment"># gocyclo 配置</span>
+  gocyclo:
+    min-complexity: 15
+  
+  <span class="comment"># dupl 配置</span>
+  dupl:
+    threshold: 100
+  
+  <span class="comment"># goconst 配置</span>
+  goconst:
+    min-len: 2
+    min-occurrences: 3
+  
+  <span class="comment"># misspell 配置</span>
+  misspell:
+    locale: US
+  
+  <span class="comment"># gocritic 配置</span>
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - whyNoLint
+
+<span class="keyword">issues:</span>
+  <span class="comment"># 最大问题数量</span>
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  <span class="comment"># 排除规则</span>
+  exclude-rules:
+    <span class="comment"># 排除测试文件中的某些检查</span>
+    - path: _test\.go
+      linters:
+        - errcheck
+        - gosec
+    <span class="comment"># 排除生成的代码</span>
+    - path: \.pb\.go
+      linters:
+        - all
+  <span class="comment"># 使用默认排除规则</span>
+  exclude-use-default: false
+
+<span class="keyword">output:</span>
+  <span class="comment"># 输出格式</span>
+  formats:
+    - format: colored-line-number</code></pre>
+            </div>
+
+            <h3>常用 Linter</h3>
+            <div class="example-box">
+                <h3>📖 Linter 说明</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Linter</th>
+                            <th>说明</th>
+                            <th>示例</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>gofmt</strong></td>
+                            <td>代码格式化</td>
+                            <td>缩进、空格</td>
+                        </tr>
+                        <tr>
+                            <td><strong>govet</strong></td>
+                            <td>可疑代码检查</td>
+                            <td>printf 参数、shadow</td>
+                        </tr>
+                        <tr>
+                            <td><strong>errcheck</strong></td>
+                            <td>错误检查</td>
+                            <td>未处理的 error</td>
+                        </tr>
+                        <tr>
+                            <td><strong>staticcheck</strong></td>
+                            <td>高级静态分析</td>
+                            <td>废弃 API、无效代码</td>
+                        </tr>
+                        <tr>
+                            <td><strong>unused</strong></td>
+                            <td>未使用代码</td>
+                            <td>未使用的变量、函数</td>
+                        </tr>
+                        <tr>
+                            <td><strong>gosimple</strong></td>
+                            <td>简化建议</td>
+                            <td>可简化的代码</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ineffassign</strong></td>
+                            <td>无效赋值</td>
+                            <td>无意义的赋值</td>
+                        </tr>
+                        <tr>
+                            <td><strong>gocyclo</strong></td>
+                            <td>圈复杂度</td>
+                            <td>复杂度过高</td>
+                        </tr>
+                        <tr>
+                            <td><strong>dupl</strong></td>
+                            <td>重复代码</td>
+                            <td>代码克隆</td>
+                        </tr>
+                        <tr>
+                            <td><strong>misspell</strong></td>
+                            <td>拼写检查</td>
+                            <td>英文拼写错误</td>
+                        </tr>
+                        <tr>
+                            <td><strong>gosec</strong></td>
+                            <td>安全检查</td>
+                            <td>安全漏洞</td>
+                        </tr>
+                        <tr>
+                            <td><strong>prealloc</strong></td>
+                            <td>预分配建议</td>
+                            <td>slice 预分配</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- CI/CD 集成 -->
+            <h2 id="ci-cd">CI/CD 集成</h2>
+
+            <h3>GitHub Actions</h3>
+            <div class="example-box">
+                <h3>📝 GitHub Actions 配置</h3>
+                <pre><code><span class="comment"># .github/workflows/lint.yml</span>
+<span class="keyword">name:</span> Lint
+
+<span class="keyword">on:</span>
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+<span class="keyword">jobs:</span>
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      <span class="comment"># 检出代码</span>
+      - uses: actions/checkout@v3
+      
+      <span class="comment"># 设置 Go 环境</span>
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          cache: false
+      
+      <span class="comment"># 运行 golangci-lint</span>
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --timeout=5m
+          only-new-issues: true</code></pre>
+            </div>
+
+            <h3>Git Pre-commit Hook</h3>
+            <div class="example-box">
+                <h3>📝 Pre-commit 配置</h3>
+                <pre><code><span class="comment"># .pre-commit-config.yaml</span>
+<span class="keyword">repos:</span>
+  <span class="comment"># Go 代码检查</span>
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v1.54.2
+    hooks:
+      - id: golangci-lint
+        args: [--timeout=5m]
+  
+  <span class="comment"># Go 代码格式化</span>
+  - repo: local
+    hooks:
+      - id: gofmt
+        name: gofmt
+        entry: gofmt
+        args: ['-w']
+        language: system
+        types: [go]
+  
+  <span class="comment"># Go 模块整理</span>
+  - repo: local
+    hooks:
+      - id: go-mod-tidy
+        name: go mod tidy
+        entry: go mod tidy
+        language: system
+        types: [go]
+        pass_filenames: false</code></pre>
+            </div>
+
+            <!-- staticcheck -->
+            <h2 id="staticcheck">staticcheck</h2>
+
+            <h3>安装和使用</h3>
+            <div class="example-box">
+                <pre><code><span class="comment"># 安装</span>
+<span class="keyword">go</span> install honnef.co/go/tools/cmd/staticcheck@latest
+
+<span class="comment"># 运行检查</span>
+staticcheck ./...
+
+<span class="comment"># 指定检查规则</span>
+staticcheck -checks=all,-ST1000 ./...
+
+<span class="comment"># 输出为 JSON</span>
+staticcheck -f json ./...</code></pre>
+            </div>
+
+            <h3>检查规则分类</h3>
+            <div class="example-box">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>分类</th>
+                            <th>前缀</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>通用错误</td>
+                            <td>S1xxx</td>
+                            <td>常见错误和反模式</td>
+                        </tr>
+                        <tr>
+                            <td>性能</td>
+                            <td>S2xxx</td>
+                            <td>性能问题</td>
+                        </tr>
+                        <tr>
+                            <td>代码风格</td>
+                            <td>S3xxx</td>
+                            <td>代码风格问题</td>
+                        </tr>
+                        <tr>
+                            <td>简化建议</td>
+                            <td>S4xxx</td>
+                            <td>可简化的代码</td>
+                        </tr>
+                        <tr>
+                            <td>废弃 API</td>
+                            <td>SAxxxx</td>
+                            <td>使用废弃的 API</td>
+                        </tr>
+                        <tr>
+                            <td>构建标签</td>
+                            <td>STxxxx</td>
+                            <td>构建标签问题</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- revive -->
+            <h2 id="revive">revive</h2>
+
+            <h3>安装和配置</h3>
+            <div class="example-box">
+                <pre><code><span class="comment"># 安装</span>
+<span class="keyword">go</span> install github.com/mgechev/revive@latest
+
+<span class="comment"># 运行</span>
+revive ./...
+
+<span class="comment"># 使用配置文件</span>
+revive -config revive.toml ./...
+
+<span class="comment"># 指定 formatter</span>
+revive -formatter friendly ./...</code></pre>
+            </div>
+
+            <h3>配置文件</h3>
+            <div class="example-box">
+                <h3>📝 revive.toml 配置</h3>
+                <pre><code><span class="comment"># revive.toml</span>
+ignoreGeneratedHeader = false
+severity = "warning"
+confidence = 0.8
+errorCode = 0
+warningCode = 0
+
+[rule.blank-imports]
+[rule.context-as-argument]
+[rule.context-keys-type]
+[rule.dot-imports]
+[rule.error-return]
+[rule.error-strings]
+[rule.error-naming]
+[rule.exported]
+[rule.if-return]
+[rule.increment-decrement]
+[rule.var-naming]
+[rule.var-declaration]
+[rule.package-comments]
+[rule.range]
+[rule.receiver-naming]
+[rule.time-naming]
+[rule.unexported-return]
+[rule.unreachable-code]
+[rule.unused-parameter]
+[rule.defer]
+[rule.unnecessary-stmt]
+[rule.modifies-value-receiver]
+[rule.constant-logical-expr]
+[rule.bool-literal-in-expr]
+[rule.redefines-builtin-id]
+
+<span class="comment"># 配置特定规则</span>
+[rule.var-naming]
+  arguments = [["ID"], ["VM"]]
+
+[rule.cyclomatic]
+  arguments = [15]</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ Lint 使用建议</h3>
+                <ul>
+                    <li><strong>CI 集成</strong>: 在 CI/CD 中自动运行 lint 检查</li>
+                    <li><strong>Pre-commit</strong>: 使用 pre-commit hook 在提交前检查</li>
+                    <li><strong>渐进式</strong>: 老项目逐步启用更多 linter</li>
+                    <li><strong>配置统一</strong>: 团队使用统一的 lint 配置</li>
+                    <li><strong>自动修复</strong>: 使用 --fix 自动修复可修复的问题</li>
+                    <li><strong>定期更新</strong>: 定期更新 linter 版本获取新规则</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <h3>⚠️ 注意事项</h3>
+                <ul>
+                    <li><strong>不要过度配置</strong>: 启用过多 linter 会降低效率</li>
+                    <li><strong>忽略规则</strong>: 合理使用 nolint 注释</li>
+                    <li><strong>性能考虑</strong>: 大项目注意超时设置</li>
+                    <li><strong>误报处理</strong>: 对于误报添加排除规则</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="stdlib-bestpractices.html">标准库最佳实践</a></li>
+                    <li><a href="ecosystem-testify.html">Testify 测试框架</a></li>
+                    <li><a href="tips-panic.html">Panic 处理</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="navigation.js"></script>
+    <script src="code-collapse.js"></script>
+</body>
+</html>

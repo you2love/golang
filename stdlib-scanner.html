@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>词法分析 - Go 标准库</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="stdlib.html" class="back-link">← 标准库概览</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="stdlib-ast.html" class="back-link">语法树 →</a>
+
+            <h1>词法分析 - go/scanner</h1>
+            <p class="intro">go/scanner 包提供了 Go 源代码的词法分析功能，将源代码分解为 Token 序列。这是构建编译器、代码分析工具的基础。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">📝</div>
+                    <h4>Token</h4>
+                    <p>词法单元</p>
+                    <code class="tag">token.Token</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔍</div>
+                    <h4>Scanner</h4>
+                    <p>词法分析器</p>
+                    <code class="tag">scanner.Scanner</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📍</div>
+                    <h4>Position</h4>
+                    <p>位置信息</p>
+                    <code class="tag">token.Position</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⚙️</div>
+                    <h4>Mode</h4>
+                    <p>扫描模式</p>
+                    <code class="tag">scanner.Mode</code>
+                </div>
+            </div>
+
+            <!-- 基础用法 -->
+            <h2 id="basics">基础用法</h2>
+
+            <h3>扫描代码</h3>
+            <div class="example-box">
+                <h3>📝 基本扫描示例</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"go/scanner"</span>
+    <span class="string">"go/token"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建文件集</span>
+    fset := token.<span class="function">NewFileSet</span>()
+
+    <span class="comment">// 源代码</span>
+    src := []<span class="keyword">byte</span>(<span class="string">`package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, World!")
+}`</span>)
+
+    <span class="comment">// 创建文件</span>
+    file := fset.<span class="function">AddFile</span>(<span class="string">""</span>, fset.<span class="function">Base</span>(), <span class="function">len</span>(src))
+
+    <span class="comment">// 创建扫描器</span>
+    <span class="keyword">var</span> s scanner.Scanner
+    s.<span class="function">Init</span>(file, src, <span class="keyword">nil</span>, scanner.ScanComments)
+
+    <span class="comment">// 扫描 Token</span>
+    <span class="keyword">for</span> {
+        pos, tok, lit := s.<span class="function">Scan</span>()
+        <span class="keyword">if</span> tok == token.EOF {
+            <span class="keyword">break</span>
+        }
+        fmt.<span class="function">Printf</span>(<span class="string">"%s\t%s\t%q\n"</span>,
+            fset.<span class="function">Position</span>(pos),
+            tok,
+            lit,
+        )
+    }
+}</code></pre>
+            </div>
+
+            <h3>输出示例</h3>
+            <div class="example-box">
+                <pre><code>:1:1      package     ""
+:1:9      ident       "main"
+:2:1      ;           "\n"
+:3:1      import      ""
+:3:8      string      "\"fmt\""
+:4:1      ;           "\n"
+:5:1      func        ""
+:5:6      ident       "main"
+:5:10     (           ""
+:5:11     )           ""
+:5:13     {           ""
+:6:1      ;           "\n"
+:6:5      ident       "fmt"
+:6:8      .           ""
+:6:9      ident       "Println"
+:6:16     (           ""
+:6:17     string      "\"Hello, World!\""
+:6:34     )           ""
+:6:36     ;           "\n"
+:7:1      }           ""
+:8:1      ;           "\n"
+:8:2      EOF         ""</code></pre>
+            </div>
+
+            <!-- Token 类型 -->
+            <h2 id="tokens">Token 类型</h2>
+
+            <div class="example-box">
+                <h3>📖 Token 分类</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"go/token"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 特殊 Token</span>
+    fmt.<span class="function">Println</span>(token.ILLEGAL)  <span class="comment">// 非法 Token</span>
+    fmt.<span class="function">Println</span>(token.EOF)      <span class="comment">// 文件结束</span>
+
+    <span class="comment">// 标识符和字面量</span>
+    fmt.<span class="function">Println</span>(token.IDENT)    <span class="comment">// 标识符</span>
+    fmt.<span class="function">Println</span>(token.INT)      <span class="comment">// 整数</span>
+    fmt.<span class="function">Println</span>(token.FLOAT)    <span class="comment">// 浮点数</span>
+    fmt.<span class="function">Println</span>(token.IMAG)     <span class="comment">// 虚数</span>
+    fmt.<span class="function">Println</span>(token.CHAR)     <span class="comment">// 字符</span>
+    fmt.<span class="function">Println</span>(token.STRING)   <span class="comment">// 字符串</span>
+    fmt.<span class="function">Println</span>(token.COMMENT)  <span class="comment">// 注释</span>
+
+    <span class="comment">// 运算符</span>
+    fmt.<span class="function">Println</span>(token.ADD)      <span class="comment">// +</span>
+    fmt.<span class="function">Println</span>(token.SUB)      <span class="comment">// -</span>
+    fmt.<span class="function">Println</span>(token.MUL)      <span class="comment">// *</span>
+    fmt.<span class="function">Println</span>(token.QUO)      <span class="comment">// /</span>
+    fmt.<span class="function">Println</span>(token.REM)      <span class="comment">// %</span>
+
+    <span class="comment">// 关键字</span>
+    fmt.<span class="function">Println</span>(token.BREAK)    <span class="comment">// break</span>
+    fmt.<span class="function">Println</span>(token.CASE)     <span class="comment">// case</span>
+    fmt.<span class="function">Println</span>(token.FUNC)     <span class="comment">// func</span>
+    fmt.<span class="function">Println</span>(token.IF)       <span class="comment">// if</span>
+    fmt.<span class="function">Println</span>(token.RETURN)   <span class="comment">// return</span>
+}</code></pre>
+            </div>
+
+            <!-- 扫描模式 -->
+            <h2 id="mode">扫描模式</h2>
+
+            <div class="example-box">
+                <h3>📝 Mode 配置</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"go/scanner"</span>
+    <span class="string">"go/token"</span>
+)
+
+<span class="keyword">func</span> <span class="function">scanWithMode</span>(mode scanner.Mode) {
+    fset := token.<span class="function">NewFileSet</span>()
+    src := []<span class="keyword">byte</span>(<span class="string">`// 注释
+package main /* 多行注释 */`</span>)
+    
+    file := fset.<span class="function">AddFile</span>(<span class="string">""</span>, fset.<span class="function">Base</span>(), <span class="function">len</span>(src))
+    
+    <span class="keyword">var</span> s scanner.Scanner
+    s.<span class="function">Init</span>(file, src, <span class="keyword">nil</span>, mode)
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Mode: %v\n"</span>, mode)
+    <span class="keyword">for</span> {
+        pos, tok, lit := s.<span class="function">Scan</span>()
+        <span class="keyword">if</span> tok == token.EOF {
+            <span class="keyword">break</span>
+        }
+        <span class="keyword">if</span> tok == token.COMMENT {
+            fmt.<span class="function">Printf</span>(<span class="string">"  Comment: %s\n"</span>, lit)
+        }
+    }
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 扫描注释</span>
+    <span class="function">scanWithMode</span>(scanner.ScanComments)
+    
+    <span class="comment">// 不扫描注释 (默认)</span>
+    <span class="function">scanWithMode</span>(<span class="number">0</span>)
+    
+    <span class="comment">// 允许非法字面量</span>
+    <span class="function">scanWithMode</span>(scanner.AllowIllegalChars)
+}</code></pre>
+            </div>
+
+            <!-- 错误处理 -->
+            <h2 id="error-handling">错误处理</h2>
+
+            <div class="example-box">
+                <h3>📝 自定义错误处理器</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"go/scanner"</span>
+    <span class="string">"go/token"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    fset := token.<span class="function">NewFileSet</span>()
+    
+    <span class="comment">// 包含错误的源代码</span>
+    src := []<span class="keyword">byte</span>(<span class="string">`package main
+
+func invalid( {
+    // 缺少右括号
+}`</span>)
+    
+    file := fset.<span class="function">AddFile</span>(<span class="string">""</span>, fset.<span class="function">Base</span>(), <span class="function">len</span>(src))
+    
+    <span class="comment">// 错误计数器</span>
+    errorCount := <span class="number">0</span>
+    
+    <span class="comment">// 自定义错误处理函数</span>
+    errorHandler := <span class="keyword">func</span>(pos token.Position, msg <span class="keyword">string</span>) {
+        errorCount++
+        fmt.<span class="function">Printf</span>(<span class="string">"Error %d at %s: %s\n"</span>,
+            errorCount, pos, msg)
+    }
+    
+    <span class="keyword">var</span> s scanner.Scanner
+    s.<span class="function">Init</span>(file, src, errorHandler, scanner.ScanComments)
+    
+    <span class="keyword">for</span> {
+        pos, tok, lit := s.<span class="function">Scan</span>()
+        <span class="keyword">if</span> tok == token.EOF {
+            <span class="keyword">break</span>
+        }
+        <span class="keyword">if</span> tok == token.ILLEGAL {
+            fmt.<span class="function">Printf</span>(<span class="string">"Illegal token at %s: %q\n"</span>,
+                fset.<span class="function">Position</span>(pos), lit)
+        }
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Total errors: %d\n"</span>, errorCount)
+}</code></pre>
+            </div>
+
+            <!-- 实用工具 -->
+            <h2 id="utilities">实用工具</h2>
+
+            <h3>Fprint 打印 Token</h3>
+            <div class="example-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"os"</span>
+    <span class="string">"go/scanner"</span>
+    <span class="string">"go/token"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    fset := token.<span class="function">NewFileSet</span>()
+    src := []<span class="keyword">byte</span>(<span class="string">`package main; import "fmt"; func main() { fmt.Println("Hi") }`</span>)
+    
+    file := fset.<span class="function">AddFile</span>(<span class="string">""</span>, fset.<span class="function">Base</span>(), <span class="function">len</span>(src))
+    
+    <span class="keyword">var</span> s scanner.Scanner
+    s.<span class="function">Init</span>(file, src, <span class="keyword">nil</span>, scanner.ScanComments)
+    
+    <span class="comment">// 使用 Fprint 打印 Token</span>
+    scanner.<span class="function">Fprint</span>(os.Stdout, fset, s.<span class="function">TokenText</span>())
+}</code></pre>
+            </div>
+
+            <h3>TokenText 获取文本</h3>
+            <div class="example-box">
+                <pre><code><span class="keyword">var</span> s scanner.Scanner
+s.<span class="function">Init</span>(file, src, <span class="keyword">nil</span>, scanner.ScanComments)
+
+<span class="keyword">for</span> {
+    pos, tok, _ := s.<span class="function">Scan</span>()
+    <span class="keyword">if</span> tok == token.EOF {
+        <span class="keyword">break</span>
+    }
+    
+    <span class="comment">// 获取 Token 的原始文本</span>
+    text := s.<span class="function">TokenText</span>()
+    fmt.<span class="function">Printf</span>(<span class="string">"%s: %s\n"</span>, tok, text)
+}</code></pre>
+            </div>
+
+            <!-- 应用场景 -->
+            <h2 id="use-cases">应用场景</h2>
+
+            <div class="example-box">
+                <h3>📝 统计代码元素</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"go/scanner"</span>
+    <span class="string">"go/token"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="keyword">type</span> CodeStats <span class="keyword">struct</span> {
+    Lines     <span class="keyword">int</span>
+    Comments  <span class="keyword">int</span>
+    Functions <span class="keyword">int</span>
+    Imports   <span class="keyword">int</span>
+}
+
+<span class="keyword">func</span> <span class="function">AnalyzeFile</span>(filename <span class="keyword">string</span>) (*CodeStats, <span class="keyword">error</span>) {
+    src, err := os.<span class="function">ReadFile</span>(filename)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    fset := token.<span class="function">NewFileSet</span>()
+    file := fset.<span class="function">AddFile</span>(filename, fset.<span class="function">Base</span>(), <span class="function">len</span>(src))
+    
+    stats := &CodeStats{}
+    <span class="keyword">var</span> s scanner.Scanner
+    s.<span class="function">Init</span>(file, src, <span class="keyword">nil</span>, scanner.ScanComments)
+    
+    <span class="keyword">for</span> {
+        _, tok, lit := s.<span class="function">Scan</span>()
+        <span class="keyword">switch</span> tok {
+        <span class="keyword">case</span> token.EOF:
+            <span class="keyword">return</span> stats, <span class="keyword">nil</span>
+        <span class="keyword">case</span> token.COMMENT:
+            stats.Comments++
+        <span class="keyword">case</span> token.FUNC:
+            stats.Functions++
+        <span class="keyword">case</span> token.IMPORT:
+            stats.Imports++
+        <span class="keyword">case</span> token.STRING:
+            <span class="comment">// 统计字符串字面量</span>
+        }
+    }
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    stats, err := <span class="function">AnalyzeFile</span>(<span class="string">"main.go"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"Error: %v\n"</span>, err)
+        <span class="keyword">return</span>
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Functions: %d\n"</span>, stats.Functions)
+    fmt.<span class="function">Printf</span>(<span class="string">"Imports: %d\n"</span>, stats.Imports)
+    fmt.<span class="function">Printf</span>(<span class="string">"Comments: %d\n"</span>, stats.Comments)
+}</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ 使用建议</h3>
+                <ul>
+                    <li><strong>使用 FileSet</strong>: 始终使用 token.FileSet 管理位置信息</li>
+                    <li><strong>错误处理</strong>: 提供自定义错误处理函数</li>
+                    <li><strong>扫描模式</strong>: 根据需要选择是否扫描注释</li>
+                    <li><strong>TokenText</strong>: 使用 TokenText() 获取原始文本</li>
+                    <li><strong>EOF 检查</strong>: 始终检查 token.EOF 结束扫描</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="stdlib-ast.html">语法树 (go/ast)</a></li>
+                    <li><a href="stdlib-parser.html">解析器 (go/parser)</a></li>
+                    <li><a href="stdlib-token.html">Token (go/token)</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="navigation.js"></script>
+    <script src="code-collapse.js"></script>
+</body>
+</html>

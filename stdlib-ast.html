@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>语法树 - Go AST 使用</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="stdlib-scanner.html" class="back-link">← 词法分析</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="stdlib-parser.html" class="back-link">解析器 →</a>
+
+            <h1>语法树 - go/ast</h1>
+            <p class="intro">go/ast 包提供了 Go 抽象语法树 (AST) 的数据结构和操作函数。AST 是编译器对源代码的结构化表示，用于代码分析、转换和生成。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">🌳</div>
+                    <h4>AST 节点</h4>
+                    <p>语法树节点</p>
+                    <code class="tag">ast.Node</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📄</div>
+                    <h4>File</h4>
+                    <p>源文件节点</p>
+                    <code class="tag">*ast.File</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔍</div>
+                    <h4>Inspector</h4>
+                    <p>节点检查器</p>
+                    <code class="tag">ast.Inspect</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">✏️</div>
+                    <h4>Writer</h4>
+                    <p>代码生成器</p>
+                    <code class="tag">ast.Fprint</code>
+                </div>
+            </div>
+
+            <!-- 基础用法 -->
+            <h2 id="basics">基础用法</h2>
+
+            <h3>解析文件</h3>
+            <div class="example-box">
+                <h3>📝 解析 Go 文件</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"go/ast"</span>
+    <span class="string">"go/parser"</span>
+    <span class="string">"go/token"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 源代码</span>
+    src := <span class="string">`package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello")
+}`</span>
+
+    <span class="comment">// 创建文件集</span>
+    fset := token.<span class="function">NewFileSet</span>()
+
+    <span class="comment">// 解析源代码</span>
+    file, err := parser.<span class="function">ParseFile</span>(fset, <span class="string">""</span>, src, <span class="number">0</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        panic(err)
+    }
+
+    <span class="comment">// 打印 AST</span>
+    ast.<span class="function">Fprint</span>(<span class="keyword">nil</span>, fset, file, <span class="keyword">nil</span>)
+}</code></pre>
+            </div>
+
+            <h3>AST 输出示例</h3>
+            <div class="example-box">
+                <pre><code>*ast.File {
+    .Package: 1:1
+    .Name: *ast.Ident {
+        .NamePos: 1:9
+        .Name: "main"
+    }
+    .Decls: []ast.Decl {
+        0: *ast.GenDecl {
+            .TokPos: 3:1
+            .Tok: import
+            .Specs: []ast.Spec {
+                0: *ast.ImportSpec {
+                    .Path: *ast.BasicLit {
+                        .ValuePos: 3:8
+                        .Kind: STRING
+                        .Value: "\"fmt\""
+                    }
+                }
+            }
+        }
+        1: *ast.FuncDecl {
+            .Name: *ast.Ident {
+                .NamePos: 5:6
+                .Name: "main"
+            }
+            .Type: *ast.FuncType {
+                .Params: *ast.FieldList {
+                    .Opening: 5:10
+                    .Closing: 5:11
+                }
+            }
+            .Body: *ast.BlockStmt {
+                .Lbrace: 5:13
+                .List: []ast.Stmt {
+                    0: *ast.ExprStmt {
+                        .X: *ast.CallExpr {
+                            .Fun: *ast.SelectorExpr {
+                                .X: *ast.Ident {
+                                    .Name: "fmt"
+                                }
+                                .Sel: *ast.Ident {
+                                    .Name: "Println"
+                                }
+                            }
+                            .Lparen: 6:16
+                            .Args: []ast.Expr {
+                                0: *ast.BasicLit {
+                                    .Kind: STRING
+                                    .Value: "\"Hello\""
+                                }
+                            }
+                            .Rparen: 6:25
+                        }
+                    }
+                }
+                .Rbrace: 7:1
+            }
+        }
+    }
+}</code></pre>
+            </div>
+
+            <!-- 遍历 AST -->
+            <h2 id="traversal">遍历 AST</h2>
+
+            <h3>使用 Inspect</h3>
+            <div class="example-box">
+                <h3>📝 遍历所有节点</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"go/ast"</span>
+    <span class="string">"go/parser"</span>
+    <span class="string">"go/token"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    src := <span class="string">`package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello")
+}`</span>
+
+    fset := token.<span class="function">NewFileSet</span>()
+    file, _ := parser.<span class="function">ParseFile</span>(fset, <span class="string">""</span>, src, <span class="number">0</span>)
+
+    <span class="comment">// 使用 Inspect 遍历</span>
+    ast.<span class="function">Inspect</span>(file, <span class="keyword">func</span>(n ast.Node) <span class="keyword">bool</span> {
+        <span class="keyword">if</span> n != <span class="keyword">nil</span> {
+            fmt.<span class="function">Printf</span>(<span class="string">"%T\n"</span>, n)
+        }
+        <span class="keyword">return</span> <span class="keyword">true</span> <span class="comment">// 继续遍历子节点</span>
+    })
+}</code></pre>
+            </div>
+
+            <h3>查找特定节点</h3>
+            <div class="example-box">
+                <h3>📝 查找函数声明</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"go/ast"</span>
+    <span class="string">"go/parser"</span>
+    <span class="string">"go/token"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    src := <span class="string">`package main
+
+func add(a, b int) int {
+    return a + b
+}
+
+func main() {
+    result := add(1, 2)
+    fmt.Println(result)
+}`</span>
+
+    fset := token.<span class="function">NewFileSet</span>()
+    file, _ := parser.<span class="function">ParseFile</span>(fset, <span class="string">""</span>, src, <span class="number">0</span>)
+
+    <span class="comment">// 查找所有函数</span>
+    ast.<span class="function">Inspect</span>(file, <span class="keyword">func</span>(n ast.Node) <span class="keyword">bool</span> {
+        <span class="keyword">if</span> fn, ok := n.(*ast.FuncDecl); ok {
+            fmt.<span class="function">Printf</span>(<span class="string">"Function: %s\n"</span>, fn.Name.Name)
+            
+            <span class="comment">// 打印参数</span>
+            <span class="keyword">if</span> fn.Type.Params != <span class="keyword">nil</span> {
+                fmt.<span class="function">Print</span>(<span class="string">"  Parameters: "</span>)
+                <span class="keyword">for</span> i, param := <span class="keyword">range</span> fn.Type.Params.List {
+                    <span class="keyword">if</span> i > <span class="number">0</span> {
+                        fmt.<span class="function">Print</span>(<span class="string">", "</span>)
+                    }
+                    <span class="keyword">for</span> j, name := <span class="keyword">range</span> param.Names {
+                        <span class="keyword">if</span> j > <span class="number">0</span> {
+                            fmt.<span class="function">Print</span>(<span class="string">", "</span>)
+                        }
+                        fmt.<span class="function">Print</span>(name.Name)
+                    }
+                }
+                fmt.<span class="function">Println</span>()
+            }
+            
+            <span class="comment">// 打印返回值</span>
+            <span class="keyword">if</span> fn.Type.Results != <span class="keyword">nil</span> && <span class="function">len</span>(fn.Type.Results.List) > <span class="number">0</span> {
+                resultType := fn.Type.Results.List[<span class="number">0</span>].Type
+                fmt.<span class="function">Printf</span>(<span class="string">"  Returns: %T\n"</span>, resultType)
+            }
+        }
+        <span class="keyword">return</span> <span class="keyword">true</span>
+    })
+}</code></pre>
+            </div>
+
+            <!-- 实用示例 -->
+            <h2 id="examples">实用示例</h2>
+
+            <h3>统计函数数量</h3>
+            <div class="example-box">
+                <h3>📝 代码统计工具</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"go/ast"</span>
+    <span class="string">"go/parser"</span>
+    <span class="string">"go/token"</span>
+)
+
+<span class="keyword">type</span> CodeStats <span class="keyword">struct</span> {
+    Functions   <span class="keyword">int</span>
+    Methods     <span class="keyword">int</span>
+    Imports     <span class="keyword">int</span>
+    Structs     <span class="keyword">int</span>
+    Interfaces  <span class="keyword">int</span>
+}
+
+<span class="keyword">func</span> <span class="function">AnalyzeFile</span>(filename <span class="keyword">string</span>) (*CodeStats, <span class="keyword">error</span>) {
+    fset := token.<span class="function">NewFileSet</span>()
+    file, err := parser.<span class="function">ParseFile</span>(fset, filename, <span class="keyword">nil</span>, <span class="number">0</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    stats := &CodeStats{}
+    
+    ast.<span class="function">Inspect</span>(file, <span class="keyword">func</span>(n ast.Node) <span class="keyword">bool</span> {
+        <span class="keyword">switch</span> x := n.(<span class="keyword">type</span>) {
+        <span class="keyword">case</span> *ast.FuncDecl:
+            <span class="keyword">if</span> x.Recv != <span class="keyword">nil</span> {
+                stats.Methods++
+            } <span class="keyword">else</span> {
+                stats.Functions++
+            }
+        <span class="keyword">case</span> *ast.GenDecl:
+            <span class="keyword">if</span> x.Tok == token.IMPORT {
+                stats.Imports += <span class="function">len</span>(x.Specs)
+            }
+            <span class="keyword">for</span> _, spec := <span class="keyword">range</span> x.Specs {
+                <span class="keyword">switch</span> spec.(<span class="keyword">type</span>) {
+                <span class="keyword">case</span> *ast.TypeSpec:
+                    ts := spec.(*ast.TypeSpec)
+                    <span class="keyword">switch</span> ts.Type.(<span class="keyword">type</span>) {
+                    <span class="keyword">case</span> *ast.StructType:
+                        stats.Structs++
+                    <span class="keyword">case</span> *ast.InterfaceType:
+                        stats.Interfaces++
+                    }
+                }
+            }
+        }
+        <span class="keyword">return</span> <span class="keyword">true</span>
+    })
+    
+    <span class="keyword">return</span> stats, <span class="keyword">nil</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    stats, err := <span class="function">AnalyzeFile</span>(<span class="string">"main.go"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        panic(err)
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Functions: %d\n"</span>, stats.Functions)
+    fmt.<span class="function">Printf</span>(<span class="string">"Methods: %d\n"</span>, stats.Methods)
+    fmt.<span class="function">Printf</span>(<span class="string">"Imports: %d\n"</span>, stats.Imports)
+    fmt.<span class="function">Printf</span>(<span class="string">"Structs: %d\n"</span>, stats.Structs)
+    fmt.<span class="function">Printf</span>(<span class="string">"Interfaces: %d\n"</span>, stats.Interfaces)
+}</code></pre>
+            </div>
+
+            <h3>查找所有调用</h3>
+            <div class="example-box">
+                <h3>📝 函数调用分析</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"go/ast"</span>
+    <span class="string">"go/parser"</span>
+    <span class="string">"go/token"</span>
+)
+
+<span class="keyword">func</span> <span class="function">FindCallExprs</span>(filename <span class="keyword">string</span>) {
+    fset := token.<span class="function">NewFileSet</span>()
+    file, _ := parser.<span class="function">ParseFile</span>(fset, filename, <span class="keyword">nil</span>, <span class="number">0</span>)
+    
+    ast.<span class="function">Inspect</span>(file, <span class="keyword">func</span>(n ast.Node) <span class="keyword">bool</span> {
+        <span class="keyword">if</span> call, ok := n.(*ast.CallExpr); ok {
+            <span class="comment">// 获取被调用的函数名</span>
+            <span class="keyword">switch</span> fun := call.Fun.(<span class="keyword">type</span>) {
+            <span class="keyword">case</span> *ast.Ident:
+                fmt.<span class="function">Printf</span>(<span class="string">"Call: %s()\n"</span>, fun.Name)
+            <span class="keyword">case</span> *ast.SelectorExpr:
+                <span class="keyword">if</span> ident, ok := fun.X.(*ast.Ident); ok {
+                    fmt.<span class="function">Printf</span>(<span class="string">"Call: %s.%s()\n"</span>,
+                        ident.Name, fun.Sel.Name)
+                }
+            }
+            
+            <span class="comment">// 打印参数数量</span>
+            fmt.<span class="function">Printf</span>(<span class="string">"  Arguments: %d\n"</span>, <span class="function">len</span>(call.Args))
+        }
+        <span class="keyword">return</span> <span class="keyword">true</span>
+    })
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="function">FindCallExprs</span>(<span class="string">"main.go"</span>)
+}</code></pre>
+            </div>
+
+            <h3>生成代码</h3>
+            <div class="example-box">
+                <h3>📝 AST 代码生成</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"bytes"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"go/ast"</span>
+    <span class="string">"go/format"</span>
+    <span class="string">"go/token"</span>
+)
+
+<span class="keyword">func</span> <span class="function">GenerateHello</span>() []<span class="keyword">byte</span> {
+    <span class="comment">// 创建文件</span>
+    file := &ast.File{
+        Name: ast.<span class="function">NewIdent</span>(<span class="string">"main"</span>),
+    }
+    
+    <span class="comment">// 创建 main 函数</span>
+    mainFunc := &ast.FuncDecl{
+        Name: ast.<span class="function">NewIdent</span>(<span class="string">"main"</span>),
+        Type: &ast.FuncType{
+            Params: &ast.FieldList{},
+        },
+        Body: &ast.BlockStmt{
+            List: []ast.Stmt{
+                &ast.ExprStmt{
+                    X: &ast.CallExpr{
+                        Fun: &ast.SelectorExpr{
+                            X:  ast.<span class="function">NewIdent</span>(<span class="string">"fmt"</span>),
+                            Sel: ast.<span class="function">NewIdent</span>(<span class="string">"Println"</span>),
+                        },
+                        Args: []ast.Expr{
+                            &ast.BasicLit{
+                                Kind:  token.STRING,
+                                Value: <span class="string">`"Hello, World!"`</span>,
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+    
+    file.Decls = []ast.Decl{mainFunc}
+    
+    <span class="comment">// 格式化输出</span>
+    <span class="keyword">var</span> buf bytes.Buffer
+    fset := token.<span class="function">NewFileSet</span>()
+    format.<span class="function">Node</span>(&buf, fset, file)
+    
+    <span class="keyword">return</span> buf.<span class="function">Bytes</span>()
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    code := <span class="function">GenerateHello</span>()
+    fmt.<span class="function">Print</span>(<span class="keyword">string</span>(code))
+}</code></pre>
+            </div>
+
+            <!-- 节点类型 -->
+            <h2 id="node-types">常见节点类型</h2>
+
+            <div class="example-box">
+                <h3>📖 节点类型对照</h3>
+                <pre><code><span class="comment">// 声明节点</span>
+*ast.FuncDecl      <span class="comment">// 函数声明</span>
+*ast.GenDecl       <span class="comment">// 通用声明 (import, var, const, type)</span>
+*ast.ImportSpec    <span class="comment">// import 声明</span>
+*ast.ValueSpec     <span class="comment">// var/const 声明</span>
+*ast.TypeSpec      <span class="comment">// type 声明</span>
+
+<span class="comment">// 语句节点</span>
+*ast.BlockStmt     <span class="comment">// 代码块 { }</span>
+*ast.IfStmt        <span class="comment">// if 语句</span>
+*ast.ForStmt       <span class="comment">// for 循环</span>
+*ast.ReturnStmt    <span class="comment">// return 语句</span>
+*ast.AssignStmt    <span class="comment">// 赋值语句</span>
+*ast.ExprStmt      <span class="comment">// 表达式语句</span>
+
+<span class="comment">// 表达式节点</span>
+*ast.Ident         <span class="comment">// 标识符</span>
+*ast.BasicLit      <span class="comment">// 字面量</span>
+*ast.CallExpr      <span class="comment">// 函数调用</span>
+*ast.SelectorExpr  <span class="comment">// 选择器 (x.sel)</span>
+*ast.BinaryExpr    <span class="comment">// 二元表达式</span>
+*ast.UnaryExpr     <span class="comment">// 一元表达式</span>
+
+<span class="comment">// 类型节点</span>
+*ast.StructType    <span class="comment">// 结构体类型</span>
+*ast.InterfaceType <span class="comment">// 接口类型</span>
+*ast.ArrayType     <span class="comment">// 数组类型</span>
+*ast.MapType       <span class="comment">// Map 类型</span>
+*ast.ChanType      <span class="comment">// Channel 类型</span></code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ 使用建议</h3>
+                <ul>
+                    <li><strong>使用 FileSet</strong>: 始终使用 token.FileSet 管理位置</li>
+                    <li><strong>类型断言</strong>: 使用 type switch 处理不同节点</li>
+                    <li><strong>Inspect 返回</strong>: 返回 false 可跳过子节点遍历</li>
+                    <li><strong>格式化输出</strong>: 使用 format.Node 格式化 AST</li>
+                    <li><strong>错误处理</strong>: 解析时始终检查错误</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="stdlib-scanner.html">词法分析 (go/scanner)</a></li>
+                    <li><a href="stdlib-parser.html">解析器 (go/parser)</a></li>
+                    <li><a href="stdlib-token.html">Token (go/token)</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="navigation.js"></script>
+    <script src="code-collapse.js"></script>
+</body>
+</html>

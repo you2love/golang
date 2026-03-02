@@ -178,11 +178,11 @@
 
 <span class="keyword">func</span> <span class="function">inspectValue</span>(v <span class="keyword">interface</span>{}) {
     val := reflect.<span class="function">ValueOf</span>(v)
-    
+
     fmt.<span class="function">Printf</span>(<span class="string">"Kind: %v\n"</span>, val.<span class="function">Kind</span>())
     fmt.<span class="function">Printf</span>(<span class="string">"Type: %v\n"</span>, val.<span class="function">Type</span>())
     fmt.<span class="function">Printf</span>(<span class="string">"CanSet: %v\n"</span>, val.<span class="function">CanSet</span>())
-    
+
     <span class="comment">// 获取值</span>
     <span class="keyword">switch</span> val.<span class="function">Kind</span>() {
     <span class="keyword">case</span> reflect.Int, reflect.Int8, reflect.Int64:
@@ -201,7 +201,7 @@
             fmt.<span class="function">Printf</span>(<span class="string">"Elem: %v\n"</span>, val.<span class="function">Elem</span>())
         }
     }
-    
+
     <span class="comment">// 获取底层值</span>
     fmt.<span class="function">Printf</span>(<span class="string">"Interface: %v\n"</span>, val.<span class="function">Interface</span>())
 }
@@ -210,11 +210,143 @@
     <span class="function">inspectValue</span>(<span class="number">42</span>)
     <span class="function">inspectValue</span>(<span class="string">"hello"</span>)
     <span class="function">inspectValue</span>([]<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>})
-    
+
     ptr := <span class="function">new</span>(<span class="keyword">int</span>)
     *ptr = <span class="number">100</span>
     <span class="function">inspectValue</span>(ptr)
 }</code></pre>
+            </div>
+
+            <!-- 反射三定律 -->
+            <h2 id="laws">反射三定律</h2>
+            <div class="info-box">
+                <h3>📜 Go 反射的核心原则</h3>
+                <p>Go 语言之父 Rob Pike 总结了反射的三条基本定律，理解这些定律是正确使用反射的关键。</p>
+            </div>
+
+            <h3>定律一：从接口值到反射对象</h3>
+            <div class="example-box">
+                <h3>📖 使用 reflect.TypeOf 和 reflect.ValueOf</h3>
+                <pre><code><span class="comment">// 定律 1: 反射可以从接口值到反射对象</span>
+<span class="comment">// 使用 reflect.TypeOf() 获取 reflect.Type</span>
+<span class="comment">// 使用 reflect.ValueOf() 获取 reflect.Value</span>
+
+<span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"reflect"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> x <span class="keyword">float64</span> = <span class="number">3.14</span>
+
+    <span class="comment">// 从接口值到反射对象</span>
+    t := reflect.<span class="function">TypeOf</span>(x)
+    v := reflect.<span class="function">ValueOf</span>(x)
+
+    fmt.<span class="function">Printf</span>(<span class="string">"Type: %v\n"</span>, t)        <span class="comment">// float64</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"Kind: %v\n"</span>, t.<span class="function">Kind</span>())   <span class="comment">// reflect.Float64</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"Value: %v\n"</span>, v.<span class="function">Float</span>()) <span class="comment">// 3.14</span>
+
+    <span class="comment">// 重要：Type 和 Value 是接口</span>
+    <span class="comment">// 它们可以表示任何类型的值</span>
+}</code></pre>
+            </div>
+
+            <h3>定律二：从反射对象到接口值</h3>
+            <div class="example-box">
+                <h3>📖 使用 Interface() 方法</h3>
+                <pre><code><span class="comment">// 定律 2: 反射可以从反射对象到接口值</span>
+<span class="comment">// 使用 reflect.Value.Interface() 获取 interface{}</span>
+
+<span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"reflect"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> x <span class="keyword">float64</span> = <span class="number">3.14</span>
+
+    <span class="comment">// 从接口值到反射对象</span>
+    v := reflect.<span class="function">ValueOf</span>(x)
+
+    <span class="comment">// 从反射对象回到接口值</span>
+    iface := v.<span class="function">Interface</span>()  <span class="comment">// interface{} 类型</span>
+
+    <span class="comment">// 类型断言获取具体类型</span>
+    y := iface.(<span class="keyword">float64</span>)
+    fmt.<span class="function">Println</span>(y)  <span class="comment">// 3.14</span>
+
+    <span class="comment">// 反射的逆向过程:</span>
+    <span class="comment">// interface{} → reflect.Value → interface{}</span>
+    <span class="comment">// 这个循环是反射的核心</span>
+}</code></pre>
+            </div>
+
+            <div class="flowchart">
+                <div class="flowchart-node">interface{}</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">ValueOf()</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">reflect.Value</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">Interface()</div>
+                <span class="flowchart-arrow">→</span>
+                <div class="flowchart-node">interface{}</div>
+            </div>
+
+            <h3>定律三：修改反射对象需要可寻址</h3>
+            <div class="example-box">
+                <h3>📖 可寻址性 (Addressability)</h3>
+                <pre><code><span class="comment">// 定律 3: 如果要修改反射对象，值必须是可寻址的</span>
+<span class="comment">// 只有可寻址的值才能调用 CanSet() 返回 true</span>
+
+<span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"reflect"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 情况 1: 普通值 - 不可寻址</span>
+    x := <span class="number">42</span>
+    v1 := reflect.<span class="function">ValueOf</span>(x)
+    fmt.<span class="function">Printf</span>(<span class="string">"CanSet: %v\n"</span>, v1.<span class="function">CanSet</span>())  <span class="comment">// false</span>
+    <span class="comment">// 原因：ValueOf(x) 创建的是副本</span>
+
+    <span class="comment">// 情况 2: 指针 - 指针本身不可修改</span>
+    v2 := reflect.<span class="function">ValueOf</span>(&x)
+    fmt.<span class="function">Printf</span>(<span class="string">"CanSet: %v\n"</span>, v2.<span class="function">CanSet</span>())  <span class="comment">// false</span>
+    <span class="comment">// 原因：指针本身不是可修改的目标</span>
+
+    <span class="comment">// 情况 3: 指针解引用 - 可寻址</span>
+    v3 := reflect.<span class="function">ValueOf</span>(&x).<span class="function">Elem</span>()
+    fmt.<span class="function">Printf</span>(<span class="string">"CanSet: %v\n"</span>, v3.<span class="function">CanSet</span>())  <span class="comment">// true</span>
+    v3.<span class="function">SetInt</span>(<span class="number">100</span>)
+    fmt.<span class="function">Println</span>(x)  <span class="comment">// 100</span>
+    <span class="comment">// 原因：Elem() 获取指针指向的值，是原始值</span>
+
+    <span class="comment">// 关键要点:</span>
+    <span class="comment">// 1. 必须传递指针：ValueOf(&x)</span>
+    <span class="comment">// 2. 必须解引用：.Elem()</span>
+    <span class="comment">// 3. 检查可修改性：.CanSet()</span>
+}</code></pre>
+            </div>
+
+            <div class="warning-box">
+                <h3>⚠️ 可寻址性规则</h3>
+                <ul>
+                    <li><strong>变量是可寻址的</strong>: <code>ValueOf(&x).Elem()</code></li>
+                    <li><strong>副本不可寻址</strong>: <code>ValueOf(x)</code> 创建副本</li>
+                    <li><strong>指针不可寻址</strong>: 指针本身不是修改目标</li>
+                    <li><strong>解引用后可寻址</strong>: <code>ValueOf(&x).Elem()</code></li>
+                    <li><strong>结构体字段</strong>: 只有导出字段可修改</li>
+                    <li><strong>切片/Map 元素</strong>: 通过索引/键访问是可寻址的</li>
+                </ul>
             </div>
 
             <!-- 修改值 -->

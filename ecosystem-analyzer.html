@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代码分析器 - Go 第三方库</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="ecosystem-lint.html" class="back-link">← Lint 工具</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="stdlib-scanner.html" class="back-link">词法分析 →</a>
+
+            <h1>代码分析器 - Go 第三方库</h1>
+            <p class="intro">Go 生态中有许多优秀的代码分析第三方库，用于静态分析、安全检查、复杂度分析等。这些库可以集成到 CI/CD 流程中，提高代码质量。</p>
+
+            <!-- 核心库 -->
+            <h2>📌 核心分析库</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">🔍</div>
+                    <h4>go-critic</h4>
+                    <p>可扩展的代码分析器</p>
+                    <code class="tag">github.com/go-critic/go-critic</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔒</div>
+                    <h4>gosec</h4>
+                    <p>安全漏洞扫描器</p>
+                    <code class="tag">github.com/securego/gosec</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📊</div>
+                    <h4>gocyclo</h4>
+                    <p>圈复杂度计算</p>
+                    <code class="tag">github.com/fzipp/gocyclo</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📈</div>
+                    <h4>gocognit</h4>
+                    <p>认知复杂度分析</p>
+                    <code class="tag">github.com/uudashr/gocognit</code>
+                </div>
+            </div>
+
+            <!-- go-critic -->
+            <h2 id="go-critic">go-critic</h2>
+
+            <h3>简介</h3>
+            <div class="example-box">
+                <p>go-critic 是一个可扩展的 Go 源代码分析器，提供了大量代码质量检查规则，可以识别代码中的坏味道和潜在问题。</p>
+            </div>
+
+            <h3>安装和使用</h3>
+            <div class="example-box">
+                <pre><code><span class="comment"># 安装</span>
+<span class="keyword">go</span> install github.com/go-critic/go-critic/cmd/gocritic@latest
+
+<span class="comment"># 运行检查</span>
+gocritic check ./...
+
+<span class="comment"># 运行特定检查</span>
+gocritic check -enable=rangeExprCopy,typeDefFirst ./...
+
+<span class="comment"># 列出所有检查</span>
+gocritic doc
+
+<span class="comment"># 查看特定检查文档</span>
+gocritic doc rangeExprCopy</code></pre>
+            </div>
+
+            <h3>检查规则分类</h3>
+            <div class="example-box">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>分类</th>
+                            <th>说明</th>
+                            <th>示例检查</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>diagnostic</strong></td>
+                            <td>诊断检查</td>
+                            <td>detects bugs</td>
+                        </tr>
+                        <tr>
+                            <td><strong>style</strong></td>
+                            <td>代码风格</td>
+                            <td>code style issues</td>
+                        </tr>
+                        <tr>
+                            <td><strong>performance</strong></td>
+                            <td>性能优化</td>
+                            <td>performance issues</td>
+                        </tr>
+                        <tr>
+                            <td><strong>experimental</strong></td>
+                            <td>实验性检查</td>
+                            <td>experimental rules</td>
+                        </tr>
+                        <tr>
+                            <td><strong>opinionated</strong></td>
+                            <td>主观建议</td>
+                            <td>opinionated rules</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>配置文件</h3>
+            <div class="example-box">
+                <h3>📝 .gocritic.yaml 配置</h3>
+                <pre><code><span class="comment"># .gocritic.yaml</span>
+<span class="keyword">enabled-tags:</span>
+  - diagnostic
+  - style
+  - performance
+
+<span class="keyword">disabled-checks:</span>
+  - regexpMust
+  - appendAssign
+
+<span class="keyword">settings:</span>
+  <span class="comment"># hugeParam 设置</span>
+  hugeParam:
+    sizeThreshold: 80
+  <span class="comment"># rangeExprCopy 设置</span>
+  rangeExprCopy:
+    sizeThreshold: 512
+  <span class="comment"># typeDefFirst 设置</span>
+  typeDefFirst:
+    ignoreTests: true</code></pre>
+            </div>
+
+            <!-- gosec -->
+            <h2 id="gosec">gosec</h2>
+
+            <h3>简介</h3>
+            <div class="example-box">
+                <p>gosec (Go Security) 是一个 Go 源代码安全扫描器，通过检查 AST 来识别潜在的安全漏洞。</p>
+            </div>
+
+            <h3>安装和使用</h3>
+            <div class="example-box">
+                <pre><code><span class="comment"># 安装</span>
+<span class="keyword">go</span> install github.com/securego/gosec/v2/cmd/gosec@latest
+
+<span class="comment"># 运行扫描</span>
+gosec ./...
+
+<span class="comment"># 排除特定规则</span>
+gosec -exclude=G101,G104 ./...
+
+<span class="comment"># 输出为 JSON</span>
+gosec -fmt=json -out=results.json ./...
+
+<span class="comment"># 输出为 SARIF (用于 GitHub)</span>
+gosec -fmt=sarif -out=results.sarif ./...
+
+<span class="comment"># 包含测试文件</span>
+gosec -tests ./...</code></pre>
+            </div>
+
+            <h3>安全规则</h3>
+            <div class="example-box">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>规则 ID</th>
+                            <th>说明</th>
+                            <th>示例</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>G101</strong></td>
+                            <td>硬编码凭证</td>
+                            <td>密码、API key</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G102</strong></td>
+                            <td>绑定到所有接口</td>
+                            <td>0.0.0.0</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G103</strong></td>
+                            <td>使用 unsafe 包</td>
+                            <td>unsafe.Pointer</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G104</strong></td>
+                            <td>未检查错误</td>
+                            <td>忽略 error</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G106</strong></td>
+                            <td>SSH 禁用主机检查</td>
+                            <td>InsecureIgnoreHostKey</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G107</strong></td>
+                            <td>URL 注入</td>
+                            <td>http.Get(userInput)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G108</strong></td>
+                            <td>命令注入</td>
+                            <td>exec.Command(userInput)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G109</strong></td>
+                            <td>XML 解析漏洞</td>
+                            <td>xml.Unmarshal</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G110</strong></td>
+                            <td>Zip 炸弹</td>
+                            <td>zip.NewReader</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G201</strong></td>
+                            <td>SQL 注入</td>
+                            <td>SQL 拼接</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G202</strong></td>
+                            <td>SQL 注入</td>
+                            <td>SQL 格式化</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G301</strong></td>
+                            <td>文件权限过大</td>
+                            <td>os.OpenFile 0777</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G302</strong></td>
+                            <td>文件权限过大</td>
+                            <td>os.Chmod 0777</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G304</strong></td>
+                            <td>文件路径遍历</td>
+                            <td>os.Open(userInput)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G401</strong></td>
+                            <td>弱加密算法</td>
+                            <td>MD5, SHA1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G402</strong></td>
+                            <td>TLS 配置不当</td>
+                            <td>MinVersion 过低</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G403</strong></td>
+                            <td>弱 RSA 密钥</td>
+                            <td>&lt;2048 位</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G501</strong></td>
+                            <td>弱加密算法</td>
+                            <td>crypto/md5</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G502</strong></td>
+                            <td>弱加密算法</td>
+                            <td>crypto/des</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G503</strong></td>
+                            <td>弱加密算法</td>
+                            <td>crypto/rc4</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G504</strong></td>
+                            <td>导入黑名单</td>
+                            <td>crypto/md5</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G505</strong></td>
+                            <td>弱加密算法</td>
+                            <td>crypto/sha1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G601</strong></td>
+                            <td>隐式内存别名</td>
+                            <td>range 变量引用</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>GitHub Actions 集成</h3>
+            <div class="example-box">
+                <pre><code><span class="comment"># .github/workflows/security.yml</span>
+<span class="keyword">name:</span> Security Scan
+
+<span class="keyword">on:</span>
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+<span class="keyword">jobs:</span>
+  gosec:
+    name: gosec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+      
+      - name: Run Gosec Security Scanner
+        uses: securego/gosec@master
+        with:
+          args: ./...</code></pre>
+            </div>
+
+            <!-- gocyclo -->
+            <h2 id="gocyclo">gocyclo</h2>
+
+            <h3>简介</h3>
+            <div class="example-box">
+                <p>gocyclo 计算 Go 代码的圈复杂度 (Cyclomatic Complexity)，帮助识别过于复杂的函数。</p>
+            </div>
+
+            <h3>安装和使用</h3>
+            <div class="example-box">
+                <pre><code><span class="comment"># 安装</span>
+<span class="keyword">go</span> install github.com/fzipp/gocyclo/cmd/gocyclo@latest
+
+<span class="comment"># 运行分析</span>
+gocyclo ./...
+
+<span class="comment"># 设置阈值</span>
+gocyclo -over 15 ./...
+
+<span class="comment"># 输出前 10 个复杂函数</span>
+gocyclo -top 10 ./...
+
+<span class="comment"># 输出平均复杂度</span>
+gocyclo -avg ./...</code></pre>
+            </div>
+
+            <h3>圈复杂度说明</h3>
+            <div class="example-box">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>复杂度</th>
+                            <th>评级</th>
+                            <th>建议</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1-5</td>
+                            <td>简单</td>
+                            <td>易于理解和维护</td>
+                        </tr>
+                        <tr>
+                            <td>6-10</td>
+                            <td>中等</td>
+                            <td>可以考虑简化</td>
+                        </tr>
+                        <tr>
+                            <td>11-20</td>
+                            <td>复杂</td>
+                            <td>建议重构</td>
+                        </tr>
+                        <tr>
+                            <td>21-50</td>
+                            <td>非常复杂</td>
+                            <td>需要重构</td>
+                        </tr>
+                        <tr>
+                            <td>&gt;50</td>
+                            <td>不可测试</td>
+                            <td>必须重构</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- gocognit -->
+            <h2 id="gocognit">gocognit</h2>
+
+            <h3>简介</h3>
+            <div class="example-box">
+                <p>gocognit 计算 Go 代码的认知复杂度 (Cognitive Complexity)，比圈复杂度更能反映代码的理解难度。</p>
+            </div>
+
+            <h3>安装和使用</h3>
+            <div class="example-box">
+                <pre><code><span class="comment"># 安装</span>
+<span class="keyword">go</span> install github.com/uudashr/gocognit/cmd/gocognit@latest
+
+<span class="comment"># 运行分析</span>
+gocognit ./...
+
+<span class="comment"># 设置阈值</span>
+gocognit -over 25 ./...
+
+<span class="comment"># 输出前 N 个复杂函数</span>
+gocognit -top 20 ./...</code></pre>
+            </div>
+
+            <!-- 其他分析工具 -->
+            <h2 id="other-tools">其他分析工具</h2>
+
+            <div class="example-box">
+                <h3>📖 工具列表</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>工具</th>
+                            <th>说明</th>
+                            <th>仓库</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>unconvert</strong></td>
+                            <td>删除不必要的类型转换</td>
+                            <td>github.com/mdempsky/unconvert</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ineffassign</strong></td>
+                            <td>检测无效的赋值</td>
+                            <td>github.com/gordonklaus/ineffassign</td>
+                        </tr>
+                        <tr>
+                            <td><strong>unparam</strong></td>
+                            <td>检测未使用的参数</td>
+                            <td>mvdan.cc/unparam</td>
+                        </tr>
+                        <tr>
+                            <td><strong>prealloc</strong></td>
+                            <td>建议预分配 slice</td>
+                            <td>github.com/alexkohler/prealloc</td>
+                        </tr>
+                        <tr>
+                            <td><strong>copyloopvar</strong></td>
+                            <td>检测循环变量复制</td>
+                            <td>github.com/karamaru-alpha/copyloopvar</td>
+                        </tr>
+                        <tr>
+                            <td><strong>exportloopref</strong></td>
+                            <td>检测导出循环变量引用</td>
+                            <td>github.com/kyoh86/exportloopref</td>
+                        </tr>
+                        <tr>
+                            <td><strong>bodyclose</strong></td>
+                            <td>检查 HTTP 响应体关闭</td>
+                            <td>github.com/timakin/bodyclose</td>
+                        </tr>
+                        <tr>
+                            <td><strong>rowserrcheck</strong></td>
+                            <td>检查 SQL rows 错误</td>
+                            <td>github.com/jingyugao/rowserrcheck</td>
+                        </tr>
+                        <tr>
+                            <td><strong>sqlclosecheck</strong></td>
+                            <td>检查 SQL 资源关闭</td>
+                            <td>github.com/ryanrolds/sqlclosecheck</td>
+                        </tr>
+                        <tr>
+                            <td><strong>errcheck</strong></td>
+                            <td>检查未处理的错误</td>
+                            <td>github.com/kisielk/errcheck</td>
+                        </tr>
+                        <tr>
+                            <td><strong>errorlint</strong></td>
+                            <td>检查错误处理</td>
+                            <td>github.com/polyfloyd/go-errorlint</td>
+                        </tr>
+                        <tr>
+                            <td><strong>nilnil</strong></td>
+                            <td>检查 nil nil 返回</td>
+                            <td>github.com/Antonboom/nilnil</td>
+                        </tr>
+                        <tr>
+                            <td><strong>noctx</strong></td>
+                            <td>检查 context 使用</td>
+                            <td>github.com/sonatard/noctx</td>
+                        </tr>
+                        <tr>
+                            <td><strong>contextcheck</strong></td>
+                            <td>检查 context 传递</td>
+                            <td>github.com/kkHAIKE/contextcheck</td>
+                        </tr>
+                        <tr>
+                            <td><strong>makezero</strong></td>
+                            <td>检查 make 和 append</td>
+                            <td>github.com/ashanbrown/makezero</td>
+                        </tr>
+                        <tr>
+                            <td><strong>predeclared</strong></td>
+                            <td>检查预声明标识符</td>
+                            <td>github.com/nishanths/predeclared</td>
+                        </tr>
+                        <tr>
+                            <td><strong>asciicheck</strong></td>
+                            <td>检查非 ASCII 标识符</td>
+                            <td>github.com/tdakkota/asciicheck</td>
+                        </tr>
+                        <tr>
+                            <td><strong>importas</strong></td>
+                            <td>检查 import 别名</td>
+                            <td>github.com/julz/importas</td>
+                        </tr>
+                        <tr>
+                            <td><strong>misspell</strong></td>
+                            <td>检查拼写错误</td>
+                            <td>github.com/golangci/misspell</td>
+                        </tr>
+                        <tr>
+                            <td><strong>whitespace</strong></td>
+                            <td>检查多余空白</td>
+                            <td>github.com/ultraware/whitespace</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 集成使用 -->
+            <h2 id="integration">集成使用</h2>
+
+            <h3>在 golangci-lint 中使用</h3>
+            <div class="example-box">
+                <pre><code><span class="comment"># .golangci.yml</span>
+<span class="keyword">linters:</span>
+  enable:
+    <span class="comment"># 代码分析</span>
+    - gocritic
+    - gocyclo
+    - gocognit
+    - unconvert
+    - ineffassign
+    - unparam
+    - prealloc
+    <span class="comment"># 安全检查</span>
+    - gosec
+    <span class="comment"># 错误检查</span>
+    - errcheck
+    - errorlint
+    <span class="comment"># 资源检查</span>
+    - bodyclose
+    - rowserrcheck
+    - sqlclosecheck
+    <span class="comment"># 其他</span>
+    - misspell
+    - predeclared
+    - asciicheck
+
+<span class="keyword">linters-settings:</span>
+  gocyclo:
+    min-complexity: 15
+  gocognit:
+    min-complexity: 25
+  gosec:
+    excludes:
+      - G101
+      - G104</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ 使用建议</h3>
+                <ul>
+                    <li><strong>CI 集成</strong>: 在 CI/CD 中自动运行分析工具</li>
+                    <li><strong>渐进式</strong>: 老项目逐步降低复杂度阈值</li>
+                    <li><strong>合理配置</strong>: 根据项目特点调整阈值</li>
+                    <li><strong>定期审查</strong>: 定期审查分析报告</li>
+                    <li><strong>团队统一</strong>: 团队使用统一配置</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="ecosystem-lint.html">Lint 工具</a></li>
+                    <li><a href="stdlib-bestpractices.html">标准库最佳实践</a></li>
+                    <li><a href="tips-panic.html">Panic 处理</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="navigation.js"></script>
+    <script src="code-collapse.js"></script>
+</body>
+</html>

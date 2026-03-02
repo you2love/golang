@@ -106,6 +106,7 @@ const navigationConfig = [
       { title: "Validator 校验", href: "ecosystem-validator.html", icon: "✔️" },
       { title: "Cobra 命令行", href: "ecosystem-cobra.html", icon: "⌨️" },
       { title: "Lint 工具", href: "ecosystem-lint.html", icon: "🔧" },
+      { title: "代码分析器", href: "ecosystem-analyzer.html", icon: "🔬" },
       { title: "gRPC", href: "ecosystem-grpc.html", icon: "📡" },
       { title: "Protobuf", href: "ecosystem-protobuf.html", icon: "📄" },
       { title: "Redis", href: "ecosystem-redis.html", icon: "🔴" },

@@ -1,0 +1,82 @@
+/* Go 教程 - 表格样式 */
+/* 版本：v2.0 */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+table caption {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px;
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85em;
+    letter-spacing: 0.5px;
+}
+
+tbody tr {
+    background: white;
+    border-bottom: 1px solid #e0e0e0;
+    transition: background-color 0.3s ease;
+}
+
+tbody tr:hover {
+    background: #f5f5f5;
+}
+
+tbody tr:nth-child(even) {
+    background: #fafafa;
+}
+
+tbody tr:nth-child(even):hover {
+    background: #f0f0f0;
+}
+
+td {
+    padding: 12px 15px;
+    border-right: 1px solid #e0e0e0;
+}
+
+td:last-child {
+    border-right: none;
+}
+
+/* 对比表格 */
+.comparison-table {
+    margin: 30px 0;
+}
+
+.comparison-table thead {
+    background: #2d2d2d;
+}
+
+.comparison-table thead th {
+    background: #2d2d2d;
+    color: #d4d4d4;
+}
+
+.comparison-table tbody tr:nth-child(odd) {
+    background: #f8f8f8;
+}
+
+.comparison-table tbody tr:nth-child(even) {
+    background: #ffffff;
+}

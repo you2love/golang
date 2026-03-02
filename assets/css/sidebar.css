@@ -1,0 +1,113 @@
+/* Go 教程 - 侧边栏导航样式 */
+/* 版本：v2.0 */
+
+.sidebar {
+    width: 280px;
+    min-width: 280px;
+    max-width: 280px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 20px;
+    height: fit-content;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+}
+
+.sidebar h3 {
+    color: #00ADD8;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    border-bottom: 2px solid #00ADD8;
+    padding-bottom: 10px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar ul ul {
+    margin-left: 20px;
+    margin-top: 5px;
+}
+
+.sidebar li {
+    margin: 5px 0;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: #333;
+    display: block;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.sidebar a:hover {
+    background: #e3f2fd;
+    color: #00ADD8;
+}
+
+.sidebar a.active {
+    background: #00ADD8;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 173, 216, 0.3);
+    transform: translateX(5px);
+}
+
+.sidebar .nav-item > a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar .nav-toggle {
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.3s ease;
+    font-size: 0.8em;
+    padding: 0 5px;
+}
+
+.sidebar .nav-toggle.collapsed {
+    transform: rotate(-90deg);
+}
+
+.sidebar .nav-submenu {
+    max-height: 1000px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.sidebar .nav-submenu.collapsed {
+    max-height: 0;
+}
+
+.level-1 {
+    margin: 20px 0 10px;
+    padding: 0;
+    list-style: none;
+}
+
+.level-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    width: 100%;
+    text-align: center;
+}

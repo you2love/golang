@@ -4,42 +4,153 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goroutine - Go 语言学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>Goroutine - Go 并发编程基石</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="concurrency.html" class="back-link">← 返回 concurrency</a>
-            <h2 id="goroutine">Goroutine - 并发编程核心</h2>
-            <p>Goroutine 是 Go 语言轻量级的线程实现，由 Go 运行时管理。Go 1.26 优化了调度器性能，结合 Green Tea GC 实现更低的延迟。</p>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="concurrency.html" class="back-link">← 返回并发编程</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="concurrency-channel.html" class="back-link">Channel →</a>
 
-            <!-- GMP 模型架构图 -->
-            <h3>GMP 调度模型架构 (Go 1.26 优化版)</h3>
+            <h1>Goroutine - Go 并发编程基石</h1>
+            <p class="intro">Goroutine 是 Go 运行时管理的轻量级线程，是 Go 并发模型的核心。理解 Goroutine 的调度机制和生命周期，是编写高效并发程序的基础。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">🧵</div>
+                    <h4>轻量级</h4>
+                    <p>初始栈仅 2KB，可动态伸缩</p>
+                    <code class="tag">10 万 + Goroutine/进程</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⚡</div>
+                    <h4>高效调度</h4>
+                    <p>用户态调度，非抢占式</p>
+                    <code class="tag">GMP 模型</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔄</div>
+                    <h4>并发执行</h4>
+                    <p>多核并行，自动负载均衡</p>
+                    <code class="tag">GOMAXPROCS</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">💰</div>
+                    <h4>低成本</h4>
+                    <p>创建/切换开销极小</p>
+                    <code class="tag">~1μs 创建</code>
+                </div>
+            </div>
+
+            <!-- 基础用法 -->
+            <h2 id="basic">基础用法</h2>
+            <div class="example-box">
+                <h3>📝 启动 Goroutine</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="comment">// 1. 启动函数作为 Goroutine</span>
+<span class="keyword">func</span> <span class="function">sayHello</span>() {
+    fmt.<span class="function">Println</span>(<span class="string">"Hello from Goroutine!"</span>)
+}
+
+<span class="comment">// 2. 启动带参数的函数</span>
+<span class="keyword">func</span> <span class="function">worker</span>(id <span class="keyword">int</span>, task <span class="keyword">string</span>) {
+    fmt.<span class="function">Printf</span>(<span class="string">"Worker %d processing: %s\n"</span>, id, task)
+}
+
+<span class="comment">// 3. 使用匿名函数</span>
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 方式 1: 直接启动函数</span>
+    <span class="keyword">go</span> <span class="function">sayHello</span>()
+    
+    <span class="comment">// 方式 2: 带参数</span>
+    <span class="keyword">go</span> <span class="function">worker</span>(<span class="number">1</span>, <span class="string">"task-1"</span>)
+    
+    <span class="comment">// 方式 3: 匿名函数 (常用)</span>
+    <span class="keyword">go</span> <span class="keyword">func</span>(msg <span class="keyword">string</span>) {
+        fmt.<span class="function">Println</span>(msg)
+    }(<span class="string">"匿名函数执行"</span>)
+    
+    <span class="comment">// 方式 4: 闭包 (注意变量捕获)</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">3</span>; i++ {
+        <span class="keyword">go</span> <span class="keyword">func</span>() {
+            fmt.<span class="function">Println</span>(i) <span class="comment">// ⚠️ 所有 Goroutine 都输出 3</span>
+        }()
+    }
+    
+    <span class="comment">// 方式 5: 闭包正确写法 (传参)</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">3</span>; i++ {
+        <span class="keyword">go</span> <span class="keyword">func</span>(n <span class="keyword">int</span>) {
+            fmt.<span class="function">Println</span>(n) <span class="comment">// ✅ 正确输出 0, 1, 2</span>
+        }(i)
+    }
+    
+    <span class="comment">// 等待 Goroutine 完成</span>
+    time.<span class="function">Sleep</span>(time.Millisecond * <span class="number">100</span>)
+}</code></pre>
+            </div>
+
+            <div class="warning-box">
+                <h3>⚠️ 常见错误：变量捕获</h3>
+                <pre><code><span class="comment">// ❌ 错误：所有 Goroutine 共享同一个 i</span>
+<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ {
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        fmt.<span class="function">Println</span>(i) <span class="comment">// 输出不确定，可能全是 10</span>
+    }()
+}
+
+<span class="comment">// ✅ 正确：通过参数传递</span>
+<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ {
+    <span class="keyword">go</span> <span class="keyword">func</span>(n <span class="keyword">int</span>) {
+        fmt.<span class="function">Println</span>(n) <span class="comment">// 正确输出 0-9</span>
+    }(i)
+}
+
+<span class="comment">// ✅ 正确：局部变量</span>
+<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ {
+    i := i <span class="comment">// Go 1.22+ 不需要这行</span>
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        fmt.<span class="function">Println</span>(i)
+    }()
+}</code></pre>
+            </div>
+
+            <!-- GMP 调度模型 -->
+            <h2 id="gmp">GMP 调度模型详解</h2>
+            
             <div class="gmp-diagram">
                 <div class="gmp-component">
                     <div class="gmp-title">G (Goroutine)</div>
-                    <div class="gmp-desc">轻量级执行单元</div>
+                    <div class="gmp-desc">用户态协程</div>
                     <div class="gmp-details">
                         <ul>
-                            <li>初始栈: 2KB</li>
-                            <li>最大栈: 1GB</li>
-                            <li>状态: 6种</li>
+                            <li>初始栈：2KB</li>
+                            <li>最大栈：1GB</li>
+                            <li>结构体：g</li>
                         </ul>
                     </div>
                 </div>
                 <div class="gmp-arrow">→</div>
                 <div class="gmp-component">
                     <div class="gmp-title">P (Processor)</div>
-                    <div class="gmp-desc">调度上下文</div>
+                    <div class="gmp-desc">逻辑处理器</div>
                     <div class="gmp-details">
                         <ul>
-                            <li>本地队列: 256</li>
-                            <li>MCache 缓存</li>
-                            <li>调度tick</li>
+                            <li>本地队列：256 槽</li>
+                            <li>数量：GOMAXPROCS</li>
+                            <li>调度上下文</li>
                         </ul>
                     </div>
                 </div>
@@ -49,287 +160,487 @@
                     <div class="gmp-desc">系统线程</div>
                     <div class="gmp-details">
                         <ul>
-                            <li>OS线程</li>
-                            <li>执行Goroutine</li>
-                            <li>工作窃取</li>
+                            <li>OS 线程映射</li>
+                            <li>执行 G</li>
+                            <li>系统调用分离</li>
                         </ul>
                     </div>
                 </div>
             </div>
 
-            <!-- Goroutine 状态流程图 -->
-            <h3>Goroutine 状态转换图</h3>
+            <h3>GMP 核心数据结构</h3>
+            <div class="example-box">
+                <h3>📖 Go 运行时中的 GMP 结构</h3>
+                <pre><code><span class="comment">// runtime/runtime2.go - G (Goroutine) 结构 (简化)</span>
+<span class="keyword">type</span> g <span class="keyword">struct</span> {
+    stack       stack   <span class="comment">// 栈的起止地址</span>
+    goid        <span class="keyword">int64</span>   <span class="comment">// Goroutine ID</span>
+    sched       gobuf   <span class="comment">// 调度上下文 (PC, SP 等)</span>
+    atomicstatus uint32 <span class="comment">// 运行状态</span>
+    stackHigh   <span class="keyword">uintptr</span> <span class="comment">// 栈最高水位</span>
+    <span class="comment">// ... 更多字段</span>
+}
+
+<span class="comment">// P (Processor) 结构 (简化)</span>
+<span class="keyword">type</span> p <span class="keyword">struct</span> {
+    lock mutex
+    status uint32
+    link p
+    id    <span class="keyword">int32</span>
+    mcache *mcache
+    runq    gQueue  <span class="comment">// G 队列 (256 个槽)</span>
+    runqhead uint32
+    runqtail uint32
+    <span class="comment">// 本地运行队列统计</span>
+    schedtick   uint32  <span class="comment">// 调度次数</span>
+    syscalltick uint32  <span class="comment">// 系统调用次数</span>
+    m           *m      <span class="comment">// 绑定的 M</span>
+    <span class="comment">// ... 更多字段</span>
+}
+
+<span class="comment">// M (Machine) 结构 (简化)</span>
+<span class="keyword">type</span> m <span class="keyword">struct</span> {
+    g0      *g     <span class="comment">// 执行调度器时用的栈</span>
+    gsignal *g     <span class="comment">// signal handling stack</span>
+    curg    *g     <span class="comment">// 当前执行的 G</span>
+    p       puintptr <span class="comment">// 绑定的 P</span>
+    nextp   puintptr
+    id      <span class="keyword">int64</span>
+    <span class="comment">// ... 更多字段</span>
+}</code></pre>
+            </div>
+
+            <h3>Goroutine 状态转换</h3>
             <div class="state-diagram">
-                <div class="state-node" data-state="_Gidle">_Gidle<br><small>创建</small></div>
+                <div class="state-node" data-state="_Gidle">_Gidle<br><small>已创建</small></div>
                 <div class="state-arrow">→</div>
-                <div class="state-node" data-state="_Grunnable">_Grunnable<br><small>就绪</small></div>
+                <div class="state-node" data-state="_Grunnable">_Grunnable<br><small>就绪态</small></div>
                 <div class="state-arrow">→</div>
-                <div class="state-node" data-state="_Grunning">_Grunning<br><small>运行</small></div>
+                <div class="state-node" data-state="_Grunning">_Grunning<br><small>运行态</small></div>
+                <div class="state-arrow">→</div>
+                <div class="state-node" data-state="_Gwaiting">_Gwaiting<br><small>等待态</small></div>
+                <div class="state-arrow">↔</div>
+                <div class="state-node" data-state="_Grunnable">_Grunnable<br><small>被唤醒</small></div>
+                <div class="state-arrow">→</div>
+                <div class="state-node" data-state="_Gdead">_Gdead<br><small>已结束</small></div>
             </div>
             <div class="state-diagram" style="margin-top: 15px;">
                 <div class="state-node" data-state="_Grunning">_Grunning</div>
                 <div class="state-arrow">→</div>
-                <div class="state-node" data-state="_Gwaiting">_Gwaiting<br><small>等待Channel/sleep</small></div>
+                <div class="state-node" data-state="_Gsyscall">_Gsyscall<br><small>系统调用</small></div>
                 <div class="state-arrow">→</div>
-                <div class="state-node" data-state="_Grunnable">_Grunnable<br><small>唤醒</small></div>
-                <div class="state-arrow">→</div>
-                <div class="state-node" data-state="_Gdead">_Gdead<br><small>完成</small></div>
+                <div class="state-node" data-state="_Grunnable">_Grunnable</div>
             </div>
 
-            <!-- 工作窃取流程图 -->
-            <h3>工作窃取 (Work Stealing) 流程</h3>
+            <div class="info-box">
+                <h3>💡 GMP 调度要点</h3>
+                <ul>
+                    <li><strong>G 创建</strong>: 调用 <code>go func()</code> 时创建，放入 P 的本地队列</li>
+                    <li><strong>调度时机</strong>: 函数调用、channel 操作、select、time.Sleep 等</li>
+                    <li><strong>工作窃取</strong>: P 的本地队列为空时，从其他 P 或全局队列窃取 G</li>
+                    <li><strong>系统调用</strong>: M 执行系统调用时，P 与 M 分离，其他 G 可继续执行</li>
+                    <li><strong>抢占调度</strong>: Go 1.14+ 基于信号的抢占，避免长时运行阻塞</li>
+                </ul>
+            </div>
+
+            <!-- 调度流程 -->
+            <h2 id="scheduler">调度流程</h2>
+            
+            <h3>Goroutine 调度流程</h3>
             <div class="flowchart">
                 <div class="flowchart-row">
-                    <div class="flowchart-node warning">P1 本地队列满</div>
+                    <div class="flowchart-node">Goroutine 创建</div>
                     <span class="flowchart-arrow">→</span>
-                    <div class="flowchart-node">P1 新任务放入全局队列</div>
+                    <div class="flowchart-node">放入 P 本地队列</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">等待调度</div>
                 </div>
                 <div class="flowchart-row">
-                    <div class="flowchart-node success">P2 空闲</div>
+                    <div class="flowchart-node success">P 有空闲 M?</div>
                     <span class="flowchart-arrow">→</span>
-                    <div class="flowchart-node">从全局队列获取任务</div>
+                    <div class="flowchart-node highlight">M 执行 G</div>
                     <span class="flowchart-arrow">→</span>
-                    <div class="flowchart-node">P2 执行任务</div>
+                    <div class="flowchart-node">G 运行完成/阻塞</div>
+                </div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node warning">本地队列空？</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node danger">工作窃取</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node success">从其他 P 窃取</div>
                 </div>
             </div>
 
-            <pre><code><span class="keyword">package</span> main
+            <h3>系统调用处理</h3>
+            <div class="flowchart">
+                <div class="flowchart-row">
+                    <div class="flowchart-node">G 执行系统调用</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node warning">M 阻塞</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node danger">P 与 M 分离</div>
+                </div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node success">创建新 M</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node highlight">P 绑定新 M</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node success">继续执行其他 G</div>
+                </div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node">系统调用返回</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">G 回到就绪队列</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">等待调度</div>
+                </div>
+            </div>
+
+            <!-- 生产级模式 -->
+            <h2 id="patterns">生产级并发模式</h2>
+
+            <h3>1. Worker Pool 模式</h3>
+            <div class="example-box">
+                <h3>📝 固定大小的 Worker 池</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
     <span class="string">"time"</span>
 )
 
-<span class="function">func</span> <span class="function">say</span>(s <span class="keyword">string</span>) {
-    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ {
-        time.<span class="function">Sleep</span>(<span class="number">100</span> * time.Millisecond)
-        fmt.<span class="function">Println</span>(s)
+<span class="comment">// Job 定义任务</span>
+<span class="keyword">type</span> Job <span class="keyword">struct</span> {
+    ID   <span class="keyword">int</span>
+    Data <span class="keyword">string</span>
+}
+
+<span class="comment">// Result 定义结果</span>
+<span class="keyword">type</span> Result <span class="keyword">struct</span> {
+    JobID  <span class="keyword">int</span>
+    Output <span class="keyword">string</span>
+}
+
+<span class="comment">// Worker 处理任务</span>
+<span class="keyword">func</span> <span class="function">worker</span>(id <span class="keyword">int</span>, jobs &lt;-<span class="keyword">chan</span> Job, results <span class="keyword">chan</span>&lt;- Result, wg *sync.WaitGroup) {
+    <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+    
+    <span class="keyword">for</span> job := <span class="keyword">range</span> jobs {
+        fmt.<span class="function">Printf</span>(<span class="string">"Worker %d processing job %d\n"</span>, id, job.ID)
+        
+        <span class="comment">// 模拟处理</span>
+        time.<span class="function">Sleep</span>(time.Millisecond * <span class="number">100</span>)
+        
+        results &lt;- Result{
+            JobID:  job.ID,
+            Output: fmt.<span class="function">Sprintf</span>(<span class="string">"Processed: %s"</span>, job.Data),
+        }
     }
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 启动 goroutine</span>
-    <span class="keyword">go</span> <span class="function">say</span>(<span class="string">"world"</span>)
-    <span class="function">say</span>(<span class="string">"hello"</span>)
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">const</span> (
+        workerCount = <span class="number">5</span>
+        jobCount    = <span class="number">20</span>
+    )
+    
+    jobs := <span class="function">make</span>(<span class="keyword">chan</span> Job, jobCount)
+    results := <span class="function">make</span>(<span class="keyword">chan</span> Result, jobCount)
+    
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="comment">// 启动 Worker 池</span>
+    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= workerCount; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="function">worker</span>(i, jobs, results, &wg)
+    }
+    
+    <span class="comment">// 发送任务</span>
+    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= jobCount; i++ {
+        jobs &lt;- Job{ID: i, Data: fmt.<span class="function">Sprintf</span>(<span class="string">"task-%d"</span>, i)}
+    }
+    <span class="function">close</span>(jobs)
+    
+    <span class="comment">// 等待所有 Worker 完成</span>
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        wg.<span class="function">Wait</span>()
+        <span class="function">close</span>(results)
+    }()
+    
+    <span class="comment">// 收集结果</span>
+    <span class="keyword">for</span> result := <span class="keyword">range</span> results {
+        fmt.<span class="function">Printf</span>(<span class="string">"Result: Job %d → %s\n"</span>, result.JobID, result.Output)
+    }
 }</code></pre>
+            </div>
+
+            <h3>2. Fan-Out / Fan-In 模式</h3>
+            <div class="example-box">
+                <h3>📝 多阶段并行处理</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="comment">// stage1: 数据生成 (Fan-Out)</span>
+<span class="keyword">func</span> <span class="function">generate</span>(nums []<span class="keyword">int</span>) &lt;-<span class="keyword">chan</span> <span class="keyword">int</span> {
+    out := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">defer</span> <span class="function">close</span>(out)
+        <span class="keyword">for</span> _, n := <span class="keyword">range</span> nums {
+            out &lt;- n
+        }
+    }()
+    <span class="keyword">return</span> out
+}
+
+<span class="comment">// stage2: 并行计算 (Fan-Out)</span>
+<span class="keyword">func</span> <span class="function">square</span>(in &lt;-<span class="keyword">chan</span> <span class="keyword">int</span>) &lt;-<span class="keyword">chan</span> <span class="keyword">int</span> {
+    out := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">var</span> wg sync.WaitGroup
+    
+    <span class="comment">// 启动 3 个计算 Goroutine</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">3</span>; i++ {
+        wg.<span class="function">Add</span>(<span class="number">1</span>)
+        <span class="keyword">go</span> <span class="keyword">func</span>() {
+            <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+            <span class="keyword">for</span> n := <span class="keyword">range</span> in {
+                out &lt;- n * n
+            }
+        }()
+    }
+    
+    <span class="comment">// 等待所有计算完成</span>
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        wg.<span class="function">Wait</span>()
+        <span class="function">close</span>(out)
+    }()
+    
+    <span class="keyword">return</span> out
+}
+
+<span class="comment">// stage3: 结果收集 (Fan-In)</span>
+<span class="keyword">func</span> <span class="function">main</span>() {
+    nums := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>}
+    
+    <span class="comment">// 管道式处理</span>
+    gen := <span class="function">generate</span>(nums)
+    sq := <span class="function">square</span>(gen)
+    
+    <span class="comment">// 收集结果</span>
+    <span class="keyword">for</span> result := <span class="keyword">range</span> sq {
+        fmt.<span class="function">Println</span>(result)
+    }
+}</code></pre>
+            </div>
+
+            <h3>3. 优雅关闭 Goroutine</h3>
+            <div class="example-box">
+                <h3>📝 使用 done channel 控制生命周期</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+    <span class="string">"os/signal"</span>
+    <span class="string">"syscall"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="comment">// Worker 持续运行直到收到停止信号</span>
+<span class="keyword">func</span> <span class="function">worker</span>(ctx context.Context, id <span class="keyword">int</span>) {
+    <span class="keyword">for</span> {
+        <span class="keyword">select</span> {
+        <span class="keyword">case</span> &lt;-ctx.<span class="function">Done</span>():
+            fmt.<span class="function">Printf</span>(<span class="string">"Worker %d shutting down\n"</span>, id)
+            <span class="keyword">return</span>
+        <span class="keyword">default</span>:
+            <span class="comment">// 执行任务</span>
+            fmt.<span class="function">Printf</span>(<span class="string">"Worker %d working...\n"</span>, id)
+            time.<span class="function">Sleep</span>(time.Second)
+        }
+    }
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建可取消的 Context</span>
+    ctx, cancel := context.WithCancel(context.<span class="function">Background</span>())
+    <span class="keyword">defer</span> <span class="function">cancel</span>()
+    
+    <span class="comment">// 启动 Worker</span>
+    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= <span class="number">3</span>; i++ {
+        <span class="keyword">go</span> <span class="function">worker</span>(ctx, i)
+    }
+    
+    <span class="comment">// 监听系统信号</span>
+    sigChan := <span class="function">make</span>(<span class="keyword">chan</span> os.Signal, <span class="number">1</span>)
+    signal.<span class="function">Notify</span>(sigChan, syscall.SIGINT, syscall.SIGTERM)
+    
+    <span class="comment">// 等待退出信号</span>
+    &lt;-sigChan
+    fmt.<span class="function">Println</span>(<span class="string">"Received shutdown signal"</span>)
+    
+    <span class="comment">// 取消 Context，通知所有 Worker 退出</span>
+    <span class="function">cancel</span>()
+    
+    <span class="comment">// 等待清理完成</span>
+    time.<span class="function">Sleep</span>(time.Millisecond * <span class="number">500</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"Shutdown complete"</span>)
+}</code></pre>
+            </div>
+
+            <!-- 性能优化 -->
+            <h2 id="performance">性能优化</h2>
+
+            <h3>Goroutine 泄漏检测</h3>
+            <div class="example-box">
+                <h3>📊 检测和预防 Goroutine 泄漏</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"runtime"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="comment">// 获取当前 Goroutine 数量</span>
+<span class="keyword">func</span> <span class="function">countGoroutines</span>() <span class="keyword">int</span> {
+    <span class="keyword">return</span> runtime.<span class="function">NumGoroutine</span>()
+}
+
+<span class="comment">// 泄漏示例：阻塞的 Goroutine</span>
+<span class="keyword">func</span> <span class="function">leak</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        &lt;-ch <span class="comment">// 永久阻塞，无人发送</span>
+        fmt.<span class="function">Println</span>(<span class="string">"永远不会执行"</span>)
+    }()
+}
+
+<span class="comment">// 修复：使用超时</span>
+<span class="keyword">func</span> <span class="function">noLeak</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">select</span> {
+        <span class="keyword">case</span> &lt;-ch:
+            fmt.<span class="function">Println</span>(<span class="string">"收到数据"</span>)
+        <span class="keyword">case</span> &lt;-time.<span class="function">After</span>(time.Second):
+            fmt.<span class="function">Println</span>(<span class="string">"超时退出"</span>)
+        }
+    }()
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    fmt.<span class="function">Printf</span>(<span class="string">"初始 Goroutine 数：%d\n"</span>, <span class="function">countGoroutines</span>())
+    
+    <span class="comment">// 模拟泄漏</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">100</span>; i++ {
+        <span class="function">leak</span>()
+    }
+    
+    time.<span class="function">Sleep</span>(time.Millisecond * <span class="number">100</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"泄漏后 Goroutine 数：%d\n"</span>, <span class="function">countGoroutines</span>())
+    
+    <span class="comment">// 修复后</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">100</span>; i++ {
+        <span class="function">noLeak</span>()
+    }
+    
+    time.<span class="function">Sleep</span>(time.Second * <span class="number">2</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"修复后 Goroutine 数：%d\n"</span>, <span class="function">countGoroutines</span>())
+}</code></pre>
+            </div>
 
             <div class="note-box">
-                <h3>Goroutine 内部实现原理</h3>
-                <p><strong>1. Goroutine 的内部结构：</strong></p>
-                <p>Goroutine 是 Go 运行时（runtime）管理的轻量级线程，其内部结构包含：</p>
-                <pre><code><span class="comment">// Goroutine 的内部结构（简化版）</span>
-<span class="keyword">type</span> g <span class="keyword">struct</span> {
-    stack       stack   <span class="comment">// 栈内存</span>
-    stackguard0 uintptr <span class="comment">// 栈溢出检查</span>
-    m           *m      <span class="comment">// 关联的 M（Machine）</span>
-    sched       gobuf   <span class="comment">// 调度信息</span>
-    goid        int64   <span class="comment">// Goroutine ID</span>
-    gopc        uintptr <span class="comment">// 创建该 goroutine 的 PC</span>
-    startpc     uintptr <span class="comment">// goroutine 函数的起始 PC</span>
-    atomicstatus uint32 <span class="comment">// 原子状态</span>
-}</code></pre>
+                <h3>📊 Goroutine 泄漏检测工具</h3>
+                <ul>
+                    <li><strong>runtime.NumGoroutine()</strong>: 实时监控 Goroutine 数量</li>
+                    <li><strong>pprof</strong>: <code>go tool pprof http://localhost:6060/debug/pprof/goroutine</code></li>
+                    <li><strong>go tool trace</strong>: 可视化调度追踪</li>
+                    <li><strong>goleak</strong>: 测试包 <code>go.uber.org/goleak</code></li>
+                </ul>
+            </div>
 
-                <p><strong>2. M（Machine）结构：</strong></p>
-                <p>M 代表操作系统线程，负责执行 goroutine：</p>
-                <pre><code><span class="comment">// M 的内部结构（简化版）</span>
-<span class="keyword">type</span> m <span class="keyword">struct</span> {
-    g0      *g      <span class="comment">// 调度用的 goroutine</span>
-    curg    *g      <span class="comment">// 当前运行的 goroutine</span>
-    p       *p      <span class="comment">// 关联的 P（Processor）</span>
-    nextp   *p      <span class="comment">// 下一个 P</span>
-    id      int64   <span class="comment">// M 的 ID</span>
-    spinning <span class="keyword">bool</span>   <span class="comment">// 是否在自旋寻找工作</span>
-    blocked <span class="keyword">bool</span>   <span class="comment">// 是否阻塞</span>
-}</code></pre>
+            <h3>性能基准对比</h3>
+            <div class="example-box">
+                <h3>📈 Goroutine vs 线程性能对比</h3>
+                <pre><code><span class="comment">// 基准测试：创建 10 万个并发单元</span>
 
-                <p><strong>3. P（Processor）结构：</strong></p>
-                <p>P 代表处理器，维护一个本地运行队列：</p>
-                <pre><code><span class="comment">// P 的内部结构（简化版）</span>
-<span class="keyword">type</span> p <span class="keyword">struct</span> {
-    id          int32
-    status      uint32
-    link        *p
-    schedtick   uint32
-    syscalltick uint32
-    m           *m      <span class="comment">// 关联的 M</span>
-    mcache      *mcache <span class="comment">// 内存分配缓存</span>
-    runqhead    uint32
-    runqtail    uint32
-    runq        [<span class="number">256</span>]<span class="keyword">guintptr</span> <span class="comment">// 本地运行队列</span>
-    runnext     guintptr <span class="comment">// 下一个运行的 goroutine</span>
-}</code></pre>
-
-                <p><strong>4. GMP 调度模型：</strong></p>
-                <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"runtime"</span>
-    <span class="string">"sync"</span>
-    <span class="string">"time"</span>
-)
-
-<span class="function">func</span> <span class="function">worker</span>(id <span class="keyword">int</span>, wg *sync.WaitGroup) {
-    <span class="keyword">defer</span> wg.<span class="function">Done</span>()
-    fmt.<span class="function">Printf</span>(<span class="string">"Worker %d 开始工作\n"</span>, id)
-    time.<span class="function">Sleep</span>(<span class="number">100</span> * time.Millisecond)
-    fmt.<span class="function">Printf</span>(<span class="string">"Worker %d 完成工作\n"</span>, id)
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 设置使用的 P 数量</span>
-    runtime.<span class="function">GOMAXPROCS</span>(<span class="number">4</span>)
-    
-    fmt.<span class="function">Printf</span>(<span class="string">"CPU 核心数: %d\n"</span>, runtime.<span class="function">NumCPU</span>())
-    fmt.<span class="function">Printf</span>(<span class="string">"GOMAXPROCS: %d\n"</span>, runtime.<span class="function">GOMAXPROCS</span>(<span class="number">0</span>))
-    
-    <span class="keyword">var</span> wg sync.WaitGroup
-    
-    <span class="comment">// 启动多个 goroutine</span>
-    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= <span class="number">10</span>; i++ {
-        wg.<span class="function">Add</span>(<span class="number">1</span>)
-        <span class="keyword">go</span> <span class="function">worker</span>(i, &amp;wg)
-    }
-    
-    wg.<span class="function">Wait</span>()
-    fmt.<span class="function">Println</span>(<span class="string">"所有 worker 完成"</span>)
-}</code></pre>
-
-                <p><strong>5. Goroutine 调度过程：</strong></p>
-                <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"runtime"</span>
-)
-
-<span class="function">func</span> <span class="function">task</span>(id <span class="keyword">int</span>) {
-    fmt.<span class="function">Printf</span>(<span class="string">"Task %d 在 P%d 上运行\n"</span>, id, runtime.<span class="function">GOMAXPROCS</span>(<span class="number">0</span>))
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// Goroutine 调度过程：</span>
-    <span class="comment">// 1. 创建 goroutine：go func() {}</span>
-    <span class="comment">// 2. 将 goroutine 放入本地运行队列（P 的 runq）</span>
-    <span class="comment">// 3. M 从 P 的 runq 中获取 goroutine 执行</span>
-    <span class="comment">// 4. 如果 P 的 runq 为空，从全局队列或其他 P 窃取 goroutine</span>
-    <span class="comment">// 5. Goroutine 执行完成或阻塞，M 继续执行下一个 goroutine</span>
-    
-    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= <span class="number">5</span>; i++ {
-        <span class="keyword">go</span> <span class="function">task</span>(i)
-    }
-    
-    <span class="comment">// 等待 goroutine 完成</span>
-    <span class="keyword">select</span> {}
-}</code></pre>
-
-                <p><strong>6. 工作窃取（Work Stealing）：</strong></p>
-                <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"runtime"</span>
-    <span class="string">"sync"</span>
-    <span class="string">"time"</span>
-)
-
-<span class="function">func</span> <span class="function">heavyTask</span>(id <span class="keyword">int</span>, wg *sync.WaitGroup) {
-    <span class="keyword">defer</span> wg.<span class="function">Done</span>()
-    
-    <span class="comment">// 模拟不同负载的任务</span>
-    duration := time.Duration(<span class="number">50</span>+id*<span class="number">10</span>) * time.Millisecond
-    time.<span class="function">Sleep</span>(duration)
-    
-    fmt.<span class="function">Printf</span>(<span class="string">"Task %d 完成，耗时 %v\n"</span>, id, duration)
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    runtime.<span class="function">GOMAXPROCS</span>(<span class="number">2</span>) <span class="comment">// 使用 2 个 P</span>
-    
-    <span class="keyword">var</span> wg sync.WaitGroup
-    
-    <span class="comment">// 创建不同负载的任务</span>
-    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= <span class="number">10</span>; i++ {
-        wg.<span class="function">Add</span>(<span class="number">1</span>)
-        <span class="keyword">go</span> <span class="function">heavyTask</span>(i, &amp;wg)
-    }
-    
-    wg.<span class="function">Wait</span>()
-    fmt.<span class="function">Println</span>(<span class="string">"所有任务完成"</span>)
-    
-    <span class="comment">// 工作窃取机制：</span>
-    <span class="comment">// 1. P1 的任务较多，P2 的任务较少</span>
-    <span class="comment">// 2. P2 完成自己的任务后，会从 P1 窃取任务执行</span>
-    <span class="comment">// 3. 这实现了负载均衡，充分利用 CPU 资源</span>
-}</code></pre>
-
-                <p><strong>7. Goroutine 栈管理：</strong></p>
-                <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"runtime"</span>
-)
-
-<span class="function">func</span> <span class="function">recursive</span>(depth <span class="keyword">int</span>) {
-    <span class="keyword">var</span> buf [<span class="number">1024</span>]<span class="keyword">byte</span> <span class="comment">// 分配 1KB 栈空间</span>
-    
-    <span class="keyword">if</span> depth &lt; <span class="number">100</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"递归深度: %d, 栈地址: %p\n"</span>, depth, &amp;buf)
-        <span class="function">recursive</span>(depth + <span class="number">1</span>)
+<span class="comment">// Goroutine 版本</span>
+<span class="keyword">func</span> <span class="function">BenchmarkGoroutine</span>(b *testing.B) {
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; b.N; i++ {
+        done := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>{})
+        <span class="keyword">go</span> <span class="keyword">func</span>() {
+            <span class="comment">// 模拟工作</span>
+            done &lt;- <span class="keyword">struct</span>{}{}
+        }()
+        &lt;-done
     }
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    fmt.<span class="function">Printf</span>(<span class="string">"初始栈大小: %d KB\n"</span>, runtime.<span class="function">GoroutineStack</span>()/<span class="number">1024</span>)
-    
-    <span class="comment">// Goroutine 栈管理特点：</span>
-    <span class="comment">// 1. 初始栈大小：2KB（Go 1.4+）</span>
-    <span class="comment">// 2. 动态增长：栈空间不足时自动扩容</span>
-    <span class="comment">// 3. 最大栈大小：1GB（可配置）</span>
-    <span class="comment">// 4. 栈拷贝：扩容时将旧栈内容拷贝到新栈</span>
-    
-    <span class="keyword">go</span> <span class="function">recursive</span>(<span class="number">0</span>)
-    
-    <span class="keyword">select</span> {}
-}</code></pre>
+<span class="comment">// 结果 (参考值):</span>
+<span class="comment">// BenchmarkGoroutine-8    100000    1200 ns/op    2 KB/op</span>
 
-                <p><strong>8. Goroutine 状态转换：</strong></p>
-                <pre><code><span class="keyword">package</span> main
+<span class="comment">// 优化技巧：</span>
+<span class="comment">// 1. 复用 Goroutine (Worker Pool)</span>
+<span class="comment">// 2. 批量处理减少创建次数</span>
+<span class="comment">// 3. 使用 sync.Pool 减少内存分配</span>
+<span class="comment">// 4. 合理设置 GOMAXPROCS</span></code></pre>
+            </div>
 
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"runtime"</span>
-    <span class="string">"time"</span>
-)
+            <div class="info-box">
+                <h3>💡 性能优化建议</h3>
+                <ul>
+                    <li><strong>避免过度创建</strong>: 使用 Worker Pool 复用 Goroutine</li>
+                    <li><strong>控制并发度</strong>: 限制同时运行的 Goroutine 数量</li>
+                    <li><strong>减少锁竞争</strong>: 使用无锁数据结构或细粒度锁</li>
+                    <li><strong>批量处理</strong>: 减少 Goroutine 间通信次数</li>
+                    <li><strong>监控泄漏</strong>: 生产环境监控 Goroutine 数量</li>
+                </ul>
+            </div>
 
-<span class="function">func</span> <span class="function">demonstrateStates</span>() {
-    fmt.<span class="function">Println</span>(<span class="string">"Goroutine 状态转换："</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"_Gidle: 刚创建，未初始化"</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"_Grunnable: 在运行队列中，等待执行"</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"_Grunning: 正在执行"</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"_Gsyscall: 正在执行系统调用"</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"_Gwaiting: 等待（channel、sleep 等）"</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"_Gdead: 已退出"</span>)
-}
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践总结</h2>
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="keyword">go</span> <span class="function">demonstrateStates</span>()
-    
-    <span class="comment">// Goroutine 状态转换示例：</span>
-    <span class="comment">// _Gidle -> _Grunnable: 创建 goroutine</span>
-    <span class="comment">// _Grunnable -> _Grunning: 被调度执行</span>
-    <span class="comment">// _Grunning -> _Gwaiting: 等待 channel 或 sleep</span>
-    <span class="comment">// _Gwaiting -> _Grunnable: 唤醒后重新进入队列</span>
-    <span class="comment">// _Grunning -> _Gdead: 执行完成</span>
-    
-    time.<span class="function">Sleep</span>(<span class="number">100</span> * time.Millisecond)
-}</code></pre>
-            
+            <div class="success-box">
+                <h3>✅ Goroutine 使用原则</h3>
+                <ul>
+                    <li><strong>明确生命周期</strong>: 确保 Goroutine 能正常退出</li>
+                    <li><strong>使用 Context</strong>: 通过 Context 控制取消和超时</li>
+                    <li><strong>避免泄漏</strong>: 确保 channel 有发送者/接收者</li>
+                    <li><strong>错误处理</strong>: 使用 errgroup 或错误 channel</li>
+                    <li><strong>资源清理</strong>: 使用 defer 确保资源释放</li>
+                    <li><strong>变量捕获</strong>: 循环中通过参数传递变量</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <h3>🚨 常见陷阱</h3>
+                <ul>
+                    <li><strong>主 Goroutine 提前退出</strong>: 使用 WaitGroup 或 channel 等待</li>
+                    <li><strong>共享数据竞争</strong>: 使用 mutex 或 channel 保护</li>
+                    <li><strong>无限阻塞</strong>: 使用 select + timeout</li>
+                    <li><strong>重复关闭 channel</strong>: 确保只关闭一次</li>
+                    <li><strong>向关闭的 channel 发送</strong>: 检查 channel 状态</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="concurrency-channel.html">Channel - 并发通信</a></li>
+                    <li><a href="concurrency-select.html">Select - 多路复用</a></li>
+                    <li><a href="concurrency-mutex.html">Mutex - 互斥锁</a></li>
+                    <li><a href="concurrency-context.html">Context - 上下文控制</a></li>
+                    <li><a href="stdlib-sync.html">sync 包 - 并发原语</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="code-collapse.js"></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

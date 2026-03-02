@@ -4,44 +4,177 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Context - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>Context - Go 上下文控制</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="concurrency.html" class="back-link">← 返回 concurrency</a>
-            <h1>Context</h1>
-            <p class="intro">Context 用于传递请求范围的数据和控制 goroutine 生命周期。</p>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="concurrency-select.html" class="back-link">← Select</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="stdlib-sync.html" class="back-link">sync 包 →</a>
 
+            <h1>Context - 请求生命周期管理</h1>
+            <p class="intro">Context 是 Go 用于控制 Goroutine 生命周期、传递请求范围数据的标准机制。掌握 Context 是编写可取消、可超时、可追踪的并发程序的关键。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
             <div class="feature-grid">
-                <div class="feature-card">
+                <div class="feature-card highlight">
                     <div class="icon">🌳</div>
                     <h4>树形结构</h4>
-                    <p>支持上下文传播</p>
+                    <p>父子 Context 级联取消</p>
+                    <code class="tag">Parent → Child</code>
                 </div>
                 <div class="feature-card">
                     <div class="icon">⏱️</div>
                     <h4>超时控制</h4>
-                    <p>WithTimeout</p>
+                    <p>自动取消防止阻塞</p>
+                    <code class="tag">WithTimeout</code>
                 </div>
                 <div class="feature-card">
-                    <div class="icon">�取消</div>
-                    <h4>取消</h4>
-                    <p>WithCancel</p>
+                    <div class="icon">📋</div>
+                    <h4>数据传递</h4>
+                    <p>请求范围键值对</p>
+                    <code class="tag">WithValue</code>
                 </div>
                 <div class="feature-card">
-                    <div class="icon">🔢</div>
-                    <h4>值传递</h4>
-                    <p>WithValue</p>
+                    <div class="icon">🛑</div>
+                    <h4>手动取消</h4>
+                    <p>主动通知退出</p>
+                    <code class="tag">WithCancel</code>
                 </div>
             </div>
 
-            <h2 id="context">Context</h2>
-            <pre><code><span class="keyword">package</span> main
+            <!-- Context 接口 -->
+            <h2 id="interface">Context 接口定义</h2>
+            <div class="example-box">
+                <h3>📖 context.Context 接口</h3>
+                <pre><code><span class="keyword">type</span> Context <span class="keyword">interface</span> {
+    <span class="function">Deadline</span>() (deadline time.Time, ok <span class="keyword">bool</span>)
+    <span class="function">Done</span>() &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>{}
+    <span class="function">Err</span>() <span class="keyword">error</span>
+    <span class="function">Value</span>(key <span class="keyword">interface</span>{}) <span class="keyword">interface</span>{}
+}
+
+<span class="comment">// 方法说明：</span>
+<span class="comment">// Deadline: 返回截止时间，ok=true 表示设置了 deadline</span>
+<span class="comment">// Done: 返回 channel，Context 取消时关闭</span>
+<span class="comment">// Err: 返回取消原因 (Canceled 或 DeadlineExceeded)</span>
+<span class="comment">// Value: 获取键值对数据</span></code></pre>
+            </div>
+
+            <div class="info-box">
+                <h3>💡 Context 使用原则</h3>
+                <ul>
+                    <li><strong>作为第一个参数</strong>: <code>func DoWork(ctx context.Context, ...)</code></li>
+                    <li><strong>不要存储在结构体</strong>: 显式传递，保持调用链清晰</li>
+                    <li><strong>及时调用 cancel</strong>: 使用 <code>defer cancel()</code> 防止资源泄漏</li>
+                    <li><strong>传递请求范围数据</strong>: 如 trace_id、user_id 等</li>
+                    <li><strong>避免滥用</strong>: 不用于传递可选参数或配置</li>
+                </ul>
+            </div>
+
+            <!-- Context 树 -->
+            <h2 id="tree">Context 层级结构</h2>
+            
+            <div class="context-tree">
+                <div class="tree-root">context.Background()</div>
+                <div class="tree-branch">
+                    <span class="tree-line">├──</span>
+                    <div class="tree-node">WithTimeout(5s)</div>
+                    <div class="tree-branch">
+                        <span class="tree-line">├──</span>
+                        <div class="tree-node">WithValue("trace_id", "xxx")</div>
+                        <span class="tree-line">└──</span>
+                        <div class="tree-node">WithValue("user_id", "123")</div>
+                    </div>
+                    <span class="tree-line">├──</span>
+                    <div class="tree-node">WithCancel()</div>
+                    <span class="tree-line">└──</span>
+                    <div class="tree-node">WithDeadline(t)</div>
+                </div>
+            </div>
+
+            <div class="flowchart">
+                <div class="flowchart-row">
+                    <div class="flowchart-node warning">HTTP Request</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">创建 Root Context</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">WithTimeout 设置超时</div>
+                </div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node">超时或完成</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node danger">自动取消所有子 Context</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node success">释放资源</div>
+                </div>
+            </div>
+
+            <!-- 四种 Context -->
+            <h2 id="types">四种 Context 类型</h2>
+            <table>
+                <caption>Context 类型对比</caption>
+                <thead>
+                    <tr>
+                        <th>类型</th>
+                        <th>创建方法</th>
+                        <th>取消方式</th>
+                        <th>使用场景</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Background</strong></td>
+                        <td><code>context.Background()</code></td>
+                        <td>永不取消</td>
+                        <td>根 Context，所有 Context 的祖先</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TODO</strong></td>
+                        <td><code>context.TODO()</code></td>
+                        <td>永不取消</td>
+                        <td>不确定使用何种 Context 时的临时选择</td>
+                    </tr>
+                    <tr>
+                        <td><strong>WithCancel</strong></td>
+                        <td><code>ctx, cancel := WithCancel(parent)</code></td>
+                        <td>手动调用 cancel()</td>
+                        <td>需要主动取消的场景</td>
+                    </tr>
+                    <tr>
+                        <td><strong>WithTimeout</strong></td>
+                        <td><code>ctx, cancel := WithTimeout(parent, d)</code></td>
+                        <td>超时自动取消</td>
+                        <td>防止操作无限等待</td>
+                    </tr>
+                    <tr>
+                        <td><strong>WithDeadline</strong></td>
+                        <td><code>ctx, cancel := WithDeadline(parent, t)</code></td>
+                        <td>到时间自动取消</td>
+                        <td>指定具体截止时间</td>
+                    </tr>
+                    <tr>
+                        <td><strong>WithValue</strong></td>
+                        <td><code>ctx := WithValue(parent, key, value)</code></td>
+                        <td>继承父 Context</td>
+                        <td>传递请求范围数据</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- 基础用法 -->
+            <h2 id="basic">基础用法</h2>
+
+            <h3>1. WithCancel - 手动取消</h3>
+            <div class="example-box">
+                <h3>📝 主动取消 Goroutine</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"context"</span>
@@ -49,34 +182,449 @@
     <span class="string">"time"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 创建一个可取消的 context</span>
-    ctx, cancel := context.<span class="function">WithCancel</span>(context.<span class="function">Background</span>())
+<span class="keyword">func</span> <span class="function">worker</span>(ctx context.Context, id <span class="keyword">int</span>) {
+    <span class="keyword">for</span> {
+        <span class="keyword">select</span> {
+        <span class="keyword">case</span> &lt;-ctx.<span class="function">Done</span>():
+            fmt.<span class="function">Printf</span>(<span class="string">"Worker %d: %v\n"</span>, id, ctx.<span class="function">Err</span>())
+            <span class="keyword">return</span>
+        <span class="keyword">default</span>:
+            fmt.<span class="function">Printf</span>(<span class="string">"Worker %d working...\n"</span>, id)
+            time.<span class="function">Sleep</span>(time.Millisecond * <span class="number">200</span>)
+        }
+    }
+}
 
-    <span class="keyword">go</span> <span class="function">func</span>() {
-        <span class="keyword">for</span> {
-            <span class="keyword">select</span> {
-            <span class="keyword">case</span> &lt;-ctx.<span class="function">Done</span>():
-                fmt.<span class="function">Println</span>(<span class="string">"goroutine 被取消"</span>)
-                <span class="keyword">return</span>
-            <span class="keyword">default</span>:
-                fmt.<span class="function">Println</span>(<span class="string">"goroutine 运行中"</span>)
-                time.<span class="function">Sleep</span>(<span class="number">500</span> * time.Millisecond)
-            }
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建可取消的 Context</span>
+    ctx, cancel := context.<span class="function">WithCancel</span>(context.<span class="function">Background</span>())
+    <span class="keyword">defer</span> <span class="function">cancel</span>() <span class="comment">// 确保资源释放</span>
+
+    <span class="comment">// 启动多个 Worker</span>
+    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= <span class="number">3</span>; i++ {
+        <span class="keyword">go</span> <span class="function">worker</span>(ctx, i)
+    }
+
+    <span class="comment">// 运行 1 秒后取消</span>
+    time.<span class="function">Sleep</span>(time.Second)
+    fmt.<span class="function">Println</span>(<span class="string">"Cancelling all workers..."</span>)
+    <span class="function">cancel</span>() <span class="comment">// 取消所有 Worker</span>
+
+    time.<span class="function">Sleep</span>(time.Millisecond * <span class="number">100</span>)
+}</code></pre>
+            </div>
+
+            <h3>2. WithTimeout - 超时控制</h3>
+            <div class="example-box">
+                <h3>📝 防止操作无限等待</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"io"</span>
+    <span class="string">"net/http"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="comment">// 带超时的 HTTP 请求</span>
+<span class="keyword">func</span> <span class="function">fetchWithTimeout</span>(url <span class="keyword">string</span>, timeout time.Duration) (<span class="keyword">string</span>, <span class="keyword">error</span>) {
+    <span class="comment">// 创建带超时的 Context</span>
+    ctx, cancel := context.<span class="function">WithTimeout</span>(context.<span class="function">Background</span>(), timeout)
+    <span class="keyword">defer</span> <span class="function">cancel</span>()
+
+    <span class="comment">// 创建带 Context 的请求</span>
+    req, err := http.<span class="function">NewRequestWithContext</span>(ctx, <span class="string">"GET"</span>, url, <span class="keyword">nil</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, err
+    }
+
+    resp, err := http.DefaultClient.<span class="function">Do</span>(req)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, err
+    }
+    <span class="keyword">defer</span> resp.Body.<span class="function">Close</span>()
+
+    body, err := io.<span class="function">ReadAll</span>(resp.Body)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="string">""</span>, err
+    }
+
+    <span class="keyword">return</span> <span class="function">string</span>(body), <span class="keyword">nil</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    body, err := <span class="function">fetchWithTimeout</span>(<span class="string">"https://api.example.com/data"</span>, time.Second*<span class="number">5</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"Error: %v\n"</span>, err)
+        <span class="keyword">return</span>
+    }
+    fmt.<span class="function">Printf</span>(<span class="string">"Response: %s\n"</span>, body)
+}</code></pre>
+            </div>
+
+            <h3>3. WithValue - 传递数据</h3>
+            <div class="example-box">
+                <h3>📝 传递请求范围数据</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+)
+
+<span class="comment">// 定义 key 类型 (避免冲突)</span>
+<span class="keyword">type</span> contextKey <span class="keyword">string</span>
+
+<span class="keyword">const</span> (
+    userIDKey   contextKey = <span class="string">"userID"</span>
+    requestIDKey contextKey = <span class="string">"requestID"</span>
+)
+
+<span class="comment">// 处理请求</span>
+<span class="keyword">func</span> <span class="function">handle</span>(ctx context.Context) {
+    userID := ctx.<span class="function">Value</span>(userIDKey).(string)
+    requestID := ctx.<span class="function">Value</span>(requestIDKey).(string)
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Processing request %s for user %s\n"</span>, requestID, userID)
+    
+    <span class="comment">// 调用下游服务，传递 Context</span>
+    <span class="function">callService</span>(ctx)
+}
+
+<span class="keyword">func</span> <span class="function">callService</span>(ctx context.Context) {
+    <span class="comment">// 可以从 Context 中获取上游传递的数据</span>
+    requestID := ctx.<span class="function">Value</span>(requestIDKey).(string)
+    fmt.<span class="function">Printf</span>(<span class="string">"Service called with requestID: %s\n"</span>, requestID)
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建带数据的 Context</span>
+    ctx := context.<span class="function">WithValue</span>(context.<span class="function">Background</span>(), userIDKey, <span class="string">"user-123"</span>)
+    ctx = context.<span class="function">WithValue</span>(ctx, requestIDKey, <span class="string">"req-456"</span>)
+    
+    <span class="function">handle</span>(ctx)
+}</code></pre>
+            </div>
+
+            <div class="warning-box">
+                <h3>⚠️ WithValue 注意事项</h3>
+                <ul>
+                    <li><strong>key 使用自定义类型</strong>: 避免与其他包冲突</li>
+                    <li><strong>只传递请求相关数据</strong>: 不用于传递配置或可选参数</li>
+                    <li><strong>数据量要小</strong>: 避免在 Context 中存储大量数据</li>
+                    <li><strong>注意类型安全</strong>: 使用类型断言时确保类型正确</li>
+                </ul>
+            </div>
+
+            <!-- 生产级模式 -->
+            <h2 id="patterns">生产级模式</h2>
+
+            <h3>1. HTTP 中间件中的 Context</h3>
+            <div class="example-box">
+                <h3>📝 请求追踪中间件</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"net/http"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="keyword">type</span> contextKey <span class="keyword">string</span>
+
+<span class="keyword">const</span> (
+    requestIDKey contextKey = <span class="string">"requestID"</span>
+    startTimeKey contextKey = <span class="string">"startTime"</span>
+)
+
+<span class="comment">// 请求追踪中间件</span>
+<span class="keyword">func</span> <span class="function">requestLogger</span>(next http.HandlerFunc) http.HandlerFunc {
+    <span class="keyword">return</span> <span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) {
+        <span class="comment">// 生成 Request ID</span>
+        requestID := <span class="function">generateRequestID</span>()
+        
+        <span class="comment">// 创建带超时和数据的 Context</span>
+        ctx, cancel := context.<span class="function">WithTimeout</span>(r.Context(), time.Second*<span class="number">30</span>)
+        <span class="keyword">defer</span> <span class="function">cancel</span>()
+        
+        ctx = context.<span class="function">WithValue</span>(ctx, requestIDKey, requestID)
+        ctx = context.<span class="function">WithValue</span>(ctx, startTimeKey, time.<span class="function">Now</span>())
+        
+        <span class="comment">// 更新请求的 Context</span>
+        r = r.<span class="function">WithContext</span>(ctx)
+        
+        <span class="comment">// 调用下一个处理函数</span>
+        <span class="function">next</span>(w, r)
+        
+        <span class="comment">// 记录日志</span>
+        startTime := ctx.<span class="function">Value</span>(startTimeKey).(time.Time)
+        duration := time.<span class="function">Since</span>(startTime)
+        fmt.<span class="function">Printf</span>(<span class="string">"[%s] %s %s - %v\n"</span>, requestID, r.Method, r.URL.Path, duration)
+    }
+}
+
+<span class="keyword">func</span> <span class="function">handler</span>(w http.ResponseWriter, r *http.Request) {
+    requestID := r.Context().<span class="function">Value</span>(requestIDKey).(string)
+    fmt.<span class="function">Printf</span>(<span class="string">"Handling request %s\n"</span>, requestID)
+    fmt.<span class="function">Fprintln</span>(w, <span class="string">"OK"</span>)
+}
+
+<span class="keyword">func</span> <span class="function">generateRequestID</span>() <span class="keyword">string</span> {
+    <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"req-%d"</span>, time.<span class="function">Now</span>().<span class="function">UnixNano</span>())
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    http.<span class="function">HandleFunc</span>(<span class="string">"/api/data"</span>, <span class="function">requestLogger</span>(handler))
+    http.<span class="function">ListenAndServe</span>(<span class="string">":8080"</span>, <span class="keyword">nil</span>)
+}</code></pre>
+            </div>
+
+            <h3>2. 并发任务控制</h3>
+            <div class="example-box">
+                <h3>📝 使用 errgroup 管理并发任务</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"errors"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="comment">// 简单实现 errgroup</span>
+<span class="keyword">type</span> Group <span class="keyword">struct</span> {
+    wg   sync.WaitGroup
+    err  <span class="keyword">error</span>
+    once sync.Once
+}
+
+<span class="keyword">func</span> (g *Group) <span class="function">Go</span>(f <span class="keyword">func</span>() <span class="keyword">error</span>) {
+    g.wg.<span class="function">Add</span>(<span class="number">1</span>)
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">defer</span> g.wg.<span class="function">Done</span>()
+        <span class="keyword">if</span> err := <span class="function">f</span>(); err != <span class="keyword">nil</span> {
+            g.once.<span class="function">Do</span>(<span class="keyword">func</span>() {
+                g.err = err
+            })
         }
     }()
+}
 
-    time.<span class="function">Sleep</span>(<span class="number">2</span> * time.Second)
-    fmt.<span class="function">Println</span>(<span class="string">"取消 goroutine"</span>)
-    <span class="function">cancel</span>()
-    time.<span class="function">Sleep</span>(time.Second)
-}</code></pre>
+<span class="keyword">func</span> (g *Group) <span class="function">Wait</span>() <span class="keyword">error</span> {
+    g.wg.<span class="function">Wait</span>()
+    <span class="keyword">return</span> g.err
+}
 
+<span class="comment">// 使用示例</span>
+<span class="keyword">func</span> <span class="function">processWithErrGroup</span>() <span class="keyword">error</span> {
+    g := &Group{}
+    
+    <span class="comment">// 启动多个任务</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ {
+        i := i
+        g.<span class="function">Go</span>(<span class="keyword">func</span>() <span class="keyword">error</span> {
+            fmt.<span class="function">Printf</span>(<span class="string">"Task %d starting\n"</span>, i)
+            time.<span class="function">Sleep</span>(time.Millisecond * <span class="number">100</span>)
             
+            <span class="keyword">if</span> i == <span class="number">3</span> {
+                <span class="keyword">return</span> errors.<span class="function">New</span>(<span class="string">"task 3 failed"</span>)
+            }
+            fmt.<span class="function">Printf</span>(<span class="string">"Task %d completed\n"</span>, i)
+            <span class="keyword">return</span> <span class="keyword">nil</span>
+        })
+    }
+    
+    <span class="keyword">return</span> g.<span class="function">Wait</span>()
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">if</span> err := <span class="function">processWithErrGroup</span>(); err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"Error: %v\n"</span>, err)
+    }
+}</code></pre>
+            </div>
+
+            <h3>3. 优雅关闭</h3>
+            <div class="example-box">
+                <h3>📝 服务优雅关闭</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"net/http"</span>
+    <span class="string">"os"</span>
+    <span class="string">"os/signal"</span>
+    <span class="string">"syscall"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    server := &http.Server{Addr: <span class="string">":8080"</span>}
+    
+    <span class="comment">// 启动 HTTP 服务</span>
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        fmt.<span class="function">Println</span>(<span class="string">"Server starting on :8080"</span>)
+        <span class="keyword">if</span> err := server.<span class="function">ListenAndServe</span>(); err != <span class="keyword">nil</span> && err != http.ErrServerClosed {
+            fmt.<span class="function">Printf</span>(<span class="string">"Server error: %v\n"</span>, err)
+        }
+    }()
+    
+    <span class="comment">// 监听退出信号</span>
+    quit := <span class="function">make</span>(<span class="keyword">chan</span> os.Signal, <span class="number">1</span>)
+    signal.<span class="function">Notify</span>(quit, syscall.SIGINT, syscall.SIGTERM)
+    &lt;-quit
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Shutting down server..."</span>)
+    
+    <span class="comment">// 创建带超时的 Context</span>
+    ctx, cancel := context.<span class="function">WithTimeout</span>(context.<span class="function">Background</span>(), time.Second*<span class="number">5</span>)
+    <span class="keyword">defer</span> <span class="function">cancel</span>()
+    
+    <span class="comment">// 优雅关闭</span>
+    <span class="keyword">if</span> err := server.<span class="function">Shutdown</span>(ctx); err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"Shutdown error: %v\n"</span>, err)
+    }
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Server stopped"</span>)
+}</code></pre>
+            </div>
+
+            <!-- 底层原理 -->
+            <h2 id="internals">底层实现原理</h2>
+
+            <h3>cancelCtx 结构</h3>
+            <div class="example-box">
+                <h3>📖 WithCancel 的实现</h3>
+                <pre><code><span class="comment">// context/context.go - cancelCtx 结构 (简化)</span>
+<span class="keyword">type</span> cancelCtx <span class="keyword">struct</span> {
+    Context
+    mu       sync.Mutex
+    done     <span class="keyword">atomic</span>.Value  <span class="comment">// 懒初始化，channel 在第一次使用时创建</span>
+    children map[canceler]<span class="keyword">struct</span>{} <span class="comment">// 子 Context 集合</span>
+    err      <span class="keyword">error</span>         <span class="comment">// 取消原因</span>
+}
+
+<span class="comment">// 取消操作</span>
+<span class="keyword">func</span> (c *cancelCtx) <span class="function">cancel</span>(err <span class="keyword">error</span>, deliver bool) {
+    c.mu.<span class="function">Lock</span>()
+    <span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()
+    
+    <span class="keyword">if</span> c.err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="comment">// 已经取消</span>
+    }
+    
+    c.err = err
+    <span class="keyword">if</span> c.done.<span class="function">Load</span>() == <span class="keyword">nil</span> {
+        c.done.<span class="function">Store</span>(closedchan) <span class="comment">// 使用预关闭的 channel</span>
+    } <span class="keyword">else</span> {
+        <span class="function">close</span>(c.done.<span class="function">Load</span>().(<span class="keyword">chan</span> <span class="keyword">struct</span>{}))
+    }
+    
+    <span class="comment">// 递归取消所有子 Context</span>
+    <span class="keyword">for</span> child := <span class="keyword">range</span> c.children {
+        child.<span class="function">cancel</span>(err, <span class="keyword">true</span>)
+    }
+    c.children = <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <h3>💡 Context 核心原理</h3>
+                <ul>
+                    <li><strong>树形传播</strong>: 父 Context 取消时，递归取消所有子节点</li>
+                    <li><strong>懒初始化</strong>: done channel 在第一次使用时才创建</li>
+                    <li><strong>原子操作</strong>: 使用 atomic.Value 保证并发安全</li>
+                    <li><strong>共享关闭 channel</strong>: 已取消的 Context 共享同一个 closed channel</li>
+                    <li><strong>无锁读取</strong>: Done() 返回的 channel 只关闭不发送，读取无锁</li>
+                </ul>
+            </div>
+
+            <!-- 常见陷阱 -->
+            <h2 id="pitfalls">常见陷阱与解决方案</h2>
+            <table class="comparison-table">
+                <caption>Context 常见陷阱</caption>
+                <thead>
+                    <tr>
+                        <th>陷阱</th>
+                        <th>错误示例</th>
+                        <th>正确做法</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>忘记调用 cancel</strong></td>
+                        <td>创建后不调用 cancel</td>
+                        <td>使用 <code>defer cancel()</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>存储 Context 在结构体</strong></td>
+                        <td><code>type S { ctx context.Context }</code></td>
+                        <td>作为参数显式传递</td>
+                    </tr>
+                    <tr>
+                        <td><strong>传递 nil Context</strong></td>
+                        <td><code>func f(ctx nil)</code></td>
+                        <td>使用 <code>context.TODO()</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>滥用 WithValue</strong></td>
+                        <td>传递大量数据或配置</td>
+                        <td>只传递请求范围数据</td>
+                    </tr>
+                    <tr>
+                        <td><strong>忽略 Done channel</strong></td>
+                        <td>不检查 ctx.Done()</td>
+                        <td>在循环中使用 select</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning-box">
+                <h3>🚨 资源泄漏示例</h3>
+                <pre><code><span class="comment">// ❌ 错误：忘记调用 cancel，导致资源泄漏</span>
+<span class="keyword">func</span> <span class="function">leak</span>() {
+    ctx, _ := context.<span class="function">WithTimeout</span>(context.<span class="function">Background</span>(), time.Second)
+    <span class="function">doWork</span>(ctx) <span class="comment">// 如果没有及时完成，goroutine 会泄漏</span>
+}
+
+<span class="comment">// ✅ 正确：使用 defer 确保 cancel 被调用</span>
+<span class="keyword">func</span> <span class="function">noLeak</span>() {
+    ctx, cancel := context.<span class="function">WithTimeout</span>(context.<span class="function">Background</span>(), time.Second)
+    <span class="keyword">defer</span> <span class="function">cancel</span>()
+    <span class="function">doWork</span>(ctx)
+}</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践总结</h2>
+
+            <div class="success-box">
+                <h3>✅ Context 使用原则</h3>
+                <ul>
+                    <li><strong>作为第一个参数</strong>: <code>func DoWork(ctx context.Context, ...)</code></li>
+                    <li><strong>显式传递</strong>: 不要存储在结构体中</li>
+                    <li><strong>及时取消</strong>: 使用 <code>defer cancel()</code></li>
+                    <li><strong>检查 Done</strong>: 在长时间运行中使用 select 检查</li>
+                    <li><strong>传递必要数据</strong>: 只传递请求范围的数据</li>
+                    <li><strong>设置超时</strong>: 外部调用应设置合理超时</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="concurrency-goroutine.html">Goroutine - 并发基石</a></li>
+                    <li><a href="concurrency-channel.html">Channel - 并发通信</a></li>
+                    <li><a href="concurrency-select.html">Select - 多路复用</a></li>
+                    <li><a href="stdlib-sync.html">sync 包 - 并发原语</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="code-collapse.js"></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

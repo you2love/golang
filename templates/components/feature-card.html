@@ -1,0 +1,23 @@
+<!-- 特性卡片网格组件 -->
+<div class="feature-grid">
+    {{#FEATURES}}
+    <div class="feature-card">
+        <div class="icon">{{ICON}}</div>
+        <h4>{{TITLE}}</h4>
+        <p>{{DESCRIPTION}}</p>
+        {{#CODE}}<code class="tag">{{CODE}}</code>{{/CODE}}
+    </div>
+    {{/FEATURES}}
+</div>
+
+<!-- 使用示例 -->
+<!-- 
+<div class="feature-grid">
+    <div class="feature-card">
+        <div class="icon">🆕</div>
+        <h4>新特性</h4>
+        <p>特性描述</p>
+        <code class="tag">示例代码</code>
+    </div>
+</div>
+-->

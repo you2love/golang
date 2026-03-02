@@ -1,0 +1,43 @@
+<!-- 对比表格组件 -->
+<table class="comparison-table">
+    {{#CAPTION}}<caption>{{CAPTION}}</caption>{{/CAPTION}}
+    <thead>
+        <tr>
+            {{#HEADERS}}
+            <th>{{.}}</th>
+            {{/HEADERS}}
+        </tr>
+    </thead>
+    <tbody>
+        {{#ROWS}}
+        <tr>
+            {{#cells}}
+            <td>{{.}}</td>
+            {{/cells}}
+        </tr>
+        {{/ROWS}}
+    </tbody>
+</table>
+
+<!-- 使用示例 -->
+<!-- 
+<table class="comparison-table">
+    <caption>变量声明方式对比</caption>
+    <thead>
+        <tr>
+            <th>方式</th>
+            <th>语法</th>
+            <th>示例</th>
+            <th>适用场景</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>var</code> 关键字</td>
+            <td><code>var name type</code></td>
+            <td><code>var name string</code></td>
+            <td>需要明确类型或零值初始化</td>
+        </tr>
+    </tbody>
+</table>
+-->

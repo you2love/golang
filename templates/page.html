@@ -1,0 +1,25 @@
+<!-- 返回链接组件 -->
+<a href="{{BACK_LINK}}" class="back-link">← {{BACK_TEXT}}</a>
+
+<!-- 页面标题 -->
+<h1>{{TITLE}}</h1>
+
+<!-- 简介文字 -->
+{{#INTRO}}
+<p class="intro">{{INTRO}}</p>
+{{/INTRO}}
+
+<!-- 主要内容 -->
+{{CONTENT}}
+
+<!-- 分页导航 -->
+{{#PAGINATION}}
+<div class="pagination">
+    {{#PREV}}
+    <a href="{{PREV_LINK}}" class="pagination-btn prev">← {{PREV_TEXT}}</a>
+    {{/PREV}}
+    {{#NEXT}}
+    <a href="{{NEXT_LINK}}" class="pagination-btn next">{{NEXT_TEXT}} →</a>
+    {{/NEXT}}
+</div>
+{{/PAGINATION}}

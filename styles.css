@@ -1123,3 +1123,229 @@ pre::-webkit-scrollbar-thumb:hover {
         max-height: none !important;
     }
 }
+
+/* ========== 学习路径样式 ========== */
+.learning-path {
+    margin: 30px 0;
+}
+
+.path-stage {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    margin: 20px 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.path-stage:hover {
+    border-color: #00ADD8;
+    box-shadow: 0 5px 15px rgba(0, 173, 216, 0.15);
+    transform: translateY(-2px);
+}
+
+.stage-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.stage-icon {
+    font-size: 1.5em;
+}
+
+.stage-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 1.1em;
+    flex: 1;
+}
+
+.stage-duration {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.85em;
+}
+
+.stage-content {
+    padding: 20px;
+}
+
+.stage-content p {
+    margin-bottom: 15px;
+    color: #555;
+}
+
+.path-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.path-link {
+    background: #e3f2fd;
+    color: #00ADD8;
+    padding: 8px 15px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+.path-link:hover {
+    background: #00ADD8;
+    color: white;
+}
+
+/* ========== 资源列表样式 ========== */
+.resource-list {
+    margin: 20px 0;
+}
+
+.resource-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    margin: 10px 0;
+    transition: all 0.3s ease;
+}
+
+.resource-item:hover {
+    background: #e8e8e8;
+    transform: translateX(5px);
+}
+
+.resource-icon {
+    font-size: 2em;
+}
+
+.resource-info h4 {
+    margin: 0 0 5px;
+    color: #333;
+}
+
+.resource-info p {
+    margin: 0;
+    color: #666;
+}
+
+.resource-info a {
+    color: #00ADD8;
+    text-decoration: none;
+}
+
+.resource-info a:hover {
+    text-decoration: underline;
+}
+
+/* ========== 导航章节样式 ========== */
+.nav-section {
+    margin: 15px 0;
+}
+
+.nav-section-title {
+    color: #00ADD8;
+    font-weight: 600;
+    padding: 8px 12px;
+    background: #e3f2fd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.sidebar .nav-section .nav-submenu {
+    margin-left: 10px;
+}
+
+.sidebar .nav-section .nav-submenu li {
+    margin: 3px 0;
+}
+
+.sidebar .nav-section .nav-submenu a {
+    padding: 6px 10px;
+    font-size: 0.95em;
+}
+
+/* ========== GMP 图增强 ========== */
+.gmp-diagram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.gmp-component {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    min-width: 150px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.gmp-title {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #00ADD8;
+    margin-bottom: 5px;
+}
+
+.gmp-desc {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.gmp-details ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+    font-size: 0.85em;
+    color: #555;
+}
+
+.gmp-details li {
+    padding: 3px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.gmp-details li:last-child {
+    border-bottom: none;
+}
+
+.gmp-arrow {
+    font-size: 2em;
+    color: white;
+}
+
+/* ========== 特性卡片高亮 ========== */
+.feature-card.highlight {
+    border-color: #f093fb;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.feature-card.highlight h4 {
+    color: white;
+}
+
+.feature-card.highlight p {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.feature-card.highlight .tag {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+}

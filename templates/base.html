@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Go 语言学习教程 - 从入门到精通">
+    <meta name="keywords" content="Go, Golang, 教程，编程，学习">
+    <meta name="author" content="Go Tutorial">
+    
+    <!-- 预加载关键资源 -->
+    <link rel="preload" href="assets/css/main.css" as="style">
+    <link rel="preload" href="assets/js/app.js" as="script">
+    
+    <!-- 样式表 -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    
+    <!-- 页面标题 -->
+    <title>{{TITLE}}</title>
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏导航 -->
+        <aside class="sidebar">
+            <!-- 导航栏将通过 JavaScript 动态加载 -->
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="content">
+            {{CONTENT}}
+        </main>
+    </div>
+    
+    <!-- JavaScript 模块 -->
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/theme.js"></script>
+    <script src="assets/js/navigation.js"></script>
+    <script src="assets/js/code-blocks.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>

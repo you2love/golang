@@ -1,0 +1,179 @@
+{
+  "version": "2.0",
+  "lastUpdated": "2026-03-01",
+  "items": [
+    {
+      "title": "🏠 首页",
+      "href": "index.html",
+      "level": 0
+    },
+    {
+      "title": "🚀 Go 1.26 新特性",
+      "href": "go126.html",
+      "level": 0
+    },
+    {
+      "title": "📖 入门指南",
+      "href": "#",
+      "level": 0,
+      "children": [
+        { "title": "安装 Go", "href": "introduction-install.html" },
+        { "title": "Hello World", "href": "introduction-helloworld.html" },
+        { "title": "语言特性", "href": "introduction-features.html" },
+        { "title": "发展历史", "href": "introduction-history.html" }
+      ]
+    },
+    {
+      "title": "📚 基础语法",
+      "href": "#",
+      "level": 0,
+      "children": [
+        { "title": "变量", "href": "basics-variables.html" },
+        { "title": "数据类型", "href": "basics-datatypes.html" },
+        { "title": "运算符", "href": "basics-operators.html" },
+        { "title": "数组", "href": "basics-arrays.html" },
+        { "title": "Maps", "href": "basics-maps.html" }
+      ]
+    },
+    {
+      "title": "🔀 控制流程",
+      "href": "#",
+      "level": 0,
+      "children": [
+        { "title": "for 循环", "href": "control-flow-for.html" },
+        { "title": "if 条件", "href": "control-flow-if.html" },
+        { "title": "switch 语句", "href": "control-flow-switch.html" },
+        { "title": "defer", "href": "control-flow-defer.html" }
+      ]
+    },
+    {
+      "title": "🏗️ 结构体",
+      "href": "structs.html",
+      "level": 0,
+      "children": [
+        { "title": "结构体基础", "href": "structs.html" },
+        { "title": "embed 文件嵌入", "href": "structs-embed.html" },
+        { "title": "结构体标签", "href": "structs-tags.html" },
+        { "title": "嵌套结构体", "href": "structs-nested.html" },
+        { "title": "结构体与接口", "href": "structs-interface.html" }
+      ]
+    },
+    {
+      "title": "📦 模块",
+      "href": "modules.html",
+      "level": 0,
+      "children": [
+        { "title": "模块介绍", "href": "modules.html" },
+        { "title": "初始化模块", "href": "modules-init.html" },
+        { "title": "依赖管理", "href": "modules-dependency.html" },
+        { "title": "私有模块", "href": "modules-private.html" },
+        { "title": "版本管理", "href": "modules-version.html" }
+      ]
+    },
+    {
+      "title": "🧩 泛型",
+      "href": "generics.html",
+      "level": 0,
+      "children": [
+        { "title": "泛型介绍", "href": "generics.html" },
+        { "title": "泛型函数", "href": "generics-functions.html" },
+        { "title": "泛型类型", "href": "generics-types.html" },
+        { "title": "类型约束", "href": "generics-constraints.html" },
+        { "title": "类型推断", "href": "generics-inference.html" }
+      ]
+    },
+    {
+      "title": "🔍 反射",
+      "href": "reflection.html",
+      "level": 0,
+      "children": [
+        { "title": "反射介绍", "href": "reflection.html" },
+        { "title": "Type 和 Value", "href": "reflection-typevalue.html" },
+        { "title": "结构体反射", "href": "reflection-struct.html" },
+        { "title": "修改值", "href": "reflection-modify.html" },
+        { "title": "方法反射", "href": "reflection-methods.html" },
+        { "title": "性能考虑", "href": "reflection-performance.html" }
+      ]
+    },
+    {
+      "title": "⚙️ 并发编程",
+      "href": "concurrency.html",
+      "level": 0,
+      "children": [
+        { "title": "并发基础", "href": "concurrency.html" },
+        { "title": "Goroutine", "href": "concurrency-goroutine.html" },
+        { "title": "Channel", "href": "concurrency-channel.html" },
+        { "title": "Select", "href": "concurrency-select.html" },
+        { "title": "Mutex", "href": "concurrency-mutex.html" },
+        { "title": "Context", "href": "concurrency-context.html" }
+      ]
+    },
+    {
+      "title": "📚 标准库",
+      "href": "stdlib.html",
+      "level": 0,
+      "children": [
+        { "title": "标准库介绍", "href": "stdlib.html" },
+        { "title": "regexp 正则表达式", "href": "stdlib-regexp.html" },
+        { "title": "sync 并发原语", "href": "stdlib-sync.html" },
+        { "title": "json 数据编码", "href": "stdlib-json.html" },
+        { "title": "time 时间处理", "href": "stdlib-time.html" },
+        { "title": "io 输入输出", "href": "stdlib-io.html" },
+        { "title": "bufio 缓冲 I/O", "href": "stdlib-bufio.html" },
+        { "title": "exp 实验性库", "href": "stdlib-exp.html" },
+        { "title": "embed 文件嵌入", "href": "stdlib-embed.html" },
+        { "title": "最佳实践", "href": "stdlib-bestpractices.html" }
+      ]
+    },
+    {
+      "title": "💡 技巧与最佳实践",
+      "href": "tips.html",
+      "level": 0,
+      "children": [
+        { "title": "常用技巧", "href": "tips.html" },
+        { "title": "惯用模式", "href": "tips-idioms.html" },
+        { "title": "性能优化", "href": "tips-performance.html" },
+        { "title": "错误处理", "href": "tips-error.html" },
+        { "title": "测试技巧", "href": "tips-testing.html" },
+        { "title": "调试技巧", "href": "tips-debug.html" },
+        { "title": "OOM 问题", "href": "tips-oom.html" },
+        { "title": "Panic 处理", "href": "tips-panic.html" }
+      ]
+    },
+    {
+      "title": "🌐 社区库",
+      "href": "ecosystem.html",
+      "level": 0,
+      "children": [
+        { "title": "生态介绍", "href": "ecosystem.html" },
+        { "title": "Gin Web 框架", "href": "ecosystem-gin.html" },
+        { "title": "GORM ORM", "href": "ecosystem-gorm.html" },
+        { "title": "Viper 配置", "href": "ecosystem-viper.html" },
+        { "title": "Zap 日志", "href": "ecosystem-zap.html" },
+        { "title": "Validator 参数校验", "href": "ecosystem-validator.html" },
+        { "title": "Cobra 命令行工具", "href": "ecosystem-cobra.html" },
+        { "title": "Go-Micro 微服务", "href": "ecosystem-gomicro.html" },
+        { "title": "Etcd 分布式存储", "href": "ecosystem-etcd.html" },
+        { "title": "Protobuf 数据序列化", "href": "ecosystem-protobuf.html" },
+        { "title": "Sonic JSON", "href": "ecosystem-sonic.html" },
+        { "title": "GoCarina/gocsv", "href": "ecosystem-gocsv.html" },
+        { "title": "Excelize Excel", "href": "ecosystem-excelize.html" },
+        { "title": "Imaging 图片处理", "href": "ecosystem-imaging.html" },
+        { "title": "Testify 测试框架", "href": "ecosystem-testify.html" },
+        { "title": "GoDS 数据结构", "href": "ecosystem-gods.html" },
+        { "title": "gg 图形库", "href": "ecosystem-gg.html" },
+        { "title": "gRPC RPC 框架", "href": "ecosystem-grpc.html" },
+        { "title": "Gateway API 网关", "href": "ecosystem-gateway.html" },
+        { "title": "Redis 客户端", "href": "ecosystem-redis.html" },
+        { "title": "MySQL 客户端", "href": "ecosystem-mysql.html" },
+        { "title": "🤖 AI 库", "href": "ecosystem-ai.html" },
+        { "title": "最佳实践", "href": "ecosystem-bestpractices.html" }
+      ]
+    },
+    {
+      "title": "🛠️ 资源",
+      "href": "resources.html",
+      "level": 0
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "version": "2.0.0",
+  "generated": "2026-03-01T22:12:48.362727",
+  "css": {
+    "main.bundle.css": {
+      "size": 21.8232421875,
+      "hash": "e7dafe3e"
+    },
+    "content.css": {
+      "size": 2.71484375,
+      "hash": "9122dd1d"
+    },
+    "code.css": {
+      "size": 3.0009765625,
+      "hash": "ba9a7255"
+    },
+    "diagrams.css": {
+      "size": 7.8173828125,
+      "hash": "901bbe96"
+    },
+    "main.css": {
+      "size": 0.4638671875,
+      "hash": "9cc4dc18"
+    },
+    "sidebar.css": {
+      "size": 2.0087890625,
+      "hash": "304c541c"
+    },
+    "utilities.css": {
+      "size": 2.5546875,
+      "hash": "2be0a455"
+    },
+    "base.css": {
+      "size": 1.9453125,
+      "hash": "8192b073"
+    },
+    "tables.css": {
+      "size": 1.3408203125,
+      "hash": "212e286d"
+    }
+  },
+  "js": {
+    "theme.js": {
+      "size": 4.681640625,
+      "hash": "7a1b8c1c"
+    },
+    "app.min.js": {
+      "size": 1.5673828125,
+      "hash": "1181b2b0"
+    },
+    "navigation.js": {
+      "size": 5.931640625,
+      "hash": "ae62e2c7"
+    },
+    "utils.min.js": {
+      "size": 3.9921875,
+      "hash": "99de6bc8"
+    },
+    "utils.js": {
+      "size": 6.5361328125,
+      "hash": "8363980f"
+    },
+    "navigation.min.js": {
+      "size": 3.3759765625,
+      "hash": "23af778a"
+    },
+    "code-blocks.js": {
+      "size": 8.4853515625,
+      "hash": "504980c1"
+    },
+    "app.js": {
+      "size": 3.2001953125,
+      "hash": "9ae78696"
+    },
+    "code-blocks.min.js": {
+      "size": 5.4521484375,
+      "hash": "b30e2bea"
+    },
+    "theme.min.js": {
+      "size": 2.7998046875,
+      "hash": "bd180923"
+    }
+  },
+  "templates": {
+    "page.html": {
+      "size": 0.53125,
+      "hash": "03e38dc7"
+    },
+    "base.html": {
+      "size": 1.2919921875,
+      "hash": "4a8ce280"
+    },
+    "components/info-box.html": {
+      "size": 0.4111328125,
+      "hash": "05593221"
+    },
+    "components/code-example.html": {
+      "size": 0.5234375,
+      "hash": "32dd6412"
+    },
+    "components/table.html": {
+      "size": 0.9453125,
+      "hash": "4b56ab57"
+    },
+    "components/feature-card.html": {
+      "size": 0.5390625,
+      "hash": "d8ccdb14"
+    }
+  }
+}

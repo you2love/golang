@@ -4,203 +4,569 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Channel - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>Channel - Go 并发编程核心机制</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="concurrency.html" class="back-link">← 返回 concurrency</a>
-            <h1>Channel</h1>
-            <p class="intro">Channel 是 goroutine 之间的通信管道，实现 CSP 模型。</p>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="concurrency-goroutine.html" class="back-link">← Goroutine</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="concurrency-select.html" class="back-link">Select →</a>
 
+            <h1>Channel - Go 并发通信核心</h1>
+            <p class="intro">Channel 是 Go 实现 CSP (Communicating Sequential Processes) 模型的核心机制，体现了 Go 的设计哲学：<strong>"不要通过共享内存来通信，而要通过通信来共享内存"</strong>。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
             <div class="feature-grid">
                 <div class="feature-card">
-                    <div class="icon">📨</div>
+                    <div class="icon">📬</div>
                     <h4>创建</h4>
-                    <p>make(chan Type)</p>
+                    <pre><code>ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">10</span>)</code></pre>
                 </div>
                 <div class="feature-card">
                     <div class="icon">📤</div>
                     <h4>发送</h4>
-                    <p>ch <- value</p>
+                    <pre><code>ch &lt;- value
+<span class="keyword">chan</span>&lt;- <span class="keyword">int</span> <span class="comment">// 只发送</span></code></pre>
                 </div>
                 <div class="feature-card">
                     <div class="icon">📥</div>
                     <h4>接收</h4>
-                    <p><-ch</p>
+                    <pre><code>value := &lt;-ch
+&lt;-<span class="keyword">chan</span> <span class="keyword">int</span> <span class="comment">// 只接收</span></code></pre>
                 </div>
                 <div class="feature-card">
                     <div class="icon">🔒</div>
                     <h4>关闭</h4>
-                    <p>close(ch)</p>
+                    <pre><code><span class="function">close</span>(ch)
+v, ok := &lt;-ch</code></pre>
                 </div>
             </div>
 
-            <h2 id="channel">Channel</h2>
-            <p>Channel 是 goroutine 之间通信的管道。</p>
-
-            <pre><code><span class="keyword">package</span> main
+            <!-- 基础示例 -->
+            <h2 id="basic">基础示例</h2>
+            <div class="example-box">
+                <h3>📝 使用 Channel 进行 Goroutine 通信</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
-<span class="function">func</span> <span class="function">sum</span>(s []<span class="keyword">int</span>, c <span class="keyword">chan</span> <span class="keyword">int</span>) {
-    sum := <span class="number">0</span>
-    <span class="keyword">for</span> _, v := <span class="keyword">range</span> s {
-        sum += v
+<span class="comment">// worker 处理数据并通过 channel 返回结果</span>
+<span class="keyword">func</span> <span class="function">worker</span>(id <span class="keyword">int</span>, jobs &lt;-<span class="keyword">chan</span> <span class="keyword">int</span>, results <span class="keyword">chan</span>&lt;- <span class="keyword">int</span>) {
+    <span class="keyword">for</span> j := <span class="keyword">range</span> jobs {
+        fmt.<span class="function">Printf</span>(<span class="string">"Worker %d started job %d\n"</span>, id, j)
+        results &lt;- j * <span class="number">2</span> <span class="comment">// 返回处理结果</span>
     }
-    c &lt;- sum <span class="comment">// 将和发送到 channel</span>
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    s := []<span class="keyword">int</span>{<span class="number">7</span>, <span class="number">2</span>, <span class="number">8</span>, -<span class="number">9</span>, <span class="number">4</span>, <span class="number">0</span>}
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建带缓冲的 channel</span>
+    jobs := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">100</span>)
+    results := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">100</span>)
 
-    c := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
-    <span class="keyword">go</span> <span class="function">sum</span>(s[:<span class="function">len</span>(s)/<span class="number">2</span>], c)
-    <span class="keyword">go</span> <span class="function">sum</span>(s[<span class="function">len</span>(s)/<span class="number">2</span>:], c)
-    x, y := &lt;-c, &lt;-c <span class="comment">// 从 channel 接收</span>
+    <span class="comment">// 启动 3 个 worker</span>
+    <span class="keyword">for</span> w := <span class="number">1</span>; w &lt;= <span class="number">3</span>; w++ {
+        <span class="keyword">go</span> <span class="function">worker</span>(w, jobs, results)
+    }
 
-    fmt.<span class="function">Println</span>(x, y, x+y)
+    <span class="comment">// 发送 5 个任务</span>
+    <span class="keyword">for</span> j := <span class="number">1</span>; j &lt;= <span class="number">5</span>; j++ {
+        jobs &lt;- j
+    }
+    <span class="function">close</span>(jobs) <span class="comment">// 关闭 jobs channel，通知 worker 没有更多任务</span>
+
+    <span class="comment">// 收集结果</span>
+    <span class="keyword">for</span> r := <span class="number">1</span>; r &lt;= <span class="number">5</span>; r++ {
+        result := &lt;-results
+        fmt.<span class="function">Printf</span>(<span class="string">"Result: %d\n"</span>, result)
+    }
 }</code></pre>
+            </div>
 
-            <div class="note-box">
-                <h3>Channel 内部实现原理</h3>
-                
-                <p><strong>1. Channel 的核心数据结构：</strong></p>
-                <p>Channel 在 Go 运行时中的核心结构是 <code>hchan</code>：</p>
-                <pre><code><span class="comment">// runtime/chan.go - Channel 的核心结构（简化版）</span>
+            <div class="info-box">
+                <h3>💡 代码要点</h3>
+                <ul>
+                    <li><strong>单向 Channel</strong>: <code>&lt;-chan int</code> 只接收，<code>chan&lt;- int</code> 只发送，编译期类型安全</li>
+                    <li><strong>range 接收</strong>: <code>for j := range jobs</code> 自动检测 channel 关闭</li>
+                    <li><strong>缓冲 Channel</strong>: 带缓冲的 channel 允许异步通信，提高吞吐量</li>
+                    <li><strong>关闭 Channel</strong>: 只有发送者应该关闭 channel，接收者关闭会导致 panic</li>
+                </ul>
+            </div>
+
+            <!-- Channel 类型详解 -->
+            <h2 id="types">Channel 类型详解</h2>
+            <table>
+                <caption>Channel 类型对比</caption>
+                <thead>
+                    <tr>
+                        <th>类型</th>
+                        <th>声明</th>
+                        <th>特性</th>
+                        <th>使用场景</th>
+                        <th>注意事项</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>无缓冲 Channel</strong></td>
+                        <td><code>make(chan T)</code></td>
+                        <td><span class="tag tag-warning">同步阻塞</span></td>
+                        <td>需要严格同步的场景</td>
+                        <td>发送/接收都会阻塞，直到对方准备好</td>
+                    </tr>
+                    <tr>
+                        <td><strong>有缓冲 Channel</strong></td>
+                        <td><code>make(chan T, N)</code></td>
+                        <td><span class="tag tag-info">异步非阻塞</span></td>
+                        <td>提高吞吐量，削峰填谷</td>
+                        <td>缓冲区满时发送阻塞，空时接收阻塞</td>
+                    </tr>
+                    <tr>
+                        <td><strong>单向 Channel</strong></td>
+                        <td><code>chan&lt;- T</code><br><code>&lt;-chan T</code></td>
+                        <td><span class="tag tag-success">类型安全</span></td>
+                        <td>限制发送/接收权限</td>
+                        <td>通常作为函数参数，内部可转换</td>
+                    </tr>
+                    <tr>
+                        <td><strong>nil Channel</strong></td>
+                        <td><code>var ch chan T</code></td>
+                        <td><span class="tag tag-danger">永久阻塞</span></td>
+                        <td>控制 select 分支禁用</td>
+                        <td>向 nil channel 发送/接收会永久阻塞</td>
+                    </tr>
+                    <tr>
+                        <td><strong>关闭 Channel</strong></td>
+                        <td><code>close(ch)</code></td>
+                        <td><span class="tag tag-warning">只可关闭一次</span></td>
+                        <td>通知接收者数据结束</td>
+                        <td>重复关闭 panic，接收者可检测关闭状态</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- 底层原理 -->
+            <h2 id="internals">底层实现原理</h2>
+            
+            <h3>hchan 数据结构</h3>
+            <div class="example-box">
+                <h3>📖 Go 运行时中的 Channel 实现</h3>
+                <pre><code><span class="comment">// runtime/chan.go - Channel 核心结构 (简化版)</span>
 <span class="keyword">type</span> hchan <span class="keyword">struct</span> {
     qcount   uint           <span class="comment">// 当前队列中元素个数</span>
-    dataqsiz uint           <span class="comment">// 环形队列大小（容量）</span>
+    dataqsiz uint           <span class="comment">// 环形队列大小 (容量)</span>
     buf      unsafe.Pointer <span class="comment">// 环形队列指针</span>
-    elemsize uint16         <span class="comment">// 元素大小</span>
+    elemsize uint16         <span class="comment">// 元素大小 (字节)</span>
     closed   uint32         <span class="comment">// channel 是否关闭</span>
-    elemtype *_type         <span class="comment">// 元素类型</span>
-    sendx    uint           <span class="comment">// 发送索引</span>
-    recvx    uint           <span class="comment">// 接收索引</span>
-    recvq    waitq          <span class="comment">// 接收等待队列</span>
-    sendq    waitq          <span class="comment">// 发送等待队列</span>
-    lock     mutex          <span class="comment">// 互斥锁</span>
+    elemtype *_type         <span class="comment">// 元素类型信息</span>
+    sendx    uint           <span class="comment">// 发送索引 (环形队列)</span>
+    recvx    uint           <span class="comment">// 接收索引 (环形队列)</span>
+    recvq    waitq          <span class="comment">// 接收等待队列 (goroutine)</span>
+    sendq    waitq          <span class="comment">// 发送等待队列 (goroutine)</span>
+    lock     mutex          <span class="comment">// 互斥锁，保护整个结构</span>
+}
+
+<span class="comment">// 等待队列</span>
+<span class="keyword">type</span> waitq <span class="keyword">struct</span> {
+    first *sudog
+    last  *sudog
+}
+
+<span class="comment">// 等待中的 goroutine</span>
+<span class="keyword">type</span> sudog <span class="keyword">struct</span> {
+    g     *g     <span class="comment">// 等待的 goroutine</span>
+    elem  unsafe.Pointer <span class="comment">// 数据指针</span>
+    next  *sudog
+    prev  *sudog
 }</code></pre>
+            </div>
 
-                <p><strong>2. 环形队列实现：</strong></p>
-                <p>Channel 使用环形队列来存储数据，这是一个高效的循环缓冲区：</p>
-                <pre><code><span class="comment">// 环形队列的工作原理示例</span>
-<span class="comment">// 假设容量为 5 的 channel</span>
+            <div class="info-box">
+                <h3>💡 Channel 核心原理</h3>
+                <ul>
+                    <li><strong>环形队列</strong>: 缓冲 channel 使用环形队列 (ring buffer) 存储数据，高效循环利用内存</li>
+                    <li><strong>等待队列</strong>: sendq 和 recvq 分别存储等待发送和接收的 goroutine</li>
+                    <li><strong>互斥锁</strong>: 所有操作都通过 lock 保护，保证并发安全</li>
+                    <li><strong>零拷贝</strong>: 直接传递数据指针，避免内存拷贝</li>
+                    <li><strong>Goroutine 调度</strong>: 阻塞时 goroutine 进入等待状态，不占用 CPU</li>
+                </ul>
+            </div>
 
-<span class="comment">// 初始状态: []</span>
-<span class="comment">// sendx = 0, recvx = 0</span>
+            <h3>发送操作流程</h3>
+            <div class="flowchart">
+                <div class="flowchart-row">
+                    <div class="flowchart-node">ch &lt;- value</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node warning">获取锁 lock(c)</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">检查 recvq</div>
+                </div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node success">有接收者等待？</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node highlight">直接传递数据</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node success">唤醒接收者</div>
+                </div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node warning">缓冲区满？</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node danger">加入 sendq</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node danger">gopark 阻塞</div>
+                </div>
+            </div>
 
-<span class="comment">// 发送 1, 2, 3: [1, 2, 3, _, _]</span>
-<span class="comment">// sendx = 3, recvx = 0</span>
+            <h3>接收操作流程</h3>
+            <div class="flowchart">
+                <div class="flowchart-row">
+                    <div class="flowchart-node">&lt;-ch</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node warning">获取锁 lock(c)</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node">检查 sendq</div>
+                </div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node success">有发送者等待？</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node highlight">直接接收数据</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node success">唤醒发送者</div>
+                </div>
+                <div class="flowchart-row">
+                    <div class="flowchart-node warning">缓冲区空？</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node danger">加入 recvq</div>
+                    <span class="flowchart-arrow">→</span>
+                    <div class="flowchart-node danger">gopark 阻塞</div>
+                </div>
+            </div>
 
-<span class="comment">// 接收 2 个值: [_, _, 3, _, _]</span>
-<span class="comment">// sendx = 3, recvx = 2</span>
+            <!-- 高级模式 -->
+            <h2 id="advanced">高级模式与最佳实践</h2>
 
-<span class="comment">// 继续发送 4, 5: [_, _, 3, 4, 5]</span>
-<span class="comment">// sendx = 0, recvx = 2 (循环回到开头)</span>
+            <h3>1. 优雅关闭 Channel</h3>
+            <div class="example-box">
+                <h3>📝 安全关闭 Channel 的模式</h3>
+                <pre><code><span class="keyword">package</span> main
 
-<span class="comment">// 接收 3 个值: [_, _, _, _, _]</span>
-<span class="comment">// sendx = 0, recvx = 0 (队列为空)</span></code></pre>
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
 
-                <p><strong>3. 发送操作流程：</strong></p>
-                <pre><code><span class="comment">// 发送操作: ch &lt;- value</span>
-
-<span class="comment">// 步骤 1: 获取 channel 锁</span>
-<span class="comment">// lock(&amp;c.lock)</span>
-
-<span class="comment">// 步骤 2: 检查是否有接收者在等待</span>
-<span class="keyword">if</span> sg := c.recvq.<span class="function">dequeue</span>(); sg != <span class="keyword">nil</span> {
-    <span class="comment">// 直接传递数据给接收者，不经过缓冲区</span>
-    <span class="function">send</span>(c, sg, ep)
-    <span class="keyword">return</span>
+<span class="comment">// 模式 1: 由发送者关闭 (推荐)</span>
+<span class="keyword">func</span> <span class="function">producerWorker</span>(ch <span class="keyword">chan</span>&lt;- <span class="keyword">int</span>, wg *sync.WaitGroup) {
+    <span class="keyword">defer</span> wg.<span class="function">Done</span>()
+    <span class="keyword">defer</span> <span class="function">close</span>(ch) <span class="comment">// 发送完成后关闭</span>
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ {
+        ch &lt;- i
+    }
 }
 
-<span class="comment">// 步骤 3: 如果缓冲区有空间，放入缓冲区</span>
-<span class="keyword">if</span> c.qcount &lt; c.dataqsiz {
-    <span class="comment">// 将数据放入环形队列</span>
-    qp := <span class="function">chanbuf</span>(c, c.sendx)
-    <span class="function">typedmemmove</span>(c.elemtype, qp, ep)
-    c.sendx++
-    <span class="keyword">if</span> c.sendx == c.dataqsiz {
-        c.sendx = <span class="number">0</span>
+<span class="comment">// 模式 2: 使用 done channel 信号</span>
+<span class="keyword">func</span> <span class="function">gracefulShutdown</span>() {
+    done := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>{})
+    dataCh := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">10</span>)
+    
+    <span class="comment">// 启动多个发送者</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">3</span>; i++ {
+        <span class="keyword">go</span> <span class="keyword">func</span>(id <span class="keyword">int</span>) {
+            <span class="keyword">for</span> {
+                <span class="keyword">select</span> {
+                <span class="keyword">case</span> dataCh &lt;- id:
+                    <span class="comment">// 发送数据</span>
+                <span class="keyword">case</span> &lt;-done:
+                    <span class="keyword">return</span> <span class="comment">// 收到关闭信号</span>
+                }
+            }
+        }(i)
     }
-    c.qcount++
-    <span class="keyword">return</span>
+    
+    <span class="comment">// 主 goroutine 决定何时关闭</span>
+    <span class="function">close</span>(done) <span class="comment">// 广播关闭信号</span>
 }
 
-<span class="comment">// 步骤 4: 缓冲区已满，阻塞当前 goroutine</span>
-<span class="comment">// 将当前 goroutine 加入发送等待队列</span>
-<span class="comment">// gopark() - 让出 CPU，等待被唤醒</span></code></pre>
-
-                <p><strong>4. 接收操作流程：</strong></p>
-                <pre><code><span class="comment">// 接收操作: value := &lt;-ch</span>
-
-<span class="comment">// 步骤 1: 获取 channel 锁</span>
-<span class="comment">// lock(&amp;c.lock)</span>
-
-<span class="comment">// 步骤 2: 检查是否有发送者在等待</span>
-<span class="keyword">if</span> sg := c.sendq.<span class="function">dequeue</span>(); sg != <span class="keyword">nil</span> {
-    <span class="comment">// 直接从发送者获取数据</span>
-    <span class="function">recv</span>(c, sg, ep)
-    <span class="keyword">return</span>
+<span class="comment">// 模式 3: 使用 context 控制</span>
+<span class="keyword">func</span> <span class="function">contextControlled</span>(ctx context.Context) {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">defer</span> <span class="function">close</span>(ch)
+        <span class="keyword">for</span> {
+            <span class="keyword">select</span> {
+            <span class="keyword">case</span> &lt;-ctx.<span class="function">Done</span>():
+                <span class="keyword">return</span>
+            <span class="keyword">case</span> ch &lt;- <span class="function">getData</span>():
+            }
+        }
+    }()
 }
 
-<span class="comment">// 步骤 3: 如果缓冲区有数据，从缓冲区读取</span>
-<span class="keyword">if</span> c.qcount &gt; <span class="number">0</span> {
-    qp := <span class="function">chanbuf</span>(c, c.recvx)
-    <span class="keyword">if</span> ep != <span class="keyword">nil</span> {
-        <span class="function">typedmemmove</span>(c.elemtype, ep, qp)
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> wg sync.WaitGroup
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    
+    wg.<span class="function">Add</span>(<span class="number">1</span>)
+    <span class="keyword">go</span> <span class="function">producerWorker</span>(ch, &wg)
+    
+    <span class="keyword">for</span> v := <span class="keyword">range</span> ch {
+        fmt.<span class="function">Println</span>(v)
     }
-    <span class="function">typedmemclr</span>(c.elemtype, qp)
-    c.recvx++
-    <span class="keyword">if</span> c.recvx == c.dataqsiz {
-        c.recvx = <span class="number">0</span>
-    }
-    c.qcount--
-    <span class="keyword">return</span>
-}
-
-<span class="comment">// 步骤 4: 缓冲区为空且未关闭，阻塞当前 goroutine</span>
-<span class="comment">// 将当前 goroutine 加入接收等待队列</span>
-<span class="comment">// gopark() - 让出 CPU，等待被唤醒</span></code></pre>
-
-                <p><strong>5. 关闭操作流程：</strong></p>
-                <pre><code><span class="comment">// 关闭操作: close(ch)</span>
-
-<span class="comment">// 步骤 1: 获取 channel 锁</span>
-<span class="comment">// lock(&amp;c.lock)</span>
-
-<span class="comment">// 步骤 2: 标记 channel 为已关闭</span>
-c.closed = <span class="number">1</span>
-
-<span class="comment">// 步骤 3: 唤醒所有等待的接收者</span>
-<span class="keyword">for</span> {
-    sg := c.recvq.<span class="function">dequeue</span>()
-    <span class="keyword">if</span> sg == <span class="keyword">nil</span> {
-        <span class="keyword">break</span>
-    }
-    sg.elem = <span class="keyword">nil</span>  <span class="comment">// 接收者获得零值</span>
-    <span class="function">goready</span>(sg.g)  <span class="comment">// 唤醒 goroutine</span>
-}
-
-<span class="comment">// 步骤 4: 唤醒所有等待的发送者（它们会 panic）</span>
-<span class="keyword">for</span> {
-    sg := c.sendq.<span class="function">dequeue</span>()
-    <span class="keyword">if</span> sg == <span class="keyword">nil</span> {
-        <span class="keyword">break</span>
-    }
-    sg.elem = <span class="keyword">nil</span>
-    <span class="function">goready</span>(sg.g)  <span class="comment">// 唤醒后发送者会 panic</span>
+    wg.<span class="function">Wait</span>()
 }</code></pre>
-            
+            </div>
+
+            <div class="warning-box">
+                <h3>⚠️ Channel 关闭规则</h3>
+                <ul>
+                    <li><strong>只关闭一次</strong>: 重复关闭会 panic</li>
+                    <li><strong>发送者关闭</strong>: 只有发送者应该关闭 channel</li>
+                    <li><strong>接收者不关闭</strong>: 接收者关闭会导致其他接收者 panic</li>
+                    <li><strong>多发送者场景</strong>: 使用 done channel 或 context，不要直接关闭数据 channel</li>
+                    <li><strong>不关闭也可以</strong>: 如果 goroutine 会自然退出，channel 可以不关闭，由 GC 回收</li>
+                </ul>
+            </div>
+
+            <h3>2. Channel 泄漏检测与预防</h3>
+            <div class="example-box">
+                <h3>📝 常见 Channel 泄漏场景</h3>
+                <pre><code><span class="comment">// 泄漏场景 1: 接收者提前退出，发送者阻塞</span>
+<span class="keyword">func</span> <span class="function">leak1</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="comment">// 如果接收者退出，这里永久阻塞</span>
+        ch &lt;- <span class="number">1</span>
+    }()
+    <span class="comment">// 忘记接收...</span>
+}
+
+<span class="comment">// 修复：使用缓冲或 select</span>
+<span class="keyword">func</span> <span class="function">fix1</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">1</span>) <span class="comment">// 缓冲</span>
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">select</span> {
+        <span class="keyword">case</span> ch &lt;- <span class="number">1</span>:
+        <span class="keyword">default</span>:
+            <span class="comment">// 非阻塞，丢弃数据</span>
+        }
+    }()
+}
+
+<span class="comment">// 泄漏场景 2: range 等待关闭，但发送者永不关闭</span>
+<span class="keyword">func</span> <span class="function">leak2</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">for</span> v := <span class="keyword">range</span> ch { <span class="comment">// 等待 channel 关闭</span>
+            fmt.<span class="function">Println</span>(v)
+        }
+    }()
+    ch &lt;- <span class="number">1</span>
+    <span class="comment">// 忘记 close(ch)...</span>
+}
+
+<span class="comment">// 修复：确保关闭</span>
+<span class="keyword">func</span> <span class="function">fix2</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">defer</span> <span class="function">close</span>(ch) <span class="comment">// 确保关闭</span>
+        ch &lt;- <span class="number">1</span>
+    }()
+    <span class="keyword">for</span> v := <span class="keyword">range</span> ch {
+        fmt.<span class="function">Println</span>(v)
+    }
+}
+
+<span class="comment">// 泄漏场景 3: 未消费完数据，goroutine 退出</span>
+<span class="keyword">func</span> <span class="function">leak3</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">10</span>)
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ {
+            ch &lt;- i
+        }
+    }()
+    <span class="comment">// 只接收部分数据</span>
+    fmt.<span class="function">Println</span>(&lt;-ch)
+    <span class="comment">// 发送者阻塞在 ch &lt;- 9，goroutine 泄漏</span>
+}</code></pre>
+            </div>
+
+            <h3>3. 性能优化技巧</h3>
+            <div class="example-box">
+                <h3>📊 Channel 性能对比与优化</h3>
+                <pre><code><span class="comment">// 场景 1: 无缓冲 vs 有缓冲 (吞吐量对比)</span>
+<span class="keyword">func</span> <span class="function">benchmarkUnbuffered</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">1000000</span>; i++ {
+            ch &lt;- i <span class="comment">// 每次发送都阻塞</span>
+        }
+        <span class="function">close</span>(ch)
+    }()
+    <span class="keyword">for</span> <span class="keyword">range</span> ch {}
+}
+
+<span class="keyword">func</span> <span class="function">benchmarkBuffered</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">1000</span>) <span class="comment">// 缓冲 1000</span>
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">1000000</span>; i++ {
+            ch &lt;- i <span class="comment">// 缓冲区未满时不阻塞</span>
+        }
+        <span class="function">close</span>(ch)
+    }()
+    <span class="keyword">for</span> <span class="keyword">range</span> ch {}
+}
+<span class="comment">// 结果：缓冲 channel 吞吐量提升 5-10 倍</span>
+
+<span class="comment">// 场景 2: 批量处理减少 channel 通信次数</span>
+<span class="keyword">func</span> <span class="function">batchProcessing</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> []<span class="keyword">int</span>, <span class="number">100</span>) <span class="comment">// 传递切片而非单个值</span>
+    
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        batch := <span class="function">make</span>([]<span class="keyword">int</span>, <span class="number">0</span>, <span class="number">100</span>)
+        <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">1000000</span>; i++ {
+            batch = <span class="function">append</span>(batch, i)
+            <span class="keyword">if</span> <span class="function">len</span>(batch) &gt;= <span class="number">100</span> {
+                ch &lt;- batch
+                batch = <span class="function">make</span>([]<span class="keyword">int</span>, <span class="number">0</span>, <span class="number">100</span>)
+            }
+        }
+        <span class="keyword">if</span> <span class="function">len</span>(batch) &gt; <span class="number">0</span> {
+            ch &lt;- batch
+        }
+        <span class="function">close</span>(ch)
+    }()
+}
+<span class="comment">// 结果：减少 channel 通信次数，降低锁竞争</span>
+
+<span class="comment">// 场景 3: 使用 sync.Pool 减少内存分配</span>
+<span class="keyword">var</span> bufferPool = sync.Pool{
+    New: <span class="keyword">func</span>() <span class="keyword">interface</span>{} {
+        <span class="keyword">return</span> <span class="function">make</span>([]<span class="keyword">byte</span>, <span class="number">4096</span>)
+    },
+}
+
+<span class="keyword">func</span> <span class="function">processWithPool</span>(ch <span class="keyword">chan</span> []<span class="keyword">byte</span>) {
+    buf := bufferPool.<span class="function">Get</span>().([]<span class="keyword">byte</span>)
+    <span class="keyword">defer</span> bufferPool.<span class="function">Put</span>(buf)
+    <span class="comment">// 使用 buf 处理数据...</span>
+}</code></pre>
+            </div>
+
+            <div class="note-box">
+                <h3>📊 Channel 性能建议</h3>
+                <ul>
+                    <li><strong>选择合适缓冲</strong>: 根据生产者/消费者速度差设置缓冲大小</li>
+                    <li><strong>批量处理</strong>: 传递批量数据而非单个值，减少通信次数</li>
+                    <li><strong>避免过度设计</strong>: 简单场景用无缓冲 channel 更清晰</li>
+                    <li><strong>注意内存分配</strong>: 高频场景使用 sync.Pool 复用缓冲区</li>
+                    <li><strong>监控等待队列</strong>: 使用 runtime 包监控 sendq/recvq 长度</li>
+                </ul>
+            </div>
+
+            <!-- 常见陷阱 -->
+            <h2 id="pitfalls">常见陷阱与解决方案</h2>
+            <table class="comparison-table">
+                <caption>Channel 常见陷阱</caption>
+                <thead>
+                    <tr>
+                        <th>陷阱</th>
+                        <th>错误示例</th>
+                        <th>正确做法</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>重复关闭</strong></td>
+                        <td><code>close(ch)</code> 多次调用</td>
+                        <td>使用 sync.Once 或确保只关闭一次</td>
+                    </tr>
+                    <tr>
+                        <td><strong>向关闭的 channel 发送</strong></td>
+                        <td>close 后继续 ch &lt;- v</td>
+                        <td>使用 recover 或确保逻辑正确</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Goroutine 泄漏</strong></td>
+                        <td>发送者阻塞无人接收</td>
+                        <td>使用 select + default 或缓冲</td>
+                    </tr>
+                    <tr>
+                        <td><strong>死锁</strong></td>
+                        <td>循环依赖等待</td>
+                        <td>使用 select 设置超时</td>
+                    </tr>
+                    <tr>
+                        <td><strong>nil channel 阻塞</strong></td>
+                        <td>var ch chan T; &lt;-ch</td>
+                        <td>确保 channel 已初始化</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning-box">
+                <h3>🚨 死锁示例与预防</h3>
+                <pre><code><span class="comment">// 死锁示例：goroutine 互相等待</span>
+<span class="keyword">func</span> <span class="function">deadlock</span>() {
+    a := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    b := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        &lt;-a <span class="comment">// 等待 b 发送</span>
+        b &lt;- <span class="number">1</span>
+    }()
+    
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        &lt;-b <span class="comment">// 等待 a 发送</span>
+        a &lt;- <span class="number">1</span>
+    }()
+    
+    <span class="comment">// 两个 goroutine 都阻塞，死锁!</span>
+}
+
+<span class="comment">// 预防：使用 select 设置超时</span>
+<span class="keyword">func</span> <span class="function">withTimeout</span>() {
+    ch := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)
+    <span class="keyword">select</span> {
+    <span class="keyword">case</span> &lt;-ch:
+        <span class="comment">// 成功接收</span>
+    <span class="keyword">case</span> &lt;-time.<span class="function">After</span>(time.Second):
+        fmt.<span class="function">Println</span>(<span class="string">"Timeout!"</span>)
+    }
+}</code></pre>
+            </div>
+
+            <!-- 总结 -->
+            <h2 id="summary">总结</h2>
+            <div class="success-box">
+                <h3>✅ Channel 核心要点</h3>
+                <ul>
+                    <li><strong>CSP 模型</strong>: Go 通过 channel 实现"通过通信共享内存"</li>
+                    <li><strong>类型安全</strong>: 单向 channel 在编译期保证发送/接收权限</li>
+                    <li><strong>同步原语</strong>: 无缓冲 channel 是同步原语，有缓冲 channel 是队列</li>
+                    <li><strong>关闭规则</strong>: 只有发送者关闭，且只关闭一次</li>
+                    <li><strong>泄漏预防</strong>: 确保发送/接收配对，使用 select 设置超时</li>
+                    <li><strong>性能优化</strong>: 根据场景选择缓冲大小，批量处理减少通信次数</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="concurrency-select.html">Select - 多路复用</a></li>
+                    <li><a href="concurrency-mutex.html">Mutex - 互斥锁</a></li>
+                    <li><a href="concurrency-context.html">Context - 上下文控制</a></li>
+                    <li><a href="stdlib-sync.html">sync 包 - 并发原语</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="code-collapse.js"></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

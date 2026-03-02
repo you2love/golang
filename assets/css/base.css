@@ -1,0 +1,113 @@
+/* Go 教程 - 基础样式 */
+/* 版本：v2.0 - 模块化重构 */
+
+/* ============ 重置与基础 ============ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    scroll-behavior: smooth;
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+}
+
+/* ============ 布局容器 ============ */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    gap: 20px;
+}
+
+/* ============ 排版 ============ */
+h1 {
+    color: #00ADD8;
+    margin-bottom: 20px;
+    font-size: 2.5em;
+    scroll-margin-top: 20px;
+}
+
+h2 {
+    color: #00ADD8;
+    margin: 30px 0 15px;
+    font-size: 1.8em;
+    scroll-margin-top: 20px;
+}
+
+h3 {
+    color: #555;
+    margin: 25px 0 10px;
+    font-size: 1.4em;
+    scroll-margin-top: 20px;
+}
+
+p {
+    margin-bottom: 15px;
+    color: #555;
+}
+
+/* ============ 链接 ============ */
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #00ADD8;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+    transform: translateX(-5px);
+}
+
+/* ============ 标签 ============ */
+.tag {
+    display: inline-block;
+    background: #00ADD8;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    margin: 2px;
+}
+
+.tag-success {
+    background: #4caf50;
+}
+
+.tag-warning {
+    background: #ffc107;
+    color: #333;
+}
+
+.tag-danger {
+    background: #f44336;
+}
+
+.tag-info {
+    background: #2196F3;
+}
+
+/* ============ 介绍区域 ============ */
+.intro {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 30px;
+    padding: 15px;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border-radius: 8px;
+    border-left: 4px solid #2196F3;
+}

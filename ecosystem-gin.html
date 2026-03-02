@@ -4,260 +4,450 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gin Web 框架 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>Gin Web 框架 - Go HTTP 开发实战</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
-            <h1>Gin Web 框架</h1>
-            <p class="intro">Gin 是 Go 语言最流行的 Web 框架，高性能、API 友好。</p>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="ecosystem.html" class="back-link">← 生态概览</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="ecosystem-gorm.html" class="back-link">GORM →</a>
 
+            <h1>Gin Web 框架 - HTTP 开发实战</h1>
+            <p class="intro">Gin 是 Go 最流行的 Web 框架之一，以高性能、简洁 API 和丰富的中间件支持著称。掌握 Gin 是开发 Go Web 应用和 API 服务的基础。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
             <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="icon">⚡</div>
+                <div class="feature-card highlight">
+                    <div class="icon">🚀</div>
                     <h4>高性能</h4>
-                    <p>比 Martini 快 40 倍</p>
+                    <p>基于 httprouter</p>
+                    <code class="tag">50x 性能提升</code>
                 </div>
                 <div class="feature-card">
                     <div class="icon">🛣️</div>
                     <h4>路由</h4>
-                    <p>灵活的路由系统</p>
+                    <p>URL 参数匹配</p>
+                    <code class="tag">:param</code>
                 </div>
                 <div class="feature-card">
-                    <div class="icon">🔄</div>
+                    <div class="icon">🔌</div>
                     <h4>中间件</h4>
-                    <p>强大的中间件支持</p>
+                    <p>请求处理链</p>
+                    <code class="tag">Use()</code>
                 </div>
                 <div class="feature-card">
                     <div class="icon">📝</div>
-                    <h4>JSON</h4>
-                    <p>高效的 JSON 处理</p>
+                    <h4>数据绑定</h4>
+                    <p>自动解析请求</p>
+                    <code class="tag">ShouldBind()</code>
                 </div>
             </div>
 
-            <h2 id="gin">Gin Web 框架</h2>
-            
-            <h3>简介</h3>
-            <p>Gin 是一个用 Go 语言编写的高性能 HTTP Web 框架，具有类似 Martini 的 API，但性能更好（高达 40 倍）。它提供了路由、中间件、JSON 验证等功能，是 Go 社区最流行的 Web 框架之一。</p>
-            
-            <h3>安装</h3>
-            <pre><code><span class="keyword">go</span> get -u github.com/gin-gonic/gin</code></pre>
-            
-            <h3>快速开始</h3>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 快速开始 -->
+            <h2 id="quickstart">快速开始</h2>
+
+            <div class="example-box">
+                <h3>📝 Hello Gin</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"github.com/gin-gonic/gin"</span>
     <span class="string">"net/http"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 创建默认路由</span>
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建路由引擎</span>
     r := gin.<span class="function">Default</span>()
-
-    <span class="comment">// 定义路由</span>
-    r.<span class="function">GET</span>(<span class="string">"/ping"</span>, <span class="keyword">func</span>(c *gin.Context) {
-        c.<span class="function">JSON</span>(http.StatusOK, gin.H{
-            <span class="string">"message"</span>: <span class="string">"pong"</span>,
-        })
-    })
-
-    <span class="comment">// 启动服务器</span>
-    r.<span class="function">Run</span>(<span class="string">":8080"</span>)
-}</code></pre>
-            
-            <h3>路由</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"github.com/gin-gonic/gin"</span>
-    <span class="string">"net/http"</span>
-)
-
-<span class="function">func</span> <span class="function">main</span>() {
-    r := gin.<span class="function">Default</span>()
-
+    
     <span class="comment">// GET 请求</span>
-    r.<span class="function">GET</span>(<span class="string">"/users"</span>, <span class="keyword">func</span>(c *gin.Context) {
+    r.<span class="function">GET</span>(<span class="string">"/"</span>, <span class="keyword">func</span>(c *gin.Context) {
         c.<span class="function">JSON</span>(http.StatusOK, gin.H{
-            <span class="string">"users"</span>: []<span class="keyword">string</span>{<span class="string">"Alice"</span>, <span class="string">"Bob"</span>},
+            <span class="string">"message"</span>: <span class="string">"Hello World"</span>,
         })
     })
-
+    
     <span class="comment">// POST 请求</span>
-    r.<span class="function">POST</span>(<span class="string">"/users"</span>, <span class="keyword">func</span>(c *gin.Context) {
-        <span class="keyword">var</span> user <span class="keyword">struct</span> {
-            Name  <span class="keyword">string</span> <span class="string">`json:"name"`</span>
-            Email <span class="keyword">string</span> <span class="string">`json:"email"`</span>
-        }
-        
-        <span class="keyword">if</span> err := c.<span class="function">ShouldBindJSON</span>(&user); err != <span class="keyword">nil</span> {
-            c.<span class="function">JSON</span>(http.StatusBadRequest, gin.H{<span class="string">"error"</span>: err.<span class="function">Error</span>()})
-            <span class="keyword">return</span>
-        }
-        
-        c.<span class="function">JSON</span>(http.StatusCreated, gin.H{
-            <span class="string">"message"</span>: <span class="string">"User created"</span>,
-            <span class="string">"user"</span>:    user,
+    r.<span class="function">POST</span>(<span class="string">"/hello"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        name := c.<span class="function">PostForm</span>(<span class="string">"name"</span>)
+        c.<span class="function">JSON</span>(http.StatusOK, gin.H{
+            <span class="string">"message"</span>: <span class="string">"Hello "</span> + name,
         })
     })
+    
+    <span class="comment">// 启动服务</span>
+    r.<span class="function">Run</span>(<span class="string">":8080"</span>) <span class="comment">// 监听 :8080</span>
+}</code></pre>
+            </div>
 
-    <span class="comment">// 路径参数</span>
+            <div class="info-box">
+                <h3>💡 Gin 要点</h3>
+                <ul>
+                    <li><strong>gin.Default()</strong>: 包含 Logger 和 Recovery 中间件</li>
+                    <li><strong>gin.New()</strong>: 纯净引擎，需手动添加中间件</li>
+                    <li><strong>gin.Context</strong>: 请求上下文，核心对象</li>
+                    <li><strong>gin.H</strong>: map[string]interface{} 快捷方式</li>
+                </ul>
+            </div>
+
+            <!-- 路由 -->
+            <h2 id="routing">路由处理</h2>
+
+            <div class="example-box">
+                <h3>📝 路由参数和查询</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"github.com/gin-gonic/gin"</span>
+    <span class="string">"net/http"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    r := gin.<span class="function">Default</span>()
+    
+    <span class="comment">// URL 参数 /users/:id</span>
     r.<span class="function">GET</span>(<span class="string">"/users/:id"</span>, <span class="keyword">func</span>(c *gin.Context) {
         id := c.<span class="function">Param</span>(<span class="string">"id"</span>)
         c.<span class="function">JSON</span>(http.StatusOK, gin.H{<span class="string">"id"</span>: id})
     })
-
-    <span class="comment">// 查询参数</span>
-    r.<span class="function">GET</span>(<span class="string">"/search"</span>, <span class="keyword">func</span>(c *gin.Context) {
-        query := c.<span class="function">Query</span>(<span class="string">"q"</span>)
-        page := c.<span class="function">DefaultQuery</span>(<span class="string">"page"</span>, <span class="string">"1"</span>)
+    
+    <span class="comment">// 可选参数 /users/:id/posts/:postID</span>
+    r.<span class="function">GET</span>(<span class="string">"/users/:id/posts/:postID"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        userID := c.<span class="function">Param</span>(<span class="string">"id"</span>)
+        postID := c.<span class="function">Param</span>(<span class="string">"postID"</span>)
         c.<span class="function">JSON</span>(http.StatusOK, gin.H{
-            <span class="string">"query"</span>: query,
-            <span class="string">"page"</span>:  page,
+            <span class="string">"userID"</span>: userID,
+            <span class="string">"postID"</span>: postID,
         })
     })
-
+    
+    <span class="comment">// 查询参数 /search?keyword=go&page=1</span>
+    r.<span class="function">GET</span>(<span class="string">"/search"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        keyword := c.<span class="function">Query</span>(<span class="string">"keyword"</span>)
+        page := c.<span class="function">DefaultQuery</span>(<span class="string">"page"</span>, <span class="string">"1"</span>)
+        c.<span class="function">JSON</span>(http.StatusOK, gin.H{
+            <span class="string">"keyword"</span>: keyword,
+            <span class="string">"page"</span>:    page,
+        })
+    })
+    
+    <span class="comment">// 表单数据</span>
+    r.<span class="function">POST</span>(<span class="string">"/form"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        name := c.<span class="function">PostForm</span>(<span class="string">"name"</span>)
+        email := c.<span class="function">DefaultPostForm</span>(<span class="string">"email"</span>, <span class="string">""</span>)
+        c.<span class="function">JSON</span>(http.StatusOK, gin.H{
+            <span class="string">"name"</span>:  name,
+            <span class="string">"email"</span>: email,
+        })
+    })
+    
     r.<span class="function">Run</span>(<span class="string">":8080"</span>)
 }</code></pre>
-            
-            <h3>中间件</h3>
-            <pre><code><span class="keyword">package</span> main
+            </div>
+
+            <!-- 数据绑定 -->
+            <h2 id="binding">数据绑定与验证</h2>
+
+            <div class="example-box">
+                <h3>📝 自动绑定和验证</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"net/http"</span>
+    
+    <span class="string">"github.com/gin-gonic/gin"</span>
+    <span class="string">"github.com/go-playground/validator/v10"</span>
+)
+
+<span class="comment">// 定义请求结构</span>
+<span class="keyword">type</span> LoginRequest <span class="keyword">struct</span> {
+    Username <span class="keyword">string</span> <span class="string">`json:"username" binding:"required,min=3,max=20"`</span>
+    Password <span class="keyword">string</span> <span class="string">`json:"password" binding:"required,min=6"`</span>
+    Email    <span class="keyword">string</span> <span class="string">`json:"email" binding:"email"`</span>
+}
+
+<span class="keyword">type</span> SignupRequest <span class="keyword">struct</span> {
+    Username <span class="keyword">string</span> <span class="string">`form:"username" binding:"required"`</span>
+    Password <span class="keyword">string</span> <span class="string">`form:"password" binding:"required"`</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    r := gin.<span class="function">Default</span>()
+    
+    <span class="comment">// JSON 绑定</span>
+    r.<span class="function">POST</span>(<span class="string">"/login"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        <span class="keyword">var</span> req LoginRequest
+        
+        <span class="comment">// ShouldBindJSON 自动解析并验证</span>
+        <span class="keyword">if</span> err := c.<span class="function">ShouldBindJSON</span>(&req); err != <span class="keyword">nil</span> {
+            c.<span class="function">JSON</span>(http.StatusBadRequest, gin.H{
+                <span class="string">"error"</span>: err.<span class="function">Error</span>(),
+            })
+            <span class="keyword">return</span>
+        }
+        
+        c.<span class="function">JSON</span>(http.StatusOK, gin.H{
+            <span class="string">"message"</span>: <span class="string">"Login success"</span>,
+            <span class="string">"user"</span>:    req.Username,
+        })
+    })
+    
+    <span class="comment">// Form 绑定</span>
+    r.<span class="function">POST</span>(<span class="string">"/signup"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        <span class="keyword">var</span> req SignupRequest
+        
+        <span class="keyword">if</span> err := c.<span class="function">ShouldBind</span>(&req); err != <span class="keyword">nil</span> {
+            c.<span class="function">JSON</span>(http.StatusBadRequest, gin.H{
+                <span class="string">"error"</span>: err.<span class="function">Error</span>(),
+            })
+            <span class="keyword">return</span>
+        }
+        
+        c.<span class="function">JSON</span>(http.StatusOK, gin.H{
+            <span class="string">"message"</span>: <span class="string">"Signup success"</span>,
+        })
+    })
+    
+    <span class="comment">// 自定义验证错误</span>
+    <span class="keyword">if</span> v, ok := r.<span class="function">Validator</span>().<span class="function">Engine</span>().(*validator.Validate); ok {
+        v.<span class="function">RegisterValidation</span>(<span class="string">"password"</span>, <span class="keyword">func</span>(fl validator.FieldLevel) <span class="keyword">bool</span> {
+            <span class="keyword">return</span> <span class="function">len</span>(fl.<span class="function">Field</span>().<span class="function">String</span>()) &gt;= <span class="number">8</span>
+        })
+    }
+    
+    r.<span class="function">Run</span>(<span class="string">":8080"</span>)
+}</code></pre>
+            </div>
+
+            <!-- 中间件 -->
+            <h2 id="middleware">中间件</h2>
+
+            <div class="example-box">
+                <h3>📝 自定义中间件</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
-    <span class="string">"github.com/gin-gonic/gin"</span>
+    <span class="string">"log"</span>
     <span class="string">"net/http"</span>
     <span class="string">"time"</span>
+    
+    <span class="string">"github.com/gin-gonic/gin"</span>
 )
 
-<span class="comment">// 自定义中间件</span>
-<span class="function">func</span> <span class="function">Logger</span>() gin.HandlerFunc {
+<span class="comment">// 日志中间件</span>
+<span class="keyword">func</span> <span class="function">Logger</span>() gin.HandlerFunc {
     <span class="keyword">return</span> <span class="keyword">func</span>(c *gin.Context) {
         start := time.<span class="function">Now</span>()
+        path := c.Request.URL.Path
         
+        <span class="comment">// 处理请求</span>
         c.<span class="function">Next</span>()
         
+        <span class="comment">// 记录日志</span>
         latency := time.<span class="function">Since</span>(start)
-        fmt.<span class="function">Printf</span>(<span class="string">"%s %s %v\n"</span>, c.<span class="function">Request</span>.Method, c.<span class="function">Request</span>.URL.Path, latency)
+        status := c.Writer.Status()
+        log.<span class="function">Printf</span>(<span class="string">"[%d] %s %v\n"</span>, status, path, latency)
     }
 }
 
 <span class="comment">// 认证中间件</span>
-<span class="function">func</span> <span class="function">AuthMiddleware</span>() gin.HandlerFunc {
+<span class="keyword">func</span> <span class="function">Auth</span>() gin.HandlerFunc {
     <span class="keyword">return</span> <span class="keyword">func</span>(c *gin.Context) {
         token := c.<span class="function">GetHeader</span>(<span class="string">"Authorization"</span>)
         
         <span class="keyword">if</span> token == <span class="string">""</span> {
-            c.<span class="function">JSON</span>(http.StatusUnauthorized, gin.H{<span class="string">"error"</span>: <span class="string">"Unauthorized"</span>})
+            c.<span class="function">JSON</span>(http.StatusUnauthorized, gin.H{
+                <span class="string">"error"</span>: <span class="string">"Missing token"</span>,
+            })
             c.<span class="function">Abort</span>()
             <span class="keyword">return</span>
         }
         
-        c.<span class="function">Set</span>(<span class="string">"user_id"</span>, <span class="string">"123"</span>)
+        <span class="comment">// 验证 token...</span>
+        <span class="keyword">if</span> token != <span class="string">"valid-token"</span> {
+            c.<span class="function">JSON</span>(http.StatusUnauthorized, gin.H{
+                <span class="string">"error"</span>: <span class="string">"Invalid token"</span>,
+            })
+            c.<span class="function">Abort</span>()
+            <span class="keyword">return</span>
+        }
+        
+        <span class="comment">// 设置用户信息</span>
+        c.<span class="function">Set</span>(<span class="string">"userID"</span>, <span class="string">"123"</span>)
         c.<span class="function">Next</span>()
     }
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    r := gin.<span class="function">Default</span>()
+<span class="comment">// CORS 中间件</span>
+<span class="keyword">func</span> <span class="function">CORS</span>() gin.HandlerFunc {
+    <span class="keyword">return</span> <span class="keyword">func</span>(c *gin.Context) {
+        c.<span class="function">Writer</span>().<span class="function">Header</span>().<span class="function">Set</span>(<span class="string">"Access-Control-Allow-Origin"</span>, <span class="string">"*"</span>)
+        c.<span class="function">Writer</span>().<span class="function">Header</span>().<span class="function">Set</span>(<span class="string">"Access-Control-Allow-Methods"</span>, <span class="string">"GET, POST, PUT, DELETE"</span>)
+        c.<span class="function">Writer</span>().<span class="function">Header</span>().<span class="function">Set</span>(<span class="string">"Access-Control-Allow-Headers"</span>, <span class="string">"Content-Type, Authorization"</span>)
+        
+        <span class="keyword">if</span> c.Request.Method == <span class="string">"OPTIONS"</span> {
+            c.<span class="function">AbortWithStatus</span>(http.StatusNoContent)
+            <span class="keyword">return</span>
+        }
+        
+        c.<span class="function">Next</span>()
+    }
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    r := gin.<span class="function">New</span>()
     
     <span class="comment">// 全局中间件</span>
-    r.<span class="function">Use</span>(<span class="function">Logger</span>())
+    r.<span class="function">Use</span>(<span class="function">Logger</span>(), <span class="function">CORS</span>())
     
     <span class="comment">// 路由组</span>
-    api := r.<span class="function">Group</span>(<span class="string">"/api"</span>)
-    api.<span class="function">Use</span>(<span class="function">AuthMiddleware</span>())
+    public := r.<span class="function">Group</span>(<span class="string">"/api"</span>)
+    {
+        public.<span class="function">GET</span>(<span class="string">"/health"</span>, <span class="keyword">func</span>(c *gin.Context) {
+            c.<span class="function">JSON</span>(http.StatusOK, gin.H{<span class="string">"status"</span>: <span class="string">"ok"</span>})
+        })
+    }
     
-    api.<span class="function">GET</span>(<span class="string">"/profile"</span>, <span class="keyword">func</span>(c *gin.Context) {
-        userID := c.<span class="function">GetString</span>(<span class="string">"user_id"</span>)
-        c.<span class="function">JSON</span>(http.StatusOK, gin.H{<span class="string">"user_id"</span>: userID})
+    <span class="comment">// 需要认证的路由</span>
+    auth := r.<span class="function">Group</span>(<span class="string">"/api"</span>)
+    auth.<span class="function">Use</span>(<span class="function">Auth</span>())
+    {
+        auth.<span class="function">GET</span>(<span class="string">"/profile"</span>, <span class="keyword">func</span>(c *gin.Context) {
+            userID := c.<span class="function">GetString</span>(<span class="string">"userID"</span>)
+            c.<span class="function">JSON</span>(http.StatusOK, gin.H{<span class="string">"userID"</span>: userID})
+        })
+    }
+    
+    r.<span class="function">Run</span>(<span class="string">":8080"</span>)
+}</code></pre>
+            </div>
+
+            <!-- 文件上传 -->
+            <h2 id="upload">文件上传</h2>
+            <div class="example-box">
+                <h3>📝 处理文件上传</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">main</span>() {
+    r := gin.<span class="function">Default</span>()
+    
+    <span class="comment">// 单文件上传</span>
+    r.<span class="function">POST</span>(<span class="string">"/upload"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        file, err := c.<span class="function">FormFile</span>(<span class="string">"file"</span>)
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            c.<span class="function">JSON</span>(http.StatusBadRequest, gin.H{<span class="string">"error"</span>: err.<span class="function">Error</span>()})
+            <span class="keyword">return</span>
+        }
+        
+        <span class="comment">// 保存到指定路径</span>
+        dst := <span class="string">"./uploads/"</span> + file.Filename
+        <span class="keyword">if</span> err := c.<span class="function">SaveUploadedFile</span>(file, dst); err != <span class="keyword">nil</span> {
+            c.<span class="function">JSON</span>(http.StatusInternalServerError, gin.H{<span class="string">"error"</span>: err.<span class="function">Error</span>()})
+            <span class="keyword">return</span>
+        }
+        
+        c.<span class="function">JSON</span>(http.StatusOK, gin.H{
+            <span class="string">"message"</span>: <span class="string">"File uploaded successfully"</span>,
+            <span class="string">"filename"</span>: file.Filename,
+        })
+    })
+    
+    <span class="comment">// 多文件上传</span>
+    r.<span class="function">POST</span>(<span class="string">"/upload/multi"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        form, _ := c.<span class="function">MultipartForm</span>()
+        files := form.File[<span class="string">"files"</span>]
+        
+        <span class="keyword">for</span> _, file := <span class="keyword">range</span> files {
+            dst := <span class="string">"./uploads/"</span> + file.Filename
+            c.<span class="function">SaveUploadedFile</span>(file, dst)
+        }
+        
+        c.<span class="function">JSON</span>(http.StatusOK, gin.H{
+            <span class="string">"message"</span>: fmt.<span class="function">Sprintf</span>(<span class="string">"%d files uploaded"</span>, <span class="function">len</span>(files)),
+        })
     })
     
     r.<span class="function">Run</span>(<span class="string">":8080"</span>)
 }</code></pre>
-            
-            <h3>路由组</h3>
-            <pre><code><span class="keyword">package</span> main
+            </div>
 
-<span class="keyword">import</span> (
-    <span class="string">"github.com/gin-gonic/gin"</span>
-    <span class="string">"net/http"</span>
-)
-
-<span class="function">func</span> <span class="function">main</span>() {
+            <!-- 错误处理 -->
+            <h2 id="error">错误处理</h2>
+            <div class="example-box">
+                <h3>📝 自定义错误处理</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">main</span>() {
     r := gin.<span class="function">Default</span>()
     
-    <span class="comment">// v1 路由组</span>
-    v1 := r.<span class="function">Group</span>(<span class="string">"/v1"</span>)
-    {
-        v1.<span class="function">GET</span>(<span class="string">"/users"</span>, <span class="keyword">func</span>(c *gin.Context) {
-            c.<span class="function">String</span>(http.StatusOK, <span class="string">"v1 users"</span>)
-        })
-        v1.<span class="function">GET</span>(<span class="string">"/posts"</span>, <span class="keyword">func</span>(c *gin.Context) {
-            c.<span class="function">String</span>(http.StatusOK, <span class="string">"v1 posts"</span>)
-        })
-    }
-    
-    <span class="comment">// v2 路由组</span>
-    v2 := r.<span class="function">Group</span>(<span class="string">"/v2"</span>)
-    {
-        v2.<span class="function">GET</span>(<span class="string">"/users"</span>, <span class="keyword">func</span>(c *gin.Context) {
-            c.<span class="function">String</span>(http.StatusOK, <span class="string">"v2 users"</span>)
-        })
-        v2.<span class="function">GET</span>(<span class="string">"/posts"</span>, <span class="keyword">func</span>(c *gin.Context) {
-            c.<span class="function">String</span>(http.StatusOK, <span class="string">"v2 posts"</span>)
-        })
-    }
-    
-    r.<span class="function">Run</span>(<span class="string">":8080"</span>)
-}</code></pre>
-            
-            <h3>错误处理</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"github.com/gin-gonic/gin"</span>
-    <span class="string">"net/http"</span>
-)
-
-<span class="function">func</span> <span class="function">main</span>() {
-    r := gin.<span class="function">Default</span>()
-    
-    <span class="comment">// 自定义错误处理</span>
+    <span class="comment">// 自定义 404</span>
     r.<span class="function">NoRoute</span>(<span class="keyword">func</span>(c *gin.Context) {
         c.<span class="function">JSON</span>(http.StatusNotFound, gin.H{
             <span class="string">"error"</span>: <span class="string">"Route not found"</span>,
+            <span class="string">"code"</span>:  <span class="string">"NOT_FOUND"</span>,
         })
     })
     
+    <span class="comment">// 自定义 405</span>
     r.<span class="function">NoMethod</span>(<span class="keyword">func</span>(c *gin.Context) {
         c.<span class="function">JSON</span>(http.StatusMethodNotAllowed, gin.H{
             <span class="string">"error"</span>: <span class="string">"Method not allowed"</span>,
         })
     })
     
-    <span class="comment">// Panic 恢复</span>
-    r.<span class="function">Use</span>(gin.<span class="function">Recovery</span>())
-    
-    r.<span class="function">GET</span>(<span class="string">"/panic"</span>, <span class="keyword">func</span>(c *gin.Context) {
-        <span class="function">panic</span>(<span class="string">"Something went wrong"</span>)
+    <span class="comment">// 优雅的错误处理</span>
+    r.<span class="function">GET</span>(<span class="string">"/error"</span>, <span class="keyword">func</span>(c *gin.Context) {
+        err := <span class="function">doSomething</span>()
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            <span class="comment">// 记录错误</span>
+            c.<span class="function">Error</span>(err)
+            
+            <span class="comment">// 返回错误响应</span>
+            c.<span class="function">JSON</span>(http.StatusInternalServerError, gin.H{
+                <span class="string">"error"</span>: <span class="string">"Internal server error"</span>,
+            })
+            <span class="keyword">return</span>
+        }
+        
+        c.<span class="function">JSON</span>(http.StatusOK, gin.H{<span class="string">"status"</span>: <span class="string">"success"</span>})
     })
     
     r.<span class="function">Run</span>(<span class="string">":8080"</span>)
+}
+
+<span class="keyword">func</span> <span class="function">doSomething</span>() <span class="keyword">error</span> {
+    <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"something went wrong"</span>)
 }</code></pre>
-            
-            
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ Gin 使用建议</h3>
+                <ul>
+                    <li><strong>路由分组</strong>: 使用 Group 组织相关路由</li>
+                    <li><strong>中间件复用</strong>: 提取通用逻辑为中间件</li>
+                    <li><strong>数据验证</strong>: 使用 binding tag 自动验证</li>
+                    <li><strong>错误处理</strong>: 统一错误响应格式</li>
+                    <li><strong>配置分离</strong>: 使用 Viper 管理配置</li>
+                    <li><strong>结构化日志</strong>: 使用 zap 等日志库</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="ecosystem-gorm.html">GORM ORM</a></li>
+                    <li><a href="ecosystem-viper.html">Viper 配置</a></li>
+                    <li><a href="ecosystem-zap.html">Zap 日志</a></li>
+                    <li><a href="ecosystem-validator.html">Validator 校验</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

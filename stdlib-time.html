@@ -4,170 +4,404 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>time 时间处理 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>time 包 - Go 时间处理详解</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="stdlib.html" class="back-link">← 返回 stdlib</a>
-            <h2 id="time">time 时间处理</h2>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="stdlib-json.html" class="back-link">← json 包</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="stdlib-io.html" class="back-link">io 包 →</a>
 
-            <h3>获取当前时间</h3>
-            <pre><code><span class="keyword">package</span> main
+            <h1>time 包 - 时间处理详解</h1>
+            <p class="intro">time 包提供了时间的显示、测量、格式化等功能。掌握 time 包是开发定时任务、日志记录、性能监控等场景的基础。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">⏰</div>
+                    <h4>Time</h4>
+                    <p>时间点</p>
+                    <code class="tag">time.Now()</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⏱️</div>
+                    <h4>Duration</h4>
+                    <p>时间间隔</p>
+                    <code class="tag">time.Second</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⏲️</div>
+                    <h4>Timer</h4>
+                    <p>定时器</p>
+                    <code class="tag">time.NewTimer</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔄</div>
+                    <h4>Ticker</h4>
+                    <p>周期触发器</p>
+                    <code class="tag">time.NewTicker</code>
+                </div>
+            </div>
+
+            <!-- Time 时间点 -->
+            <h2 id="time">Time 时间点</h2>
+
+            <div class="example-box">
+                <h3>📝 获取和操作时间</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
     <span class="string">"time"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 获取当前时间</span>
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 当前时间</span>
     now := time.<span class="function">Now</span>()
-    fmt.<span class="function">Println</span>(<span class="string">"Current time:"</span>, now)
+    fmt.<span class="function">Printf</span>(<span class="string">"Now: %v\n"</span>, now)
     
-    <span class="comment">// 获取 UTC 时间</span>
-    utc := time.<span class="function">Now</span>().<span class="function">UTC</span>()
-    fmt.<span class="function">Println</span>(<span class="string">"UTC time:"</span>, utc)
+    <span class="comment">// 时间分量</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"Year: %d\n"</span>, now.<span class="function">Year</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"Month: %d\n"</span>, now.<span class="function">Month</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"Day: %d\n"</span>, now.<span class="function">Day</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"Hour: %d\n"</span>, now.<span class="function">Hour</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"Minute: %d\n"</span>, now.<span class="function">Minute</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"Second: %d\n"</span>, now.<span class="function">Second</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"Weekday: %v\n"</span>, now.<span class="function">Weekday</span>())
+    
+    <span class="comment">// 时间计算</span>
+    tomorrow := now.<span class="function">Add</span>(<span class="number">24</span> * time.Hour)
+    fmt.<span class="function">Printf</span>(<span class="string">"Tomorrow: %v\n"</span>, tomorrow)
+    
+    yesterday := now.<span class="function">AddDate</span>(<span class="number">0</span>, <span class="number">0</span>, -<span class="number">1</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"Yesterday: %v\n"</span>, yesterday)
+    
+    <span class="comment">// 时间比较</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"Before: %v\n"</span>, now.<span class="function">Before</span>(tomorrow))
+    fmt.<span class="function">Printf</span>(<span class="string">"After: %v\n"</span>, now.<span class="function">After</span>(tomorrow))
+    fmt.<span class="function">Printf</span>(<span class="string">"Equal: %v\n"</span>, now.<span class="function">Equal</span>(now))
+    
+    <span class="comment">// 时间差</span>
+    diff := tomorrow.<span class="function">Sub</span>(now)
+    fmt.<span class="function">Printf</span>(<span class="string">"Diff: %v hours\n"</span>, diff.<span class="function">Hours</span>())
 }</code></pre>
+            </div>
 
-            <h3>时间格式化</h3>
-            <pre><code><span class="keyword">package</span> main
+            <!-- Duration 时间间隔 -->
+            <h2 id="duration">Duration 时间间隔</h2>
+            <div class="example-box">
+                <h3>📝 Duration 操作</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
     <span class="string">"time"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 内置常量</span>
+    fmt.<span class="function">Println</span>(time.Nanosecond)   <span class="comment">// 1ns</span>
+    fmt.<span class="function">Println</span>(time.Microsecond)  <span class="comment">// 1µs</span>
+    fmt.<span class="function">Println</span>(time.Millisecond)  <span class="comment">// 1ms</span>
+    fmt.<span class="function">Println</span>(time.Second)       <span class="comment">// 1s</span>
+    fmt.<span class="function">Println</span>(time.Minute)       <span class="comment">// 1m0s</span>
+    fmt.<span class="function">Println</span>(time.Hour)         <span class="comment">// 1h0m0s</span>
+    
+    <span class="comment">// 创建 Duration</span>
+    d1 := <span class="number">5</span> * time.Second
+    d2 := <span class="number">2</span> * time.Minute
+    d3 := time.Hour + <span class="number">30</span> * time.Minute
+    
+    <span class="comment">// Duration 计算</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"d1 + d2: %v\n"</span>, d1+d2)
+    fmt.<span class="function">Printf</span>(<span class="string">"d2 - d1: %v\n"</span>, d2-d1)
+    fmt.<span class="function">Printf</span>(<span class="string">"d1 * 2: %v\n"</span>, d1*<span class="number">2</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"d2 / 2: %v\n"</span>, d2/<span class="number">2</span>)
+    
+    <span class="comment">// 转换为不同单位</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"d1 Nanoseconds: %d\n"</span>, d1.<span class="function">Nanoseconds</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"d1 Microseconds: %d\n"</span>, d1.<span class="function">Microseconds</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"d1 Milliseconds: %d\n"</span>, d1.<span class="function">Milliseconds</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"d1 Seconds: %f\n"</span>, d1.<span class="function">Seconds</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"d1 Minutes: %f\n"</span>, d1.<span class="function">Minutes</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"d1 Hours: %f\n"</span>, d1.<span class="function">Hours</span>())
+    
+    <span class="comment">// 解析 Duration 字符串</span>
+    d4, _ := time.<span class="function">ParseDuration</span>(<span class="string">"1h30m45s"</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"Parsed: %v\n"</span>, d4)
+}</code></pre>
+            </div>
+
+            <!-- 格式化 -->
+            <h2 id="format">时间格式化</h2>
+            <div class="example-box">
+                <h3>📝 Format 和 Parse</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
     now := time.<span class="function">Now</span>()
     
-    <span class="comment">// 使用预定义格式</span>
-    fmt.<span class="function">Println</span>(<span class="string">"RFC3339:"</span>, now.<span class="function">Format</span>(time.RFC3339))
-    fmt.<span class="function">Println</span>(<span class="string">"RFC1123:"</span>, now.<span class="function">Format</span>(time.RFC1123))
+    <span class="comment">// Go 的参考时间：2006-01-02 15:04:05</span>
+    <span class="comment">// 记忆口诀：1 2 3 4 5 6 (美国格式)</span>
     
-    <span class="comment">// 自定义格式（参考 2006-01-02 15:04:05）</span>
-    fmt.<span class="function">Println</span>(<span class="string">"Custom:"</span>, now.<span class="function">Format</span>(<span class="string">"2006-01-02 15:04:05"</span>))
-    fmt.<span class="function">Println</span>(<span class="string">"Date only:"</span>, now.<span class="function">Format</span>(<span class="string">"2006-01-02"</span>))
-    fmt.<span class="function">Println</span>(<span class="string">"Time only:"</span>, now.<span class="function">Format</span>(<span class="string">"15:04:05"</span>))
-}</code></pre>
-
-            <h3>时间解析</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"time"</span>
-)
-
-<span class="function">func</span> <span class="function">main</span>() {
+    <span class="comment">// 常用格式</span>
+    fmt.<span class="function">Println</span>(now.<span class="function">Format</span>(<span class="string">"2006-01-02 15:04:05"</span>))
+    fmt.<span class="function">Println</span>(now.<span class="function">Format</span>(<span class="string">"2006/01/02"</span>))
+    fmt.<span class="function">Println</span>(now.<span class="function">Format</span>(<span class="string">"15:04:05"</span>))
+    fmt.<span class="function">Println</span>(now.<span class="function">Format</span>(<span class="string">"2006-01-02T15:04:05Z07:00"</span>)) <span class="comment">// RFC3339</span>
+    
+    <span class="comment">// 自定义格式</span>
+    fmt.<span class="function">Println</span>(now.<span class="function">Format</span>(<span class="string">"Jan 2, 2006 at 3:04pm"</span>))
+    fmt.<span class="function">Println</span>(now.<span class="function">Format</span>(<span class="string">"Monday, January 2, 2006"</span>))
+    
     <span class="comment">// 解析时间字符串</span>
-    timeStr := <span class="string">"2024-01-26 15:30:45"</span>
-    parsedTime, err := time.<span class="function">Parse</span>(<span class="string">"2006-01-02 15:04:05"</span>, timeStr)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
-        <span class="keyword">return</span>
-    }
-    fmt.<span class="function">Println</span>(<span class="string">"Parsed time:"</span>, parsedTime)
+    t1, _ := time.<span class="function">Parse</span>(<span class="string">"2006-01-02"</span>, <span class="string">"2024-03-15"</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"Parsed: %v\n"</span>, t1)
     
-    <span class="comment">// 解析 RFC3339 格式</span>
-    rfcTime, err := time.<span class="function">Parse</span>(time.RFC3339, <span class="string">"2024-01-26T15:30:45Z"</span>)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
-        <span class="keyword">return</span>
-    }
-    fmt.<span class="function">Println</span>(<span class="string">"RFC3339 time:"</span>, rfcTime)
+    t2, _ := time.<span class="function">Parse</span>(time.RFC3339, <span class="string">"2024-03-15T10:30:00Z"</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"RFC3339: %v\n"</span>, t2)
+    
+    <span class="comment">// 常用布局常量</span>
+    fmt.<span class="function">Println</span>(now.<span class="function">Format</span>(time.RFC822))
+    fmt.<span class="function">Println</span>(now.<span class="function">Format</span>(time.RFC1123))
+    fmt.<span class="function">Println</span>(now.<span class="function">Format</span>(time.DateTime))
 }</code></pre>
+            </div>
 
-            <h3>时间计算</h3>
-            <pre><code><span class="keyword">package</span> main
+            <div class="info-box">
+                <h3>💡 格式化要点</h3>
+                <ul>
+                    <li><strong>参考时间</strong>: Go 使用 <code>2006-01-02 15:04:05</code> 作为参考格式</li>
+                    <li><strong>记忆方法</strong>: 1 2 3 4 5 6 (美国日期格式)</li>
+                    <li><strong>时区</strong>: 使用 <code>Z07:00</code> 或 <code>MST</code> 表示时区</li>
+                    <li><strong>布局常量</strong>: time.RFC3339、time.RFC822 等</li>
+                </ul>
+            </div>
+
+            <!-- Timer 和 Ticker -->
+            <h2 id="timer-ticker">Timer 和 Ticker</h2>
+
+            <h3>Timer 一次性定时器</h3>
+            <div class="example-box">
+                <h3>📝 Timer 使用</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
     <span class="string">"time"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    now := time.<span class="function">Now</span>()
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建 Timer</span>
+    timer := time.<span class="function">NewTimer</span>(time.Second * <span class="number">2</span>)
     
-    <span class="comment">// 添加时间</span>
-    future := now.<span class="function">Add</span>(<span class="number">24</span> * time.Hour)
-    fmt.<span class="function">Println</span>(<span class="string">"24 hours later:"</span>, future)
+    <span class="comment">// 等待 Timer</span>
+    &lt;-timer.C
+    fmt.<span class="function">Println</span>(<span class="string">"2 seconds elapsed"</span>)
     
-    <span class="comment">// 减去时间</span>
-    past := now.<span class="function">Add</span>(-<span class="number">24</span> * time.Hour)
-    fmt.<span class="function">Println</span>(<span class="string">"24 hours ago:"</span>, past)
+    <span class="comment">// 使用 AfterFunc</span>
+    time.<span class="function">AfterFunc</span>(time.Second, <span class="keyword">func</span>() {
+        fmt.<span class="function">Println</span>(<span class="string">"1 second later (async)"</span>)
+    })
     
-    <span class="comment">// 计算时间差</span>
-    duration := future.<span class="function">Sub</span>(now)
-    fmt.<span class="function">Println</span>(<span class="string">"Duration:"</span>, duration)
-    fmt.<span class="function">Println</span>(<span class="string">"Hours:"</span>, duration.<span class="function">Hours</span>())
-    fmt.<span class="function">Println</span>(<span class="string">"Minutes:"</span>, duration.<span class="function">Minutes</span>())
+    <span class="comment">// 简单等待</span>
+    &lt;-time.<span class="function">After</span>(time.Millisecond * <span class="number">500</span>)
+    fmt.<span class="function">Println</span>(<span class="string">"500ms elapsed"</span>)
     
-    <span class="comment">// 计算两个时间之间的天数</span>
-    days := duration.<span class="function">Hours</span>() / <span class="number">24</span>
-    fmt.<span class="function">Println</span>(<span class="string">"Days:"</span>, days)
+    <span class="comment">// 停止 Timer</span>
+    timer2 := time.<span class="function">NewTimer</span>(time.Minute)
+    <span class="keyword">if</span> timer2.<span class="function">Stop</span>() {
+        fmt.<span class="function">Println</span>(<span class="string">"Timer stopped before firing"</span>)
+    }
+    
+    time.<span class="function">Sleep</span>(time.Millisecond * <span class="number">100</span>)
 }</code></pre>
+            </div>
 
-            <h3>定时器和 Ticker</h3>
-            <pre><code><span class="keyword">package</span> main
+            <h3>Ticker 周期触发器</h3>
+            <div class="example-box">
+                <h3>📝 Ticker 使用</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
     <span class="string">"time"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// Timer：一次性定时器</span>
-    timer := time.<span class="function">NewTimer</span>(<span class="number">2</span> * time.Second)
-    <-timer.C
-    fmt.<span class="function">Println</span>(<span class="string">"Timer expired"</span>)
-    
-    <span class="comment">// Ticker：周期性定时器</span>
-    ticker := time.<span class="function">NewTicker</span>(<span class="number">1</span> * time.Second)
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建 Ticker</span>
+    ticker := time.<span class="function">NewTicker</span>(time.Second)
     <span class="keyword">defer</span> ticker.<span class="function">Stop</span>()
     
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">3</span>; i++ {
-        <-ticker.C
-        fmt.<span class="function">Printf</span>(<span class="string">"Tick %d\n"</span>, i)
-    }
+    <span class="comment">// 周期执行</span>
+    done := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">bool</span>)
+    
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        count := <span class="number">0</span>
+        <span class="keyword">for</span> {
+            <span class="keyword">select</span> {
+            <span class="keyword">case</span> &lt;-ticker.C:
+                count++
+                fmt.<span class="function">Printf</span>(<span class="string">"Tick %d\n"</span>, count)
+                <span class="keyword">if</span> count &gt;= <span class="number">5</span> {
+                    done &lt;- <span class="keyword">true</span>
+                    <span class="keyword">return</span>
+                }
+            }
+        }
+    }()
+    
+    &lt;-done
+    fmt.<span class="function">Println</span>(<span class="string">"Ticker stopped"</span>)
 }</code></pre>
+            </div>
 
-            <h3>时区处理</h3>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 性能分析 -->
+            <h2 id="profiling">性能分析</h2>
+            <div class="example-box">
+                <h3>📊 使用 time 进行性能测试</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
     <span class="string">"time"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 加载时区</span>
-    loc, err := time.<span class="function">LoadLocation</span>(<span class="string">"Asia/Shanghai"</span>)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"Error:"</span>, err)
-        <span class="keyword">return</span>
-    }
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 方法 1: 使用 Sub</span>
+    start := time.<span class="function">Now</span>()
+    <span class="function">doWork</span>()
+    elapsed := time.<span class="function">Since</span>(start)
+    fmt.<span class="function">Printf</span>(<span class="string">"Elapsed: %v\n"</span>, elapsed)
     
-    <span class="comment">// 在指定时区创建时间</span>
-    now := time.<span class="function">Now</span>().<span class="function">In</span>(loc)
-    fmt.<span class="function">Println</span>(<span class="string">"Shanghai time:"</span>, now)
+    <span class="comment">// 方法 2: 使用 defer</span>
+    <span class="function">timedFunction</span>()
     
-    <span class="comment">// 转换时区</span>
-    nyLoc, _ := time.<span class="function">LoadLocation</span>(<span class="string">"America/New_York"</span>)
-    nyTime := now.<span class="function">In</span>(nyLoc)
-    fmt.<span class="function">Println</span>(<span class="string">"New York time:"</span>, nyTime)
-}</code></pre>
+    <span class="comment">// 方法 3: 使用 AfterFunc 超时</span>
+    done := <span class="function">make</span>(<span class="keyword">chan</span> <span class="keyword">bool</span>)
+    timeout := time.<span class="function">AfterFunc</span>(time.Second, <span class="keyword">func</span>() {
+        fmt.<span class="function">Println</span>(<span class="string">"Timeout!"</span>)
+    })
+    
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="function">doWork</span>()
+        done &lt;- <span class="keyword">true</span>
+    }()
+    
+    &lt;-done
+    timeout.<span class="function">Stop</span>()
+}
 
-            
+<span class="keyword">func</span> <span class="function">doWork</span>() {
+    time.<span class="function">Sleep</span>(time.Millisecond * <span class="number">100</span>)
+}
+
+<span class="keyword">func</span> <span class="function">timedFunction</span>() {
+    <span class="keyword">defer</span> <span class="keyword">func</span>(start time.Time) {
+        fmt.<span class="function">Printf</span>(<span class="string">"Function took: %v\n"</span>, time.<span class="function">Since</span>(start))
+    }(time.<span class="function">Now</span>())
+    
+    <span class="function">doWork</span>()
+}</code></pre>
+            </div>
+
+            <!-- 时区处理 -->
+            <h2 id="timezone">时区处理</h2>
+            <div class="example-box">
+                <h3>📝 时区转换</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 本地时间</span>
+    local := time.<span class="function">Now</span>()
+    fmt.<span class="function">Printf</span>(<span class="string">"Local: %v (%v)\n"</span>, local, local.<span class="function">Location</span>())
+    
+    <span class="comment">// UTC 时间</span>
+    utc := local.<span class="function">UTC</span>()
+    fmt.<span class="function">Printf</span>(<span class="string">"UTC: %v\n"</span>, utc)
+    
+    <span class="comment">// 加载时区</span>
+    loc, _ := time.<span class="function">LoadLocation</span>(<span class="string">"Asia/Shanghai"</span>)
+    shanghai := local.<span class="function">In</span>(loc)
+    fmt.<span class="function">Printf</span>(<span class="string">"Shanghai: %v\n"</span>, shanghai)
+    
+    loc2, _ := time.<span class="function">LoadLocation</span>(<span class="string">"America/New_York"</span>)
+    ny := local.<span class="function">In</span>(loc2)
+    fmt.<span class="function">Printf</span>(<span class="string">"New York: %v\n"</span>, ny)
+    
+    <span class="comment">// 固定偏移时区</span>
+    fixedZone := time.<span class="function">FixedZone</span>(<span class="string">"CST"</span>, <span class="number">8</span>*<span class="number">3600</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"Fixed: %v\n"</span>, local.<span class="function">In</span>(fixedZone))
+}</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ Time 使用建议</h3>
+                <ul>
+                    <li><strong>存储 UTC</strong>: 数据库中存储 UTC 时间</li>
+                    <li><strong>显示本地化</strong>: 展示时转换为本地时间</li>
+                    <li><strong>使用常量</strong>: time.Second、time.Minute 等</li>
+                    <li><strong>停止 Ticker</strong>: 使用 defer ticker.Stop()</li>
+                    <li><strong>超时控制</strong>: 使用 time.After 或 context</li>
+                    <li><strong>避免泄漏</strong>: Timer/Ticker 用后及时停止</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <h3>🚨 常见陷阱</h3>
+                <ul>
+                    <li><strong>Timer 泄漏</strong>: 不调用 Stop() 会导致资源泄漏</li>
+                    <li><strong>Ticker 泄漏</strong>: 必须调用 Stop() 停止</li>
+                    <li><strong>时区问题</strong>: 跨时区系统应统一使用 UTC</li>
+                    <li><strong>时间比较</strong>: 使用 Equal() 而非 ==</li>
+                    <li><strong>格式化错误</strong>: 记住参考时间是 2006 不是 1970</li>
+                </ul>
+            </div>
+
+            <!-- 总结 -->
+            <h2 id="summary">总结</h2>
+
+            <div class="success-box">
+                <h3>✅ 核心要点</h3>
+                <ul>
+                    <li><strong>Time</strong>: 时间点，使用 time.Now() 获取</li>
+                    <li><strong>Duration</strong>: 时间间隔，纳秒为单位</li>
+                    <li><strong>Format/Parse</strong>: 使用参考时间 2006-01-02 15:04:05</li>
+                    <li><strong>Timer</strong>: 一次性定时器，用后 Stop()</li>
+                    <li><strong>Ticker</strong>: 周期触发器，用后 Stop()</li>
+                    <li><strong>时区</strong>: 存储 UTC，显示本地化</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="stdlib-json.html">json 包</a></li>
+                    <li><a href="stdlib-io.html">io 包</a></li>
+                    <li><a href="concurrency-context.html">Context 超时控制</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

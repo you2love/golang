@@ -4,26 +4,57 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Validator 参数校验 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>Validator - Go 参数校验库</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
-            <h2 id="validator">Validator 参数校验</h2>
-            
-            <h3>简介</h3>
-            <p>Validator 是 Go 语言中最流行的参数校验库，基于结构体标签实现，支持多种校验规则，可以轻松集成到 Gin 等 Web 框架中。它支持自定义校验规则、国际化错误消息等功能。</p>
-            
-            <h3>安装</h3>
-            <pre><code><span class="keyword">go</span> get -u github.com/go-playground/validator/v10</code></pre>
-            
-            <h3>快速开始</h3>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="ecosystem-zap.html" class="back-link">← Zap</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="ecosystem-cobra.html" class="back-link">Cobra →</a>
+
+            <h1>Validator - Go 参数校验库</h1>
+            <p class="intro">go-playground/validator 是 Go 最流行的参数校验库，支持丰富的校验规则和自定义验证。掌握 Validator 是开发安全、健壮的 Go Web 应用的基础。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">✅</div>
+                    <h4>丰富规则</h4>
+                    <p>100+ 内置规则</p>
+                    <code class="tag">required,email</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🏷️</div>
+                    <h4>Tag 声明</h4>
+                    <p>结构体标签定义</p>
+                    <code class="tag">validate:"..."</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔧</div>
+                    <h4>自定义验证</h4>
+                    <p>注册自定义规则</p>
+                    <code class="tag">RegisterValidation</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🌐</div>
+                    <h4>多语言</h4>
+                    <p>错误消息翻译</p>
+                    <code class="tag">i18n</code>
+                </div>
+            </div>
+
+            <!-- 快速开始 -->
+            <h2 id="quickstart">快速开始</h2>
+
+            <div class="example-box">
+                <h3>📝 基础校验</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
@@ -31,180 +62,187 @@
 )
 
 <span class="keyword">type</span> User <span class="keyword">struct</span> {
-    Name  <span class="keyword">string</span> <span class="string">`validate:"required,min=3,max=32"`</span>
-    Email <span class="keyword">string</span> <span class="string">`validate:"required,email"`</span>
-    Age   <span class="keyword">int</span>    <span class="string">`validate:"required,gte=0,lte=130"`</span>
+    Username <span class="keyword">string</span> <span class="string">`validate:"required,min=3,max=20"`</span>
+    Email    <span class="keyword">string</span> <span class="string">`validate:"required,email"`</span>
+    Age      <span class="keyword">int</span>    <span class="string">`validate:"required,min=18,max=100"`</span>
+    Password <span class="keyword">string</span> <span class="string">`validate:"required,min=8,containsany=!@#$%"`</span>
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
+<span class="keyword">func</span> <span class="function">main</span>() {
     validate := validator.<span class="function">New</span>()
     
     user := User{
-        Name:  <span class="string">"Alice"</span>,
-        Email: <span class="string">"alice@example.com"</span>,
-        Age:   <span class="number">25</span>,
+        Username: <span class="string">"alice"</span>,
+        Email:    <span class="string">"alice@example.com"</span>,
+        Age:      <span class="number">25</span>,
+        Password: <span class="string">"pass123!"</span>,
     }
     
     err := validate.<span class="function">Struct</span>(user)
     <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"Validation failed:"</span>, err)
+        <span class="comment">// 字段错误</span>
+        <span class="keyword">for</span> _, err := <span class="keyword">range</span> err.(validator.ValidationErrors) {
+            fmt.<span class="function">Printf</span>(<span class="string">"Field: %s, Error: %s\n"</span>, err.<span class="function">Field</span>(), err.<span class="function">Tag</span>())
+        }
         <span class="keyword">return</span>
     }
     
     fmt.<span class="function">Println</span>(<span class="string">"Validation passed!"</span>)
 }</code></pre>
-            
-            <h3>常用校验规则</h3>
-            <pre><code><span class="keyword">type</span> User <span class="keyword">struct</span> {
-    <span class="comment">// 必填字段</span>
-    Name <span class="keyword">string</span> <span class="string">`validate:"required"`</span>
+            </div>
+
+            <div class="info-box">
+                <h3>💡 Validator 要点</h3>
+                <ul>
+                    <li><strong>单例模式</strong>: validate 实例应全局复用</li>
+                    <li><strong>并发安全</strong>: Validate 是并发安全的</li>
+                    <li><strong>缓存</strong>: 结构体校验规则会被缓存</li>
+                    <li><strong>嵌套校验</strong>: 支持嵌套结构体和切片</li>
+                </ul>
+            </div>
+
+            <!-- 内置规则 -->
+            <h2 id="rules">内置校验规则</h2>
+
+            <div class="example-box">
+                <h3>📖 常用校验规则</h3>
+                <pre><code><span class="keyword">type</span> Request <span class="keyword">struct</span> {
+    <span class="comment">// 必填</span>
+    Name     <span class="keyword">string</span> <span class="string">`validate:"required"`</span>
+    Nickname <span class="keyword">string</span> <span class="string">`validate:"omitempty,min=2"`</span> <span class="comment">// 可选，但有值时需满足</span>
     
-    <span class="comment">// 字符串长度</span>
-    Username <span class="keyword">string</span> <span class="string">`validate:"min=3,max=20"`</span>
+    <span class="comment">// 字符串</span>
+    Email    <span class="keyword">string</span> <span class="string">`validate:"email"`</span>
+    URL      <span class="keyword">string</span> <span class="string">`validate:"url"`</span>
+    Mobile   <span class="keyword">string</span> <span class="string">`validate:"mobile"`</span>
+    IP       <span class="keyword">string</span> <span class="string">`validate:"ip"`</span>
+    UUID     <span class="keyword">string</span> <span class="string">`validate:"uuid"`</span>
     
-    <span class="comment">// 邮箱格式</span>
-    Email <span class="keyword">string</span> <span class="string">`validate:"email"`</span>
+    <span class="comment">// 长度</span>
+    Code     <span class="keyword">string</span> <span class="string">`validate:"len=6"`</span>       <span class="comment">// 固定长度</span>
+    Password <span class="keyword">string</span> <span class="string">`validate:"min=8,max=20"`</span> <span class="comment">// 长度范围</span>
     
-    <span class="comment">// URL 格式</span>
-    Website <span class="keyword">string</span> <span class="string">`validate:"url"`</span>
+    <span class="comment">// 数值</span>
+    Age      <span class="keyword">int</span>    <span class="string">`validate:"min=0,max=150"`</span>
+    Score    <span class="keyword">float64</span> <span class="string">`validate:"gte=0,lte=100"`</span> <span class="comment">// >= 和 <=</span>
+    Count    <span class="keyword">int</span>    <span class="string">`validate:"gt=0"`</span>        <span class="comment">// ></span>
     
-    <span class="comment">// 数值范围</span>
-    Age <span class="keyword">int</span> <span class="string">`validate:"gte=0,lte=130"`</span>
+    <span class="comment">// 正则</span>
+    ZipCode  <span class="keyword">string</span> <span class="string">`validate:"regexp=^[0-9]{6}$"`</span>
     
-    <span class="comment">// 大于等于 (gte)、大于 (gt)、小于等于 (lte)、小于 (lt)</span>
+    <span class="comment">// 枚举</span>
+    Status   <span class="keyword">string</span> <span class="string">`validate:"oneof=active inactive pending"`</span>
+    Role     <span class="keyword">string</span> <span class="string">`validate:"oneof=admin user guest"`</span>
+    
+    <span class="comment">// 时间</span>
+    Birthday <span class="keyword">time.Time</span> <span class="string">`validate:"lt"`</span> <span class="comment">// 必须小于当前时间</span>
+    EndTime  <span class="keyword">time.Time</span> <span class="string">`validate:"gtfield=StartTime"`</span> <span class="comment">// 必须大于 StartTime 字段</span>
+    
+    <span class="comment">// 切片/数组</span>
+    Tags     []<span class="keyword">string</span> <span class="string">`validate:"min=1,max=5"`</span>
+    IDs      []<span class="keyword">int</span>    <span class="string">`validate:"unique"`</span> <span class="comment">// 元素唯一</span>
+    
+    <span class="comment">// 嵌套</span>
+    Address  *Address <span class="string">`validate:"required,dive"`</span> <span class="comment">// dive 深入嵌套</span>
+    Items    []Item   <span class="string">`validate:"dive"`</span>
+}
+
+<span class="keyword">type</span> Address <span class="keyword">struct</span> {
+    Province <span class="keyword">string</span> <span class="string">`validate:"required"`</span>
+    City     <span class="keyword">string</span> <span class="string">`validate:"required"`</span>
+    District <span class="keyword">string</span> <span class="string">`validate:"required"`</span>
+}
+
+<span class="keyword">type</span> Item <span class="keyword">struct</span> {
+    ID    <span class="keyword">int</span>    <span class="string">`validate:"required"`</span>
+    Name  <span class="keyword">string</span> <span class="string">`validate:"required"`</span>
     Price <span class="keyword">float64</span> <span class="string">`validate:"gt=0"`</span>
-    
-    <span class="comment">// 正则表达式</span>
-    Phone <span class="keyword">string</span> <span class="string">`validate:"required,^1[3-9]\\d{9}$"`</span>
-    
-    <span class="comment">// 枚举值</span>
-    Gender <span class="keyword">string</span> <span class="string">`validate:"oneof=male female other"`</span>
-    
-    <span class="comment">// 字符串包含</span>
-    Password <span class="keyword">string</span> <span class="string">`validate:"containsany=!@#$%"`</span>
-    
-    <span class="comment">// 唯一性（需要自定义校验）</span>
-    Username <span class="keyword">string</span> <span class="string">`validate:"unique"`</span>
-    
-    <span class="comment">// 可选字段</span>
-    Nickname <span class="keyword">string</span> <span class="string">`validate:"omitempty,min=2"`</span>
-    
-    <span class="comment">// 排除某些值</span>
-    Role <span class="keyword">string</span> <span class="string">`validate:"nefield=Password"`</span>
-    
-    <span class="comment">// 字段相等</span>
-    ConfirmPassword <span class="keyword">string</span> <span class="string">`validate:"eqfield=Password"`</span>
-    
-    <span class="comment">// 字段不等</span>
-    NewEmail <span class="keyword">string</span> <span class="string">`validate:"nefield=OldEmail"`</span>
 }</code></pre>
-            
-            <h3>错误处理</h3>
-            <pre><code><span class="keyword">package</span> main
+            </div>
 
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"github.com/go-playground/validator/v10"</span>
-)
+            <!-- 错误处理 -->
+            <h2 id="errors">错误处理</h2>
 
-<span class="function">func</span> <span class="function">handleValidationError</span>(err <span class="keyword">error</span>) {
-    <span class="comment">// 类型断言</span>
-    validationErrors, ok := err.(validator.ValidationErrors)
-    <span class="keyword">if</span> !ok {
-        fmt.<span class="function">Println</span>(<span class="string">"Unknown error:"</span>, err)
-        <span class="keyword">return</span>
+            <div class="example-box">
+                <h3>📝 解析校验错误</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">validateUser</span>(user User) <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span> {
+    errors := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>)
+    
+    err := validate.<span class="function">Struct</span>(user)
+    <span class="keyword">if</span> err == <span class="keyword">nil</span> {
+        <span class="keyword">return</span> errors
     }
     
-    <span class="comment">// 遍历所有错误</span>
-    <span class="keyword">for</span>, e := <span class="keyword">range</span> validationErrors {
-        fmt.<span class="function">Printf</span>(<span class="string">"Field: %s, Tag: %s, Param: %s\n"</span>, e.<span class="function">Field</span>(), e.<span class="function">Tag</span>(), e.<span class="function">Param</span>())
-    }
-}
-
-<span class="comment">// 自定义错误消息</span>
-<span class="keyword">type</span> ErrorResponse <span class="keyword">struct</span> {
-    Field   <span class="keyword">string</span> <span class="string">`json:"field"`</span>
-    Message <span class="keyword">string</span> <span class="string">`json:"message"`</span>
-}
-
-<span class="function">func</span> <span class="function">getValidationErrors</span>(err <span class="keyword">error</span>) []ErrorResponse {
-    <span class="keyword">var</span> errors []ErrorResponse
-    
-    validationErrors := err.(validator.ValidationErrors)
-    <span class="keyword">for</span>, e := <span class="keyword">range</span> validationErrors {
-        errors = <span class="function">append</span>(errors, ErrorResponse{
-            Field:   e.<span class="function">Field</span>(),
-            Message: <span class="function">getErrorMessage</span>(e),
-        })
+    <span class="keyword">for</span> _, err := <span class="keyword">range</span> err.(validator.ValidationErrors) {
+        field := err.<span class="function">Field</span>()
+        tag := err.<span class="function">Tag</span>()
+        
+        <span class="keyword">switch</span> tag {
+        <span class="keyword">case</span> <span class="string">"required"</span>:
+            errors[field] = <span class="string">"不能为空"</span>
+        <span class="keyword">case</span> <span class="string">"email"</span>:
+            errors[field] = <span class="string">"邮箱格式不正确"</span>
+        <span class="keyword">case</span> <span class="string">"min"</span>:
+            errors[field] = fmt.<span class="function">Sprintf</span>(<span class="string">"长度不能小于 %s"</span>, err.<span class="function">Param</span>())
+        <span class="keyword">case</span> <span class="string">"max"</span>:
+            errors[field] = fmt.<span class="function">Sprintf</span>(<span class="string">"长度不能超过 %s"</span>, err.<span class="function">Param</span>())
+        <span class="keyword">default</span>:
+            errors[field] = <span class="string">"校验失败"</span>
+        }
     }
     
     <span class="keyword">return</span> errors
-}
-
-<span class="function">func</span> <span class="function">getErrorMessage</span>(e validator.FieldError) <span class="keyword">string</span> {
-    <span class="keyword">switch</span> e.<span class="function">Tag</span>() {
-    <span class="keyword">case</span> <span class="string">"required"</span>:
-        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%s is required"</span>, e.<span class="function">Field</span>())
-    <span class="keyword">case</span> <span class="string">"email"</span>:
-        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%s must be a valid email"</span>, e.<span class="function">Field</span>())
-    <span class="keyword">case</span> <span class="string">"min"</span>:
-        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%s must be at least %s characters"</span>, e.<span class="function">Field</span>(), e.<span class="function">Param</span>())
-    <span class="keyword">case</span> <span class="string">"max"</span>:
-        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%s must be at most %s characters"</span>, e.<span class="function">Field</span>(), e.<span class="function">Param</span>())
-    <span class="keyword">default</span>:
-        <span class="keyword">return</span> fmt.<span class="function">Sprintf</span>(<span class="string">"%s is invalid"</span>, e.<span class="function">Field</span>())
-    }
 }</code></pre>
-            
-            <h3>自定义校验规则</h3>
-            <pre><code><span class="keyword">package</span> main
+            </div>
+
+            <!-- 自定义验证 -->
+            <h2 id="custom">自定义验证</h2>
+
+            <div class="example-box">
+                <h3>📝 注册自定义规则</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
     <span class="string">"github.com/go-playground/validator/v10"</span>
     <span class="string">"regexp"</span>
 )
 
-<span class="comment">// 自定义校验：手机号</span>
-<span class="function">func</span> <span class="function">validateMobile</span>(fl validator.FieldLevel) <span class="keyword">bool</span> {
-    mobile := fl.<span class="function">Field</span>().<span class="function">String</span>()
-    matched, _ := regexp.<span class="function">MatchString</span>(<span class="string">`^1[3-9]\d{9}$`</span>, mobile)
-    <span class="keyword">return</span> matched
+<span class="keyword">var</span> validate *validator.Validate
+
+<span class="keyword">func</span> <span class="function">init</span>() {
+    validate = validator.<span class="function">New</span>()
+    
+    <span class="comment">// 自定义规则：校验身份证号</span>
+    validate.<span class="function">RegisterValidation</span>(<span class="string">"id_card"</span>, <span class="keyword">func</span>(fl validator.FieldLevel) <span class="keyword">bool</span> {
+        idCard := fl.<span class="function">Field</span>().<span class="function">String</span>()
+        matched, _ := regexp.<span class="function">MatchString</span>(<span class="string">`^[1-9]\d{5}(18|19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx]$`</span>, idCard)
+        <span class="keyword">return</span> matched
+    })
+    
+    <span class="comment">// 自定义规则：校验密码强度</span>
+    validate.<span class="function">RegisterValidation</span>(<span class="string">"password_strength"</span>, <span class="keyword">func</span>(fl validator.FieldLevel) <span class="keyword">bool</span> {
+        password := fl.<span class="function">Field</span>().<span class="function">String</span>()
+        <span class="keyword">if</span> <span class="function">len</span>(password) < <span class="number">8</span> {
+            <span class="keyword">return</span> <span class="keyword">false</span>
+        }
+        <span class="comment">// 必须包含字母和数字</span>
+        hasLetter := regexp.<span class="function">MatchString</span>(<span class="string">`[a-zA-Z]`</span>, password)
+        hasNumber := regexp.<span class="function">MatchString</span>(<span class="string">`[0-9]`</span>, password)
+        <span class="keyword">return</span> hasLetter && hasNumber
+    })
 }
 
-<span class="comment">// 自定义校验：用户名唯一性</span>
-<span class="function">func</span> <span class="function">validateUsernameUnique</span>(fl validator.FieldLevel) <span class="keyword">bool</span> {
-    username := fl.<span class="function">Field</span>().<span class="function">String</span>()
-    <span class="comment">// 这里应该查询数据库检查用户名是否已存在</span>
-    <span class="comment">// 简化示例：假设用户名不能是 "admin"</span>
-    <span class="keyword">return</span> username != <span class="string">"admin"</span>
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    validate := validator.<span class="function">New</span>()
-    
-    <span class="comment">// 注册自定义校验</span>
-    validate.<span class="function">RegisterValidation</span>(<span class="string">"mobile"</span>, <span class="function">validateMobile</span>)
-    validate.<span class="function">RegisterValidation</span>(<span class="string">"username_unique"</span>, <span class="function">validateUsernameUnique</span>)
-    
-    <span class="keyword">type</span> User <span class="keyword">struct</span> {
-        Username <span class="keyword">string</span> <span class="string">`validate:"required,username_unique"`</span>
-        Mobile   <span class="keyword">string</span> <span class="string">`validate:"required,mobile"`</span>
-    }
-    
-    user := User{
-        Username: <span class="string">"admin"</span>,
-        Mobile:   <span class="string">"13800138000"</span>,
-    }
-    
-    err := validate.<span class="function">Struct</span>(user)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        fmt.<span class="function">Println</span>(<span class="string">"Validation failed:"</span>, err)
-    }
+<span class="keyword">type</span> RegisterRequest <span class="keyword">struct</span> {
+    IDCard   <span class="keyword">string</span> <span class="string">`validate:"required,id_card"`</span>
+    Password <span class="keyword">string</span> <span class="string">`validate:"required,password_strength"`</span>
 }</code></pre>
-            
-            <h3>与 Gin 集成</h3>
-            <pre><code><span class="keyword">package</span> main
+            </div>
+
+            <!-- 与 Gin 集成 -->
+            <h2 id="gin">与 Gin 集成</h2>
+            <div class="example-box">
+                <h3>📝 Gin + Validator 中间件</h3>
+                <pre><code><span class="keyword">package</span> middleware
 
 <span class="keyword">import</span> (
     <span class="string">"github.com/gin-gonic/gin"</span>
@@ -212,69 +250,94 @@
     <span class="string">"net/http"</span>
 )
 
-<span class="keyword">type</span> CreateUserRequest <span class="keyword">struct</span> {
-    Name     <span class="keyword">string</span> <span class="string">`json:"name" validate:"required,min=3,max=32"`</span>
-    Email    <span class="keyword">string</span> <span class="string">`json:"email" validate:"required,email"`</span>
-    Password <span class="keyword">string</span> <span class="string">`json:"password" validate:"required,min=8"`</span>
+<span class="keyword">type</span> ErrorResponse <span class="keyword">struct</span> {
+    Code    <span class="keyword">int</span>               <span class="string">`json:"code"`</span>
+    Message <span class="keyword">string</span>            <span class="string">`json:"message"`</span>
+    Errors  <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span> <span class="string">`json:"errors,omitempty"`</span>
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
+<span class="keyword">func</span> <span class="function">ValidationMiddleware</span>() gin.HandlerFunc {
+    <span class="keyword">return</span> <span class="keyword">func</span>(c *gin.Context) {
+        <span class="comment">// 获取 gin 的 validator</span>
+        v, _ := c.<span class="function">Get</span>(<span class="string">"validator"</span>)
+        validate, ok := v.(*validator.Validate)
+        <span class="keyword">if</span> !ok {
+            c.<span class="function">Next</span>()
+            <span class="keyword">return</span>
+        }
+        
+        <span class="comment">// 获取请求体结构体</span>
+        <span class="keyword">if</span> c.Request.Body == <span class="keyword">nil</span> {
+            c.<span class="function">Next</span>()
+            <span class="keyword">return</span>
+        }
+        
+        c.<span class="function">Next</span>()
+    }
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
     r := gin.<span class="function">Default</span>()
     
-    <span class="comment">// 获取 Gin 的 validator</span>
-    <span class="keyword">if</span> v, ok := binding.Validator.<span class="function">Engine</span>().(*validator.Validate); ok {
-        <span class="comment">// 注册自定义校验</span>
-        v.<span class="function">RegisterValidation</span>(<span class="string">"mobile"</span>, <span class="function">validateMobile</span>)
+    <span class="comment">// 替换 gin 的 validator</span>
+    <span class="keyword">if</span> v, ok := r.<span class="function">Validator</span>().<span class="function">Engine</span>().(*validator.Validate); ok {
+        <span class="comment">// 注册自定义规则</span>
+        v.<span class="function">RegisterValidation</span>(<span class="string">"custom_rule"</span>, <span class="keyword">func</span>(fl validator.FieldLevel) <span class="keyword">bool</span> {
+            <span class="keyword">return</span> <span class="keyword">true</span>
+        })
     }
     
+    <span class="comment">// 使用示例</span>
     r.<span class="function">POST</span>(<span class="string">"/users"</span>, <span class="keyword">func</span>(c *gin.Context) {
         <span class="keyword">var</span> req CreateUserRequest
-        
-        <span class="comment">// 绑定和校验</span>
         <span class="keyword">if</span> err := c.<span class="function">ShouldBindJSON</span>(&req); err != <span class="keyword">nil</span> {
-            c.<span class="function">JSON</span>(http.StatusBadRequest, gin.H{
-                <span class="string">"error"</span>: <span class="function">getValidationErrors</span>(err),
+            c.<span class="function">JSON</span>(http.StatusBadRequest, ErrorResponse{
+                Code:    <span class="number">400</span>,
+                Message: <span class="string">"Validation failed"</span>,
+                Errors:  formatErrors(err),
             })
             <span class="keyword">return</span>
         }
         
-        c.<span class="function">JSON</span>(http.StatusCreated, gin.H{
-            <span class="string">"message"</span>: <span class="string">"User created"</span>,
-            <span class="string">"user"</span>:    req,
-        })
+        c.<span class="function">JSON</span>(http.StatusOK, gin.H{<span class="string">"message"</span>: <span class="string">"success"</span>})
     })
     
     r.<span class="function">Run</span>(<span class="string">":8080"</span>)
-}</code></pre>
-            
-            <h3>结构体嵌套校验</h3>
-            <pre><code><span class="keyword">type</span> Address <span class="keyword">struct</span> {
-    Street  <span class="keyword">string</span> <span class="string">`validate:"required"`</span>
-    City    <span class="keyword">string</span> <span class="string">`validate:"required"`</span>
-    ZipCode <span class="keyword">string</span> <span class="string">`validate:"required,len=6"`</span>
 }
 
-<span class="keyword">type</span> User <span class="keyword">struct</span> {
-    Name    <span class="keyword">string</span>  <span class="string">`validate:"required"`</span>
-    Address Address  <span class="string">`validate:"required,dive"`</span>  <span class="comment">// dive 表示校验嵌套结构体</span>
+<span class="keyword">func</span> <span class="function">formatErrors</span>(err <span class="keyword">error</span>) <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span> {
+    errors := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>)
+    <span class="keyword">for</span> _, e := <span class="keyword">range</span> err.(validator.ValidationErrors) {
+        errors[e.<span class="function">Field</span>()] = getErrorMessage(e)
+    }
+    <span class="keyword">return</span> errors
 }</code></pre>
-            
-            <h3>数组/切片校验</h3>
-            <pre><code><span class="keyword">type</span> Order <span class="keyword">struct</span> {
-    Items []Item <span class="string">`validate:"required,min=1,dive"`</span>  <span class="comment">// 校验数组中的每个元素</span>
-}
+            </div>
 
-<span class="keyword">type</span> Item <span class="keyword">struct</span> {
-    Name  <span class="keyword">string</span>  <span class="string">`validate:"required"`</span>
-    Price <span class="keyword">float64</span> <span class="string">`validate:"required,gt=0"`</span>
-}</code></pre>
-            
-            
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ Validator 使用建议</h3>
+                <ul>
+                    <li><strong>单例模式</strong>: 全局复用 validator 实例</li>
+                    <li><strong>自定义错误</strong>: 将英文错误转换为中文</li>
+                    <li><strong>分组校验</strong>: 不同场景使用不同校验组</li>
+                    <li><strong>嵌套校验</strong>: 使用 dive 深入嵌套结构</li>
+                    <li><strong>性能考虑</strong>: 避免过度复杂的正则</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="ecosystem-gin.html">Gin Web 框架</a></li>
+                    <li><a href="stdlib-json.html">JSON 编解码</a></li>
+                    <li><a href="stdlib-regexp.html">regexp 正则表达式</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

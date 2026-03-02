@@ -4,222 +4,388 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viper 配置 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>Viper - Go 配置管理神器</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
-            <h2 id="viper">Viper 配置</h2>
-            
-            <h3>简介</h3>
-            <p>Viper 是 Go 语言的配置管理库，支持多种配置格式（JSON、TOML、YAML、HCL、envfile 等），可以从文件、环境变量、命令行参数等多种来源读取配置，并支持配置热重载。</p>
-            
-            <h3>安装</h3>
-            <pre><code><span class="keyword">go</span> get github.com/spf13/viper</code></pre>
-            
-            <h3>快速开始</h3>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="ecosystem-gorm.html" class="back-link">← GORM</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="ecosystem-zap.html" class="back-link">Zap →</a>
+
+            <h1>Viper - Go 配置管理神器</h1>
+            <p class="intro">Viper 是 Go 最流行的配置管理库，支持多种配置格式、环境变量、命令行参数、远程配置中心等。掌握 Viper 是开发生产级 Go 应用的基础。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">📄</div>
+                    <h4>多格式</h4>
+                    <p>JSON/YAML/TOML</p>
+                    <code class="tag">.yaml</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔄</div>
+                    <h4>热重载</h4>
+                    <p>配置变更监听</p>
+                    <code class="tag">WatchConfig</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🌐</div>
+                    <h4>远程配置</h4>
+                    <p>etcd/Consul</p>
+                    <code class="tag">Remote Config</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⚙️</div>
+                    <h4>优先级</h4>
+                    <p>多来源合并</p>
+                    <code class="tag">Priority</code>
+                </div>
+            </div>
+
+            <!-- 快速开始 -->
+            <h2 id="quickstart">快速开始</h2>
+
+            <div class="example-box">
+                <h3>📝 基础使用</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
     <span class="string">"github.com/spf13/viper"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    v := viper.<span class="function">New</span>()
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 设置配置文件名</span>
+    viper.<span class="function">SetConfigName</span>(<span class="string">"config"</span>)
+    <span class="comment">// 设置文件类型</span>
+    viper.<span class="function">SetConfigType</span>(<span class="string">"yaml"</span>)
+    <span class="comment">// 设置搜索路径</span>
+    viper.<span class="function">AddConfigPath</span>(<span class="string">"./configs"</span>)
+    viper.<span class="function">AddConfigPath</span>(<span class="string">"/etc/myapp"</span>)
     
-    <span class="comment">// 设置配置文件名和路径</span>
-    v.<span class="function">SetConfigName</span>(<span class="string">"config"</span>)
-    v.<span class="function">SetConfigType</span>(<span class="string">"yaml"</span>)
-    v.<span class="function">AddConfigPath</span>(<span class="string">"./"</span>)
-    
-    <span class="comment">// 读取配置文件</span>
-    <span class="keyword">if</span> err := v.<span class="function">ReadInConfig</span>(); err != <span class="keyword">nil</span> {
-        <span class="function">panic</span>(fmt.<span class="function">Errorf</span>(<span class="string">"Failed to read config file: %s"</span>, err))
+    <span class="comment">// 读取配置</span>
+    <span class="keyword">if</span> err := viper.<span class="function">ReadInConfig</span>(); err != <span class="keyword">nil</span> {
+        <span class="keyword">panic</span>(fmt.<span class="function">Sprintf</span>(<span class="string">"Config error: %v"</span>, err))
     }
     
-    <span class="comment">// 获取配置值</span>
-    fmt.<span class="function">Println</span>(<span class="string">"Server Port:"</span>, v.<span class="function">GetString</span>(<span class="string">"server.port"</span>))
-    fmt.<span class="function">Println</span>(<span class="string">"Database Host:"</span>, v.<span class="function">GetString</span>(<span class="string">"database.host"</span>))
+    <span class="comment">// 读取配置值</span>
+    host := viper.<span class="function">GetString</span>(<span class="string">"server.host"</span>)
+    port := viper.<span class="function">GetInt</span>(<span class="string">"server.port"</span>)
+    debug := viper.<span class="function">GetBool</span>(<span class="string">"app.debug"</span>)
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Server: %s:%d, Debug: %v\n"</span>, host, port, debug)
 }</code></pre>
-            
-            <h3>配置文件示例</h3>
-            <pre><code><span class="comment"># config.yaml</span>
-server:
-  port: <span class="number">8080</span>
-  host: localhost
+            </div>
 
-database:
-  host: localhost
-  port: <span class="number">3306</span>
-  name: mydb
-  user: root
-  password: secret
+            <div class="info-box">
+                <h3>💡 Viper 要点</h3>
+                <ul>
+                    <li><strong>自动搜索</strong>: 在多个路径查找配置文件</li>
+                    <li><strong>类型安全</strong>: GetString/GetInt/GetBool 等类型方法</li>
+                    <li><strong>嵌套访问</strong>: 使用点号访问嵌套配置</li>
+                    <li><strong>默认值</strong>: SetDefault 设置默认值</li>
+                </ul>
+            </div>
 
-logging:
-  level: info
-  format: json</code></pre>
-            
-            <h3>读取配置</h3>
-            <pre><code><span class="comment">// 获取字符串</span>
-port := v.<span class="function">GetString</span>(<span class="string">"server.port"</span>)
+            <!-- 配置文件示例 -->
+            <h2 id="config-file">配置文件</h2>
 
-<span class="comment">// 获取整数</span>
-port := v.<span class="function">GetInt</span>(<span class="string">"server.port"</span>)
+            <div class="example-box">
+                <h3>📝 YAML 配置示例</h3>
+                <pre><code><span class="comment"># config.yaml</span>
+<span class="string">server:</span>
+  <span class="string">host:</span> <span class="string">"0.0.0.0"</span>
+  <span class="string">port:</span> <span class="number">8080</span>
+  <span class="string">timeout:</span> <span class="string">"30s"</span>
 
-<span class="comment">// 获取布尔值</span>
-debug := v.<span class="function">GetBool</span>(<span class="string">"debug"</span>)
+<span class="string">database:</span>
+  <span class="string">driver:</span> <span class="string">"mysql"</span>
+  <span class="string">dsn:</span> <span class="string">"user:pass@tcp(localhost:3306)/db"</span>
+  <span class="string">max_idle:</span> <span class="number">10</span>
+  <span class="string">max_open:</span> <span class="number">100</span>
 
-<span class="comment">// 获取浮点数</span>
-timeout := v.<span class="function">GetFloat64</span>(<span class="string">"timeout"</span>)
+<span class="string">redis:</span>
+  <span class="string">addr:</span> <span class="string">"localhost:6379"</span>
+  <span class="string">password:</span> <span class="string">""</span>
+  <span class="string">db:</span> <span class="number">0</span>
 
-<span class="comment">// 获取时间</span>
-duration := v.<span class="function">GetDuration</span>(<span class="string">"timeout"</span>)
+<span class="string">app:</span>
+  <span class="string">name:</span> <span class="string">"MyApp"</span>
+  <span class="string">version:</span> <span class="string">"1.0.0"</span>
+  <span class="string">debug:</span> <span class="boolean">true</span>
+  <span class="string">log_level:</span> <span class="string">"info"</span>
 
-<span class="comment">// 获取字符串切片</span>
-hosts := v.<span class="function">GetStringSlice</span>(<span class="string">"servers.hosts"</span>)
+<span class="string">features:</span>
+  <span class="string">- "feature1"</span>
+  <span class="string">- "feature2"</span>
+  <span class="string">- "feature3"</span></code></pre>
+            </div>
 
-<span class="comment">// 获取所有配置</span>
-all := v.<span class="function">AllSettings</span>()
-
-<span class="comment">// 检查键是否存在</span>
-<span class="keyword">if</span> v.<span class="function">IsSet</span>(<span class="string">"server.port"</span>) {
-    port := v.<span class="function">GetString</span>(<span class="string">"server.port"</span>)
-}
-
-<span class="comment">// 获取子配置</span>
-server := v.<span class="function">Sub</span>(<span class="string">"server"</span>)
-port := server.<span class="function">GetString</span>(<span class="string">"port"</span>)</code></pre>
-            
-            <h3>环境变量</h3>
-            <pre><code><span class="keyword">package</span> main
+            <div class="example-box">
+                <h3>📝 读取配置到结构体</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
     <span class="string">"github.com/spf13/viper"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    v := viper.<span class="function">New</span>()
+<span class="comment">// 配置结构体</span>
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    Server   ServerConfig   <span class="string">`mapstructure:"server"`</span>
+    Database DatabaseConfig <span class="string">`mapstructure:"database"`</span>
+    Redis    RedisConfig    <span class="string">`mapstructure:"redis"`</span>
+    App      AppConfig      <span class="string">`mapstructure:"app"`</span>
+}
+
+<span class="keyword">type</span> ServerConfig <span class="keyword">struct</span> {
+    Host    <span class="keyword">string</span> <span class="string">`mapstructure:"host"`</span>
+    Port    <span class="keyword">int</span>    <span class="string">`mapstructure:"port"`</span>
+    Timeout <span class="keyword">string</span> <span class="string">`mapstructure:"timeout"`</span>
+}
+
+<span class="keyword">type</span> DatabaseConfig <span class="keyword">struct</span> {
+    Driver  <span class="keyword">string</span> <span class="string">`mapstructure:"driver"`</span>
+    DSN     <span class="keyword">string</span> <span class="string">`mapstructure:"dsn"`</span>
+    MaxIdle <span class="keyword">int</span>    <span class="string">`mapstructure:"max_idle"`</span>
+    MaxOpen <span class="keyword">int</span>    <span class="string">`mapstructure:"max_open"`</span>
+}
+
+<span class="keyword">type</span> RedisConfig <span class="keyword">struct</span> {
+    Addr     <span class="keyword">string</span> <span class="string">`mapstructure:"addr"`</span>
+    Password <span class="keyword">string</span> <span class="string">`mapstructure:"password"`</span>
+    DB       <span class="keyword">int</span>    <span class="string">`mapstructure:"db"`</span>
+}
+
+<span class="keyword">type</span> AppConfig <span class="keyword">struct</span> {
+    Name    <span class="keyword">string</span> <span class="string">`mapstructure:"name"`</span>
+    Version <span class="keyword">string</span> <span class="string">`mapstructure:"version"`</span>
+    Debug   <span class="keyword">bool</span>   <span class="string">`mapstructure:"debug"`</span>
+    LogLevel <span class="keyword">string</span> <span class="string">`mapstructure:"log_level"`</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    viper.<span class="function">SetConfigFile</span>(<span class="string">"./configs/config.yaml"</span>)
+    viper.<span class="function">ReadInConfig</span>()
     
-    <span class="comment">// 绑定环境变量</span>
-    v.<span class="function">BindEnv</span>(<span class="string">"server.port"</span>, <span class="string">"SERVER_PORT"</span>)
-    v.<span class="function">BindEnv</span>(<span class="string">"database.host"</span>, <span class="string">"DB_HOST"</span>)
+    <span class="comment">// 方式 1: 手动读取</span>
+    host := viper.<span class="function">GetString</span>(<span class="string">"server.host"</span>)
+    port := viper.<span class="function">GetInt</span>(<span class="string">"server.port"</span>)
     
-    <span class="comment">// 自动绑定环境变量（使用前缀）</span>
-    v.<span class="function">SetEnvPrefix</span>(<span class="string">"APP"</span>)
-    v.<span class="function">AutomaticEnv</span>()
-    <span class="comment">// APP_SERVER_PORT -> server.port</span>
+    <span class="comment">// 方式 2: 解组到结构体</span>
+    <span class="keyword">var</span> config Config
+    viper.<span class="function">Unmarshal</span>(&config)
     
-    <span class="comment">// 设置默认值</span>
-    v.<span class="function">SetDefault</span>(<span class="string">"server.port"</span>, <span class="number">8080</span>)
-    v.<span class="function">SetDefault</span>(<span class="string">"debug"</span>, <span class="keyword">false</span>)
-    
-    <span class="comment">// 读取环境变量</span>
-    port := v.<span class="function">GetString</span>(<span class="string">"server.port"</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"Port:"</span>, port)
+    fmt.<span class="function">Printf</span>(<span class="string">"Server: %s:%d\n"</span>, config.Server.Host, config.Server.Port)
+    fmt.<span class="function">Printf</span>(<span class="string">"Database: %s\n"</span>, config.Database.DSN)
+    fmt.<span class="function">Printf</span>(<span class="string">"App: %s v%s\n"</span>, config.App.Name, config.App.Version)
 }</code></pre>
-            
-            <h3>命令行参数</h3>
-            <pre><code><span class="keyword">package</span> main
+            </div>
+
+            <!-- 配置优先级 -->
+            <h2 id="priority">配置优先级</h2>
+
+            <div class="example-box">
+                <h3>📖 Viper 配置来源优先级</h3>
+                <pre><code><span class="comment">// Viper 配置优先级 (从高到低):</span>
+<span class="comment">// 1. 显式调用 Set</span>
+<span class="comment">// 2. 命令行参数 (flag)</span>
+<span class="comment">// 3. 环境变量</span>
+<span class="comment">// 4. 配置文件</span>
+<span class="comment">// 5. 远程配置 (etcd/Consul)</span>
+<span class="comment">// 6. 默认值</span>
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 6. 设置默认值 (最低优先级)</span>
+    viper.<span class="function">SetDefault</span>(<span class="string">"server.host"</span>, <span class="string">"localhost"</span>)
+    viper.<span class="function">SetDefault</span>(<span class="string">"server.port"</span>, <span class="number">8080</span>)
+    
+    <span class="comment">// 4. 读取配置文件</span>
+    viper.<span class="function">SetConfigName</span>(<span class="string">"config"</span>)
+    viper.<span class="function">ReadInConfig</span>()
+    
+    <span class="comment">// 3. 绑定环境变量</span>
+    viper.<span class="function">BindEnv</span>(<span class="string">"server.host"</span>, <span class="string">"SERVER_HOST"</span>)
+    viper.<span class="function">BindEnv</span>(<span class="string">"server.port"</span>, <span class="string">"SERVER_PORT"</span>)
+    viper.<span class="function">AutomaticEnv</span>() <span class="comment">// 自动绑定所有环境变量</span>
+    
+    <span class="comment">// 2. 绑定命令行参数</span>
+    <span class="keyword">var</span> port <span class="keyword">int</span>
+    flag.<span class="function">IntVar</span>(&port, <span class="string">"port"</span>, <span class="number">0</span>, <span class="string">"Server port"</span>)
+    flag.<span class="function">Parse</span>()
+    viper.<span class="function">BindPFlag</span>(<span class="string">"server.port"</span>, flag.<span class="function">Lookup</span>(<span class="string">"port"</span>))
+    
+    <span class="comment">// 1. 显式设置 (最高优先级)</span>
+    viper.<span class="function">Set</span>(<span class="string">"server.host"</span>, <span class="string">"127.0.0.1"</span>)
+    
+    <span class="comment">// 获取最终值</span>
+    host := viper.<span class="function">GetString</span>(<span class="string">"server.host"</span>)
+}</code></pre>
+            </div>
+
+            <!-- 热重载 -->
+            <h2 id="hot-reload">配置热重载</h2>
+            <div class="example-box">
+                <h3>📝 监听配置变更</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
-    <span class="string">"github.com/spf13/cobra"</span>
     <span class="string">"github.com/spf13/viper"</span>
 )
 
-<span class="keyword">var</span> rootCmd = &cobra.Command{
-    <span class="function">Run</span>: <span class="keyword">func</span>(cmd *cobra.Command, args []<span class="keyword">string</span>) {
-        port := viper.<span class="function">GetInt</span>(<span class="string">"port"</span>)
-        fmt.<span class="function">Println</span>(<span class="string">"Port:"</span>, port)
-    },
-}
-
-<span class="function">func</span> <span class="function">init</span>() {
-    rootCmd.<span class="function">PersistentFlags</span>().<span class="function">Int</span>(<span class="string">"port"</span>, <span class="number">8080</span>, <span class="string">"Server port"</span>)
-    viper.<span class="function">BindPFlag</span>(<span class="string">"port"</span>, rootCmd.<span class="function">PersistentFlags</span>().<span class="function">Lookup</span>(<span class="string">"port"</span>))
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    cobra.<span class="function">Execute</span>()
+<span class="keyword">func</span> <span class="function">main</span>() {
+    viper.<span class="function">SetConfigFile</span>(<span class="string">"./configs/config.yaml"</span>)
+    viper.<span class="function">ReadInConfig</span>()
+    
+    <span class="comment">// 监听配置变更</span>
+    viper.<span class="function">WatchConfig</span>()
+    
+    <span class="comment">// 注册变更回调</span>
+    viper.<span class="function">OnConfigChange</span>(<span class="keyword">func</span>(e viper.ConfigEvent) {
+        fmt.<span class="function">Printf</span>(<span class="string">"Config changed: %s\n"</span>, e.Key)
+        
+        <span class="comment">// 重新加载配置到结构体</span>
+        <span class="keyword">var</span> config Config
+        viper.<span class="function">Unmarshal</span>(&config)
+        
+        fmt.<span class="function">Printf</span>(<span class="string">"New config: %+v\n"</span>, config)
+    })
+    
+    <span class="comment">// 保持程序运行</span>
+    <span class="keyword">select</span> {}
 }</code></pre>
-            
-            <h3>配置热重载</h3>
-            <pre><code><span class="keyword">package</span> main
+            </div>
+
+            <!-- 多环境配置 -->
+            <h2 id="multi-env">多环境配置</h2>
+            <div class="example-box">
+                <h3>📝 环境分离配置</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
-    <span class="string">"log"</span>
-    <span class="string">"github.com/fsnotify/fsnotify"</span>
+    <span class="string">"os"</span>
     <span class="string">"github.com/spf13/viper"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    v := viper.<span class="function">New</span>()
-    v.<span class="function">SetConfigName</span>(<span class="string">"config"</span>)
-    v.<span class="function">SetConfigType</span>(<span class="string">"yaml"</span>)
-    v.<span class="function">AddConfigPath</span>(<span class="string">"./"</span>)
+<span class="keyword">func</span> <span class="function">LoadConfig</span>(env <span class="keyword">string</span>) (*Config, <span class="keyword">error</span>) {
+    <span class="comment">// 根据环境加载不同配置</span>
+    configFile := fmt.<span class="function">Sprintf</span>(<span class="string">"./configs/config.%s.yaml"</span>, env)
     
-    <span class="keyword">if</span> err := v.<span class="function">ReadInConfig</span>(); err != <span class="keyword">nil</span> {
+    viper.<span class="function">SetConfigFile</span>(configFile)
+    
+    <span class="keyword">if</span> err := viper.<span class="function">ReadInConfig</span>(); err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    
+    <span class="keyword">var</span> config Config
+    viper.<span class="function">Unmarshal</span>(&config)
+    
+    <span class="keyword">return</span> &config, <span class="keyword">nil</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 从环境变量获取环境名</span>
+    env := os.<span class="function">Getenv</span>(<span class="string">"APP_ENV"</span>)
+    <span class="keyword">if</span> env == <span class="string">""</span> {
+        env = <span class="string">"development"</span>
+    }
+    
+    config, err := <span class="function">LoadConfig</span>(env)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
         <span class="function">panic</span>(err)
     }
     
-    <span class="comment">// 监听配置文件变化</span>
-    v.<span class="function">OnConfigChange</span>(<span class="keyword">func</span>(e fsnotify.Event) {
-        fmt.<span class="function">Printf</span>(<span class="string">"Config file changed: %s\n"</span>, e.Name)
-        log.<span class="function">Println</span>(<span class="string">"Reloading config..."</span>)
-    })
-    
-    v.<span class="function">WatchConfig</span>()
-    
-    <span class="comment">// 主循环</span>
-    <span class="keyword">select</span> {}
+    fmt.<span class="function">Printf</span>(<span class="string">"Loaded config for %s environment\n"</span>, env)
 }</code></pre>
-            
-            <h3>多配置源</h3>
-            <pre><code><span class="keyword">package</span> main
+            </div>
+
+            <!-- 远程配置 -->
+            <h2 id="remote">远程配置中心</h2>
+            <div class="example-box">
+                <h3>📝 从 etcd/Consul 读取配置</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
     <span class="string">"github.com/spf13/viper"</span>
+    <span class="string">"github.com/spf13/viper/remote"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    v := viper.<span class="function">New</span>()
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 从 etcd 读取配置</span>
+    err := viper.<span class="function">AddRemoteProvider</span>(
+        <span class="string">"etcd"</span>,
+        <span class="string">"http://localhost:2379"</span>,
+        <span class="string">"/config/app"</span>,
+    )
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
     
-    <span class="comment">// 1. 设置默认值</span>
-    v.<span class="function">SetDefault</span>(<span class="string">"server.port"</span>, <span class="number">8080</span>)
+    viper.<span class="function">SetConfigType</span>(<span class="string">"yaml"</span>)
     
-    <span class="comment">// 2. 读取配置文件</span>
-    v.<span class="function">SetConfigName</span>(<span class="string">"config"</span>)
-    v.<span class="function">SetConfigType</span>(<span class="string">"yaml"</span>)
-    v.<span class="function">AddConfigPath</span>(<span class="string">"./"</span>)
-    v.<span class="function">ReadInConfig</span>()
+    <span class="keyword">if</span> err := viper.<span class="function">ReadRemoteConfig</span>(); err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
     
-    <span class="comment">// 3. 读取环境变量</span>
-    v.<span class="function">SetEnvPrefix</span>(<span class="string">"APP"</span>)
-    v.<span class="function">AutomaticEnv</span>()
+    <span class="comment">// 从 Consul 读取配置</span>
+    <span class="comment">// viper.AddRemoteProvider("consul", "http://localhost:8500", "/config/app")</span>
     
-    <span class="comment">// 4. 读取命令行参数</span>
-    <span class="comment">// 使用 cobra 绑定</span>
-    
-    <span class="comment">// 优先级：命令行参数 > 环境变量 > 配置文件 > 默认值</span>
-    port := v.<span class="function">GetInt</span>(<span class="string">"server.port"</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"Port:"</span>, port)
+    <span class="comment">// 监听远程配置变更</span>
+    <span class="keyword">go</span> <span class="keyword">func</span>() {
+        <span class="keyword">for</span> {
+            viper.<span class="function">WatchRemoteConfig</span>()
+            <span class="comment">// 配置已变更，重新加载</span>
+            viper.<span class="function">ReadRemoteConfig</span>()
+        }
+    }()
 }</code></pre>
-            
-            
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ Viper 使用建议</h3>
+                <ul>
+                    <li><strong>配置结构体</strong>: 使用结构体定义配置，类型安全</li>
+                    <li><strong>多环境分离</strong>: dev/test/prod 使用不同配置文件</li>
+                    <li><strong>环境变量</strong>: 敏感信息使用环境变量</li>
+                    <li><strong>默认值</strong>: 为关键配置设置默认值</li>
+                    <li><strong>配置验证</strong>: 启动时验证配置有效性</li>
+                    <li><strong>热重载</strong>: 生产环境启用配置热重载</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <h3>🚨 常见陷阱</h3>
+                <ul>
+                    <li><strong>并发安全</strong>: Viper 读取是并发安全的，但 Write 不是</li>
+                    <li><strong>类型转换</strong>: GetInt/GetString 等会进行类型转换</li>
+                    <li><strong>嵌套访问</strong>: 点号访问只支持一层 mapstructure</li>
+                    <li><strong>环境变量</strong>: 环境变量名默认大写</li>
+                    <li><strong>远程配置</strong>: 需要额外安装 remote 包</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="ecosystem-gin.html">Gin Web 框架</a></li>
+                    <li><a href="ecosystem-zap.html">Zap 日志</a></li>
+                    <li><a href="ecosystem-etcd.html">Etcd 分布式存储</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

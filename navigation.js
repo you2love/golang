@@ -75,6 +75,7 @@ const navigationConfig = [
       { title: "标准库概览", href: "stdlib.html", icon: "📚" },
       { title: "词法分析", href: "stdlib-scanner.html", icon: "🔍" },
       { title: "语法树 AST", href: "stdlib-ast.html", icon: "🌳" },
+      { title: "Analysis 框架", href: "stdlib-analysis.html", icon: "🔬" },
       { title: "regexp 正则", href: "stdlib-regexp.html", icon: "🔤" },
       { title: "sync 并发原语", href: "stdlib-sync.html", icon: "🔒" },
       { title: "json 编解码", href: "stdlib-json.html", icon: "📄" },

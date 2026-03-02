@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis 框架 - Go 代码分析</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="stdlib-ast.html" class="back-link">← 语法树</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="ecosystem-analyzer.html" class="back-link">代码分析器 →</a>
+
+            <h1>Analysis 框架 - golang.org/x/tools/analysis</h1>
+            <p class="intro">golang.org/x/tools/analysis 是 Go 官方提供的代码分析框架，用于构建静态分析工具。它提供了统一的接口和基础设施，简化了分析器的开发。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">🔧</div>
+                    <h4>Analyzer</h4>
+                    <p>分析器单元</p>
+                    <code class="tag">*analysis.Analyzer</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📊</div>
+                    <h4>Pass</h4>
+                    <p>分析上下文</p>
+                    <code class="tag">*analysis.Pass</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📍</div>
+                    <h4>Diagnostic</h4>
+                    <p>诊断报告</p>
+                    <code class="tag">analysis.Diagnostic</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔗</div>
+                    <h4>Facts</h4>
+                    <p>跨包事实</p>
+                    <code class="tag">analysis.Fact</code>
+                </div>
+            </div>
+
+            <!-- 安装 -->
+            <h2 id="install">安装</h2>
+
+            <div class="example-box">
+                <pre><code><span class="comment"># 安装 analysis 包</span>
+<span class="keyword">go</span> get golang.org/x/tools/go/analysis
+
+<span class="comment"># 安装 singlechecker (用于运行单个 analyzer)</span>
+<span class="keyword">go</span> get golang.org/x/tools/go/analysis/singlechecker
+
+<span class="comment"># 安装 multichecker (用于运行多个 analyzer)</span>
+<span class="keyword">go</span> get golang.org/x/tools/go/analysis/multichecker</code></pre>
+            </div>
+
+            <!-- 基础用法 -->
+            <h2 id="basics">基础用法</h2>
+
+            <h3>创建 Analyzer</h3>
+            <div class="example-box">
+                <h3>📝 最简单的 Analyzer</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"golang.org/x/tools/go/analysis"</span>
+    <span class="string">"golang.org/x/tools/go/analysis/singlechecker"</span>
+)
+
+<span class="comment">// 创建 Analyzer</span>
+<span class="keyword">var</span> Analyzer = &analysis.Analyzer{
+    Name: <span class="string">"example"</span>,
+    Doc:  <span class="string">"示例分析器"</span>,
+    Run:  run,
+}
+
+<span class="keyword">func</span> run(pass *analysis.Pass) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
+    <span class="comment">// 遍历所有文件</span>
+    <span class="keyword">for</span> _, file := <span class="keyword">range</span> pass.Files {
+        <span class="comment">// 分析 AST</span>
+        <span class="comment">// ...
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>, <span class="keyword">nil</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    singlechecker.<span class="function">Main</span>(Analyzer)
+}</code></pre>
+            </div>
+
+            <h3>运行 Analyzer</h3>
+            <div class="example-box">
+                <pre><code><span class="comment"># 运行分析器</span>
+<span class="keyword">go</span> run main.go ./...
+
+<span class="comment"># 输出示例:</span>
+/path/to/file.go:10:5: example: 发现问题</code></pre>
+            </div>
+
+            <!-- 诊断报告 -->
+            <h2 id="diagnostic">诊断报告</h2>
+
+            <div class="example-box">
+                <h3>📝 报告问题</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"go/ast"</span>
+    <span class="string">"golang.org/x/tools/go/analysis"</span>
+    <span class="string">"golang.org/x/tools/go/analysis/singlechecker"</span>
+)
+
+<span class="keyword">var</span> Analyzer = &analysis.Analyzer{
+    Name: <span class="string">"unreachable"</span>,
+    Doc:  <span class="string">"检查 unreachable 代码"</span>,
+    Run:  run,
+}
+
+<span class="keyword">func</span> run(pass *analysis.Pass) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
+    <span class="keyword">for</span> _, file := <span class="keyword">range</span> pass.Files {
+        ast.<span class="function">Inspect</span>(file, <span class="keyword">func</span>(n ast.Node) <span class="keyword">bool</span> {
+            <span class="comment">// 检查 return 后的代码</span>
+            <span class="keyword">if</span> stmt, ok := n.(*ast.ReturnStmt); ok {
+                <span class="comment">// 报告问题</span>
+                pass.<span class="function">Reportf</span>(stmt.Pos(), <span class="string">"unreachable code after return"</span>)
+            }
+            <span class="keyword">return</span> <span class="keyword">true</span>
+        })
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>, <span class="keyword">nil</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    singlechecker.<span class="function">Main</span>(Analyzer)
+}</code></pre>
+            </div>
+
+            <h3>Reportf 方法</h3>
+            <div class="example-box">
+                <pre><code><span class="comment">// Reportf 报告诊断信息</span>
+pass.<span class="function">Reportf</span>(pos, <span class="string">"message"</span>)
+
+<span class="comment">// 带格式的報告</span>
+pass.<span class="function">Reportf</span>(pos, <span class="string">"variable %s is unused"</span>, name)
+
+<span class="comment">// 带修复建议</span>
+pass.<span class="function">Report</span>(analysis.Diagnostic{
+    Pos:     pos,
+    Message: <span class="string">"variable is unused"</span>,
+    SuggestedFixes: []analysis.SuggestedFix{
+        {
+            Message: <span class="string">"Remove unused variable"</span>,
+            TextEdits: []analysis.TextEdit{
+                {
+                    Pos:     start,
+                    End:     end,
+                    NewText: []<span class="keyword">byte</span>(<span class="string">""</span>),
+                },
+            },
+        },
+    },
+})</code></pre>
+            </div>
+
+            <!-- 遍历 AST -->
+            <h2 id="ast-traversal">遍历 AST</h2>
+
+            <div class="example-box">
+                <h3>📝 使用 Inspector</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"go/ast"</span>
+    <span class="string">"golang.org/x/tools/go/analysis"</span>
+    <span class="string">"golang.org/x/tools/go/analysis/passes/inspect"</span>
+    <span class="string">"golang.org/x/tools/go/ast/inspector"</span>
+)
+
+<span class="keyword">var</span> Analyzer = &analysis.Analyzer{
+    Name:     <span class="string">"myanalyzer"</span>,
+    Doc:      <span class="string">"使用 Inspector 遍历 AST"</span>,
+    Run:      run,
+    Requires: []*analysis.Analyzer{inspect.Analyzer},
+}
+
+<span class="keyword">func</span> run(pass *analysis.Pass) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
+    <span class="comment">// 获取 Inspector</span>
+    inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
+
+    <span class="comment">// 指定要检查的节点类型</span>
+    nodeFilter := []ast.Node{
+        (*ast.FuncDecl)(<span class="keyword">nil</span>),
+        (*ast.CallExpr)(<span class="keyword">nil</span>),
+    }
+
+    <span class="comment">// 遍历节点</span>
+    inspect.<span class="function">Preorder</span>(nodeFilter, <span class="keyword">func</span>(n ast.Node) {
+        <span class="keyword">switch</span> n := n.(<span class="keyword">type</span>) {
+        <span class="keyword">case</span> *ast.FuncDecl:
+            <span class="comment">// 处理函数声明</span>
+            pass.<span class="function">Reportf</span>(n.Pos(), <span class="string">"found function: %s"</span>, n.Name.Name)
+        <span class="keyword">case</span> *ast.CallExpr:
+            <span class="comment">// 处理函数调用</span>
+            <span class="keyword">if</span> ident, ok := n.Fun.(*ast.Ident); ok {
+                pass.<span class="function">Reportf</span>(n.Pos(), <span class="string">"found call: %s"</span>, ident.Name)
+            }
+        }
+    })
+
+    <span class="keyword">return</span> <span class="keyword">nil</span>, <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+
+            <!-- 依赖管理 -->
+            <h2 id="dependencies">依赖管理</h2>
+
+            <div class="example-box">
+                <h3>📝 使用其他 Analyzer</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"golang.org/x/tools/go/analysis"</span>
+    <span class="string">"golang.org/x/tools/go/analysis/passes/inspect"</span>
+    <span class="string">"golang.org/x/tools/go/analysis/passes/buildtag"</span>
+)
+
+<span class="keyword">var</span> Analyzer = &analysis.Analyzer{
+    Name: <span class="string">"myanalyzer"</span>,
+    Doc:  <span class="string">"依赖其他 analyzer"</span>,
+    Run:  run,
+    <span class="comment">// 声明依赖</span>
+    Requires: []*analysis.Analyzer{
+        inspect.Analyzer,
+        buildtag.Analyzer,
+    },
+}
+
+<span class="keyword">func</span> run(pass *analysis.Pass) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
+    <span class="comment">// 访问依赖的结果</span>
+    <span class="comment">// inspect.Analyzer 的结果
+    inspect := pass.ResultOf[inspect.Analyzer]
+    
+    <span class="comment">// buildtag.Analyzer 的结果
+    <span class="comment">// ...
+    
+    <span class="keyword">return</span> <span class="keyword">nil</span>, <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+
+            <h3>内置 Analyzer</h3>
+            <div class="example-box">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Analyzer</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>inspect.Analyzer</strong></td>
+                            <td>提供 AST Inspector</td>
+                        </tr>
+                        <tr>
+                            <td><strong>buildtag.Analyzer</strong></td>
+                            <td>检查 build tag</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ctrlflow.Analyzer</strong></td>
+                            <td>控制流图</td>
+                        </tr>
+                        <tr>
+                            <td><strong>tokenfileanalyzer.Analyzer</strong></td>
+                            <td>提供 token.File</td>
+                        </tr>
+                        <tr>
+                            <td><strong>typesinfo.Analyzer</strong></td>
+                            <td>提供类型信息</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Facts -->
+            <h2 id="facts">Facts - 跨包分析</h2>
+
+            <div class="example-box">
+                <h3>📝 导出和导入 Facts</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"go/ast"</span>
+    <span class="string">"golang.org/x/tools/go/analysis"</span>
+)
+
+<span class="comment">// 定义 Fact 类型</span>
+<span class="keyword">type</span> MyFact <span class="keyword">struct</span> {
+    Data <span class="keyword">string</span>
+}
+
+<span class="keyword">func</span> (f *MyFact) <span class="function">AFact</span>()         {}
+<span class="keyword">func</span> (f *MyFact) <span class="function">String</span>() <span class="keyword">string</span> { <span class="keyword">return</span> f.Data }
+
+<span class="keyword">var</span> Analyzer = &analysis.Analyzer{
+    Name: <span class="string">"myfact"</span>,
+    Doc:  <span class="string">"导出和导入 facts"</span>,
+    Run:  run,
+    <span class="comment">// 声明 Fact 类型</span>
+    FactTypes: []analysis.Fact{&MyFact{}},
+}
+
+<span class="keyword">func</span> run(pass *analysis.Pass) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
+    <span class="comment">// 导出 Fact</span>
+    <span class="keyword">for</span> _, file := <span class="keyword">range</span> pass.Files {
+        ast.<span class="function">Inspect</span>(file, <span class="keyword">func</span>(n ast.Node) <span class="keyword">bool</span> {
+            <span class="keyword">if</span> fn, ok := n.(*ast.FuncDecl); ok {
+                <span class="comment">// 导出关于函数的 fact</span>
+                pass.<span class="function">ExportObjectFact</span>(fn.<span class="function">Obj</span>(), &MyFact{Data: <span class="string">"exported"</span>})
+            }
+            <span class="keyword">return</span> <span class="keyword">true</span>
+        })
+    }
+
+    <span class="comment">// 导入 Fact</span>
+    <span class="keyword">var</span> fact MyFact
+    <span class="keyword">if</span> pass.<span class="function">ImportObjectFact</span>(someObj, &fact) {
+        fmt.<span class="function">Printf</span>(<span class="string">"Found fact: %s\n"</span>, fact.Data)
+    }
+
+    <span class="keyword">return</span> <span class="keyword">nil</span>, <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+
+            <!-- 实际示例 -->
+            <h2 id="examples">实际示例</h2>
+
+            <h3>检查未使用的变量</h3>
+            <div class="example-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"go/ast"</span>
+    <span class="string">"golang.org/x/tools/go/analysis"</span>
+    <span class="string">"golang.org/x/tools/go/analysis/singlechecker"</span>
+)
+
+<span class="keyword">var</span> Analyzer = &analysis.Analyzer{
+    Name: <span class="string">"unusedvar"</span>,
+    Doc:  <span class="string">"检查未使用的变量"</span>,
+    Run:  run,
+}
+
+<span class="keyword">func</span> run(pass *analysis.Pass) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
+    <span class="keyword">for</span> _, file := <span class="keyword">range</span> pass.Files {
+        <span class="comment">// 收集所有声明的变量</span>
+        declared := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">bool</span>)
+        ast.<span class="function">Inspect</span>(file, <span class="keyword">func</span>(n ast.Node) <span class="keyword">bool</span> {
+            <span class="keyword">if</span> vs, ok := n.(*ast.ValueSpec); ok {
+                <span class="keyword">for</span> _, name := <span class="keyword">range</span> vs.Names {
+                    declared[name.Name] = <span class="keyword">true</span>
+                }
+            }
+            <span class="keyword">return</span> <span class="keyword">true</span>
+        })
+
+        <span class="comment">// 收集所有使用的变量</span>
+        used := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">bool</span>)
+        ast.<span class="function">Inspect</span>(file, <span class="keyword">func</span>(n ast.Node) <span class="keyword">bool</span> {
+            <span class="keyword">if</span> ident, ok := n.(*ast.Ident); ok {
+                used[ident.Name] = <span class="keyword">true</span>
+            }
+            <span class="keyword">return</span> <span class="keyword">true</span>
+        })
+
+        <span class="comment">// 报告未使用的变量</span>
+        <span class="keyword">for</span> name := <span class="keyword">range</span> declared {
+            <span class="keyword">if</span> !used[name] {
+                pass.<span class="function">Reportf</span>(token.NoPos, <span class="string">"variable %s is unused"</span>, name)
+            }
+        }
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>, <span class="keyword">nil</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    singlechecker.<span class="function">Main</span>(Analyzer)
+}</code></pre>
+            </div>
+
+            <h3>检查函数复杂度</h3>
+            <div class="example-box">
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"go/ast"</span>
+    <span class="string">"golang.org/x/tools/go/analysis"</span>
+    <span class="string">"golang.org/x/tools/go/analysis/singlechecker"</span>
+)
+
+<span class="keyword">var</span> Analyzer = &analysis.Analyzer{
+    Name: <span class="string">"funccomplexity"</span>,
+    Doc:  <span class="string">"检查函数复杂度"</span>,
+    Run:  run,
+}
+
+<span class="keyword">func</span> run(pass *analysis.Pass) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
+    <span class="keyword">for</span> _, file := <span class="keyword">range</span> pass.Files {
+        ast.<span class="function">Inspect</span>(file, <span class="keyword">func</span>(n ast.Node) <span class="keyword">bool</span> {
+            <span class="keyword">if</span> fn, ok := n.(*ast.FuncDecl); ok {
+                complexity := <span class="function">calculateComplexity</span>(fn.Body)
+                <span class="keyword">if</span> complexity > <span class="number">10</span> {
+                    pass.<span class="function">Reportf</span>(fn.Pos(), <span class="string">"function %s has complexity %d"</span>,
+                        fn.Name.Name, complexity)
+                }
+            }
+            <span class="keyword">return</span> <span class="keyword">true</span>
+        })
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>, <span class="keyword">nil</span>
+}
+
+<span class="keyword">func</span> <span class="function">calculateComplexity</span>(body *ast.BlockStmt) <span class="keyword">int</span> {
+    complexity := <span class="number">1</span>
+    ast.<span class="function">Inspect</span>(body, <span class="keyword">func</span>(n ast.Node) <span class="keyword">bool</span> {
+        <span class="keyword">switch</span> n.(<span class="keyword">type</span>) {
+        <span class="keyword">case</span> *ast.IfStmt, *ast.ForStmt, *ast.RangeStmt,
+             *ast.CaseClause, *ast.CommClause:
+            complexity++
+        }
+        <span class="keyword">return</span> <span class="keyword">true</span>
+    })
+    <span class="keyword">return</span> complexity
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    singlechecker.<span class="function">Main</span>(Analyzer)
+}</code></pre>
+            </div>
+
+            <!-- 多 Analyzer -->
+            <h2 id="multi-analyzer">运行多个 Analyzer</h2>
+
+            <div class="example-box">
+                <h3>📝 使用 multichecker</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"golang.org/x/tools/go/analysis/multichecker"</span>
+    <span class="string">"golang.org/x/tools/go/analysis/passes/unusedresult"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    multichecker.<span class="function">Main</span>(
+        unusedresult.Analyzer,
+        <span class="comment">// 添加更多 analyzer
+    )
+}</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ 使用建议</h3>
+                <ul>
+                    <li><strong>单一职责</strong>: 每个 Analyzer 只做一件事</li>
+                    <li><strong>清晰文档</strong>: 提供清晰的 Doc 说明</li>
+                    <li><strong>准确报告</strong>: 使用准确的位置和消息</li>
+                    <li><strong>提供修复</strong>: 尽可能提供 SuggestedFixes</li>
+                    <li><strong>性能考虑</strong>: 避免重复遍历 AST</li>
+                    <li><strong>使用 Inspector</strong>: 优先使用 Inspector 而非 Inspect</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="stdlib-ast.html">语法树 AST</a></li>
+                    <li><a href="stdlib-scanner.html">词法分析</a></li>
+                    <li><a href="ecosystem-analyzer.html">代码分析器</a></li>
+                    <li><a href="ecosystem-lint.html">Lint 工具</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="navigation.js"></script>
+    <script src="code-collapse.js"></script>
+</body>
+</html>

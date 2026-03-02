@@ -4,100 +4,311 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>泛型类型 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>泛型类型 - Go 类型参数详解</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="generics.html" class="back-link">← 返回 generics</a>
-            <h1>泛型类型</h1>
-            <p class="intro">泛型类型允许创建可复用的数据结构。</p>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="generics-functions.html" class="back-link">← 泛型函数</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="generics-constraints.html" class="back-link">类型约束 →</a>
 
+            <h1>泛型类型 - 参数化数据结构</h1>
+            <p class="intro">泛型类型允许定义参数化的数据结构，一套代码适用于多种类型。本节深入讲解泛型类型定义、方法、嵌套和实际应用。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
             <div class="feature-grid">
-                <div class="feature-card">
+                <div class="feature-card highlight">
                     <div class="icon">📦</div>
-                    <h4>泛型结构体</h4>
-                    <p>type Stack[T any]</p>
+                    <h4>泛型类型</h4>
+                    <p>参数化结构</p>
+                    <code class="tag">type T[K any]</code>
                 </div>
                 <div class="feature-card">
-                    <div class="icon">🎯</div>
-                    <h4>类型参数</h4>
-                    <p>[T any]</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🛠️</div>
+                    <div class="icon">🔧</div>
                     <h4>泛型方法</h4>
-                    <p>方法支持泛型</p>
+                    <p>类型参数方法</p>
+                    <code class="tag">func (t T) M()</code>
                 </div>
                 <div class="feature-card">
-                    <div class="icon">🔄</div>
-                    <h4>自引用</h4>
-                    <p>Go 1.26 新特性</p>
+                    <div class="icon">📚</div>
+                    <h4>数据结构</h4>
+                    <p>栈/队列/链表</p>
+                    <code class="tag">通用实现</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔗</div>
+                    <h4>类型嵌套</h4>
+                    <p>泛型组合</p>
+                    <code class="tag">嵌套参数</code>
                 </div>
             </div>
 
-            <h2 id="types">泛型类型</h2>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 泛型类型定义 -->
+            <h2 id="definition">泛型类型定义</h2>
+
+            <div class="example-box">
+                <h3>📝 定义泛型类型</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
 <span class="comment">// 泛型结构体</span>
+<span class="keyword">type</span> Box[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
+    value T
+}
+
+<span class="comment">// 泛型构造函数</span>
+<span class="keyword">func</span> <span class="function">NewBox</span>[T <span class="keyword">any</span>](v T) *Box[T] {
+    <span class="keyword">return</span> &Box[T]{value: v}
+}
+
+<span class="comment">// 泛型方法</span>
+<span class="keyword">func</span> (b *Box[T]) <span class="function">Get</span>() T {
+    <span class="keyword">return</span> b.value
+}
+
+<span class="keyword">func</span> (b *Box[T]) <span class="function">Set</span>(v T) {
+    b.value = v
+}
+
+<span class="comment">// 多类型参数结构体</span>
+<span class="keyword">type</span> Pair[K <span class="keyword">any</span>, V <span class="keyword">any</span>] <span class="keyword">struct</span> {
+    Key   K
+    Value V
+}
+
+<span class="keyword">func</span> <span class="function">NewPair</span>[K, V <span class="keyword">any</span>](k K, v V) *Pair[K, V] {
+    <span class="keyword">return</span> &Pair[K, V]{Key: k, Value: v}
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 使用泛型 Box</span>
+    intBox := <span class="function">NewBox</span>(<span class="number">42</span>)
+    fmt.<span class="function">Println</span>(intBox.<span class="function">Get</span>())
+    
+    strBox := <span class="function">NewBox</span>(<span class="string">"hello"</span>)
+    fmt.<span class="function">Println</span>(strBox.<span class="function">Get</span>())
+    
+    <span class="comment">// 使用泛型 Pair</span>
+    pair := <span class="function">NewPair</span>(<span class="string">"name"</span>, <span class="string">"Alice"</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"%s: %s\n"</span>, pair.Key, pair.Value)
+}</code></pre>
+            </div>
+
+            <!-- 泛型数据结构 -->
+            <h2 id="data-structures">泛型数据结构</h2>
+
+            <h3>栈 (Stack)</h3>
+            <div class="example-box">
+                <h3>📝 泛型栈实现</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// 泛型栈</span>
 <span class="keyword">type</span> Stack[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
     items []T
 }
 
-<span class="function">func</span> (s *Stack[T]) <span class="function">Push</span>(item T) {
+<span class="keyword">func</span> <span class="function">NewStack</span>[T <span class="keyword">any</span>]() *Stack[T] {
+    <span class="keyword">return</span> &Stack[T]{items: <span class="function">make</span>([]T, <span class="number">0</span>)}
+}
+
+<span class="keyword">func</span> (s *Stack[T]) <span class="function">Push</span>(item T) {
     s.items = <span class="function">append</span>(s.items, item)
 }
 
-<span class="function">func</span> (s *Stack[T]) <span class="function">Pop</span>() (T, <span class="keyword">bool</span>) {
+<span class="keyword">func</span> (s *Stack[T]) <span class="function">Pop</span>() (T, <span class="keyword">bool</span>) {
+    <span class="keyword">var</span> zero T
     <span class="keyword">if</span> <span class="function">len</span>(s.items) == <span class="number">0</span> {
-        <span class="keyword">var</span> zero T
         <span class="keyword">return</span> zero, <span class="keyword">false</span>
     }
-    index := <span class="function">len</span>(s.items) - <span class="number">1</span>
-    item := s.items[index]
-    s.items = s.items[:index]
+    item := s.items[<span class="function">len</span>(s.items)-<span class="number">1</span>]
+    s.items = s.items[:<span class="function">len</span>(s.items)-<span class="number">1</span>]
     <span class="keyword">return</span> item, <span class="keyword">true</span>
 }
 
-<span class="function">func</span> (s *Stack[T]) <span class="function">IsEmpty</span>() <span class="keyword">bool</span> {
+<span class="keyword">func</span> (s *Stack[T]) <span class="function">Peek</span>() (T, <span class="keyword">bool</span>) {
+    <span class="keyword">var</span> zero T
+    <span class="keyword">if</span> <span class="function">len</span>(s.items) == <span class="number">0</span> {
+        <span class="keyword">return</span> zero, <span class="keyword">false</span>
+    }
+    <span class="keyword">return</span> s.items[<span class="function">len</span>(s.items)-<span class="number">1</span>], <span class="keyword">true</span>
+}
+
+<span class="keyword">func</span> (s *Stack[T]) <span class="function">IsEmpty</span>() <span class="keyword">bool</span> {
     <span class="keyword">return</span> <span class="function">len</span>(s.items) == <span class="number">0</span>
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 整数栈</span>
-    intStack := Stack[<span class="keyword">int</span>]{}
-    intStack.<span class="function">Push</span>(<span class="number">1</span>)
-    intStack.<span class="function">Push</span>(<span class="number">2</span>)
-    intStack.<span class="function">Push</span>(<span class="number">3</span>)
+<span class="keyword">func</span> (s *Stack[T]) <span class="function">Size</span>() <span class="keyword">int</span> {
+    <span class="keyword">return</span> <span class="function">len</span>(s.items)
+}
 
-    <span class="keyword">for</span> !intStack.<span class="function">IsEmpty</span>() {
-        val, _ := intStack.<span class="function">Pop</span>()
-        fmt.<span class="function">Println</span>(<span class="string">"弹出:"</span>, val)
+<span class="keyword">func</span> <span class="function">main</span>() {
+    stack := <span class="function">NewStack</span>[<span class="keyword">int</span>]()
+    stack.<span class="function">Push</span>(<span class="number">1</span>)
+    stack.<span class="function">Push</span>(<span class="number">2</span>)
+    stack.<span class="function">Push</span>(<span class="number">3</span>)
+    
+    fmt.<span class="function">Println</span>(stack.<span class="function">Pop</span>()) <span class="comment">// 3, true</span>
+    fmt.<span class="function">Println</span>(stack.<span class="function">Peek</span>())  <span class="comment">// 2, true</span>
+    fmt.<span class="function">Println</span>(stack.<span class="function">Size</span>())  <span class="comment">// 2</span>
+}</code></pre>
+            </div>
+
+            <h3>队列 (Queue)</h3>
+            <div class="example-box">
+                <h3>📝 泛型队列实现</h3>
+                <pre><code><span class="keyword">type</span> Queue[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
+    items []T
+}
+
+<span class="keyword">func</span> <span class="function">NewQueue</span>[T <span class="keyword">any</span>]() *Queue[T] {
+    <span class="keyword">return</span> &Queue[T]{items: <span class="function">make</span>([]T, <span class="number">0</span>)}
+}
+
+<span class="keyword">func</span> (q *Queue[T]) <span class="function">Enqueue</span>(item T) {
+    q.items = <span class="function">append</span>(q.items, item)
+}
+
+<span class="keyword">func</span> (q *Queue[T]) <span class="function">Dequeue</span>() (T, <span class="keyword">bool</span>) {
+    <span class="keyword">var</span> zero T
+    <span class="keyword">if</span> <span class="function">len</span>(q.items) == <span class="number">0</span> {
+        <span class="keyword">return</span> zero, <span class="keyword">false</span>
     }
+    item := q.items[<span class="number">0</span>]
+    q.items = q.items[<span class="number">1</span>:]
+    <span class="keyword">return</span> item, <span class="keyword">true</span>
+}
 
-    <span class="comment">// 字符串栈</span>
-    strStack := Stack[<span class="keyword">string</span>]{}
-    strStack.<span class="function">Push</span>(<span class="string">"Hello"</span>)
-    strStack.<span class="function">Push</span>(<span class="string">"World"</span>)
+<span class="keyword">func</span> (q *Queue[T]) <span class="function">Front</span>() (T, <span class="keyword">bool</span>) {
+    <span class="keyword">var</span> zero T
+    <span class="keyword">if</span> <span class="function">len</span>(q.items) == <span class="number">0</span> {
+        <span class="keyword">return</span> zero, <span class="keyword">false</span>
+    }
+    <span class="keyword">return</span> q.items[<span class="number">0</span>], <span class="keyword">true</span>
+}</code></pre>
+            </div>
 
-    <span class="keyword">for</span> !strStack.<span class="function">IsEmpty</span>() {
-        val, _ := strStack.<span class="function">Pop</span>()
-        fmt.<span class="function">Println</span>(<span class="string">"弹出:"</span>, val)
+            <h3>链表 (Linked List)</h3>
+            <div class="example-box">
+                <h3>📝 泛型链表实现</h3>
+                <pre><code><span class="keyword">type</span> Node[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
+    value T
+    next  *Node[T]
+}
+
+<span class="keyword">type</span> LinkedList[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
+    head *Node[T]
+    size <span class="keyword">int</span>
+}
+
+<span class="keyword">func</span> <span class="function">NewLinkedList</span>[T <span class="keyword">any</span>]() *LinkedList[T] {
+    <span class="keyword">return</span> &LinkedList[T]{}
+}
+
+<span class="keyword">func</span> (l *LinkedList[T]) <span class="function">Prepend</span>(value T) {
+    node := &Node[T]{value: value, next: l.head}
+    l.head = node
+    l.size++
+}
+
+<span class="keyword">func</span> (l *LinkedList[T]) <span class="function">Append</span>(value T) {
+    newNode := &Node[T]{value: value}
+    <span class="keyword">if</span> l.head == <span class="keyword">nil</span> {
+        l.head = newNode
+    } <span class="keyword">else</span> {
+        current := l.head
+        <span class="keyword">for</span> current.next != <span class="keyword">nil</span> {
+            current = current.next
+        }
+        current.next = newNode
+    }
+    l.size++
+}
+
+<span class="keyword">func</span> (l *LinkedList[T]) <span class="function">Traverse</span>(fn <span class="keyword">func</span>(T)) {
+    current := l.head
+    <span class="keyword">for</span> current != <span class="keyword">nil</span> {
+        <span class="function">fn</span>(current.value)
+        current = current.next
     }
 }</code></pre>
+            </div>
 
-            
+            <!-- 类型嵌套 -->
+            <h2 id="nested">类型嵌套和组合</h2>
+            <div class="example-box">
+                <h3>📝 泛型嵌套使用</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="comment">// 嵌套泛型</span>
+<span class="keyword">type</span> Container[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
+    items []T
+}
+
+<span class="keyword">type</span> NamedContainer[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
+    name      <span class="keyword">string</span>
+    container *Container[T]
+}
+
+<span class="keyword">func</span> <span class="function">NewNamedContainer</span>[T <span class="keyword">any</span>](name <span class="keyword">string</span>) *NamedContainer[T] {
+    <span class="keyword">return</span> &NamedContainer[T]{
+        name:      name,
+        container: <span class="function">NewContainer</span>[T](),
+    }
+}
+
+<span class="comment">// 泛型接口组合</span>
+<span class="keyword">type</span> Comparable <span class="keyword">interface</span> {
+    ~<span class="keyword">int</span> | ~<span class="keyword">int64</span> | ~<span class="keyword">float64</span> | ~<span class="keyword">string</span>
+}
+
+<span class="keyword">type</span> SortedList[T Comparable] <span class="keyword">struct</span> {
+    items []T
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 嵌套泛型</span>
+    nc := <span class="function">NewNamedContainer</span>[<span class="keyword">int</span>](<span class="string">"numbers"</span>)
+    
+    <span class="comment">// 泛型接口</span>
+    sl := &SortedList[<span class="keyword">int</span>]{items: []<span class="keyword">int</span>{<span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>}}
+    fmt.<span class="function">Println</span>(sl.items)
+}</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ 泛型类型使用建议</h3>
+                <ul>
+                    <li><strong>有意义的命名</strong>: T、K、V 等通用名称</li>
+                    <li><strong>合理约束</strong>: 使用最宽松的约束</li>
+                    <li><strong>零值处理</strong>: 注意空情况的返回值</li>
+                    <li><strong>方法接收者</strong>: 指针接收者可修改内部状态</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="generics-constraints.html">类型约束</a></li>
+                    <li><a href="generics-inference.html">类型推断</a></li>
+                    <li><a href="reflection.html">反射</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

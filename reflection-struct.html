@@ -4,18 +4,57 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>反射结构体 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>结构体反射 - Go 反射详解</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="reflection.html" class="back-link">← 返回 reflection</a>
-            <h2 id="struct">结构体反射</h2>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="reflection.html" class="back-link">← 反射概览</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="reflection-typevalue.html" class="back-link">Type 和 Value →</a>
+
+            <h1>结构体反射 - 运行时结构体操作</h1>
+            <p class="intro">结构体反射允许在运行时检查和操作结构体字段、标签和方法。这是实现 ORM、序列化、验证等框架的基础技术。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">🏗️</div>
+                    <h4>字段访问</h4>
+                    <p>NumField/Field</p>
+                    <code class="tag">reflect.Value</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🏷️</div>
+                    <h4>Struct Tag</h4>
+                    <p>标签解析</p>
+                    <code class="tag">Tag.Get()</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">✏️</div>
+                    <h4>字段修改</h4>
+                    <p>可寻址值</p>
+                    <code class="tag">CanSet()</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔍</div>
+                    <h4>类型检查</h4>
+                    <p>Kind/Type</p>
+                    <code class="tag">reflect.Kind</code>
+                </div>
+            </div>
+
+            <!-- 字段访问 -->
+            <h2 id="field-access">字段访问</h2>
+
+            <div class="example-box">
+                <h3>📝 访问结构体字段</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
@@ -23,48 +62,245 @@
 )
 
 <span class="keyword">type</span> Person <span class="keyword">struct</span> {
-    Name    <span class="keyword">string</span> `json:"name" db:"person_name"`
-    Age     <span class="keyword">int</span>    `json:"age" db:"person_age"`
-    Email   <span class="keyword">string</span> `json:"email" db:"person_email"`
-    Address <span class="keyword">string</span> `json:"address,omitempty"`
+    Name <span class="keyword">string</span> <span class="string">`json:"name"`</span>
+    Age  <span class="keyword">int</span>    <span class="string">`json:"age"`</span>
+    City <span class="keyword">string</span> <span class="string">`json:"city,omitempty"`</span>
 }
 
-<span class="function">func</span> <span class="function">printStructInfo</span>(s <span class="keyword">interface</span>{}) {
-    v := reflect.<span class="function">ValueOf</span>(s)
-    t := v.<span class="function">Type</span>()
-
-    fmt.<span class="function">Println</span>(<span class="string">"结构体类型:"</span>, t.<span class="function">Name</span>())
-    fmt.<span class="function">Println</span>(<span class="string">"字段数量:"</span>, t.<span class="function">NumField</span>())
-
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < t.<span class="function">NumField</span>(); i++ {
-        field := t.<span class="function">Field</span>(i)
-        fieldValue := v.<span class="function">Field</span>(i)
-
-        fmt.<span class="Function">Printf</span>(<span class="string">"  字段 %d:\n"</span>, i)
-        fmt.<span class="Function">Printf</span>(<span class="string">"    名称: %s\n"</span>, field.Name)
-        fmt.<span class="Function">Printf</span>(<span class="string">"    类型: %s\n"</span>, field.Type)
-        fmt.<span class="Function">Printf</span>(<span class="string">"    值: %v\n"</span>, fieldValue.<span class="function">Interface</span>())
-        fmt.<span class="Function">Printf</span>(<span class="string">"    标签: %s\n"</span>, field.Tag)
+<span class="keyword">func</span> <span class="function">main</span>() {
+    p := Person{Name: <span class="string">"Alice"</span>, Age: <span class="number">30</span>, City: <span class="string">"Beijing"</span>}
+    
+    <span class="comment">// 获取 reflect.Value</span>
+    v := reflect.<span class="function">ValueOf</span>(p)
+    
+    <span class="comment">// 字段数量</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"NumField: %d\n"</span>, v.<span class="function">NumField</span>())
+    
+    <span class="comment">// 访问字段</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; v.<span class="function">NumField</span>(); i++ {
+        field := v.<span class="function">Field</span>(i)
+        fmt.<span class="function">Printf</span>(<span class="string">"Field %d: %v = %v\n"</span>, i, 
+            v.<span class="function">Type</span>().<span class="function">Field</span>(i).Name, field.<span class="function">Interface</span>())
     }
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    person := Person{
-        Name:    <span class="string">"张三"</span>,
-        Age:     <span class="number">25</span>,
-        Email:   <span class="string">"zhangsan@example.com"</span>,
-        Address: <span class="string">"北京市"</span>,
-    }
-
-    <span class="function">printStructInfo</span>(person)
+    
+    <span class="comment">// 通过字段名访问</span>
+    nameVal := v.<span class="function">FieldByName</span>(<span class="string">"Name"</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"Name: %v\n"</span>, nameVal.<span class="function">String</span>())
+    
+    ageVal := v.<span class="function">FieldByName</span>(<span class="string">"Age"</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"Age: %v\n"</span>, ageVal.<span class="function">Int</span>())
 }</code></pre>
+            </div>
 
-            
+            <div class="warning-box">
+                <h3>⚠️ 字段访问注意</h3>
+                <ul>
+                    <li><strong>导出字段</strong>: 只能访问大写开头的导出字段</li>
+                    <li><strong>指针解引用</strong>: 如果是指针需要先 Elem()</li>
+                    <li><strong>CanSet</strong>: 修改前检查字段是否可设置</li>
+                </ul>
+            </div>
+
+            <!-- Struct Tag -->
+            <h2 id="struct-tag">Struct Tag 解析</h2>
+
+            <div class="example-box">
+                <h3>📝 解析 Struct Tag</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"reflect"</span>
+    <span class="string">"strings"</span>
+)
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    ID       <span class="keyword">int</span>    <span class="string">`json:"id" db:"user_id" validate:"required"`</span>
+    Username <span class="keyword">string</span> <span class="string">`json:"username" db:"username" validate:"min=3"`</span>
+    Email    <span class="keyword">string</span> <span class="string">`json:"email" db:"email" validate:"email"`</span>
+    Password <span class="keyword">string</span> <span class="string">`json:"-" db:"password"`</span>
+}
+
+<span class="comment">// 解析单个 Tag</span>
+<span class="keyword">func</span> <span class="function">parseSingleTag</span>() {
+    <span class="keyword">var</span> u User
+    t := reflect.<span class="function">TypeOf</span>(u)
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; t.<span class="function">NumField</span>(); i++ {
+        field := t.<span class="function">Field</span>(i)
+        tag := field.Tag
+        
+        fmt.<span class="function">Printf</span>(<span class="string">"Field: %s\n"</span>, field.Name)
+        fmt.<span class="function">Printf</span>(<span class="string">"  JSON: %s\n"</span>, tag.<span class="function">Get</span>(<span class="string">"json"</span>))
+        fmt.<span class="function">Printf</span>(<span class="string">"  DB: %s\n"</span>, tag.<span class="function">Get</span>(<span class="string">"db"</span>))
+        fmt.<span class="function">Printf</span>(<span class="string">"  Validate: %s\n"</span>, tag.<span class="function">Get</span>(<span class="string">"validate"</span>))
+        fmt.<span class="function">Println</span>()
+    }
+}
+
+<span class="comment">// 解析 Tag 选项 (如 omitempty)</span>
+<span class="keyword">func</span> <span class="function">parseTagOptions</span>(tagName <span class="keyword">string</span>) (<span class="keyword">string</span>, []<span class="keyword">string</span>) {
+    parts := strings.<span class="function">Split</span>(tagName, <span class="string">","</span>)
+    <span class="keyword">if</span> <span class="function">len</span>(parts) == <span class="number">0</span> {
+        <span class="keyword">return</span> <span class="string">"-"</span>, <span class="keyword">nil</span>
+    }
+    <span class="keyword">return</span> parts[<span class="number">0</span>], parts[<span class="number">1</span>:]
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="function">parseSingleTag</span>()
+    
+    <span class="comment">// 解析选项</span>
+    name, opts := <span class="function">parseTagOptions</span>(<span class="string">"username,omitempty"</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"Name: %s, Options: %v\n"</span>, name, opts)
+}</code></pre>
+            </div>
+
+            <!-- 修改字段 -->
+            <h2 id="modify-fields">修改字段值</h2>
+            <div class="example-box">
+                <h3>📝 通过反射修改字段</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"reflect"</span>
+)
+
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    Host <span class="keyword">string</span>
+    Port <span class="keyword">int</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    cfg := Config{Host: <span class="string">"localhost"</span>, Port: <span class="number">8080</span>}
+    
+    <span class="comment">// ❌ 错误：不能修改非指针的值</span>
+    v := reflect.<span class="function">ValueOf</span>(cfg)
+    fmt.<span class="function">Printf</span>(<span class="string">"CanSet: %v\n"</span>, v.<span class="function">Field</span>(<span class="number">0</span>).<span class="function">CanSet</span>()) <span class="comment">// false</span>
+    
+    <span class="comment">// ✅ 正确：使用指针</span>
+    v = reflect.<span class="function">ValueOf</span>(&cfg).<span class="function">Elem</span>() <span class="comment">// Elem() 解引用</span>
+    
+    <span class="comment">// 修改字段</span>
+    <span class="keyword">if</span> v.<span class="function">Field</span>(<span class="number">0</span>).<span class="function">CanSet</span>() {
+        v.<span class="function">Field</span>(<span class="number">0</span>).<span class="function">SetString</span>(<span class="string">"127.0.0.1"</span>)
+    }
+    
+    <span class="keyword">if</span> v.<span class="function">Field</span>(<span class="number">1</span>).<span class="function">CanSet</span>() {
+        v.<span class="function">Field</span>(<span class="number">1</span>).<span class="function">SetInt</span>(<span class="number">9000</span>)
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Config: %+v\n"</span>, cfg)
+    <span class="comment">// Config: {Host:127.0.0.1 Port:9000}</span>
+}
+
+<span class="comment">// 通用字段设置函数</span>
+<span class="keyword">func</span> <span class="function">SetField</span>(obj <span class="keyword">interface</span>{}, fieldName <span class="keyword">string</span>, value <span class="keyword">interface</span>{}) <span class="keyword">error</span> {
+    v := reflect.<span class="function">ValueOf</span>(obj)
+    
+    <span class="keyword">if</span> v.<span class="function">Kind</span>() != reflect.Ptr {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"obj must be a pointer"</span>)
+    }
+    
+    v = v.<span class="function">Elem</span>()
+    field := v.<span class="function">FieldByName</span>(fieldName)
+    
+    <span class="keyword">if</span> !field.<span class="function">CanSet</span>() {
+        <span class="keyword">return</span> fmt.<span class="function">Errorf</span>(<span class="string">"field %s cannot be set"</span>, fieldName)
+    }
+    
+    field.<span class="function">Set</span>(reflect.<span class="function">ValueOf</span>(value))
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}</code></pre>
+            </div>
+
+            <!-- 实用模式 -->
+            <h2 id="patterns">实用模式</h2>
+
+            <h3>1. JSON 序列化</h3>
+            <div class="example-box">
+                <h3>📝 简化版 JSON 序列化</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">ToJSON</span>(v <span class="keyword">interface</span>{}) <span class="keyword">string</span> {
+    val := reflect.<span class="function">ValueOf</span>(v)
+    <span class="keyword">if</span> val.<span class="function">Kind</span>() == reflect.Ptr {
+        val = val.<span class="function">Elem</span>()
+    }
+    
+    <span class="keyword">var</span> parts []<span class="keyword">string</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; val.<span class="function">NumField</span>(); i++ {
+        field := val.<span class="function">Type</span>().<span class="function">Field</span>(i)
+        tag := field.Tag.<span class="function">Get</span>(<span class="string">"json"</span>)
+        
+        <span class="keyword">if</span> tag == <span class="string">"-"</span> {
+            <span class="keyword">continue</span>
+        }
+        
+        name := field.Name
+        <span class="keyword">if</span> tag != <span class="string">""</span> {
+            name = strings.<span class="function">Split</span>(tag, <span class="string">","</span>)[<span class="number">0</span>]
+        }
+        
+        value := val.<span class="function">Field</span>(i)
+        parts = <span class="function">append</span>(parts, fmt.<span class="function">Sprintf</span>(<span class="string">`"%s":%v`</span>, name, value.<span class="function">Interface</span>()))
+    }
+    
+    <span class="keyword">return</span> <span class="string">"{"</span> + strings.<span class="function">Join</span>(parts, <span class="string">","</span>) + <span class="string">"}"</span>
+}</code></pre>
+            </div>
+
+            <h3>2. 数据库映射</h3>
+            <div class="example-box">
+                <h3>📝 结构体到数据库列映射</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">GetColumnNames</span>(v <span class="keyword">interface</span>{}) []<span class="keyword">string</span> {
+    t := reflect.<span class="function">TypeOf</span>(v)
+    <span class="keyword">if</span> t.<span class="function">Kind</span>() == reflect.Ptr {
+        t = t.<span class="function">Elem</span>()
+    }
+    
+    <span class="keyword">var</span> columns []<span class="keyword">string</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; t.<span class="function">NumField</span>(); i++ {
+        field := t.<span class="function">Field</span>(i)
+        dbTag := field.Tag.<span class="function">Get</span>(<span class="string">"db"</span>)
+        
+        <span class="keyword">if</span> dbTag == <span class="string">"-"</span> {
+            <span class="keyword">continue</span>
+        }
+        
+        <span class="keyword">if</span> dbTag != <span class="string">""</span> {
+            columns = <span class="function">append</span>(columns, dbTag)
+        } <span class="keyword">else</span> {
+            columns = <span class="function">append</span>(columns, field.Name)
+        }
+    }
+    
+    <span class="keyword">return</span> columns
+}</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ 结构体反射使用建议</h3>
+                <ul>
+                    <li><strong>指针传递</strong>: 修改字段必须传指针</li>
+                    <li><strong>CanSet 检查</strong>: 修改前检查是否可设置</li>
+                    <li><strong>缓存 Type</strong>: 避免重复获取 Type 信息</li>
+                    <li><strong>优先泛型</strong>: Go 1.18+ 优先使用泛型</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="reflection.html">反射概览</a></li>
+                    <li><a href="reflection-typevalue.html">Type 和 Value</a></li>
+                    <li><a href="stdlib-json.html">JSON 编解码</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

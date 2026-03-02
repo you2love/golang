@@ -4,68 +4,175 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>运算符 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>运算符 - Go 运算符详解</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="basics.html" class="back-link">← 返回 basics</a>
-            <h2 id="operators">运算符</h2>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="basics-datatypes.html" class="back-link">← 数据类型</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="basics-arrays.html" class="back-link">数组 →</a>
 
-            <h3>算术运算符</h3>
-            <pre><code><span class="keyword">package</span> main
+            <h1>运算符 - Go 运算符详解</h1>
+            <p class="intro">Go 提供了丰富的运算符用于各种计算和比较。理解运算符的优先级和特性是编写正确表达式的基础。</p>
+
+            <h2 id="arithmetic">算术运算符</h2>
+            <div class="example-box">
+                <h3>📝 基本算术运算</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
-<span class="function">func</span> <span class="function">main</span>() {
+<span class="keyword">func</span> <span class="function">main</span>() {
     a, b := <span class="number">10</span>, <span class="number">3</span>
-
-    fmt.<span class="function">Println</span>(<span class="string">"加法:"</span>, a + b)    <span class="comment">// 13</span>
-    fmt.<span class="function">Println</span>(<span class="string">"减法:"</span>, a - b)    <span class="comment">// 7</span>
-    fmt.<span class="function">Println</span>(<span class="string">"乘法:"</span>, a * b)    <span class="comment">// 30</span>
-    fmt.<span class="function">Println</span>(<span class="string">"除法:"</span>, a / b)    <span class="comment">// 3</span>
-    fmt.<span class="function">Println</span>(<span class="string">"取余:"</span>, a % b)    <span class="comment">// 1</span>
+    
+    <span class="comment">// 基本运算</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"%d + %d = %d\n"</span>, a, b, a+b)
+    fmt.<span class="function">Printf</span>(<span class="string">"%d - %d = %d\n"</span>, a, b, a-b)
+    fmt.<span class="function">Printf</span>(<span class="string">"%d * %d = %d\n"</span>, a, b, a*b)
+    fmt.<span class="function">Printf</span>(<span class="string">"%d / %d = %d\n"</span>, a, b, a/b)  <span class="comment">// 整数除法</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"%d %% %d = %d\n"</span>, a, b, a%b)  <span class="comment">// 取余</span>
+    
+    <span class="comment">// 浮点运算</span>
+    x, y := <span class="number">10.0</span>, <span class="number">3.0</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"%.2f / %.2f = %.2f\n"</span>, x, y, x/y)
+    
+    <span class="comment">// 自增自减</span>
+    i := <span class="number">0</span>
+    i++  <span class="comment">// i = 1</span>
+    i--  <span class="comment">// i = 0</span>
+    
+    <span class="comment">// ❌ Go 没有 ++i 或 --i</span>
+    <span class="comment">// ❌ Go 没有自增自减表达式，只能是语句</span>
 }</code></pre>
+            </div>
 
-            <h3>比较运算符</h3>
-            <pre><code><span class="keyword">package</span> main
+            <h2 id="comparison">比较运算符</h2>
+            <div class="example-box">
+                <h3>📝 比较运算</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
-<span class="function">func</span> <span class="function">main</span>() {
-    a, b := <span class="number">10</span>, <span class="number">20</span>
-
-    fmt.<span class="function">Println</span>(<span class="string">"等于:"</span>, a == b)  <span class="comment">// false</span>
-    fmt.<span class="function">Println</span>(<span class="string">"不等于:"</span>, a != b)  <span class="comment">// true</span>
-    fmt.<span class="function">Println</span>(<span class="string">"小于:"</span>, a < b)   <span class="comment">// true</span>
-    fmt.<span class="function">Println</span>(<span class="string">"小于等于:"</span>, a <= b) <span class="comment">// true</span>
-    fmt.<span class="function">Println</span>(<span class="string">"大于:"</span>, a > b)   <span class="comment">// false</span>
-    fmt.<span class="function">Println</span>(<span class="string">"大于等于:"</span>, a >= b) <span class="comment">// false</span>
+<span class="keyword">func</span> <span class="function">main</span>() {
+    a, b := <span class="number">10</span>, <span class="number">5</span>
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"%d == %d: %v\n"</span>, a, b, a == b)
+    fmt.<span class="function">Printf</span>(<span class="string">"%d != %d: %v\n"</span>, a, b, a != b)
+    fmt.<span class="function">Printf</span>(<span class="string">"%d > %d: %v\n"</span>, a, b, a > b)
+    fmt.<span class="function">Printf</span>(<span class="string">"%d < %d: %v\n"</span>, a, b, a < b)
+    fmt.<span class="function">Printf</span>(<span class="string">"%d >= %d: %v\n"</span>, a, b, a >= b)
+    fmt.<span class="function">Printf</span>(<span class="string">"%d <= %d: %v\n"</span>, a, b, a <= b)
+    
+    <span class="comment">// 字符串比较 (字典序)</span>
+    fmt.<span class="function">Println</span>(<span class="string">"apple"</span> < <span class="string">"banana"</span>)  <span class="comment">// true</span>
 }</code></pre>
+            </div>
 
-            <h3>逻辑运算符</h3>
-            <pre><code><span class="keyword">package</span> main
+            <h2 id="logical">逻辑运算符</h2>
+            <div class="example-box">
+                <h3>📝 逻辑运算</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
-<span class="function">func</span> <span class="function">main</span>() {
+<span class="keyword">func</span> <span class="function">main</span>() {
     a, b := <span class="keyword">true</span>, <span class="keyword">false</span>
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"true && false = %v\n"</span>, a && b)
+    fmt.<span class="function">Printf</span>(<span class="string">"true || false = %v\n"</span>, a || b)
+    fmt.<span class="function">Printf</span>(<span class="string">"!true = %v\n"</span>, !a)
+    
+    <span class="comment">// 短路求值</span>
+    <span class="keyword">if</span> <span class="keyword">false</span> && <span class="function">expensive</span>() {
+        <span class="comment">// expensive() 不会被调用</span>
+    }
+    
+    <span class="keyword">if</span> <span class="keyword">true</span> || <span class="function">expensive</span>() {
+        <span class="comment">// expensive() 不会被调用</span>
+    }
+}
 
-    fmt.<span class="function">Println</span>(<span class="string">"与:"</span>, a && b)  <span class="comment">// false</span>
-    fmt.<span class="function">Println</span>(<span class="string">"或:"</span>, a || b)  <span class="comment">// true</span>
-    fmt.<span class="function">Println</span>(<span class="string">"非:"</span>, !a)     <span class="comment">// false</span>
+<span class="keyword">func</span> <span class="function">expensive</span>() <span class="keyword">bool</span> {
+    fmt.<span class="function">Println</span>(<span class="string">"Expensive called"</span>)
+    <span class="keyword">return</span> <span class="keyword">true</span>
 }</code></pre>
+            </div>
 
-            
+            <h2 id="bitwise">位运算符</h2>
+            <div class="example-box">
+                <h3>📝 位运算</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    a, b := <span class="number">12</span>, <span class="number">5</span>  <span class="comment">// 1100, 0101</span>
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"%d & %d = %d\n"</span>, a, b, a&b)   <span class="comment">// 0100 = 4</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"%d | %d = %d\n"</span>, a, b, a|b)   <span class="comment">// 1101 = 13</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"%d ^ %d = %d\n"</span>, a, b, a^b)   <span class="comment">// 1001 = 9</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"%d &^ %d = %d\n"</span>, a, b, a&^b) <span class="comment">// 1000 = 8 (位清除)</span>
+    
+    <span class="comment">// 移位</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"%d << 1 = %d\n"</span>, a, a<<1)  <span class="comment">// 24</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"%d >> 1 = %d\n"</span>, a, a>>1)  <span class="comment">// 6</span>
+}</code></pre>
+            </div>
+
+            <h2 id="assignment">赋值运算符</h2>
+            <div class="example-box">
+                <h3>📝 复合赋值</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    a := <span class="number">10</span>
+    
+    a += <span class="number">5</span>   <span class="comment">// a = a + 5 = 15</span>
+    a -= <span class="number">3</span>   <span class="comment">// a = a - 3 = 12</span>
+    a *= <span class="number">2</span>   <span class="comment">// a = a * 2 = 24</span>
+    a /= <span class="number">4</span>   <span class="comment">// a = a / 4 = 6</span>
+    a %= <span class="number">4</span>   <span class="comment">// a = a % 4 = 2</span>
+    
+    a <<= <span class="number">2</span>  <span class="comment">// a = a << 2 = 8</span>
+    a >>= <span class="number">1</span>  <span class="comment">// a = a >> 1 = 4</span>
+    a &= <span class="number">3</span>   <span class="comment">// a = a & 3 = 0</span>
+    a |= <span class="number">5</span>   <span class="comment">// a = a | 5 = 5</span>
+    a ^= <span class="number">3</span>   <span class="comment">// a = a ^ 3 = 6</span>
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Result: %d\n"</span>, a)
+}</code></pre>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 运算符优先级 (从高到低)</h3>
+                <ol>
+                    <li><code>() [] -> .</code></li>
+                    <li><code>! + - ^ * & &^ ++ --</code></li>
+                    <li><code>* / % << >> & &^</code></li>
+                    <li><code>+ - | ^</code></li>
+                    <li><code>== != < <= > >=</code></li>
+                    <li><code>&&</code></li>
+                    <li><code>||</code></li>
+                </ol>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="basics-variables.html">变量</a></li>
+                    <li><a href="basics-datatypes.html">数据类型</a></li>
+                    <li><a href="control-flow-if.html">流程控制</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

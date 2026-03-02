@@ -4,144 +4,178 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Protobuf 数据序列化 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>Protobuf - Go 数据序列化</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
-            <h2 id="protobuf">Protobuf 数据序列化</h2>
-            <p>Protocol Buffers (Protobuf) 是 Google 开发的一种语言无关、平台无关的序列化结构数据的方法。</p>
-            
-            <h3>快速开始</h3>
-            <pre><code><span class="comment">// 安装 protoc 编译器</span>
-<span class="comment">// macOS: brew install protobuf</span>
-<span class="comment">// Ubuntu: apt-get install protobuf-compiler</span>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="ecosystem-grpc.html" class="back-link">← gRPC</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="ecosystem-sonic.html" class="back-link">Sonic →</a>
 
-<span class="comment">// 安装 Go 插件</span>
-go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest</code></pre>
-            
-            <h3>定义 .proto 文件</h3>
-            <pre><code><span class="comment">// user.proto</span>
-syntax = <span class="string">"proto3"</span>;
+            <h1>Protobuf - Go 数据序列化</h1>
+            <p class="intro">Protocol Buffers (Protobuf) 是 Google 开发的二进制序列化格式，广泛用于 gRPC 和数据存储。掌握 Protobuf 是开发高性能分布式系统的基础。</p>
+
+            <h2 id="definition">定义消息</h2>
+            <div class="example-box">
+                <h3>📝 .proto 文件</h3>
+                <pre><code><span class="comment">// user.proto</span>
+<span class="keyword">syntax</span> = <span class="string">"proto3"</span>;
 
 <span class="keyword">package</span> user;
 
-<span class="keyword">option</span> go_package = <span class="string">"./user"</span>;
+<span class="keyword">option</span> go_package = <span class="string">"github.com/example/proto"</span>;
 
+<span class="comment">// 枚举类型</span>
+<span class="keyword">enum</span> UserRole {
+    USER_ROLE_UNSPECIFIED = <span class="number">0</span>;
+    USER_ROLE_ADMIN = <span class="number">1</span>;
+    USER_ROLE_MEMBER = <span class="number">2</span>;
+    USER_ROLE_GUEST = <span class="number">3</span>;
+}
+
+<span class="comment">// 消息定义</span>
 <span class="keyword">message</span> User {
-    <span class="keyword">int32</span> id = 1;
-    <span class="keyword">string</span> name = 2;
-    <span class="keyword">string</span> email = 3;
-    <span class="keyword">repeated</span> <span class="keyword">string</span> tags = 4;
-    <span class="keyword">enum</span> Status {
-        UNKNOWN = 0;
-        ACTIVE = 1;
-        INACTIVE = 2;
+    <span class="keyword">int64</span> id = <span class="number">1</span>;
+    <span class="keyword">string</span> name = <span class="number">2</span>;
+    <span class="keyword">string</span> email = <span class="number">3</span>;
+    <span class="keyword">int32</span> age = <span class="number">4</span>;
+    UserRole role = <span class="number">5</span>;
+    <span class="keyword">bool</span> active = <span class="number">6</span>;
+    repeated <span class="keyword">string</span> tags = <span class="number">7</span>;  <span class="comment">// 列表</span>
+    Profile profile = <span class="number">8</span>;         <span class="comment">// 嵌套消息</span>
+}
+
+<span class="keyword">message</span> Profile {
+    <span class="keyword">string</span> bio = <span class="number">1</span>;
+    <span class="keyword">string</span> avatar_url = <span class="number">2</span>;
+    <span class="keyword">map</span>&lt;<span class="keyword">string</span>, <span class="keyword">string</span>&gt; social_links = <span class="number">3</span>;  <span class="comment">// Map</span>
+}
+
+<span class="comment">// Oneof: 互斥字段</span>
+<span class="keyword">message</span> Contact {
+    <span class="keyword">oneof</span> contact_info {
+        <span class="keyword">string</span> email = <span class="number">1</span>;
+        <span class="keyword">string</span> phone = <span class="number">2</span>;
     }
-    Status status = 5;
-}
-
-<span class="keyword">message</span> GetUserRequest {
-    <span class="keyword">int32</span> id = 1;
-}
-
-<span class="keyword">message</span> GetUserResponse {
-    User user = 1;
 }</code></pre>
-            
-            <h3>生成 Go 代码</h3>
-            <pre><code><span class="comment">// 生成代码</span>
+            </div>
+
+            <h2 id="generate">生成代码</h2>
+            <div class="example-box">
+                <h3>📝 编译 Proto 文件</h3>
+                <pre><code><span class="comment"># 安装 protoc 编译器</span>
+<span class="comment"># macOS</span>
+brew install protobuf
+
+<span class="comment"># Ubuntu/Debian</span>
+apt-get install protobuf-compiler
+
+<span class="comment"># 安装 Go 插件</span>
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+<span class="comment"># 生成 Go 代码</span>
 protoc --go_out=. --go_opt=paths=source_relative \
        --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-       user.proto</code></pre>
-            
-            <h3>序列化和反序列化</h3>
-            <pre><code><span class="keyword">package</span> main
+       user.proto
+
+<span class="comment"># 生成文件:</span>
+<span class="comment"># - user.pb.go (消息定义)</span>
+<span class="comment"># - user_grpc.pb.go (gRPC 服务)</span></code></pre>
+            </div>
+
+            <h2 id="usage">使用消息</h2>
+            <div class="example-box">
+                <h3>📝 序列化和反序列化</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
     <span class="string">"google.golang.org/protobuf/proto"</span>
-    <span class="string">"path/to/user"</span>
+    pb <span class="string">"path/to/proto"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
+<span class="keyword">func</span> <span class="function">main</span>() {
     <span class="comment">// 创建消息</span>
-    u := &user.User{
-        Id:    1,
-        Name:  <span class="string">"张三"</span>,
-        Email: <span class="string">"zhangsan@example.com"</span>,
-        Tags:  []<span class="keyword">string</span>{<span class="string">"admin"</span>, <span class="string">"user"</span>},
-        Status: user.User_ACTIVE,
+    user := &pb.User{
+        Id:    <span class="number">1</span>,
+        Name:  <span class="string">"Alice"</span>,
+        Email: <span class="string">"alice@example.com"</span>,
+        Age:   <span class="number">30</span>,
+        Role:  pb.UserRole_USER_ROLE_MEMBER,
+        Active: <span class="keyword">true</span>,
+        Tags:   []<span class="keyword">string</span>{<span class="string">"go"</span>, <span class="string">"protobuf"</span>},
+        Profile: &pb.Profile{
+            Bio: <span class="string">"Go Developer"</span>,
+            SocialLinks: <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>{
+                <span class="string">"github"</span>: <span class="string">"alice"</span>,
+                <span class="string">"twitter"</span>: <span class="string">"@alice"</span>,
+            },
+        },
     }
     
     <span class="comment">// 序列化</span>
-    data, err := proto.<span class="function">Marshal</span>(u)
+    data, err := proto.<span class="function">Marshal</span>(user)
     <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        <span class="keyword">panic</span>(err)
+        <span class="function">panic</span>(err)
     }
-    fmt.<span class="function">Printf</span>(<span class="string">"序列化结果: %x\n"</span>, data)
+    fmt.<span class="function">Printf</span>(<span class="string">"Serialized size: %d bytes\n"</span>, <span class="function">len</span>(data))
     
     <span class="comment">// 反序列化</span>
-    <span class="keyword">var</span> u2 user.User
-    err = proto.<span class="function">Unmarshal</span>(data, &u2)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        <span class="keyword">panic</span>(err)
+    <span class="keyword">var</span> user2 pb.User
+    <span class="keyword">if</span> err := proto.<span class="function">Unmarshal</span>(data, &user2); err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
     }
-    fmt.<span class="function">Printf</span>(<span class="string">"反序列化结果: %+v\n"</span>, u2)
-}</code></pre>
-            
-            <h3>Protobuf 最佳实践</h3>
-            <div class="note-box">
-                <h4>1. 字段编号规范</h4>
-                <pre><code><span class="comment">// 1-15: 单字节编码，常用字段</span>
-<span class="comment">// 16-2047: 两字节编码，不常用字段</span>
-<span class="comment">// 保留字段编号：19000-19999</span>
-
-<span class="keyword">message</span> User {
-    <span class="keyword">string</span> name = 1;   <span class="comment">// 常用字段</span>
-    <span class="keyword">string</span> email = 2;  <span class="comment">// 常用字段</span>
-    <span class="keyword">string</span> phone = 16; <span class="comment">// 不常用字段</span>
-}</code></pre>
-                
-                <h4>2. 使用 oneof</h4>
-                <pre><code><span class="keyword">message</span> Result {
-    <span class="keyword">oneof</span> result {
-        <span class="keyword">string</span> error = 1;
-        <span class="keyword">string</span> data = 2;
-    }
-}</code></pre>
-                
-                <h4>3. 使用 map</h4>
-                <pre><code><span class="keyword">message</span> User {
-    <span class="keyword">map</span>&lt;<span class="keyword">string</span>, <span class="keyword">string</span>&gt; metadata = 10;
-}</code></pre>
-                
-                <h4>4. 版本兼容性</h4>
-                <pre><code><span class="comment">// 新增字段时使用 optional</span>
-<span class="keyword">message</span> User {
-    <span class="keyword">string</span> name = 1;
-    <span class="keyword">optional</span> <span class="keyword">string</span> nickname = 10; <span class="comment">// 新增字段</span>
-}
-
-<span class="comment">// 保留废弃字段</span>
-<span class="keyword">message</span> User {
-    <span class="keyword">int32</span> old_id = 1 [deprecated = <span class="keyword">true</span>];
-    <span class="keyword">string</span> new_id = 2;
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Deserialized: %+v\n"</span>, &user2)
 }</code></pre>
             </div>
 
-            
+            <h2 id="json">JSON 互操作</h2>
+            <div class="example-box">
+                <h3>📝 JSON 转换</h3>
+                <pre><code><span class="keyword">import</span> (
+    <span class="string">"google.golang.org/protobuf/encoding/protojson"</span>
+    pb <span class="string">"path/to/proto"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    user := &pb.User{
+        Id: <span class="number">1</span>,
+        Name: <span class="string">"Alice"</span>,
+    }
+    
+    <span class="comment">// Protobuf → JSON</span>
+    jsonData, err := protojson.<span class="function">Marshal</span>(user)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
+    fmt.<span class="function">Println</span>(<span class="function">string</span>(jsonData))
+    <span class="comment">// {"id":"1","name":"Alice"}</span>
+    
+    <span class="comment">// JSON → Protobuf</span>
+    <span class="keyword">var</span> user2 pb.User
+    <span class="keyword">if</span> err := protojson.<span class="function">Unmarshal</span>(jsonData, &user2); err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
+}</code></pre>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="ecosystem-grpc.html">gRPC</a></li>
+                    <li><a href="stdlib-json.html">JSON 编解码</a></li>
+                    <li><a href="ecosystem-sonic.html">Sonic JSON</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

@@ -20,38 +20,7 @@
             <h1>Cobra - Go 命令行框架</h1>
             <p class="intro">Cobra 是 Go 最流行的命令行框架，被 kubectl、docker、github-cli 等知名项目使用。它提供了丰富的子命令、标志、参数等功能，是开发 CLI 工具的首选。</p>
 
-            <!-- 核心概念 -->
-            <h2>📌 核心概念</h2>
-            <div class="feature-grid">
-                <div class="feature-card highlight">
-                    <div class="icon">⌨️</div>
-                    <h4>命令</h4>
-                    <p>Command 结构</p>
-                    <code class="tag">cobra.Command</code>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🏷️</div>
-                    <h4>标志</h4>
-                    <p>Flag 参数</p>
-                    <code class="tag">--flag, -f</code>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">📚</div>
-                    <h4>子命令</h4>
-                    <p>命令层级</p>
-                    <code class="tag">AddCommand</code>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">📖</div>
-                    <h4>文档生成</h4>
-                    <p>自动生成帮助</p>
-                    <code class="tag">gen-docs</code>
-                </div>
-            </div>
-
-            <!-- 快速开始 -->
             <h2 id="quickstart">快速开始</h2>
-
             <div class="example-box">
                 <h3>📝 基础命令行</h3>
                 <pre><code><span class="keyword">package</span> main
@@ -94,20 +63,7 @@
 }</code></pre>
             </div>
 
-            <div class="info-box">
-                <h3>💡 Cobra 要点</h3>
-                <ul>
-                    <li><strong>Use</strong>: 命令用法格式</li>
-                    <li><strong>Short/Long</strong>: 命令描述</li>
-                    <li><strong>Run</strong>: 命令执行函数</li>
-                    <li><strong>Flags</strong>: 命令行标志</li>
-                    <li><strong>Execute</strong>: 执行命令</li>
-                </ul>
-            </div>
-
-            <!-- 子命令 -->
             <h2 id="subcommands">子命令</h2>
-
             <div class="example-box">
                 <h3>📝 添加子命令</h3>
                 <pre><code><span class="keyword">package</span> main
@@ -160,7 +116,6 @@
 <span class="comment">// myapp server stop</span></code></pre>
             </div>
 
-            <!-- 标志类型 -->
             <h2 id="flags">标志类型</h2>
             <div class="example-box">
                 <h3>📝 各种标志类型</h3>
@@ -199,7 +154,6 @@
 }</code></pre>
             </div>
 
-            <!-- 参数验证 -->
             <h2 id="args">参数验证</h2>
             <div class="example-box">
                 <h3>📝 参数验证器</h3>
@@ -243,7 +197,6 @@
 }</code></pre>
             </div>
 
-            <!-- 持久标志 -->
             <h2 id="persistent">持久标志</h2>
             <div class="example-box">
                 <h3>📝 持久标志 (子命令共享)</h3>
@@ -265,7 +218,6 @@
 <span class="comment">// verbose 仅对 server 可用</span></code></pre>
             </div>
 
-            <!-- 完整示例 -->
             <h2 id="example">完整示例</h2>
             <div class="example-box">
                 <h3>📝 完整 CLI 应用</h3>
@@ -344,9 +296,7 @@
 }</code></pre>
             </div>
 
-            <!-- 最佳实践 -->
             <h2 id="best-practices">最佳实践</h2>
-
             <div class="success-box">
                 <h3>✅ Cobra 使用建议</h3>
                 <ul>

@@ -4,71 +4,161 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数组与切片 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>数组 - Go 数组和切片</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="basics.html" class="back-link">← 返回 basics</a>
-            <h1>数组与切片</h1>
-            <p class="intro">数组是固定长度的同类型元素集合，切片是数组的动态视图。</p>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="basics-operators.html" class="back-link">← 运算符</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="basics-maps.html" class="back-link">Map →</a>
 
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="icon">📊</div>
-                    <h4>数组</h4>
-                    <p>固定长度</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">✂️</div>
-                    <h4>切片</h4>
-                    <p>动态大小</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">📈</div>
-                    <h4>append</h4>
-                    <p>动态添加元素</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🎯</div>
-                    <h4>make</h4>
-                    <p>创建切片</p>
-                </div>
-            </div>
+            <h1>数组 - Go 数组和切片</h1>
+            <p class="intro">数组和切片是 Go 中最基本的集合类型。数组是固定长度的，切片是动态的。理解它们的区别和用法是 Go 编程的基础。</p>
 
             <h2 id="arrays">数组</h2>
-            <pre><code><span class="keyword">package</span> main
+            <div class="example-box">
+                <h3>📝 数组定义和使用</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 声明数组</span>
-    <span class="keyword">var</span> arr1 [<span class="number">5</span>]<span class="keyword">int</span>
-    arr1[<span class="number">0</span>] = <span class="number">1</span>
-    arr1[<span class="number">1</span>] = <span class="number">2</span>
-
-    <span class="comment">// 数组初始化</span>
-    arr2 := [<span class="number">5</span>]<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>
-
-    <span class="comment">// 让编译器计算长度</span>
-    arr3 := [...]<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}
-
-    fmt.<span class="function">Println</span>(<span class="string">"数组1:"</span>, arr1)
-    fmt.<span class="function">Println</span>(<span class="string">"数组2:"</span>, arr2)
-    fmt.<span class="function">Println</span>(<span class="string">"数组3:"</span>, arr3)
-    fmt.<span class="function">Println</span>(<span class="string">"数组2长度:"</span>, <span class="function">len</span>(arr2))
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 方式 1: 指定长度</span>
+    <span class="keyword">var</span> a [<span class="number">5</span>]<span class="keyword">int</span>
+    a[<span class="number">0</span>] = <span class="number">1</span>
+    
+    <span class="comment">// 方式 2: 初始化</span>
+    b := [<span class="number">5</span>]<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>}
+    
+    <span class="comment">// 方式 3: 让编译器计算长度</span>
+    c := [...] <span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>}
+    
+    <span class="comment">// 访问元素</span>
+    fmt.<span class="function">Println</span>(b[<span class="number">0</span>])  <span class="comment">// 1</span>
+    fmt.<span class="function">Println</span>(<span class="function">len</span>(b)) <span class="comment">// 5</span>
+    
+    <span class="comment">// 遍历数组</span>
+    <span class="keyword">for</span> i, v := <span class="keyword">range</span> b {
+        fmt.<span class="function">Printf</span>(<span class="string">"a[%d] = %d\n"</span>, i, v)
+    }
+    
+    <span class="comment">// 二维数组</span>
+    <span class="keyword">var</span> matrix [<span class="number">2</span>][<span class="number">3</span>]<span class="keyword">int</span>
+    matrix[<span class="number">0</span>][<span class="number">0</span>] = <span class="number">1</span>
 }</code></pre>
+            </div>
 
-            
+            <div class="info-box">
+                <h3>💡 数组要点</h3>
+                <ul>
+                    <li><strong>固定长度</strong>: 长度是类型的一部分</li>
+                    <li><strong>值类型</strong>: 赋值会复制整个数组</li>
+                    <li><strong>零值</strong>: 元素默认值为零值</li>
+                    <li><strong>长度固定</strong>: 不能改变长度</li>
+                </ul>
+            </div>
+
+            <h2 id="slices">切片</h2>
+            <div class="example-box">
+                <h3>📝 切片定义和操作</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 方式 1: 从数组创建</span>
+    arr := [<span class="number">5</span>]<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>}
+    slice := arr[<span class="number">1</span>:<span class="number">4</span>]  <span class="comment">// [2 3 4]</span>
+    
+    <span class="comment">// 方式 2: 直接创建切片</span>
+    s1 := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}
+    
+    <span class="comment">// 方式 3: make 创建</span>
+    s2 := <span class="function">make</span>([]<span class="keyword">int</span>, <span class="number">5</span>)      <span class="comment">// len=5, cap=5</span>
+    s3 := <span class="function">make</span>([]<span class="keyword">int</span>, <span class="number">3</span>, <span class="number">5</span>)  <span class="comment">// len=3, cap=5</span>
+    
+    <span class="comment">// 切片操作</span>
+    nums := []<span class="keyword">int</span>{<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>}
+    
+    fmt.<span class="function">Println</span>(nums[<span class="number">1</span>:<span class="number">4</span>])    <span class="comment">// [1 2 3]</span>
+    fmt.<span class="function">Println</span>(nums[:<span class="number">3</span>])     <span class="comment">// [0 1 2]</span>
+    fmt.<span class="function">Println</span>(nums[<span class="number">3</span>:])     <span class="comment">// [3 4 5]</span>
+    fmt.<span class="function">Println</span>(nums[:])      <span class="comment">// [0 1 2 3 4 5]</span>
+    
+    <span class="comment">// len 和 cap</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"len: %d, cap: %d\n"</span>, <span class="function">len</span>(s3), <span class="function">cap</span>(s3))
+}</code></pre>
+            </div>
+
+            <div class="example-box">
+                <h3>📝 切片追加和复制</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// append: 追加元素</span>
+    s := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}
+    s = <span class="function">append</span>(s, <span class="number">4</span>)        <span class="comment">// [1 2 3 4]</span>
+    s = <span class="function">append</span>(s, <span class="number">5</span>, <span class="number">6</span>)     <span class="comment">// [1 2 3 4 5 6]</span>
+    
+    <span class="comment">// 追加另一个切片</span>
+    s2 := []<span class="keyword">int</span>{<span class="number">7</span>, <span class="number">8</span>}
+    s = <span class="function">append</span>(s, s2...)    <span class="comment">// [1 2 3 4 5 6 7 8]</span>
+    
+    <span class="comment">// copy: 复制切片</span>
+    src := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>}
+    dst := <span class="function">make</span>([]<span class="keyword">int</span>, <span class="number">3</span>)
+    n := <span class="function">copy</span>(dst, src)     <span class="comment">// n=3, dst=[1 2 3]</span>
+    
+    fmt.<span class="function">Println</span>(s)
+    fmt.<span class="function">Printf</span>(<span class="string">"Copied %d elements\n"</span>, n)
+}</code></pre>
+            </div>
+
+            <div class="warning-box">
+                <h3>⚠️ 切片陷阱</h3>
+                <pre><code><span class="comment">// 陷阱 1: 共享底层数组</span>
+a := []<span class="keyword">int</span>{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>}
+b := a[<span class="number">1</span>:<span class="number">3</span>]  <span class="comment">// [2 3]</span>
+b[<span class="number">0</span>] = <span class="number">99</span>
+fmt.<span class="function">Println</span>(a)  <span class="comment">// [1 99 3 4 5] - a 被修改!</span>
+
+<span class="comment">// 陷阱 2: append 可能扩容</span>
+s := <span class="function">make</span>([]<span class="keyword">int</span>, <span class="number">0</span>, <span class="number">2</span>)
+s = <span class="function">append</span>(s, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)  <span class="comment">// 容量不足，创建新数组</span>
+
+<span class="comment">// 避免：显式复制</span>
+b := <span class="function">make</span>([]<span class="keyword">int</span>, <span class="function">len</span>(a[<span class="number">1</span>:<span class="number">3</span>]))
+<span class="function">copy</span>(b, a[<span class="number">1</span>:<span class="number">3</span>])</code></pre>
+            </div>
+
+            <h2 id="best-practices">最佳实践</h2>
+            <div class="success-box">
+                <h3>✅ 切片使用建议</h3>
+                <ul>
+                    <li><strong>预分配容量</strong>: 知道大小时用 make([], 0, cap)</li>
+                    <li><strong>注意共享</strong>: 切片共享底层数组</li>
+                    <li><strong>使用 append</strong>: 不要手动管理容量</li>
+                    <li><strong>传递切片</strong>: 切片传递是引用语义</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="basics-maps.html">Map</a></li>
+                    <li><a href="structs.html">结构体</a></li>
+                    <li><a href="generics.html">泛型</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

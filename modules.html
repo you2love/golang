@@ -4,402 +4,157 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>模块化与 Go Module - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    <script src="scroll.js"></script>
-    </head>
+    <title>Go Modules - 模块管理</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
         <div class="content">
-            <a href="index.html" class="back-link">← 返回首页</a>
-            <h1>模块化与 Go Module</h1>
-            <p class="intro">Go Module 是 Go 官方依赖管理工具，提供版本控制和依赖隔离。</p>
+            <h1>Go Modules - 模块管理</h1>
+            <p class="intro">Go Modules 是 Go 的依赖管理系统，从 Go 1.11 引入，Go 1.13+ 成为标准。掌握 Modules 是管理 Go 项目依赖的基础。</p>
 
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="icon">📦</div>
-                    <h4>依赖管理</h4>
-                    <p>自动下载和管理依赖</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🏷️</div>
-                    <h4>版本控制</h4>
-                    <p>语义化版本号支持</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🔒</div>
-                    <h4>校验和</h4>
-                    <p>go.sum 确保依赖安全</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🚀</div>
-                    <h4>模块代理</h4>
-                    <p>支持私有模块代理</p>
-                </div>
-            </div>
-
-            <h2 id="introduction">Go Module 简介</h2>
-            <p>Go Module 是 Go 1.11 引入的官方依赖管理工具，用于管理 Go 项目的依赖关系。它解决了之前使用 GOPATH 和 vendor 目录管理依赖的痛点，提供了更好的版本控制和依赖隔离。</p>
-
+            <h2 id="init">初始化模块</h2>
             <div class="example-box">
-                <h3>Go Module 的核心特性</h3>
-                <ul>
-                    <li><strong>版本控制</strong>：基于语义化版本（Semantic Versioning）</li>
-                    <li><strong>依赖隔离</strong>：每个项目有自己的依赖管理</li>
-                    <li><strong>可重现构建</strong>：确保构建结果的一致性</li>
-                    <li><strong>网络代理</strong>：支持 Go Module Proxy</li>
-                    <li><strong>私有仓库</strong>：支持私有模块配置</li>
-                </ul>
-            </div>
+                <h3>📝 创建模块</h3>
+                <pre><code><span class="comment"># 初始化新模块</span>
+go mod init github.com/user/project
 
-            <h2 id="init">初始化 Module</h2>
-            <pre><code><span class="comment"># 创建新项目目录</span>
-<span class="keyword">mkdir</span> myproject
-<span class="keyword">cd</span> myproject
+<span class="comment"># 生成的 go.mod:</span>
+<span class="keyword">module</span> github.com/user/project
 
-<span class="comment"># 初始化 Go Module</span>
-<span class="keyword">go</span> mod init github.com/username/myproject</code></pre>
-
-            <p>执行上述命令后，会在项目根目录生成 <code>go.mod</code> 文件：</p>
-            <pre><code><span class="keyword">module</span> github.com/username/myproject
-
-<span class="keyword">go</span> 1.21</code></pre>
-
-            <div class="note-box">
-                <h3>go.mod 文件说明</h3>
-                <ul>
-                    <li><code>module</code>：定义模块路径，通常是仓库地址</li>
-                    <li><code>go</code>：指定 Go 版本</li>
-                    <li><code>require</code>：声明依赖及其版本</li>
-                    <li><code>exclude</code>：排除特定版本的依赖</li>
-                    <li><code>replace</code>：替换依赖为本地路径或其他版本</li>
-                </ul>
-            </div>
-
-            <h2 id="dependency">依赖管理</h2>
-            
-            <h3>添加依赖</h3>
-            <pre><code><span class="comment"># 方法1：直接导入并运行 go mod tidy</span>
-<span class="keyword">go</span> get github.com/gin-gonic/gin
-<span class="keyword">go</span> mod tidy
-
-<span class="comment"># 方法2：指定版本</span>
-<span class="keyword">go</span> get github.com/gin-gonic/gin@v1.9.1
-
-<span class="comment"># 方法3：使用最新版本</span>
-<span class="keyword">go</span> get github.com/gin-gonic/gin@latest
-
-<span class="comment"># 方法4：使用特定提交</span>
-<span class="keyword">go</span> get github.com/gin-gonic/gin@abc123def</code></pre>
-
-            <h3>查看依赖</h3>
-            <pre><code><span class="comment"># 列出所有依赖</span>
-<span class="keyword">go</span> list -m all
-
-<span class="comment"># 查看特定依赖信息</span>
-<span class="keyword">go</span> list -m -json github.com/gin-gonic/gin
-
-<span class="comment"># 查看依赖关系图</span>
-<span class="keyword">go</span> mod graph</code></pre>
-
-            <h3>更新依赖</h3>
-            <pre><code><span class="comment"># 更新所有依赖到最新兼容版本</span>
-<span class="keyword">go</span> get -u ./...
-<span class="keyword">go</span> mod tidy
-
-<span class="comment"># 更新特定依赖</span>
-<span class="keyword">go</span> get -u github.com/gin-gonic/gin
-
-<span class="comment"># 更新到特定版本</span>
-<span class="keyword">go</span> get github.com/gin-gonic/gin@v1.10.0</code></pre>
-
-            <h3>移除未使用的依赖</h3>
-            <pre><code><span class="keyword">go</span> mod tidy</code></pre>
-
-            <h2 id="version">版本控制</h2>
-            
-            <h3>语义化版本</h3>
-            <p>Go Module 使用语义化版本（Semantic Versioning）格式：<code>vMAJOR.MINOR.PATCH</code></p>
-            <ul>
-                <li><strong>MAJOR</strong>：不兼容的 API 变更</li>
-                <li><strong>MINOR</strong>：向后兼容的功能性新增</li>
-                <li><strong>PATCH</strong>：向后兼容的问题修正</li>
-            </ul>
-
-            <h3>版本选择规则</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"github.com/gin-gonic/gin"</span>
-)
-
-<span class="comment">// go.mod 中的依赖声明</span>
-<span class="comment">// require github.com/gin-gonic/gin v1.9.1</span>
-
-<span class="function">func</span> <span class="function">main</span>() {
-    r := gin.<span class="function">Default</span>()
-    r.<span class="function">GET</span>(<span class="string">"/"</span>, <span class="keyword">func</span>(c *gin.Context) {
-        c.<span class="function">JSON</span>(<span class="number">200</span>, gin.H{
-            <span class="string">"message"</span>: <span class="string">"Hello, World!"</span>,
-        })
-    })
-    r.<span class="function">Run</span>()
-}</code></pre>
-
-            <div class="note-box">
-                <h3>最小版本选择（MVS）</h3>
-                <p>Go Module 使用最小版本选择算法：</p>
-                <ul>
-                    <li>选择满足所有依赖要求的最小版本</li>
-                    <li>确保构建的可重现性</li>
-                    <li>避免依赖冲突</li>
-                </ul>
-                <pre><code><span class="comment"># 示例：如果 A 需要 v1.2.0，B 需要 v1.3.0</span>
-<span class="comment"># Go Module 会选择 v1.3.0（满足两者的最小版本）</span></code></pre>
-            </div>
-
-            <h3>版本约束</h3>
-            <pre><code><span class="comment">// go.mod 中的版本约束示例</span>
-
-<span class="keyword">require</span> (
-    github.com/gin-gonic/gin v1.9.1           <span class="comment">// 精确版本</span>
-    github.com/stretchr/testify v1.8.4         <span class="comment">// 精确版本</span>
-    golang.org/x/crypto v0.15.0                <span class="comment">// 伪版本</span>
-)
-
-<span class="comment">// 使用间接依赖</span>
-<span class="keyword">require</span> (
-    github.com/ugorji/go/codec v1.2.12 <span class="comment">//indirect</span>
-)</code></pre>
-
-            <h2 id="private">私有 Module</h2>
-            
-            <h3>配置私有仓库</h3>
-            <pre><code><span class="comment"># 方法1：使用 go env 配置</span>
-<span class="keyword">go</span> env -w GOPRIVATE=github.com/yourcompany/*
-
-<span class="comment"># 方法2：配置多个私有仓库</span>
-<span class="keyword">go</span> env -w GOPRIVATE=github.com/yourcompany/*,gitlab.com/yourcompany/*</code></pre>
-
-            <h3>配置 Git 认证</h3>
-            <pre><code><span class="comment"># 配置 Git 使用 SSH</span>
-<span class="keyword">git</span> config --global url.<span class="string">"git@github.com:"</span>.insteadOf <span class="string">"https://github.com/"</span>
-
-<span class="comment"># 或者使用 netrc 配置 HTTPS 认证</span>
-<span class="comment"># 创建 ~/.netrc 文件</span>
-machine github.com
-login your-username
-password your-token</code></pre>
-
-            <h3>本地 Module 开发</h3>
-            <pre><code><span class="comment">// go.mod 中使用 replace 指令</span>
-<span class="keyword">replace</span> github.com/yourcompany/module => ../module
-
-<span class="comment">// 或者使用绝对路径</span>
-<span class="keyword">replace</span> github.com/yourcompany/module => /absolute/path/to/module</code></pre>
-
-            <div class="example-box">
-                <h3>Go Module 最佳实践</h3>
-                
-                <p><strong>1. 项目结构最佳实践</strong></p>
-                <pre><code><span class="comment">// 推荐的项目结构</span>
-myproject/
-├── cmd/
-│   ├── server/
-│   │   └── main.go
-│   └── client/
-│       └── main.go
-├── internal/
-│   ├── config/
-│   ├── handler/
-│   └── service/
-├── pkg/
-│   └── utils/
-├── api/
-│   └── proto/
-├── go.mod
-├── go.sum
-└── README.md</code></pre>
-
-                <p><strong>2. 依赖管理最佳实践</strong></p>
-                <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"fmt"</span>
-    <span class="string">"github.com/gin-gonic/gin"</span>
-)
-
-<span class="comment">// 最佳实践：</span>
-<span class="comment">// 1. 定期运行 go mod tidy 清理未使用的依赖</span>
-<span class="comment">// 2. 使用 go mod verify 验证依赖完整性</span>
-<span class="comment">// 3. 提交 go.mod 和 go.sum 到版本控制</span>
-<span class="comment">// 4. 不要提交 vendor 目录（除非有特殊需求）</span>
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 验证依赖</span>
-    <span class="comment">// go mod verify</span>
-    
-    fmt.<span class="function">Println</span>(<span class="string">"Hello, Module!"</span>)
-}</code></pre>
-
-                <p><strong>3. 版本发布最佳实践</strong></p>
-                <pre><code><span class="comment">// 1. 使用语义化版本</span>
-<span class="comment">// 2. 为每个版本打 tag</span>
-<span class="comment">// 3. 使用 go get -u 更新依赖</span>
-
-<span class="comment">// 发布新版本</span>
-<span class="keyword">git</span> tag v1.0.0
-<span class="keyword">git</span> push origin v1.0.0
-
-<span class="comment">// 发布补丁版本</span>
-<span class="keyword">git</span> tag v1.0.1
-<span class="keyword">git</span> push origin v1.0.1</code></pre>
-
-                <p><strong>4. 多 Module 项目</strong></p>
-                <pre><code><span class="comment">// monorepo 结构</span>
-company/
-├── services/
-│   ├── user-service/
-│   │   └── go.mod
-│   └── order-service/
-│       └── go.mod
-├── shared/
-│   └── common/
-│       └── go.mod
-└── go.work  <span class="comment">// Go Workspace 文件</span>
-
-<span class="comment">// go.work 文件内容</span>
-<span class="keyword">go</span> 1.21
-
-<span class="keyword">use</span> (
-    ./services/user-service
-    ./services/order-service
-    ./shared/common
-)</code></pre>
-
-                <p><strong>5. 依赖安全</strong></p>
-                <pre><code><span class="comment"># 检查依赖安全漏洞</span>
-<span class="keyword">go</span> list -json -m all | <span class="keyword">go</span> mod download -json
-
-<span class="comment"># 使用 govulncheck 检查漏洞</span>
-<span class="keyword">go</span> install golang.org/x/vuln/cmd/govulncheck@latest
-<span class="keyword">govulncheck</span> ./...</code></pre>
-
-                <p><strong>6. 性能优化</strong></p>
-                <pre><code><span class="comment"># 使用 Go Module Proxy 加速下载</span>
-<span class="keyword">go</span> env -w GOPROXY=https://goproxy.cn,direct
-
-<span class="comment"># 配置私有仓库不走代理</span>
-<span class="keyword">go</span> env -w GOPRIVATE=github.com/yourcompany/*
-
-<span class="comment"># 禁用校验（仅用于开发环境）</span>
-<span class="keyword">go</span> env -w GOSUMDB=off</code></pre>
-
-                <p><strong>7. 常用命令速查</strong></p>
-                <pre><code><span class="comment"># 初始化模块</span>
-<span class="keyword">go</span> mod init module-path
+<span class="keyword">go</span> 1.26
 
 <span class="comment"># 添加依赖</span>
-<span class="keyword">go</span> get package@version
+go get github.com/gin-gonic/gin
 
 <span class="comment"># 整理依赖</span>
-<span class="keyword">go</span> mod tidy
+go mod tidy
 
-<span class="comment"># 验证依赖</span>
-<span class="keyword">go</span> mod verify
+<span class="comment"># 查看依赖</span>
+go list -m all
+
+<span class="comment"># 更新依赖</span>
+go get -u github.com/gin-gonic/gin
+
+<span class="comment"># 降级依赖</span>
+go get github.com/gin-gonic/gin@v1.9.0
+
+<span class="comment"># 清理未使用依赖</span>
+go mod tidy</code></pre>
+            </div>
+
+            <h2 id="go-mod-file">go.mod 文件</h2>
+            <div class="example-box">
+                <h3>📖 go.mod 格式</h3>
+                <pre><code><span class="keyword">module</span> github.com/user/myapp
+
+<span class="keyword">go</span> 1.26
+
+<span class="keyword">require</span> (
+    github.com/gin-gonic/gin v1.9.1
+    github.com/go-redis/redis/v8 v8.11.5
+)
+
+<span class="keyword">require</span> (
+    github.com/gin-contrib/sse v0.1.0 <span class="comment">// indirect</span>
+    github.com/go-playground/validator/v10 v10.14.0 <span class="comment">// indirect</span>
+)
+
+<span class="keyword">replace</span> github.com/old/package => github.com/new/package v1.0.0
+
+<span class="keyword">exclude</span> github.com/bad/package v1.0.0
+
+<span class="comment">// 字段说明:</span>
+<span class="comment">// module: 模块路径</span>
+<span class="comment">// go: Go 版本</span>
+<span class="comment">// require: 依赖列表</span>
+<span class="comment">// indirect: 间接依赖</span>
+<span class="comment">// replace: 替换依赖</span>
+<span class="comment">// exclude: 排除版本</span></code></pre>
+            </div>
+
+            <h2 id="commands">常用命令</h2>
+            <div class="example-box">
+                <h3>📝 Modules 命令</h3>
+                <pre><code><span class="comment"># 初始化</span>
+go mod init [module-path]
 
 <span class="comment"># 下载依赖</span>
-<span class="keyword">go</span> mod download
+go mod download
 
-<span class="comment"># 查看依赖图</span>
-<span class="keyword">go</span> mod graph
+<span class="comment"># 整理依赖 (添加缺失，删除未用)</span>
+go mod tidy
 
-<span class="comment"># 为什么需要某个依赖</span>
-<span class="keyword">go</span> mod why package</code></pre>
+<span class="comment"># 验证依赖</span>
+go mod verify
 
-                <p><strong>8. 错误处理</strong></p>
-                <pre><code><span class="comment"># 常见错误及解决方案</span>
+<span class="comment"># 查看依赖</span>
+go list -m all                 <span class="comment"># 所有依赖</span>
+go list -m -versions [pkg]     <span class="comment"># 可用版本</span>
+go list -m -json [pkg]         <span class="comment"># 详细信息</span>
 
-<span class="comment">// 错误1：module not found</span>
-<span class="comment">// 解决：检查 GOPROXY 设置</span>
-<span class="keyword">go</span> env -w GOPROXY=https://goproxy.cn,direct
+<span class="comment"># 编辑 go.mod</span>
+go mod edit -require=pkg@v1.0.0
+go mod edit -droprequire=pkg
+go mod edit -replace=old=new
 
-<span class="comment">// 错误2：版本冲突</span>
-<span class="comment">// 解决：使用 go mod why 查看依赖关系</span>
-<span class="keyword">go</span> mod why github.com/conflicting/package
+<span class="comment"># 缓存管理</span>
+go clean -modcache             <span class="comment"># 清理缓存</span>
+go env GOMODCACHE              <span class="comment"># 缓存位置</span>
 
-<span class="comment">// 错误3：校验失败</span>
-<span class="comment">// 解决：更新 go.sum 或重新下载</span>
-<span class="keyword">go</span> mod download
-<span class="keyword">go</span> mod verify</code></pre>
+<span class="comment"># 构建</span>
+go build -mod=readonly         <span class="comment"># 只读模式</span>
+go build -mod=vendor           <span class="comment"># 使用 vendor</span></code></pre>
+            </div>
+
+            <h2 id="versioning">版本管理</h2>
+            <div class="example-box">
+                <h3>📖 语义化版本</h3>
+                <pre><code><span class="comment"># 版本格式</span>
+v1.2.3  <span class="comment"># 主版本。次版本。修订版本</span>
+
+<span class="comment"># 预发布版本</span>
+v1.2.3-beta.1
+v1.2.3-rc.1
+
+<span class="comment"># 伪版本 (从 commit 生成)</span>
+v0.0.0-20240101123456-abcdef123456
+
+<span class="comment"># 版本选择</span>
+go get pkg@latest              <span class="comment"># 最新版</span>
+go get pkg@upgrade             <span class="comment"># 最新兼容版</span>
+go get pkg@patch               <span class="comment"># 最新补丁版</span>
+go get pkg@v1.2.3              <span class="comment"># 指定版本</span>
+go get pkg@abcdef123456        <span class="comment"># 指定 commit</span></code></pre>
+            </div>
+
+            <h2 id="best-practices">最佳实践</h2>
+            <div class="success-box">
+                <h3>✅ Modules 使用建议</h3>
+                <ul>
+                    <li><strong>提交 go.sum</strong>: 确保依赖完整性</li>
+                    <li><strong>定期 tidy</strong>: 保持依赖干净</li>
+                    <li><strong>锁定版本</strong>: 生产环境锁定依赖版本</li>
+                    <li><strong>检查更新</strong>: 定期检查安全更新</li>
+                    <li><strong>使用 proxy</strong>: 配置 GOPROXY 加速下载</li>
+                </ul>
             </div>
 
             <div class="note-box">
-                <h3>Go Module 内部实现原理</h3>
-                
-                <p><strong>1. go.mod 文件结构</strong></p>
-                <pre><code><span class="comment">// go.mod 的内部表示（简化版）</span>
-<span class="keyword">type</span> Module <span class="keyword">struct</span> {
-    Path      <span class="keyword">string</span>       <span class="comment">// 模块路径</span>
-    Version   <span class="keyword">string</span>       <span class="comment">// 模块版本</span>
-    Require   []Require      <span class="comment">// 直接依赖</span>
-    Exclude   []Exclude      <span class="comment">// 排除的版本</span>
-    Replace   []Replace      <span class="comment">// 替换规则</span>
-}
+                <h3>📖 配置代理</h3>
+                <pre><code><span class="comment"># 设置 GOPROXY</span>
+go env -w GOPROXY=https://goproxy.cn,direct
 
-<span class="keyword">type</span> Require <span class="keyword">struct</span> {
-    Path      <span class="keyword">string</span>
-    Version   <span class="keyword">string</span>
-    Indirect  <span class="keyword">bool</span>         <span class="comment">// 是否为间接依赖</span>
-}</code></pre>
-
-                <p><strong>2. 依赖解析流程</strong></p>
-                <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="comment">// Go Module 依赖解析流程：</span>
-<span class="comment">// 1. 读取 go.mod 文件</span>
-<span class="comment">// 2. 解析直接依赖</span>
-<span class="comment">// 3. 递归解析间接依赖</span>
-<span class="comment">// 4. 应用最小版本选择算法</span>
-<span class="comment">// 5. 生成 go.sum 文件</span>
-<span class="comment">// 6. 下载依赖到模块缓存</span>
-
-<span class="function">func</span> <span class="function">main</span>() {
-    fmt.<span class="function">Println</span>(<span class="string">"Go Module 依赖解析"</span>)
-}</code></pre>
-
-                <p><strong>3. 模块缓存机制</strong></p>
-                <pre><code><span class="comment">// 模块缓存位置</span>
-<span class="comment">// $GOPATH/pkg/mod/</span>
-
-<span class="comment">// 缓存结构</span>
-<span class="comment">// cache/download/github.com/gin-gonic/gin/@v/v1.9.1.info</span>
-<span class="comment">// cache/download/github.com/gin-gonic/gin/@v/v1.9.1.mod</span>
-<span class="comment">// cache/download/github.com/gin-gonic/gin/@v/v1.9.1.zip</span>
-<span class="comment">// cache/download/github.com/gin-gonic/gin/@v/v1.9.1.ziphash</span></code></pre>
-
-                <p><strong>4. go.sum 文件作用</strong></p>
-                <pre><code><span class="comment">// go.sum 文件示例</span>
-github.com/gin-gonic/gin v1.9.1 h1:4idEAncQnU5cB7BeOkPtxjfCSye0AAm1RG0JrbypNbs=
-github.com/gin-gonic/gin v1.9.1/go.mod h1:hPrL7NrpHw1VkgRZiEO4eA5I9k+/gEtvbtP0JNtawO/M=
-
-<span class="comment">// go.sum 的作用：</span>
-<span class="comment">// 1. 记录依赖的哈希值</span>
-<span class="comment">// 2. 确保依赖完整性</span>
-<span class="comment">// 3. 防止依赖被篡改</span>
-<span class="comment">// 4. 支持可重现构建</span></code></pre>
+<span class="comment"># 常用代理:</span>
+<span class="comment"># https://goproxy.io (全球)</span>
+<span class="comment"># https://goproxy.cn (中国)</span>
+<span class="comment"># https://mirrors.aliyun.com/goproxy/ (阿里云)</span></code></pre>
             </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

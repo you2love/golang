@@ -4,198 +4,220 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySQL 客户端 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>MySQL - Go MySQL 客户端</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
-            <h2 id="mysql">MySQL 客户端</h2>
-            <p>Go 中常用 GORM 或 database/sql 操作 MySQL 数据库。</p>
-            
-            <h3>快速开始</h3>
-            <pre><code><span class="keyword">go get</span> gorm.io/gorm
-<span class="keyword">go get</span> gorm.io/driver/mysql</code></pre>
-            
-            <h3>连接数据库</h3>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="ecosystem-redis.html" class="back-link">← Redis</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="ecosystem-gateway.html" class="back-link">Gateway →</a>
+
+            <h1>MySQL - Go MySQL 客户端</h1>
+            <p class="intro">MySQL 是最流行的关系型数据库之一。Go 通过 database/sql 标准库和 go-sql-driver/mysql 驱动支持 MySQL 操作。</p>
+
+            <h2 id="connection">连接数据库</h2>
+            <div class="example-box">
+                <h3>📝 建立连接</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
-    <span class="string">"gorm.io/driver/mysql"</span>
-    <span class="string">"gorm.io/gorm"</span>
+    <span class="string">"database/sql"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"log"</span>
+    
+    _ <span class="string">"github.com/go-sql-driver/mysql"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// DSN 格式</span>
     dsn := <span class="string">"user:password@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"</span>
-    db, err := gorm.<span class="function">Open</span>(mysql.<span class="function">Open</span>(dsn), &gorm.Config{})
+    
+    <span class="comment">// 打开连接</span>
+    db, err := sql.<span class="function">Open</span>(<span class="string">"mysql"</span>, dsn)
     <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        <span class="keyword">panic</span>(err)
+        log.<span class="function">Fatal</span>(err)
     }
-}</code></pre>
-            
-            <h3>定义模型</h3>
-            <pre><code><span class="keyword">type</span> User <span class="keyword">struct</span> {
-    ID        <span class="keyword">uint</span>           <span class="string">`gorm:"primaryKey"`</span>
-    Name      <span class="keyword">string</span>         <span class="string">`gorm:"size:255;not null"`</span>
-    Email     <span class="keyword">string</span>         <span class="string">`gorm:"size:255;uniqueIndex"`</span>
-    Age       <span class="keyword">int</span>            <span class="string">`gorm:"default:0"`</span>
-    CreatedAt time.Time
-    UpdatedAt time.Time
-    DeletedAt gorm.DeletedAt <span class="string">`gorm:"index"`</span>
-}
-
-<span class="comment">// 自动迁移</span>
-db.<span class="function">AutoMigrate</span>(&User{})</code></pre>
-            
-            <h3>CRUD 操作</h3>
-            <pre><code><span class="comment">// 创建</span>
-user := User{Name: <span class="string">"张三"</span>, Email: <span class="string">"zhangsan@example.com"</span>}
-result := db.<span class="function">Create</span>(&user)
-
-<span class="comment">// 查询</span>
-<span class="keyword">var</span> user User
-db.<span class="function">First</span>(&user, 1)  <span class="comment">// 根据 ID 查询</span>
-db.<span class="function">Where</span>(<span class="string">"name = ?"</span>, <span class="string">"张三"</span>).<span class="function">First</span>(&user)
-db.<span class="function">Find</span>(&users)  <span class="comment">// 查询所有</span>
-
-<span class="comment">// 更新</span>
-db.<span class="function">Model</span>(&user).<span class="function">Update</span>(<span class="string">"name"</span>, <span class="string">"李四"</span>)
-db.<span class="function">Model</span>(&user).<span class="function">Updates</span>(User{Name: <span class="string">"李四"</span>, Age: 30})
-
-<span class="comment">// 删除</span>
-db.<span class="function">Delete</span>(&user)  <span class="comment">// 软删除</span>
-db.<span class="function">Unscoped</span>().<span class="function">Delete</span>(&user)  <span class="comment">// 永久删除</span></code></pre>
-            
-            <h3>复杂查询</h3>
-            <pre><code><span class="comment">// 条件查询</span>
-db.<span class="function">Where</span>(<span class="string">"age > ?"</span>, 18).<span class="function">Find</span>(&users)
-db.<span class="function">Where</span>(<span class="string">"name LIKE ?"</span>, <span class="string">"%张%"</span>).<span class="function">Find</span>(&users)
-
-<span class="comment">// Or 查询</span>
-db.<span class="function">Where</span>(<span class="string">"name = ?"</span>, <span class="string">"张三"</span>).<span class="function">Or</span>(<span class="string">"name = ?"</span>, <span class="string">"李四"</span>).<span class="function">Find</span>(&users)
-
-<span class="comment">// 排序和分页</span>
-db.<span class="function">Order</span>(<span class="string">"age desc"</span>).<span class="function">Offset</span>(0).<span class="function">Limit</span>(10).<span class="function">Find</span>(&users)
-
-<span class="comment">// 统计</span>
-<span class="keyword">var</span> count <span class="keyword">int64</span>
-db.<span class="function">Model</span>(&User{}).<span class="function">Count</span>(&count)
-
-<span class="comment">// 原生 SQL</span>
-db.<span class="function">Raw</span>(<span class="string">"SELECT * FROM users WHERE age > ?"</span>, 18).<span class="function">Scan</span>(&users)</code></pre>
-            
-            <h3>事务</h3>
-            <pre><code><span class="comment">// 自动事务</span>
-err := db.<span class="function">Transaction</span>(<span class="keyword">func</span>(tx *gorm.DB) <span class="keyword">error</span> {
-    <span class="keyword">if</span> err := tx.<span class="function">Create</span>(&user1).<span class="function">Error</span>; err != <span class="keyword">nil</span> {
-        <span class="keyword">return</span> err
+    <span class="keyword">defer</span> db.<span class="function">Close</span>()
+    
+    <span class="comment">// 测试连接</span>
+    <span class="keyword">if</span> err := db.<span class="function">Ping</span>(); err != <span class="keyword">nil</span> {
+        log.<span class="function">Fatal</span>(err)
     }
-    <span class="keyword">if</span> err := tx.<span class="function">Create</span>(&user2).<span class="function">Error</span>; err != <span class="keyword">nil</span> {
-        <span class="keyword">return</span> err
-    }
-    <span class="keyword">return</span> <span class="keyword">nil</span>
-})
-
-<span class="comment">// 手动事务</span>
-tx := db.<span class="function">Begin</span>()
-<span class="keyword">defer</span> <span class="function">func</span>() {
-    <span class="keyword">if</span> r := <span class="function">recover</span>(); r != <span class="keyword">nil</span> {
-        tx.<span class="function">Rollback</span>()
-    }
-}()
-
-<span class="keyword">if</span> err := tx.<span class="function">Create</span>(&user).<span class="function">Error</span>; err != <span class="keyword">nil</span> {
-    tx.<span class="function">Rollback</span>()
-    <span class="keyword">return</span> err
-}
-
-tx.<span class="function">Commit</span>()</code></pre>
-            
-            <h3>MySQL 最佳实践</h3>
-            <div class="note-box">
-                <h4>1. 连接池配置</h4>
-                <pre><code>sqlDB, _ := db.<span class="function">DB</span>()
-sqlDB.<span class="function">SetMaxIdleConns</span>(10)
-sqlDB.<span class="function">SetMaxOpenConns</span>(100)
-sqlDB.<span class="function">SetConnMaxLifetime</span>(time.Hour)</code></pre>
-                
-                <h4>2. 使用索引</h4>
-                <pre><code><span class="keyword">type</span> User <span class="keyword">struct</span> {
-    Email <span class="keyword">string</span> <span class="string">`gorm:"uniqueIndex"`</span>
-    Age   <span class="keyword">int</span>    <span class="string">`gorm:"index"`</span>
-}</code></pre>
-                
-                <h4>3. 批量操作</h4>
-                <pre><code><span class="comment">// 使用 CreateInBatches 批量插入</span>
-users := []User{{Name: <span class="string">"a"</span>}, {Name: <span class="string">"b"</span>}, {Name: <span class="string">"c"</span>}}
-db.<span class="function">CreateInBatches</span>(users, 100)</code></pre>
-                
-                <h4>4. 预加载避免 N+1</h4>
-                <pre><code><span class="comment">// 使用 Preload 预加载关联</span>
-db.<span class="function">Preload</span>(<span class="string">"Orders"</span>).<span class="function">Find</span>(&users)</code></pre>
-                
-                <h4>5. 使用软删除</h4>
-                <pre><code><span class="keyword">type</span> User <span class="keyword">struct</span> {
-    DeletedAt gorm.DeletedAt <span class="string">`gorm:"index"`</span>
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Connected to MySQL"</span>)
+    
+    <span class="comment">// 连接池配置</span>
+    db.<span class="function">SetMaxIdleConns</span>(<span class="number">10</span>)
+    db.<span class="function">SetMaxOpenConns</span>(<span class="number">100</span>)
+    db.<span class="function">SetConnMaxLifetime</span>(time.Hour)
 }</code></pre>
             </div>
 
-            <h3>集成最佳实践</h3>
+            <h2 id="crud">CRUD 操作</h2>
             <div class="example-box">
-                <h4>完整的数据访问层</h4>
-                <pre><code><span class="keyword">type</span> UserRepository <span class="keyword">interface</span> {
-    <span class="function">Create</span>(user *User) <span class="keyword">error</span>
-    <span class="function">GetByID</span>(id <span class="keyword">uint</span>) (*User, <span class="keyword">error</span>)
-    <span class="function">GetByEmail</span>(email <span class="keyword">string</span>) (*User, <span class="keyword">error</span>)
-    <span class="function">Update</span>(user *User) <span class="keyword">error</span>
-    <span class="function">Delete</span>(id <span class="keyword">uint</span>) <span class="keyword">error</span>
+                <h3>📝 增删改查</h3>
+                <pre><code><span class="keyword">type</span> User <span class="keyword">struct</span> {
+    ID    <span class="keyword">int64</span>
+    Name  <span class="keyword">string</span>
+    Email <span class="keyword">string</span>
+    Age   <span class="keyword">int</span>
 }
 
-<span class="keyword">type</span> userRepository <span class="keyword">struct</span> {
-    db *gorm.DB
+<span class="comment">// 创建</span>
+<span class="keyword">func</span> <span class="function">CreateUser</span>(db *sql.DB, user *User) (<span class="keyword">int64</span>, <span class="keyword">error</span>) {
+    result, err := db.<span class="function">Exec</span>(
+        <span class="string">"INSERT INTO users (name, email, age) VALUES (?, ?, ?)"</span>,
+        user.Name, user.Email, user.Age,
+    )
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="number">0</span>, err
+    }
+    <span class="keyword">return</span> result.<span class="function">LastInsertId</span>()
 }
 
-<span class="function">func</span> <span class="function">NewUserRepository</span>(db *gorm.DB) UserRepository {
-    <span class="keyword">return</span> &userRepository{db: db}
-}
-
-<span class="function">func</span> (r *userRepository) <span class="function">GetByID</span>(id <span class="keyword">uint</span>) (*User, <span class="keyword">error</span>) {
+<span class="comment">// 查询单条</span>
+<span class="keyword">func</span> <span class="function">GetUser</span>(db *sql.DB, id <span class="keyword">int64</span>) (*User, <span class="keyword">error</span>) {
     <span class="keyword">var</span> user User
-    err := r.db.<span class="function">First</span>(&user, id).<span class="function">Error</span>
+    err := db.<span class="function">QueryRow</span>(
+        <span class="string">"SELECT id, name, email, age FROM users WHERE id = ?"</span>,
+        id,
+    ).<span class="function">Scan</span>(&user.ID, &user.Name, &user.Email, &user.Age)
+    
+    <span class="keyword">if</span> err == sql.ErrNoRows {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, <span class="keyword">nil</span>
+    }
     <span class="keyword">if</span> err != <span class="keyword">nil</span> {
         <span class="keyword">return</span> <span class="keyword">nil</span>, err
     }
     <span class="keyword">return</span> &user, <span class="keyword">nil</span>
+}
+
+<span class="comment">// 查询多条</span>
+<span class="keyword">func</span> <span class="function">GetAllUsers</span>(db *sql.DB) ([]*User, <span class="keyword">error</span>) {
+    rows, err := db.<span class="function">Query</span>(<span class="string">"SELECT id, name, email, age FROM users"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, err
+    }
+    <span class="keyword">defer</span> rows.<span class="function">Close</span>()
+    
+    <span class="keyword">var</span> users []*User
+    <span class="keyword">for</span> rows.<span class="function">Next</span>() {
+        <span class="keyword">var</span> user User
+        <span class="keyword">if</span> err := rows.<span class="function">Scan</span>(&user.ID, &user.Name, &user.Email, &user.Age); err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> <span class="keyword">nil</span>, err
+        }
+        users = <span class="function">append</span>(users, &user)
+    }
+    
+    <span class="keyword">return</span> users, rows.<span class="function">Err</span>()
+}
+
+<span class="comment">// 更新</span>
+<span class="keyword">func</span> <span class="function">UpdateUser</span>(db *sql.DB, user *User) <span class="keyword">error</span> {
+    _, err := db.<span class="function">Exec</span>(
+        <span class="string">"UPDATE users SET name = ?, email = ?, age = ? WHERE id = ?"</span>,
+        user.Name, user.Email, user.Age, user.ID,
+    )
+    <span class="keyword">return</span> err
+}
+
+<span class="comment">// 删除</span>
+<span class="keyword">func</span> <span class="function">DeleteUser</span>(db *sql.DB, id <span class="keyword">int64</span>) <span class="keyword">error</span> {
+    _, err := db.<span class="function">Exec</span>(<span class="string">"DELETE FROM users WHERE id = ?"</span>, id)
+    <span class="keyword">return</span> err
 }</code></pre>
             </div>
-<h3>总结</h3>
+
+            <h2 id="transaction">事务处理</h2>
             <div class="example-box">
-                <p>本章介绍了 Go 语言生态中更多重要的社区库：</p>
+                <h3>📝 事务操作</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">TransferMoney</span>(db *sql.DB, from, to <span class="keyword">int64</span>, amount <span class="keyword">float64</span>) <span class="keyword">error</span> {
+    <span class="comment">// 开启事务</span>
+    tx, err := db.<span class="function">Begin</span>()
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="comment">// 确保提交或回滚</span>
+    <span class="keyword">defer</span> <span class="keyword">func</span>() {
+        <span class="keyword">if</span> p := <span class="function">recover</span>(); p != <span class="keyword">nil</span> {
+            tx.<span class="function">Rollback</span>()
+            <span class="function">panic</span>(p)
+        } <span class="keyword">else if</span> err != <span class="keyword">nil</span> {
+            tx.<span class="function">Rollback</span>()
+        }
+    }()
+    
+    <span class="comment">// 扣款</span>
+    _, err = tx.<span class="function">Exec</span>(
+        <span class="string">"UPDATE accounts SET balance = balance - ? WHERE id = ?"</span>,
+        amount, from,
+    )
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="comment">// 收款</span>
+    _, err = tx.<span class="function">Exec</span>(
+        <span class="string">"UPDATE accounts SET balance = balance + ? WHERE id = ?"</span>,
+        amount, to,
+    )
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
+    
+    <span class="comment">// 提交事务</span>
+    <span class="keyword">return</span> tx.<span class="function">Commit</span>()
+}</code></pre>
+            </div>
+
+            <h2 id="prepared">预编译语句</h2>
+            <div class="example-box">
+                <h3>📝 Prepared Statement</h3>
+                <pre><code><span class="comment">// 创建预编译语句</span>
+stmt, err := db.<span class="function">Prepare</span>(<span class="string">"SELECT id, name, email FROM users WHERE id = ?"</span>)
+<span class="keyword">if</span> err != <span class="keyword">nil</span> {
+    log.<span class="function">Fatal</span>(err)
+}
+<span class="keyword">defer</span> stmt.<span class="function">Close</span>()
+
+<span class="comment">// 使用预编译语句</span>
+<span class="keyword">var</span> user User
+err = stmt.<span class="function">QueryRow</span>(<span class="number">1</span>).<span class="function">Scan</span>(&user.ID, &user.Name, &user.Email)
+
+<span class="comment">// 批量插入</span>
+<span class="keyword">func</span> <span class="function">BatchInsert</span>(db *sql.DB, users []User) <span class="keyword">error</span> {
+    tx, _ := db.<span class="function">Begin</span>()
+    stmt, _ := tx.<span class="function">Prepare</span>(<span class="string">"INSERT INTO users (name, email) VALUES (?, ?)"</span>)
+    <span class="keyword">defer</span> stmt.<span class="function">Close</span>()
+    
+    <span class="keyword">for</span> _, user := <span class="keyword">range</span> users {
+        _, err := stmt.<span class="function">Exec</span>(user.Name, user.Email)
+        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+            tx.<span class="function">Rollback</span>()
+            <span class="keyword">return</span> err
+        }
+    }
+    
+    <span class="keyword">return</span> tx.<span class="function">Commit</span>()
+}</code></pre>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
                 <ul>
-                    <li><strong>Validator</strong>：强大的参数校验库，支持多种校验规则和自定义规则</li>
-                    <li><strong>Cobra</strong>：功能丰富的命令行框架，适合构建 CLI 应用</li>
-                    <li><strong>Go-Micro</strong>：微服务框架，提供服务发现、RPC 通信等功能</li>
-                    <li><strong>Etcd</strong>：分布式键值存储，用于配置管理和服务发现</li>
+                    <li><a href="ecosystem-gorm.html">GORM ORM</a></li>
+                    <li><a href="ecosystem-redis.html">Redis</a></li>
+                    <li><a href="stdlib-database.html">database/sql</a></li>
                 </ul>
-                <p>这些库在构建企业级应用时非常有用，掌握它们可以帮助您构建高性能、可扩展的微服务架构。</p>
             </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
-</html>
-        </div>
-    </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
 </body>
-    <script src="navigation.js"></script>
 </html>

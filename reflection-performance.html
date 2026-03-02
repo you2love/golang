@@ -4,31 +4,173 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>性能考虑 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>反射性能 - Go 反射性能分析</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="reflection.html" class="back-link">← 返回 reflection</a>
-            <h2 id="performance">反射的性能考虑</h2>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="reflection-methods.html" class="back-link">← 方法反射</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="generics.html" class="back-link">泛型 →</a>
+
+            <h1>反射性能 - 性能分析与优化</h1>
+            <p class="intro">反射虽然强大，但性能开销较大。理解反射的性能特征和优化技巧，以及在可能的情况下使用泛型替代，是编写高性能 Go 代码的关键。</p>
+
+            <h2 id="performance-cost">性能开销</h2>
+            <div class="example-box">
+                <h3>📊 反射性能对比</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"reflect"</span>
+    <span class="string">"testing"</span>
+)
+
+<span class="keyword">type</span> Person <span class="keyword">struct</span> {
+    Name <span class="keyword">string</span>
+    Age  <span class="keyword">int</span>
+}
+
+<span class="comment">// 直接访问</span>
+<span class="keyword">func</span> <span class="function">DirectAccess</span>(p Person) <span class="keyword">string</span> {
+    <span class="keyword">return</span> p.Name
+}
+
+<span class="comment">// 反射访问</span>
+<span class="keyword">func</span> <span class="function">ReflectAccess</span>(p Person) <span class="keyword">string</span> {
+    v := reflect.<span class="function">ValueOf</span>(p)
+    <span class="keyword">return</span> v.<span class="function">FieldByName</span>(<span class="string">"Name"</span>).<span class="function">String</span>()
+}
+
+<span class="comment">// 基准测试结果 (Go 1.26, 参考值)</span>
+<span class="comment">// BenchmarkDirectAccess-8    1000000000    0.3 ns/op</span>
+<span class="comment">// BenchmarkReflectAccess-8     10000000    100 ns/op</span>
+<span class="comment">// 反射慢约 300 倍</span>
+
+<span class="keyword">func</span> <span class="function">BenchmarkDirectAccess</span>(b *testing.B) {
+    p := Person{Name: <span class="string">"Alice"</span>, Age: <span class="number">30</span>}
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; b.N; i++ {
+        _ = <span class="function">DirectAccess</span>(p)
+    }
+}
+
+<span class="keyword">func</span> <span class="function">BenchmarkReflectAccess</span>(b *testing.B) {
+    p := Person{Name: <span class="string">"Alice"</span>, Age: <span class="number">30</span>}
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; b.N; i++ {
+        _ = <span class="function">ReflectAccess</span>(p)
+    }
+}</code></pre>
+            </div>
+
+            <div class="warning-box">
+                <h3>⚠️ 反射性能要点</h3>
+                <ul>
+                    <li><strong>慢 100-1000 倍</strong>: 反射比直接代码慢很多</li>
+                    <li><strong>内存分配</strong>: 反射会创建临时对象</li>
+                    <li><strong>无法内联</strong>: 反射调用无法被内联优化</li>
+                    <li><strong>类型检查</strong>: 编译期无法检查类型错误</li>
+                </ul>
+            </div>
+
+            <h2 id="optimization">优化技巧</h2>
+            <div class="example-box">
+                <h3>📝 反射优化方法</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"reflect"</span>
+
+<span class="comment">// 技巧 1: 缓存 Type 信息</span>
+<span class="keyword">var</span> typeCache = <span class="function">make</span>(<span class="keyword">map</span>[reflect.Type][]<span class="keyword">int</span>)
+
+<span class="keyword">func</span> <span class="function">getCachedFields</span>(t reflect.Type) []<span class="keyword">int</span> {
+    <span class="keyword">if</span> fields, ok := typeCache[t]; ok {
+        <span class="keyword">return</span> fields
+    }
+    <span class="comment">// 计算并缓存</span>
+    <span class="keyword">return</span> fields
+}
+
+<span class="comment">// 技巧 2: 减少反射调用次数</span>
+<span class="keyword">func</span> <span class="function">optimized</span>(v reflect.Value) {
+    <span class="comment">// ❌ 不推荐：每次都调用 Field</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; v.<span class="function">NumField</span>(); i++ {
+        _ = v.<span class="function">Field</span>(i).<span class="function">Interface</span>()
+    }
+    
+    <span class="comment">// ✅ 推荐：缓存 Field 值</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; v.<span class="function">NumField</span>(); i++ {
+        field := v.<span class="function">Field</span>(i)
+        _ = field.<span class="function">Interface</span>()
+    }
+}
+
+<span class="comment">// 技巧 3: 使用泛型替代 (Go 1.18+)</span>
+<span class="keyword">func</span> <span class="function">GenericMap</span>[T, U <span class="keyword">any</span>](slice []T, fn <span class="keyword">func</span>(T) U) []U {
+    result := <span class="function">make</span>([]U, <span class="function">len</span>(slice))
+    <span class="keyword">for</span> i, v := <span class="keyword">range</span> slice {
+        result[i] = <span class="function">fn</span>(v)
+    }
+    <span class="keyword">return</span> result
+}</code></pre>
+            </div>
+
+            <h2 id="alternatives">替代方案</h2>
+            <div class="example-box">
+                <h3>📝 泛型替代反射</h3>
+                <pre><code><span class="comment">// ❌ 反射版本</span>
+<span class="keyword">func</span> <span class="function">ReflectFilter</span>(slice <span class="keyword">interface</span>{}, predicate <span class="keyword">interface</span>{}) <span class="keyword">interface</span>{} {
+    <span class="comment">// 复杂的反射逻辑</span>
+    <span class="comment">// 性能差，类型不安全</span>
+}
+
+<span class="comment">// ✅ 泛型版本</span>
+<span class="keyword">func</span> <span class="function">Filter</span>[T <span class="keyword">any</span>](slice []T, predicate <span class="keyword">func</span>(T) <span class="keyword">bool</span>) []T {
+    result := []T{}
+    <span class="keyword">for</span> _, v := <span class="keyword">range</span> slice {
+        <span class="keyword">if</span> <span class="function">predicate</span>(v) {
+            result = <span class="function">append</span>(result, v)
+        }
+    }
+    <span class="keyword">return</span> result
+}
+
+<span class="comment">// 泛型优势:</span>
+<span class="comment">// 1. 类型安全</span>
+<span class="comment">// 2. 性能更好</span>
+<span class="comment">// 3. 代码更清晰</span></code></pre>
+            </div>
+
+            <h2 id="when-to-use">何时使用反射</h2>
+            <div class="success-box">
+                <h3>✅ 反射适用场景</h3>
+                <ul>
+                    <li><strong>框架开发</strong>: ORM、序列化库等</li>
+                    <li><strong>通用工具</strong>: 无法预知类型的场景</li>
+                    <li><strong>元编程</strong>: 代码生成、标签解析</li>
+                    <li><strong>调试工具</strong>: 打印复杂结构</li>
+                </ul>
+                <h3>❌ 避免使用反射</h3>
+                <ul>
+                    <li><strong>性能敏感</strong>: 高频调用路径</li>
+                    <li><strong>简单场景</strong>: 可以用泛型或直接代码</li>
+                    <li><strong>类型已知</strong>: 编译期已知类型</li>
+                </ul>
+            </div>
 
             <div class="note-box">
-                <h3>反射的性能开销</h3>
+                <h3>📖 延伸阅读</h3>
                 <ul>
-                    <li>反射比直接调用慢很多</li>
-                    <li>反射操作会绕过编译器的类型检查</li>
-                    <li>反射代码更难调试和维护</li>
+                    <li><a href="reflection.html">反射概览</a></li>
+                    <li><a href="generics.html">泛型</a></li>
+                    <li><a href="stdlib-bestpractices.html">最佳实践</a></li>
                 </ul>
-            
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

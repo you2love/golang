@@ -4,57 +4,248 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>嵌套结构体 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>嵌套与嵌入 - Go 结构体组合</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="structs.html" class="back-link">← 返回 structs</a>
-            <h2 id="nested">结构体嵌套</h2>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="structs.html" class="back-link">← 结构体</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="structs-tags.html" class="back-link">Struct Tag →</a>
+
+            <h1>嵌套与嵌入 - 结构体组合</h1>
+            <p class="intro">Go 通过结构体嵌套和嵌入实现代码复用，这是 Go 组合优于继承理念的体现。掌握匿名嵌入和字段提升是编写优雅 Go 代码的关键。</p>
+
+            <h2 id="nested">嵌套结构体</h2>
+            <div class="example-box">
+                <h3>📝 命名嵌套</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
-<span class="comment">// 地址结构体</span>
 <span class="keyword">type</span> Address <span class="keyword">struct</span> {
     City    <span class="keyword">string</span>
+    District <span class="keyword">string</span>
     Street  <span class="keyword">string</span>
-    ZipCode <span class="keyword">string</span>
 }
 
-<span class="comment">// 用户结构体</span>
-<span class="keyword">type</span> User <span class="keyword">struct</span> {
+<span class="keyword">type</span> Person <span class="keyword">struct</span> {
     Name    <span class="keyword">string</span>
     Age     <span class="keyword">int</span>
-    Address <span class="comment">// 嵌套结构体</span>
+    Address Address <span class="comment">// 命名嵌套</span>
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    user := User{
-        Name: <span class="string">"张三"</span>,
-        Age:  <span class="number">25</span>,
+<span class="keyword">func</span> <span class="function">main</span>() {
+    p := Person{
+        Name: <span class="string">"Alice"</span>,
+        Age:  <span class="number">30</span>,
         Address: Address{
-            City:    <span class="string">"北京"</span>,
-            Street:  <span class="string">"长安街"</span>,
-            ZipCode: <span class="string">"100000"</span>,
+            City:     <span class="string">"Beijing"</span>,
+            District: <span class="string">"Chaoyang"</span>,
+            Street:   <span class="string">"Main St"</span>,
         },
     }
-
-    fmt.<span class="function">Println</span>(<span class="string">"用户:"</span>, user.Name)
-    fmt.<span class="function">Println</span>(<span class="string">"城市:"</span>, user.Address.City)
-    fmt.<span class="function">Println</span>(<span class="string">"街道:"</span>, user.Address.Street)
+    
+    <span class="comment">// 访问嵌套字段</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"%s lives in %s, %s\n"</span>, 
+        p.Name, p.Address.City, p.Address.District)
 }</code></pre>
+            </div>
 
-            
+            <h2 id="embedding">匿名嵌入</h2>
+            <div class="example-box">
+                <h3>📝 字段提升</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">type</span> Address <span class="keyword">struct</span> {
+    City   <span class="keyword">string</span>
+    Street <span class="keyword">string</span>
+}
+
+<span class="keyword">type</span> Person <span class="keyword">struct</span> {
+    Name <span class="keyword">string</span>
+    Age  <span class="keyword">int</span>
+    Address <span class="comment">// 匿名嵌入，字段提升</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    p := Person{
+        Name: <span class="string">"Alice"</span>,
+        Age:  <span class="number">30</span>,
+        Address: Address{
+            City:   <span class="string">"Beijing"</span>,
+            Street: <span class="string">"Main St"</span>,
+        },
+    }
+    
+    <span class="comment">// 字段提升：可以直接访问</span>
+    fmt.<span class="function">Println</span>(p.City)   <span class="comment">// 等价于 p.Address.City</span>
+    fmt.<span class="function">Println</span>(p.Street)  <span class="comment">// 等价于 p.Address.Street</span>
+    
+    <span class="comment">// 也可以显式访问</span>
+    fmt.<span class="function">Println</span>(p.Address.City)
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <h3>💡 嵌入要点</h3>
+                <ul>
+                    <li><strong>字段提升</strong>: 嵌入类型的字段提升到外层</li>
+                    <li><strong>访问方式</strong>: 可以直接访问或通过嵌入类型访问</li>
+                    <li><strong>方法提升</strong>: 嵌入类型的方法也会提升</li>
+                    <li><strong>名称冲突</strong>: 同名字段会隐藏嵌入字段</li>
+                </ul>
+            </div>
+
+            <h2 id="methods">嵌入类型的方法</h2>
+            <div class="example-box">
+                <h3>📝 方法提升</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">type</span> Logger <span class="keyword">struct</span> {
+    prefix <span class="keyword">string</span>
+}
+
+<span class="keyword">func</span> (l Logger) <span class="function">Info</span>(msg <span class="keyword">string</span>) {
+    fmt.<span class="function">Printf</span>(<span class="string">"[%s] INFO: %s\n"</span>, l.prefix, msg)
+}
+
+<span class="keyword">func</span> (l Logger) <span class="function">Error</span>(msg <span class="string">string</span>) {
+    fmt.<span class="function">Printf</span>(<span class="string">"[%s] ERROR: %s\n"</span>, l.prefix, msg)
+}
+
+<span class="keyword">type</span> Service <span class="keyword">struct</span> {
+    Name   <span class="keyword">string</span>
+    Logger <span class="comment">// 嵌入 Logger</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    svc := Service{
+        Name:   <span class="string">"UserService"</span>,
+        Logger: Logger{prefix: <span class="string">"SVC"</span>},
+    }
+    
+    <span class="comment">// 方法提升：可以直接调用</span>
+    svc.<span class="function">Info</span>(<span class="string">"Service started"</span>)
+    svc.<span class="function">Error</span>(<span class="string">"Something went wrong"</span>)
+    
+    <span class="comment">// 也可以显式调用</span>
+    svc.Logger.<span class="function">Info</span>(<span class="string">"Explicit call"</span>)
+}</code></pre>
+            </div>
+
+            <h2 id="override">方法重写</h2>
+            <div class="example-box">
+                <h3>📝 覆盖嵌入方法</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">type</span> Base <span class="keyword">struct</span>{}
+
+<span class="keyword">func</span> (b Base) <span class="function">Greet</span>() {
+    fmt.<span class="function">Println</span>(<span class="string">"Hello from Base"</span>)
+}
+
+<span class="keyword">type</span> Derived <span class="keyword">struct</span> {
+    Base <span class="comment">// 嵌入 Base</span>
+}
+
+<span class="comment">// 重写 Greet 方法</span>
+<span class="keyword">func</span> (d Derived) <span class="function">Greet</span>() {
+    fmt.<span class="function">Println</span>(<span class="string">"Hello from Derived"</span>)
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    d := Derived{}
+    
+    <span class="comment">// 调用重写的方法</span>
+    d.<span class="function">Greet</span>() <span class="comment">// Hello from Derived</span>
+    
+    <span class="comment">// 调用嵌入类型的方法</span>
+    d.Base.<span class="function">Greet</span>() <span class="comment">// Hello from Base</span>
+}</code></pre>
+            </div>
+
+            <h2 id="multiple">多重嵌入</h2>
+            <div class="example-box">
+                <h3>📝 嵌入多个类型</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">type</span> A <span class="keyword">struct</span> {
+    AField <span class="keyword">string</span>
+}
+
+<span class="keyword">type</span> B <span class="keyword">struct</span> {
+    BField <span class="keyword">int</span>
+}
+
+<span class="keyword">type</span> C <span class="keyword">struct</span> {
+    A <span class="comment">// 嵌入 A</span>
+    B <span class="comment">// 嵌入 B</span>
+    CField <span class="keyword">string</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    c := C{
+        A:      A{AField: <span class="string">"a-value"</span>},
+        B:      B{BField: <span class="number">42</span>},
+        CField: <span class="string">"c-value"</span>,
+    }
+    
+    <span class="comment">// 访问提升的字段</span>
+    fmt.<span class="function">Println</span>(c.AField)   <span class="comment">// a-value</span>
+    fmt.<span class="function">Println</span>(c.BField)   <span class="comment">// 42</span>
+    fmt.<span class="function">Println</span>(c.CField)   <span class="comment">// c-value</span>
+}</code></pre>
+            </div>
+
+            <div class="warning-box">
+                <h3>⚠️ 名称冲突</h3>
+                <pre><code><span class="comment">// 如果多个嵌入类型有同名字段</span>
+<span class="keyword">type</span> A <span class="keyword">struct</span> { Name <span class="keyword">string</span> }
+<span class="keyword">type</span> B <span class="keyword">struct</span> { Name <span class="keyword">string</span> }
+
+<span class="keyword">type</span> C <span class="keyword">struct</span> {
+    A
+    B
+}
+
+<span class="comment">// c.Name 会编译错误！</span>
+<span class="comment">// 必须显式指定：c.A.Name 或 c.B.Name</span></code></pre>
+            </div>
+
+            <h2 id="best-practices">最佳实践</h2>
+            <div class="success-box">
+                <h3>✅ 嵌入使用建议</h3>
+                <ul>
+                    <li><strong>组合优于继承</strong>: 使用嵌入实现代码复用</li>
+                    <li><strong>语义清晰</strong>: 嵌入应该有"is-a"关系</li>
+                    <li><strong>避免深度嵌套</strong>: 超过 2 层考虑重构</li>
+                    <li><strong>注意冲突</strong>: 避免同名字段冲突</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="structs-tags.html">Struct Tag</a></li>
+                    <li><a href="structs-interface.html">接口 Interface</a></li>
+                    <li><a href="generics.html">泛型</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

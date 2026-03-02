@@ -4,85 +4,172 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>反射方法 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>反射方法 - Go 方法反射详解</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="reflection.html" class="back-link">← 返回 reflection</a>
-            <h2 id="methods">调用方法</h2>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="reflection-modify.html" class="back-link">← 修改值</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="reflection-performance.html" class="back-link">性能分析 →</a>
+
+            <h1>反射方法 - 方法反射详解</h1>
+            <p class="intro">通过反射可以检查和调用结构体方法，这是实现依赖注入、RPC 框架等高级功能的基础。掌握方法反射需要理解 Method 和 FuncType。</p>
+
+            <h2 id="method-info">方法信息</h2>
+            <div class="example-box">
+                <h3>📝 获取方法信息</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"fmt"</span>
     <span class="string">"reflect"</span>
 )
 
-<span class="keyword">type</span> Calculator <span class="keyword">struct</span> {
-    result <span class="keyword">float64</span>
+<span class="keyword">type</span> Calculator <span class="keyword">struct</span>{}
+
+<span class="keyword">func</span> (c Calculator) <span class="function">Add</span>(a, b <span class="keyword">int</span>) <span class="keyword">int</span> {
+    <span class="keyword">return</span> a + b
 }
 
-<span class="function">func</span> (c *Calculator) <span class="function">Add</span>(a, b <span class="keyword">float64</span>) <span class="keyword">float64</span> {
-    c.result = a + b
-    <span class="keyword">return</span> c.result
+<span class="keyword">func</span> (c Calculator) <span class="function">Sub</span>(a, b <span class="keyword">int</span>) <span class="keyword">int</span> {
+    <span class="keyword">return</span> a - b
 }
 
-<span class="function">func</span> (c *Calculator) <span class="function">Subtract</span>(a, b <span class="keyword">float64</span>) <span class="keyword">float64</span> {
-    c.result = a - b
-    <span class="keyword">return</span> c.result
+<span class="keyword">func</span> (c Calculator) <span class="function">Mul</span>(a, b <span class="keyword">int</span>) <span class="keyword">int</span> {
+    <span class="keyword">return</span> a * b
 }
 
-<span class="function">func</span> (c *Calculator) <span class="function">GetResult</span>() <span class="keyword">float64</span> {
-    <span class="keyword">return</span> c.result
-}
-
-<span class="function">func</span> <span class="function">callMethod</span>(obj <span class="keyword">interface</span>{}, methodName <span class="keyword">string</span>, args ...<span class="keyword">interface</span>{}) {
-    v := reflect.<span class="function">ValueOf</span>(obj)
-
-    <span class="comment">// 解引用指针</span>
-    <span class="keyword">if</span> v.<span class="function">Kind</span>() == reflect.Ptr {
-        v = v.<span class="function">Elem</span>()
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> c Calculator
+    t := reflect.<span class="function">TypeOf</span>(c)
+    
+    <span class="comment">// 方法数量</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"NumMethod: %d\n"</span>, t.<span class="function">NumMethod</span>())
+    
+    <span class="comment">// 遍历所有方法</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; t.<span class="function">NumMethod</span>(); i++ {
+        method := t.<span class="function">Method</span>(i)
+        fmt.<span class="function">Printf</span>(<span class="string">"Method %d: %s\n"</span>, i, method.Name)
+        fmt.<span class="function">Printf</span>(<span class="string">"  Type: %v\n"</span>, method.Type)
+        fmt.<span class="function">Printf</span>(<span class="string">"  In: %d, Out: %d\n"</span>, 
+            method.Type.<span class="function">NumIn</span>(), method.Type.<span class="function">NumOut</span>())
     }
-
-    method := v.<span class="function">MethodByName</span>(methodName)
-
-    <span class="keyword">if</span> method.<span class="function">IsValid</span>() {
-        <span class="comment">// 准备参数</span>
-        in := <span class="function">make</span>([]reflect.Value, <span class="function">len</span>(args))
-        <span class="keyword">for</span> i, arg := <span class="keyword">range</span> args {
-            in[i] = reflect.<span class="function">ValueOf</span>(arg)
-        }
-
-        <span class="comment">// 调用方法</span>
-        results := method.<span class="function">Call</span>(in)
-
-        <span class="comment">// 输出结果</span>
-        <span class="keyword">for</span> _, result := <span class="keyword">range</span> results {
-            fmt.<span class="function">Printf</span>(<span class="string">"结果: %v\n"</span>, result.<span class="function">Interface</span>())
-        }
-    } <span class="keyword">else</span> {
-        fmt.<span class="function">Printf</span>(<span class="string">"方法 %s 不存在\n"</span>, methodName)
-    }
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    calc := &Calculator{}
-
-    <span class="function">callMethod</span>(calc, <span class="string">"Add"</span>, <span class="number">10.0</span>, <span class="number">5.0</span>)
-    <span class="function">callMethod</span>(calc, <span class="string">"Subtract"</span>, <span class="number">20.0</span>, <span class="number">8.0</span>)
-    <span class="function">callMethod</span>(calc, <span class="string">"GetResult"</span>)
 }</code></pre>
+            </div>
 
-            
+            <h2 id="call-method">调用方法</h2>
+            <div class="example-box">
+                <h3>📝 反射调用方法</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"reflect"</span>
+)
+
+<span class="keyword">type</span> Greeter <span class="keyword">struct</span> {
+    Name <span class="keyword">string</span>
+}
+
+<span class="keyword">func</span> (g Greeter) <span class="function">Greet</span>() <span class="keyword">string</span> {
+    <span class="keyword">return</span> <span class="string">"Hello, "</span> + g.Name
+}
+
+<span class="keyword">func</span> (g Greeter) <span class="function">GreetWith</span>(prefix <span class="keyword">string</span>) <span class="keyword">string</span> {
+    <span class="keyword">return</span> prefix + <span class="string">", "</span> + g.Name
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    g := Greeter{Name: <span class="string">"Alice"</span>}
+    v := reflect.<span class="function">ValueOf</span>(g)
+    
+    <span class="comment">// 获取方法</span>
+    greetMethod := v.<span class="function">MethodByName</span>(<span class="string">"Greet"</span>)
+    
+    <span class="comment">// 调用无参数方法</span>
+    results := greetMethod.<span class="function">Call</span>(<span class="keyword">nil</span>)
+    fmt.<span class="function">Println</span>(results[<span class="number">0</span>].<span class="function">String</span>())
+    
+    <span class="comment">// 调用有参数方法</span>
+    greetWithMethod := v.<span class="function">MethodByName</span>(<span class="string">"GreetWith"</span>)
+    args := []reflect.Value{
+        reflect.<span class="function">ValueOf</span>(<span class="string">"Hi"</span>),
+    }
+    results = greetWithMethod.<span class="function">Call</span>(args)
+    fmt.<span class="function">Println</span>(results[<span class="number">0</span>].<span class="function">String</span>())
+}</code></pre>
+            </div>
+
+            <h2 id="method-type">方法类型</h2>
+            <div class="example-box">
+                <h3>📝 方法类型信息</h3>
+                <pre><code><span class="keyword">func</span> <span class="function">inspectMethod</span>(v <span class="keyword">interface</span>{}, methodName <span class="keyword">string</span>) {
+    val := reflect.<span class="function">ValueOf</span>(v)
+    method := val.<span class="function">MethodByName</span>(methodName)
+    
+    <span class="keyword">if</span> !method.<span class="function">IsValid</span>() {
+        fmt.<span class="function">Printf</span>(<span class="string">"Method %s not found\n"</span>, methodName)
+        <span class="keyword">return</span>
+    }
+    
+    t := method.<span class="function">Type</span>()
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Method: %s\n"</span>, methodName)
+    fmt.<span class="function">Printf</span>(<span class="string">"NumIn: %d\n"</span>, t.<span class="function">NumIn</span>())
+    fmt.<span class="function">Printf</span>(<span class="string">"NumOut: %d\n"</span>, t.<span class="function">NumOut</span>())
+    
+    <span class="comment">// 输入参数类型</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; t.<span class="function">NumIn</span>(); i++ {
+        fmt.<span class="function">Printf</span>(<span class="string">"  In[%d]: %v\n"</span>, i, t.<span class="function">In</span>(i))
+    }
+    
+    <span class="comment">// 输出参数类型</span>
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; t.<span class="function">NumOut</span>(); i++ {
+        fmt.<span class="function">Printf</span>(<span class="string">"  Out[%d]: %v\n"</span>, i, t.<span class="function">Out</span>(i))
+    }
+}</code></pre>
+            </div>
+
+            <h2 id="practical">实用模式</h2>
+            <div class="example-box">
+                <h3>📝 自动注册处理器</h3>
+                <pre><code><span class="keyword">type</span> Handler <span class="keyword">interface</span>{}
+
+<span class="keyword">type</span> UserService <span class="keyword">struct</span>{}
+
+<span class="keyword">func</span> (s *UserService) <span class="function">GetUser</span>(id <span class="keyword">int</span>) {}
+<span class="keyword">func</span> (s *UserService) <span class="function">CreateUser</span>(name <span class="keyword">string</span>) {}
+<span class="keyword">func</span> (s *UserService) <span class="function">DeleteUser</span>(id <span class="keyword">int</span>) {}
+
+<span class="keyword">func</span> <span class="function">RegisterHandlers</span>(handler Handler) {
+    t := reflect.<span class="function">TypeOf</span>(handler)
+    v := reflect.<span class="function">ValueOf</span>(handler)
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; t.<span class="function">NumMethod</span>(); i++ {
+        method := t.<span class="function">Method</span>(i)
+        methodVal := v.<span class="function">Method</span>(i)
+        
+        fmt.<span class="function">Printf</span>(<span class="string">"Registered: %s\n"</span>, method.Name)
+        <span class="comment">// 存储 methodVal 供后续调用</span>
+    }
+}</code></pre>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="reflection.html">反射概览</a></li>
+                    <li><a href="reflection-modify.html">修改值</a></li>
+                    <li><a href="reflection-performance.html">性能分析</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

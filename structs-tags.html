@@ -4,57 +4,200 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>结构体标签 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>Struct Tag - Go 结构体标签</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="structs.html" class="back-link">← 返回 structs</a>
-            <h2 id="tags">结构体标签</h2>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="structs-nested.html" class="back-link">← 嵌套与嵌入</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="structs-interface.html" class="back-link">接口 →</a>
+
+            <h1>Struct Tag - 结构体标签</h1>
+            <p class="intro">Struct Tag 是结构体字段的元数据，用于提供额外信息。Tag 被反射读取，广泛应用于 JSON 序列化、数据库映射、参数校验等场景。</p>
+
+            <h2 id="basics">Tag 基础</h2>
+            <div class="example-box">
+                <h3>📝 Tag 语法</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+<span class="keyword">import</span> <span class="string">"reflect"</span>
+
+<span class="keyword">type</span> User <span class="keyword">struct</span> {
+    ID       <span class="keyword">int</span>    <span class="string">`json:"id" db:"user_id" validate:"required"`</span>
+    Username <span class="keyword">string</span> <span class="string">`json:"username" db:"username" validate:"min=3"`</span>
+    Email    <span class="keyword">string</span> <span class="string">`json:"email" db:"email" validate:"email"`</span>
+    Password <span class="keyword">string</span> <span class="string">`json:"-" db:"password"`</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> u User
+    t := reflect.<span class="function">TypeOf</span>(u)
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; t.<span class="function">NumField</span>(); i++ {
+        field := t.<span class="function">Field</span>(i)
+        tag := field.Tag
+        
+        fmt.<span class="function">Printf</span>(<span class="string">"Field: %s\n"</span>, field.Name)
+        fmt.<span class="function">Printf</span>(<span class="string">"  JSON: %s\n"</span>, tag.<span class="function">Get</span>(<span class="string">"json"</span>))
+        fmt.<span class="function">Printf</span>(<span class="string">"  DB: %s\n"</span>, tag.<span class="function">Get</span>(<span class="string">"db"</span>))
+        fmt.<span class="function">Printf</span>(<span class="string">"  Validate: %s\n"</span>, tag.<span class="function">Get</span>(<span class="string">"validate"</span>))
+    }
+}
+
+<span class="comment">// Tag 格式:</span>
+<span class="comment">// `key:"value" key2:"value2"`</span>
+<span class="comment">// 多个 tag 用空格分隔</span>
+<span class="comment">// 值用反引号包裹</span></code></pre>
+            </div>
+
+            <h2 id="json">JSON Tag</h2>
+            <div class="example-box">
+                <h3>📝 JSON 序列化标签</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"encoding/json"</span>
     <span class="string">"fmt"</span>
-    <span class="string">"reflect"</span>
 )
 
-<span class="keyword">type</span> User <span class="keyword">struct</span> {
-    ID       <span class="keyword">int</span>    `json:"id"`
-    Name     <span class="keyword">string</span> `json:"name"`
-    Email    <span class="keyword">string</span> `json:"email"`
-    Password <span class="keyword">string</span> `json:"-"` <span class="comment">// 不进行 JSON 序列化</span>
+<span class="keyword">type</span> Product <span class="keyword">struct</span> {
+    ID       <span class="keyword">int</span>     <span class="string">`json:"id"`</span>
+    Name     <span class="keyword">string</span>  <span class="string">`json:"name"`</span>
+    Price    <span class="keyword">float64</span> <span class="string">`json:"price"`</span>
+    Stock    <span class="keyword">int</span>     <span class="string">`json:"stock,omitempty"`</span>
+    Internal <span class="keyword">string</span>  <span class="string">`json:"-"`</span>
+    Secret   <span class="keyword">string</span>  <span class="string">`json:"-,omitempty"`</span>
 }
 
-<span class="function">func</span> <span class="function">main</span>() {
-    user := User{
+<span class="keyword">func</span> <span class="function">main</span>() {
+    p := Product{
         ID:       <span class="number">1</span>,
-        Name:     <span class="string">"张三"</span>,
-        Email:    <span class="string">"zhangsan@example.com"</span>,
-        Password: <span class="string">"secret"</span>,
+        Name:     <span class="string">"Laptop"</span>,
+        Price:    <span class="number">999.99</span>,
+        Stock:    <span class="number">0</span>,
+        Internal: <span class="string">"internal data"</span>,
+        Secret:   <span class="string">"secret"</span>,
     }
+    
+    data, _ := json.<span class="function">MarshalIndent</span>(p, <span class="string">""</span>, <span class="string">"  "</span>)
+    fmt.<span class="function">Println</span>(<span class="function">string</span>(data))
+    <span class="comment">// 输出:</span>
+    <span class="comment">// {</span>
+    <span class="comment">//   "id": 1,</span>
+    <span class="comment">//   "name": "Laptop",</span>
+    <span class="comment">//   "price": 999.99</span>
+    <span class="comment">// }</span>
+    <span class="comment">// stock 为 0 被 omitempty 省略</span>
+    <span class="comment">// Internal 被 "-" 忽略</span>
+    <span class="comment">// Secret 被 "-" 忽略</span>
+}</code></pre>
+            </div>
 
-    <span class="comment">// JSON 序列化</span>
-    jsonData, _ := json.<span class="function">Marshal</span>(user)
-    fmt.<span class="function">Println</span>(<span class="string">"JSON:"</span>, <span class="keyword">string</span>(jsonData))
+            <div class="info-box">
+                <h3>💡 JSON Tag 选项</h3>
+                <ul>
+                    <li><strong>json:"name"</strong>: 自定义字段名</li>
+                    <li><strong>json:"-"</strong>: 忽略该字段</li>
+                    <li><strong>json:",omitempty"</strong>: 零值时省略</li>
+                    <li><strong>json:",string"</strong>: 数字转为字符串</li>
+                </ul>
+            </div>
 
-    <span class="comment">// 反射获取标签</span>
-    t := reflect.<span class="function">TypeOf</span>(user)
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < t.<span class="function">NumField</span>(); i++ {
+            <h2 id="validate">校验 Tag</h2>
+            <div class="example-box">
+                <h3>📝 Validator 标签</h3>
+                <pre><code><span class="keyword">type</span> RegisterRequest <span class="keyword">struct</span> {
+    Username <span class="keyword">string</span> <span class="string">`validate:"required,min=3,max=20"`</span>
+    Email    <span class="keyword">string</span> <span class="string">`validate:"required,email"`</span>
+    Password <span class="keyword">string</span> <span class="string">`validate:"required,min=8"`</span>
+    Age      <span class="keyword">int</span>    <span class="string">`validate:"min=18,max=100"`</span>
+    Role     <span class="keyword">string</span> <span class="string">`validate:"oneof=admin user"`</span>
+}
+
+<span class="comment">// 常用校验规则:</span>
+<span class="comment">// required: 必填</span>
+<span class="comment">// min/max: 最小/最大值</span>
+<span class="comment">// email: 邮箱格式</span>
+<span class="comment">// oneof: 枚举值</span>
+<span class="comment">// len: 固定长度</span>
+<span class="comment">// regexp: 正则匹配</span></code></pre>
+            </div>
+
+            <h2 id="custom">自定义 Tag 解析</h2>
+            <div class="example-box">
+                <h3>📝 解析 Tag 选项</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"reflect"</span>
+    <span class="string">"strings"</span>
+)
+
+<span class="keyword">type</span> Config <span class="keyword">struct</span> {
+    Host <span class="keyword">string</span> <span class="string">`env:"DB_HOST" default:"localhost"`</span>
+    Port <span class="keyword">int</span>    <span class="string">`env:"DB_PORT" default:"5432"`</span>
+}
+
+<span class="keyword">func</span> <span class="function">parseTag</span>(tag <span class="keyword">string</span>) (<span class="keyword">string</span>, <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>) {
+    parts := strings.<span class="function">Split</span>(tag, <span class="string">","</span>)
+    name := parts[<span class="number">0</span>]
+    opts := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>)
+    
+    <span class="keyword">for</span> _, part := <span class="keyword">range</span> parts[<span class="number">1</span>:] {
+        kv := strings.<span class="function">SplitN</span>(part, <span class="string">"="</span>, <span class="number">2</span>)
+        <span class="keyword">if</span> <span class="function">len</span>(kv) == <span class="number">2</span> {
+            opts[kv[<span class="number">0</span>]] = kv[<span class="number">1</span>]
+        } <span class="keyword">else</span> {
+            opts[kv[<span class="number">0</span>]] = <span class="string">""</span>
+        }
+    }
+    
+    <span class="keyword">return</span> name, opts
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> cfg Config
+    t := reflect.<span class="function">TypeOf</span>(cfg)
+    
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; t.<span class="function">NumField</span>(); i++ {
         field := t.<span class="function">Field</span>(i)
-        fmt.<span class="function">Printf</span>(<span class="string">"字段: %s, 标签: %s\n"</span>, field.Name, field.Tag.<span class="function">Get</span>(<span class="string">"json"</span>))
+        tag := field.Tag.<span class="function">Get</span>(<span class="string">"env"</span>)
+        
+        name, opts := <span class="function">parseTag</span>(tag)
+        fmt.<span class="function">Printf</span>(<span class="string">"Field: %s, Env: %s, Default: %s\n"</span>, 
+            field.Name, name, opts[<span class="string">"default"</span>])
     }
 }</code></pre>
-        
+            </div>
+
+            <h2 id="best-practices">最佳实践</h2>
+            <div class="success-box">
+                <h3>✅ Tag 使用建议</h3>
+                <ul>
+                    <li><strong>一致性</strong>: 同一项目使用统一的 tag 命名</li>
+                    <li><strong>简洁</strong>: tag 值尽量简短</li>
+                    <li><strong>文档</strong>: 自定义 tag 要有文档说明</li>
+                    <li><strong>验证</strong>: 重要字段添加 validate tag</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="structs-interface.html">接口 Interface</a></li>
+                    <li><a href="stdlib-json.html">JSON 编解码</a></li>
+                    <li><a href="ecosystem-validator.html">Validator 校验</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

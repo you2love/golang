@@ -4,183 +4,132 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gateway API网关 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>API Gateway - Go API 网关</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
         <div class="content">
-            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
-            <h2 id="gateway">Gateway API网关</h2>
-            <p>gRPC-Gateway 是 Google 提供的一个插件，用于将 gRPC 服务转换为 RESTful API。它允许客户端通过 HTTP/JSON 调用 gRPC 服务，同时保持 gRPC 的高性能和类型安全。</p>
-            
-            <h3>核心特性</h3>
-            <ul>
-                <li><strong>自动生成</strong>：从 Protobuf 定义自动生成 RESTful API</li>
-                <li><strong>双向转换</strong>：支持 HTTP/JSON 到 gRPC 的双向转换</li>
-                <li><strong>OpenAPI 支持</strong>：自动生成 OpenAPI (Swagger) 文档</li>
-                <li><strong>反向代理</strong>：作为反向代理转发请求到 gRPC 服务</li>
-                <li><strong>中间件支持</strong>：支持认证、日志、CORS 等中间件</li>
-            </ul>
-            
-            <h3>安装</h3>
-            <pre><code><span class="keyword">go</span> install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest
-<span class="keyword">go</span> install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest</code></pre>
-            
-            <h3>定义服务</h3>
-            <pre><code>syntax = <span class="string">"proto3"</span>;
+            <a href="ecosystem-mysql.html" class="back-link">← MySQL</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="ecosystem-imaging.html" class="back-link">Imaging →</a>
 
-<span class="keyword">package</span> example;
+            <h1>API Gateway - Go API 网关</h1>
+            <p class="intro">API Gateway 是微服务架构的入口点，负责请求路由、认证、限流等功能。使用 Go 构建 API Gateway 可以利用其高并发优势。</p>
 
-<span class="keyword">option</span> go_package = <span class="string">"./example"</span>;
-
-<span class="keyword">import</span> <span class="string">"google/api/annotations.proto"</span>;
-
-<span class="keyword">service</span> Greeter {
-    <span class="keyword">rpc</span> SayHello (HelloRequest) <span class="keyword">returns</span> (HelloReply) {
-        <span class="keyword">option</span> (google.api.http) = {
-            <span class="keyword">get</span>: <span class="string">"/v1/hello/{name}"</span>
-        };
-    }
-    
-    <span class="keyword">rpc</span> CreateUser (CreateUserRequest) <span class="keyword">returns</span> (User) {
-        <span class="keyword">option</span> (google.api.http) = {
-            <span class="keyword">post</span>: <span class="string">"/v1/users"</span>
-            body: <span class="string">"*"</span>
-        };
-    }
-}
-
-<span class="keyword">message</span> HelloRequest {
-    <span class="keyword">string</span> name = 1;
-}
-
-<span class="keyword">message</span> HelloReply {
-    <span class="keyword">string</span> message = 1;
-}
-
-<span class="keyword">message</span> CreateUserRequest {
-    <span class="keyword">string</span> name = 1;
-    <span class="keyword">string</span> email = 2;
-}
-
-<span class="keyword">message</span> User {
-    <span class="keyword">string</span> id = 1;
-    <span class="keyword">string</span> name = 2;
-    <span class="keyword">string</span> email = 3;
-}</code></pre>
-            
-            <h3>生成代码</h3>
-            <pre><code>protoc -I. \
-    --go_out=. --go_opt=paths=source_relative \
-    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-    --grpc-gateway_out=. --grpc-gateway_opt=paths=source_relative \
-    --openapiv2_out=. --openapiv2_opt=paths=source_relative \
-    service.proto</code></pre>
-            
-            <h3>实现 Gateway 服务</h3>
-            <pre><code><span class="keyword">package</span> main
+            <h2 id="basics">网关基础</h2>
+            <div class="example-box">
+                <h3>📝 基础网关实现</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
-    <span class="string">"context"</span>
-    <span class="string">"log"</span>
+    <span class="string">"fmt"</span>
     <span class="string">"net/http"</span>
-    <span class="string">"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"</span>
-    <span class="string">"google.golang.org/grpc"</span>
-    <span class="string">"google.golang.org/grpc/credentials/insecure"</span>
-    gw <span class="string">"path/to/your/proto"</span>
+    <span class="string">"net/http/httputil"</span>
+    <span class="string">"net/url"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 创建 gRPC 连接</span>
-    conn, err := grpc.<span class="function">DialContext</span>(
-        context.<span class="function">Background</span>(),
-        <span class="string">"localhost:50051"</span>,
-        grpc.<span class="function">WithTransportCredentials</span>(insecure.<span class="function">NewCredentials</span>()),
-    )
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        log.<span class="function">Fatalf</span>(<span class="string">"failed to dial server: %v"</span>, err)
+<span class="keyword">type</span> Gateway <span class="keyword">struct</span> {
+    proxies <span class="keyword">map</span>[<span class="keyword">string</span>]*httputil.ReverseProxy
+}
+
+<span class="keyword">func</span> <span class="function">NewGateway</span>() *Gateway {
+    g := &Gateway{
+        proxies: <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]*httputil.ReverseProxy),
     }
-    
-    <span class="comment">// 创建 Gateway mux</span>
-    mux := runtime.<span class="function">NewServeMux</span>()
     
     <span class="comment">// 注册服务</span>
-    err = gw.<span class="function">RegisterGreeterHandler</span>(context.<span class="function">Background</span>(), mux, conn)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        log.<span class="function">Fatalf</span>(<span class="string">"failed to register handler: %v"</span>, err)
-    }
+    g.<span class="function">Register</span>(<span class="string">"/user-service"</span>, <span class="string">"http://localhost:8081"</span>)
+    g.<span class="function">Register</span>(<span class="string">"/order-service"</span>, <span class="string">"http://localhost:8082"</span>)
     
-    <span class="comment">// 启动 HTTP 服务</span>
-    addr := <span class="string">":8080"</span>
-    log.<span class="function">Printf</span>(<span class="string">"Gateway server listening on %s"</span>, addr)
-    
-    <span class="keyword">if</span> err := http.<span class="function">ListenAndServe</span>(addr, mux); err != <span class="keyword">nil</span> {
-        log.<span class="function">Fatalf</span>(<span class="string">"failed to serve: %v"</span>, err)
-    }
-}</code></pre>
+    <span class="keyword">return</span> g
+}
+
+<span class="keyword">func</span> (g *Gateway) <span class="function">Register</span>(path, target <span class="keyword">string</span>) {
+    targetURL, _ := url.<span class="function">Parse</span>(target)
+    g.proxies[path] = httputil.<span class="function">NewSingleHostReverseProxy</span>(targetURL)
+}
+
+<span class="keyword">func</span> (g *Gateway) <span class="function">ServeHTTP</span>(w http.ResponseWriter, r *http.Request) {
+    <span class="comment">// 路由匹配</span>
+    <span class="keyword">for</span> path, proxy := <span class="keyword">range</span> g.proxies {
+        <span class="keyword">if</span> len(r.URL.Path) &gt; <span class="function">len</span>(path) && r.URL.Path[:<span class="function">len</span>(path)] == path {
+            <span class="comment">// 认证检查</span>
+            <span class="keyword">if</span> !g.<span class="function">authenticate</span>(r) {
+                http.<span class="function">Error</span>(w, <span class="string">"Unauthorized"</span>, http.StatusUnauthorized)
+                <span class="keyword">return</span>
+            }
             
-            <h3>添加中间件</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"log"</span>
-    <span class="string">"net/http"</span>
-)
-
-<span class="comment">// CORS 中间件</span>
-<span class="function">func</span> <span class="function">corsMiddleware</span>(h http.Handler) http.Handler {
-    <span class="keyword">return</span> http.<span class="function">HandlerFunc</span>(<span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) {
-        w.<span class="function">Header</span>().<span class="function">Set</span>(<span class="string">"Access-Control-Allow-Origin"</span>, <span class="string">"*"</span>)
-        w.<span class="function">Header</span>().<span class="function">Set</span>(<span class="string">"Access-Control-Allow-Methods"</span>, <span class="string">"GET, POST, PATCH, DELETE, OPTIONS"</span>)
-        w.<span class="function">Header</span>().<span class="function">Set</span>(<span class="string">"Access-Control-Allow-Headers"</span>, <span class="string">"Content-Type, Authorization"</span>)
-        
-        <span class="keyword">if</span> r.Method == <span class="string">"OPTIONS"</span> {
-            w.<span class="function">WriteHeader</span>(http.StatusOK)
+            <span class="comment">// 转发请求</span>
+            proxy.<span class="function">ServeHTTP</span>(w, r)
             <span class="keyword">return</span>
         }
-        
-        h.<span class="function">ServeHTTP</span>(w, r)
+    }
+    
+    http.<span class="function">NotFound</span>(w, r)
+}
+
+<span class="keyword">func</span> (g *Gateway) <span class="function">authenticate</span>(r *http.Request) <span class="keyword">bool</span> {
+    token := r.Header.<span class="function">Get</span>(<span class="string">"Authorization"</span>)
+    <span class="keyword">return</span> token != <span class="string">""</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    gateway := <span class="function">NewGateway</span>()
+    http.<span class="function">ListenAndServe</span>(<span class="string">":8080"</span>, gateway)
+}</code></pre>
+            </div>
+
+            <h2 id="middleware">中间件</h2>
+            <div class="example-box">
+                <h3>📝 网关中间件</h3>
+                <pre><code><span class="comment">// 限流中间件</span>
+<span class="keyword">func</span> <span class="function">RateLimit</span>(middleware http.Handler) http.Handler {
+    <span class="keyword">return</span> http.<span class="function">HandlerFunc</span>(<span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) {
+        <span class="comment">// 实现限流逻辑</span>
+        middleware.<span class="function">ServeHTTP</span>(w, r)
     })
 }
 
 <span class="comment">// 日志中间件</span>
-<span class="function">func</span> <span class="function">loggingMiddleware</span>(h http.Handler) http.Handler {
+<span class="keyword">func</span> <span class="function">Logging</span>(middleware http.Handler) http.Handler {
     <span class="keyword">return</span> http.<span class="function">HandlerFunc</span>(<span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) {
-        log.<span class="function">Printf</span>(<span class="string">"Request: %s %s"</span>, r.Method, r.URL.Path)
-        h.<span class="function">ServeHTTP</span>(w, r)
+        start := time.<span class="function">Now</span>()
+        middleware.<span class="function">ServeHTTP</span>(w, r)
+        fmt.<span class="function">Printf</span>(<span class="string">"[%s] %s %v\n"</span>, r.Method, r.URL.Path, time.<span class="function">Since</span>(start))
     })
 }
 
-<span class="comment">// 使用中间件</span>
-<span class="function">func</span> <span class="function">main</span>() {
-    mux := runtime.<span class="function">NewServeMux</span>()
-    
-    <span class="comment">// 使用中间件包装</span>
-    handler := <span class="function">corsMiddleware</span>(<span class="function">loggingMiddleware</span>(mux))
-    
-    http.<span class="function">ListenAndServe</span>(<span class="string">":8080"</span>, handler)
+<span class="comment">// CORS 中间件</span>
+<span class="keyword">func</span> <span class="function">CORS</span>(middleware http.Handler) http.Handler {
+    <span class="keyword">return</span> http.<span class="function">HandlerFunc</span>(<span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) {
+        w.Header().<span class="function">Set</span>(<span class="string">"Access-Control-Allow-Origin"</span>, <span class="string">"*"</span>)
+        w.Header().<span class="function">Set</span>(<span class="string">"Access-Control-Allow-Methods"</span>, <span class="string">"GET, POST, PUT, DELETE"</span>)
+        w.Header().<span class="function">Set</span>(<span class="string">"Access-Control-Allow-Headers"</span>, <span class="string">"Content-Type, Authorization"</span>)
+        
+        <span class="keyword">if</span> r.Method == <span class="string">"OPTIONS"</span> {
+            w.WriteHeader(http.StatusNoContent)
+            <span class="keyword">return</span>
+        }
+        
+        middleware.<span class="function">ServeHTTP</span>(w, r)
+    })
 }</code></pre>
-            
-            <h3>测试 API</h3>
-            <pre><code><span class="comment"># GET 请求</span>
-curl http://localhost:8080/v1/hello/World
+            </div>
 
-<span class="comment"># POST 请求</span>
-curl -X POST http://localhost:8080/v1/users \
-  -H <span class="string">"Content-Type: application/json"</span> \
-  -d <span class="string">'{"name": "Alice", "email": "alice@example.com"}'</span>
-
-<span class="comment"># 查看 OpenAPI 文档</span>
-curl http://localhost:8080/swagger.json</code></pre>
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="ecosystem-gin.html">Gin Web 框架</a></li>
+                    <li><a href="ecosystem-gomicro.html">Go-Micro</a></li>
+                    <li><a href="ecosystem-grpc.html">gRPC</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

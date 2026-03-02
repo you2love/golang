@@ -4,109 +4,141 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数据类型 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>数据类型 - Go 基础类型</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="basics.html" class="back-link">← 返回 basics</a>
-            <h1>数据类型</h1>
-            <p class="intro">Go 语言提供丰富的基本数据类型，满足各种开发需求。</p>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="basics-variables.html" class="back-link">← 变量</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="basics-operators.html" class="back-link">运算符 →</a>
 
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="icon">🔢</div>
-                    <h4>数值</h4>
-                    <p>int, float64, complex</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🔤</div>
-                    <h4>字符串</h4>
-                    <p>string</p>
-                </div>
-                <div class="feature-card">
-                    <div name="true">✔️</div>
-                    <h4>布尔</h4>
-                    <p>bool</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🔄</div>
-                    <h4>派生类型</h4>
-                    <p>指针、数组、切片</p>
-                </div>
+            <h1>数据类型 - Go 基础类型</h1>
+            <p class="intro">Go 是静态类型语言，提供了丰富的基础数据类型。理解各种类型及其特性是编写正确 Go 代码的前提。</p>
+
+            <h2 id="basic-types">基础类型</h2>
+            <div class="example-box">
+                <h3>📝 数值类型</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 整数类型</span>
+    <span class="keyword">var</span> a <span class="keyword">int</span> = <span class="number">42</span>
+    <span class="keyword">var</span> b <span class="keyword">int8</span> = <span class="number">127</span>
+    <span class="keyword">var</span> c <span class="keyword">int16</span> = <span class="number">32767</span>
+    <span class="keyword">var</span> d <span class="keyword">int32</span> = <span class="number">2147483647</span>
+    <span class="keyword">var</span> e <span class="keyword">int64</span> = <span class="number">9223372036854775807</span>
+    
+    <span class="comment">// 无符号整数</span>
+    <span class="keyword">var</span> f <span class="keyword">uint</span> = <span class="number">100</span>
+    <span class="keyword">var</span> g <span class="keyword">uint8</span> = <span class="number">255</span>  <span class="comment">// 别名：byte</span>
+    <span class="keyword">var</span> h <span class="keyword">uint64</span> = <span class="number">18446744073709551615</span>
+    
+    <span class="comment">// 浮点数</span>
+    <span class="keyword">var</span> i <span class="keyword">float32</span> = <span class="number">3.14</span>
+    <span class="keyword">var</span> j <span class="keyword">float64</span> = <span class="number">3.1415926535</span>
+    
+    <span class="comment">// 复数</span>
+    <span class="keyword">var</span> k <span class="keyword">complex64</span> = <span class="number">1</span> + <span class="number">2i</span>
+    <span class="keyword">var</span> l <span class="keyword">complex128</span> = <span class="number">1</span> + <span class="number">2i</span>
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"int: %d, float: %f, complex: %v\n"</span>, a, j, l)
+}
+
+<span class="comment">// 类型大小 (64 位系统)</span>
+<span class="comment">// int: 8 bytes</span>
+<span class="comment">// int8: 1 byte</span>
+<span class="comment">// int16: 2 bytes</span>
+<span class="comment">// int32: 4 bytes</span>
+<span class="comment">// int64: 8 bytes</span>
+<span class="comment">// float32: 4 bytes</span>
+<span class="comment">// float64: 8 bytes</span></code></pre>
             </div>
 
-            <h2 id="datatypes">基本数据类型</h2>
-
-            <h3>数值类型</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 整型</span>
-    <span class="keyword">var</span> i <span class="keyword">int</span> = <span class="number">42</span>
-    <span class="keyword">var</span> i8 <span class="keyword">int8</span> = <span class="number">127</span>
-    <span class="keyword">var</span> i16 <span class="keyword">int16</span> = <span class="number">32767</span>
-    <span class="keyword">var</span> i32 <span class="keyword">int32</span> = <span class="number">2147483647</span>
-    <span class="keyword">var</span> i64 <span class="keyword">int64</span> = <span class="number">9223372036854775807</span>
-
-    <span class="comment">// 无符号整型</span>
-    <span class="keyword">var</span> u <span class="keyword">uint</span> = <span class="number">42</span>
-    <span class="keyword">var</span> u8 <span class="keyword">uint8</span> = <span class="number">255</span>
-    <span class="keyword">var</span> u16 <span class="keyword">uint16</span> = <span class="number">65535</span>
-    <span class="keyword">var</span> u32 <span class="keyword">uint32</span> = <span class="number">4294967295</span>
-    <span class="keyword">var</span> u64 <span class="keyword">uint64</span> = <span class="number">18446744073709551615</span>
-
-    <span class="comment">// 浮点型</span>
-    <span class="keyword">var</span> f32 <span class="keyword">float32</span> = <span class="number">3.14</span>
-    <span class="keyword">var</span> f64 <span class="keyword">float64</span> = <span class="number">3.141592653589793</span>
-
-    <span class="comment">// 复数</span>
-    <span class="keyword">var</span> c64 <span class="keyword">complex64</span> = <span class="number">1</span> + <span class="number">2i</span>
-    <span class="keyword">var</span> c128 <span class="keyword">complex128</span> = <span class="number">1</span> + <span class="number">2i</span>
-
-    fmt.<span class="function">Println</span>(i, i8, i16, i32, i64)
-    fmt.<span class="function">Println</span>(u, u8, u16, u32, u64)
-    fmt.<span class="function">Println</span>(f32, f64)
-    fmt.<span class="function">Println</span>(c64, c128)
-}</code></pre>
-
-            <h3>字符串和布尔类型</h3>
-            <pre><code><span class="keyword">package</span> main
+            <div class="example-box">
+                <h3>📝 其他基础类型</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 字符串</span>
-    <span class="keyword">var</span> str <span class="keyword">string</span> = <span class="string">"Hello, Go!"</span>
-    message := <span class="string">"Welcome to Go programming"</span>
-
-    <span class="comment">// 多行字符串</span>
-    multiline := <span class="string">`这是一个
-多行字符串
-示例`</span>
-
+<span class="keyword">func</span> <span class="function">main</span>() {
     <span class="comment">// 布尔类型</span>
-    <span class="keyword">var</span> isTrue <span class="keyword">bool</span> = <span class="keyword">true</span>
-    isFalse := <span class="keyword">false</span>
-
-    fmt.<span class="function">Println</span>(str)
-    fmt.<span class="function">Println</span>(message)
-    fmt.<span class="function">Println</span>(multiline)
-    fmt.<span class="function">Println</span>(isTrue, isFalse)
+    <span class="keyword">var</span> isActive <span class="keyword">bool</span> = <span class="keyword">true</span>
+    <span class="keyword">var</span> isDone <span class="keyword">bool</span> = <span class="keyword">false</span>
+    
+    <span class="comment">// 字符串</span>
+    <span class="keyword">var</span> name <span class="keyword">string</span> = <span class="string">"Go"</span>
+    message := <span class="string">`多行字符串
+可以跨行
+保留格式`</span>
+    
+    <span class="comment">// 字节 (byte 是 uint8 别名)</span>
+    <span class="keyword">var</span> b <span class="keyword">byte</span> = <span class="string">'A'</span>
+    
+    <span class="comment">// rune (rune 是 int32 别名，表示 Unicode 码点)</span>
+    <span class="keyword">var</span> r <span class="keyword">rune</span> = <span class="string">'中'</span>
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"Bool: %v, String: %s\n"</span>, isActive, name)
+    fmt.<span class="function">Printf</span>(<span class="string">"Byte: %c, Rune: %c\n"</span>, b, r)
 }</code></pre>
+            </div>
 
-            
+            <div class="info-box">
+                <h3>💡 类型要点</h3>
+                <ul>
+                    <li><strong>默认类型</strong>: 整数默认 int，浮点默认 float64</li>
+                    <li><strong>类型转换</strong>: Go 没有隐式类型转换</li>
+                    <li><strong>byte/rune</strong>: byte=uint8, rune=int32</li>
+                    <li><strong>字符串</strong>: 不可变，UTF-8 编码</li>
+                </ul>
+            </div>
+
+            <h2 id="type-conversion">类型转换</h2>
+            <div class="example-box">
+                <h3>📝 显式类型转换</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 整数转浮点</span>
+    <span class="keyword">var</span> i <span class="keyword">int</span> = <span class="number">42</span>
+    f := <span class="keyword">float64</span>(i)
+    
+    <span class="comment">// 浮点转整数 (截断)</span>
+    <span class="keyword">var</span> x <span class="keyword">float64</span> = <span class="number">3.9</span>
+    y := <span class="keyword">int</span>(x)  <span class="comment">// 3</span>
+    
+    <span class="comment">// 不同宽度整数转换</span>
+    <span class="keyword">var</span> a <span class="keyword">int8</span> = <span class="number">10</span>
+    b := <span class="keyword">int32</span>(a)
+    c := <span class="keyword">int64</span>(a)
+    
+    <span class="comment">// 整数和字符串互转</span>
+    num := <span class="number">123</span>
+    str := fmt.<span class="function">Sprintf</span>(<span class="string">"%d"</span>, num)
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"int→float: %f, float→int: %d\n"</span>, f, y)
+    fmt.<span class="function">Printf</span>(<span class="string">"int→string: %s\n"</span>, str)
+}</code></pre>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="basics-variables.html">变量</a></li>
+                    <li><a href="basics-operators.html">运算符</a></li>
+                    <li><a href="basics-arrays.html">数组</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

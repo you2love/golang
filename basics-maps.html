@@ -4,96 +4,200 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>映射 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>Map - Go 映射类型</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="basics.html" class="back-link">← 返回 basics</a>
-            <h1>映射 (Map)</h1>
-            <p class="intro">Map 是 Go 语言中的键值对数据结构，实现哈希表。</p>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="basics-arrays.html" class="back-link">← 数组</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="structs.html" class="back-link">结构体 →</a>
 
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="icon">🔑</div>
-                    <h4>键值对</h4>
-                    <p>key-value 存储</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">⚡</div>
-                    <h4>查找</h4>
-                    <p>O(1) 时间复杂度</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🔄</div>
-                    <h4>遍历</h4>
-                    <p>range 遍历</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🗑️</div>
-                    <h4>删除</h4>
-                    <p>delete 函数</p>
-                </div>
-            </div>
+            <h1>Map - Go 映射类型</h1>
+            <p class="intro">Map 是键值对的无序集合，是 Go 中常用的数据结构。理解 Map 的创建、操作和特性对于编写高效的 Go 代码至关重要。</p>
 
-            <h2 id="maps">映射（Map）</h2>
-            <pre><code><span class="keyword">package</span> main
+            <h2 id="basics">Map 基础</h2>
+            <div class="example-box">
+                <h3>📝 Map 定义和操作</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> <span class="string">"fmt"</span>
 
-<span class="function">func</span> <span class="function">main</span>() {
-    <span class="comment">// 创建 map</span>
-    m1 := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>)
-    m1[<span class="string">"apple"</span>] = <span class="number">5</span>
-    m1[<span class="string">"banana"</span>] = <span class="number">3</span>
-
-    <span class="comment">// map 字面量</span>
-    m2 := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>{
-        <span class="string">"red"</span>:    <span class="number">255</span>,
-        <span class="string">"green"</span>:  <span class="number">128</span>,
-        <span class="string">"blue"</span>:   <span class="number">64</span>,
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 方式 1: make 创建</span>
+    m := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>)
+    m[<span class="string">"a"</span>] = <span class="number">1</span>
+    m[<span class="string">"b"</span>] = <span class="number">2</span>
+    
+    <span class="comment">// 方式 2: 字面量初始化</span>
+    ages := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>{
+        <span class="string">"Alice"</span>: <span class="number">30</span>,
+        <span class="string">"Bob"</span>:   <span class="number">25</span>,
     }
-
-    <span class="comment">// 读取值</span>
-    value, exists := m1[<span class="string">"apple"</span>]
-    fmt.<span class="function">Println</span>(<span class="string">"apple 的值:"</span>, value, <span class="string">"存在:"</span>, exists)
-
-    <span class="comment">// 删除键</span>
-    <span class="keyword">delete</span>(m1, <span class="string">"banana"</span>)
-
-    <span class="comment">// 遍历 map</span>
-    <span class="keyword">for</span> key, val := <span class="keyword">range</span> m2 {
-        fmt.<span class="function">Println</span>(key, <span class="string">":"</span>, val)
+    
+    <span class="comment">// 访问元素</span>
+    fmt.<span class="function">Println</span>(ages[<span class="string">"Alice"</span>])  <span class="comment">// 30</span>
+    
+    <span class="comment">// 检查键是否存在</span>
+    <span class="keyword">if</span> val, ok := ages[<span class="string">"Charlie"</span>]; ok {
+        fmt.<span class="function">Println</span>(<span class="string">"Found:"</span>, val)
+    } <span class="keyword">else</span> {
+        fmt.<span class="function">Println</span>(<span class="string">"Not found"</span>)
     }
-
-    fmt.<span class="function">Println</span>(<span class="string">"map 长度:"</span>, <span class="function">len</span>(m2))
+    
+    <span class="comment">// 删除元素</span>
+    <span class="function">delete</span>(ages, <span class="string">"Bob"</span>)
+    
+    <span class="comment">// 获取长度</span>
+    fmt.<span class="function">Println</span>(<span class="function">len</span>(ages))
+    
+    <span class="comment">// 遍历 Map</span>
+    <span class="keyword">for</span> key, value := <span class="keyword">range</span> ages {
+        fmt.<span class="function">Printf</span>(<span class="string">"%s: %d\n"</span>, key, value)
+    }
 }</code></pre>
+            </div>
+
+            <div class="info-box">
+                <h3>💡 Map 要点</h3>
+                <ul>
+                    <li><strong>引用类型</strong>: Map 是引用类型</li>
+                    <li><strong>无序</strong>: 遍历顺序不固定</li>
+                    <li><strong>键类型</strong>: 必须是可比较类型</li>
+                    <li><strong>零值 nil</strong>: nil map 不能赋值</li>
+                </ul>
+            </div>
+
+            <h2 id="operations">Map 操作</h2>
+            <div class="example-box">
+                <h3>📝 常用操作</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建并初始化</span>
+    scores := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>{
+        <span class="string">"Math"</span>:    <span class="number">95</span>,
+        <span class="string">"English"</span>: <span class="number">88</span>,
+        <span class="string">"Science"</span>: <span class="number">92</span>,
+    }
+    
+    <span class="comment">// 添加/修改</span>
+    scores[<span class="string">"History"</span>] = <span class="number">85</span>
+    scores[<span class="string">"Math"</span>] = <span class="number">100</span>
+    
+    <span class="comment">// 检查存在性</span>
+    <span class="keyword">if</span> _, exists := scores[<span class="string">"Art"</span>]; !exists {
+        fmt.<span class="function">Println</span>(<span class="string">"Art not found"</span>)
+    }
+    
+    <span class="comment">// 删除</span>
+    <span class="function">delete</span>(scores, <span class="string">"English"</span>)
+    
+    <span class="comment">// 只获取键</span>
+    <span class="keyword">for</span> key := <span class="keyword">range</span> scores {
+        fmt.<span class="function">Println</span>(key)
+    }
+    
+    <span class="comment">// 只获取值</span>
+    <span class="keyword">for</span> _, value := <span class="keyword">range</span> scores {
+        fmt.<span class="function">Println</span>(value)
+    }
+}</code></pre>
+            </div>
+
+            <h2 id="advanced">高级用法</h2>
+            <div class="example-box">
+                <h3>📝 Map 高级操作</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> <span class="string">"fmt"</span>
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 嵌套 Map</span>
+    users := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>{
+        <span class="string">"user1"</span>: {<span class="string">"name"</span>: <span class="string">"Alice"</span>, <span class="string">"email"</span>: <span class="string">"alice@example.com"</span>},
+        <span class="string">"user2"</span>: {<span class="string">"name"</span>: <span class="string">"Bob"</span>, <span class="string">"email"</span>: <span class="string">"bob@example.com"</span>},
+    }
+    
+    <span class="comment">// 访问嵌套 Map</span>
+    fmt.<span class="function">Println</span>(users[<span class="string">"user1"</span>][<span class="string">"name"</span>])
+    
+    <span class="comment">// Map 切片</span>
+    configs := []<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>{
+        {<span class="string">"host"</span>: <span class="string">"localhost"</span>, <span class="string">"port"</span>: <span class="string">"8080"</span>},
+        {<span class="string">"host"</span>: <span class="string">"127.0.0.1"</span>, <span class="string">"port"</span>: <span class="string">"9000"</span>},
+    }
+    
+    <span class="comment">// 切片 Map</span>
+    sliceMap := <span class="keyword">map</span>[<span class="keyword">string</span>][]<span class="keyword">int</span>{
+        <span class="string">"nums1"</span>: {<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>},
+        <span class="string">"nums2"</span>: {<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>},
+    }
+    
+    fmt.<span class="function">Println</span>(sliceMap[<span class="string">"nums1"</span>])
+}</code></pre>
+            </div>
+
+            <div class="warning-box">
+                <h3>⚠️ Map 注意事项</h3>
+                <ul>
+                    <li><strong>nil Map</strong>: 不能向 nil map 添加元素</li>
+                    <li><strong>并发安全</strong>: Map 不是并发安全的</li>
+                    <li><strong>无序遍历</strong>: 不要依赖遍历顺序</li>
+                    <li><strong>键类型</strong>: slice、function、map 不能做键</li>
+                </ul>
+            </div>
+
+            <h2 id="concurrent">并发 Map</h2>
+            <div class="example-box">
+                <h3>📝 sync.Map 并发安全</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"sync"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="keyword">var</span> m sync.Map
+    
+    <span class="comment">// 存储</span>
+    m.<span class="function">Store</span>(<span class="string">"key1"</span>, <span class="string">"value1"</span>)
+    
+    <span class="comment">// 读取</span>
+    val, ok := m.<span class="function">Load</span>(<span class="string">"key1"</span>)
+    fmt.<span class="function">Println</span>(val, ok)
+    
+    <span class="comment">// 读取或存储</span>
+    val, loaded := m.<span class="function">LoadOrStore</span>(<span class="string">"key2"</span>, <span class="string">"value2"</span>)
+    
+    <span class="comment">// 删除</span>
+    m.<span class="function">Delete</span>(<span class="string">"key1"</span>)
+    
+    <span class="comment">// 遍历</span>
+    m.<span class="function">Range</span>(<span class="keyword">func</span>(key, value <span class="keyword">interface</span>{}) <span class="keyword">bool</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"%v: %v\n"</span>, key, value)
+        <span class="keyword">return</span> <span class="keyword">true</span>
+    })
+}</code></pre>
+            </div>
 
             <div class="note-box">
-                <h3>Map 的内部结构</h3>
-                <p>Map 在 Go 内部使用哈希表实现，主要包含以下结构：</p>
-                <pre><code><span class="keyword">type</span> hmap <span class="keyword">struct</span> {
-    count     <span class="keyword">int</span>         <span class="comment">// map 中元素的数量</span>
-    flags     <span class="keyword">uint8</span>       <span class="comment">// 状态标志</span>
-    B         <span class="keyword">uint8</span>       <span class="comment">// 桶数组大小的对数（bucket 数组大小 = 2^B）</span>
-    noverflow <span class="keyword">uint16</span>     <span class="comment">// 溢出的桶数量</span>
-    hash0     <span class="keyword">uint32</span>     <span class="comment">// 哈希种子</span>
-    buckets   unsafe.Pointer <span class="comment">// 桶数组的指针</span>
-    oldbuckets unsafe.Pointer <span class="comment">// 扩容时的旧桶数组</span>
-    nevacuate <span class="keyword">uintptr</span>    <span class="comment">// 扩容搬迁进度</span>
-    extra *mapextra <span class="comment">// 额外信息（溢出桶等）</span>
-}</code></pre>
-                <p>Map 的查找、插入和删除操作的平均时间复杂度为 O(1)。当 map 中的元素数量超过负载因子时，会自动扩容。</p>
-            
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="basics-arrays.html">数组</a></li>
+                    <li><a href="structs.html">结构体</a></li>
+                    <li><a href="stdlib-sync.html">sync 包</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

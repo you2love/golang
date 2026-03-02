@@ -20,38 +20,7 @@
             <h1>Validator - Go 参数校验库</h1>
             <p class="intro">go-playground/validator 是 Go 最流行的参数校验库，支持丰富的校验规则和自定义验证。掌握 Validator 是开发安全、健壮的 Go Web 应用的基础。</p>
 
-            <!-- 核心概念 -->
-            <h2>📌 核心概念</h2>
-            <div class="feature-grid">
-                <div class="feature-card highlight">
-                    <div class="icon">✅</div>
-                    <h4>丰富规则</h4>
-                    <p>100+ 内置规则</p>
-                    <code class="tag">required,email</code>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🏷️</div>
-                    <h4>Tag 声明</h4>
-                    <p>结构体标签定义</p>
-                    <code class="tag">validate:"..."</code>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🔧</div>
-                    <h4>自定义验证</h4>
-                    <p>注册自定义规则</p>
-                    <code class="tag">RegisterValidation</code>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🌐</div>
-                    <h4>多语言</h4>
-                    <p>错误消息翻译</p>
-                    <code class="tag">i18n</code>
-                </div>
-            </div>
-
-            <!-- 快速开始 -->
             <h2 id="quickstart">快速开始</h2>
-
             <div class="example-box">
                 <h3>📝 基础校验</h3>
                 <pre><code><span class="keyword">package</span> main
@@ -101,9 +70,7 @@
                 </ul>
             </div>
 
-            <!-- 内置规则 -->
             <h2 id="rules">内置校验规则</h2>
-
             <div class="example-box">
                 <h3>📖 常用校验规则</h3>
                 <pre><code><span class="keyword">type</span> Request <span class="keyword">struct</span> {
@@ -160,9 +127,7 @@
 }</code></pre>
             </div>
 
-            <!-- 错误处理 -->
             <h2 id="errors">错误处理</h2>
-
             <div class="example-box">
                 <h3>📝 解析校验错误</h3>
                 <pre><code><span class="keyword">func</span> <span class="function">validateUser</span>(user User) <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span> {
@@ -195,9 +160,7 @@
 }</code></pre>
             </div>
 
-            <!-- 自定义验证 -->
             <h2 id="custom">自定义验证</h2>
-
             <div class="example-box">
                 <h3>📝 注册自定义规则</h3>
                 <pre><code><span class="keyword">package</span> main
@@ -238,7 +201,6 @@
 }</code></pre>
             </div>
 
-            <!-- 与 Gin 集成 -->
             <h2 id="gin">与 Gin 集成</h2>
             <div class="example-box">
                 <h3>📝 Gin + Validator 中间件</h3>
@@ -294,7 +256,7 @@
             c.<span class="function">JSON</span>(http.StatusBadRequest, ErrorResponse{
                 Code:    <span class="number">400</span>,
                 Message: <span class="string">"Validation failed"</span>,
-                Errors:  formatErrors(err),
+                Errors:  <span class="function">formatErrors</span>(err),
             })
             <span class="keyword">return</span>
         }
@@ -308,15 +270,13 @@
 <span class="keyword">func</span> <span class="function">formatErrors</span>(err <span class="keyword">error</span>) <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span> {
     errors := <span class="function">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>)
     <span class="keyword">for</span> _, e := <span class="keyword">range</span> err.(validator.ValidationErrors) {
-        errors[e.<span class="function">Field</span>()] = getErrorMessage(e)
+        errors[e.<span class="function">Field</span>()] = <span class="function">getErrorMessage</span>(e)
     }
     <span class="keyword">return</span> errors
 }</code></pre>
             </div>
 
-            <!-- 最佳实践 -->
             <h2 id="best-practices">最佳实践</h2>
-
             <div class="success-box">
                 <h3>✅ Validator 使用建议</h3>
                 <ul>

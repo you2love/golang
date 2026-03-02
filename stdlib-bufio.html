@@ -4,81 +4,200 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>bufio 缓冲 I/O - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>bufio 包 - Go 缓冲 I/O 详解</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
-                <div class="content">
-            <a href="stdlib.html" class="back-link">← 返回 stdlib</a>
-            <h2 id="bufio">bufio 缓冲 I/O</h2>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
+        <div class="content">
+            <a href="stdlib-io.html" class="back-link">← io 包</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="stdlib-embed.html" class="back-link">embed 包 →</a>
 
-            <h3>缓冲读取</h3>
-            <pre><code><span class="keyword">package</span> main
+            <h1>bufio 包 - Go 缓冲 I/O 详解</h1>
+            <p class="intro">bufio 包提供了带缓冲的 I/O 操作，通过减少系统调用次数来显著提升 I/O 性能。理解 bufio 是高效处理文件、网络等 I/O 操作的关键。</p>
+
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">📖</div>
+                    <h4>Reader</h4>
+                    <p>缓冲读取</p>
+                    <code class="tag">ReadString</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">✍️</div>
+                    <h4>Writer</h4>
+                    <p>缓冲写入</p>
+                    <code class="tag">WriteString</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔍</div>
+                    <h4>Scanner</h4>
+                    <p>文本扫描</p>
+                    <code class="tag">Scan()</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⚡</div>
+                    <h4>性能提升</h4>
+                    <p>减少系统调用</p>
+                    <code class="tag">10x 性能</code>
+                </div>
+            </div>
+
+            <!-- bufio.Reader -->
+            <h2 id="reader">bufio.Reader 缓冲读取</h2>
+
+            <div class="example-box">
+                <h3>📝 Reader 基础使用</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"bufio"</span>
     <span class="string">"fmt"</span>
     <span class="string">"os"</span>
+    <span class="string">"strings"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 从字符串读取</span>
+    reader := bufio.<span class="function">NewReader</span>(strings.<span class="function">NewReader</span>(<span class="string">"Hello, World!\n"</span>))
+    
+    <span class="comment">// 读取到分隔符</span>
+    line, _ := reader.<span class="function">ReadString</span>(<span class="string">'\n'</span>)
+    fmt.<span class="function">Println</span>(line)
+    
+    <span class="comment">// 读取单个字节</span>
+    b, _ := reader.<span class="function">ReadByte</span>()
+    fmt.<span class="function">Printf</span>(<span class="string">"Byte: %c\n"</span>, b)
+    
+    <span class="comment">// 读取到指定分隔符（丢弃）</span>
+    reader.<span class="function">ReadBytes</span>(<span class="string">'\n'</span>)
+    
+    <span class="comment">// 读取一行（不包括\n）</span>
+    reader2 := bufio.<span class="function">NewReader</span>(strings.<span class="function">NewReader</span>(<span class="string">"Line 1\nLine 2\n"</span>))
+    line2, _ := reader2.<span class="function">ReadLine</span>()
+    fmt.<span class="function">Printf</span>(<span class="string">"Line: %s\n"</span>, line2)
+    
+    <span class="comment">// 从文件读取</span>
     file, _ := os.<span class="function">Open</span>(<span class="string">"test.txt"</span>)
     <span class="keyword">defer</span> file.<span class="function">Close</span>()
     
-    scanner := bufio.<span class="function">NewScanner</span>(file)
-    
-    <span class="comment">// 逐行读取</span>
-    <span class="keyword">for</span> scanner.<span class="function">Scan</span>() {
-        fmt.<span class="function">Println</span>(scanner.<span class="function">Text</span>())
-    }
+    bufReader := bufio.<span class="function">NewReader</span>(file)
+    content, _ := bufReader.<span class="function">ReadString</span>(<span class="string">'\n'</span>)
+    fmt.<span class="function">Println</span>(content)
 }</code></pre>
+            </div>
 
-            <h3>缓冲写入</h3>
-            <pre><code><span class="keyword">package</span> main
+            <div class="info-box">
+                <h3>💡 Reader 要点</h3>
+                <ul>
+                    <li><strong>默认缓冲</strong>: 默认缓冲区大小为 4KB</li>
+                    <li><strong>自定义大小</strong>: NewReaderSize 可指定大小</li>
+                    <li><strong>Peek</strong>: 预览数据而不消耗</li>
+                    <li><strong>Discard</strong>: 跳过指定字节数</li>
+                </ul>
+            </div>
+
+            <!-- bufio.Writer -->
+            <h2 id="writer">bufio.Writer 缓冲写入</h2>
+            <div class="example-box">
+                <h3>📝 Writer 基础使用</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"bufio"</span>
+    <span class="string">"bytes"</span>
     <span class="string">"fmt"</span>
     <span class="string">"os"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 写入 bytes.Buffer</span>
+    <span class="keyword">var</span> buf bytes.Buffer
+    writer := bufio.<span class="function">NewWriter</span>(&buf)
+    
+    <span class="comment">// 缓冲写入</span>
+    writer.<span class="function">WriteString</span>(<span class="string">"Hello, "</span>)
+    writer.<span class="function">WriteString</span>(<span class="string">"World!\n"</span>)
+    
+    <span class="comment">// 必须刷新才能看到数据</span>
+    writer.<span class="function">Flush</span>()
+    fmt.<span class="function">Println</span>(buf.<span class="function">String</span>())
+    
+    <span class="comment">// 写入文件</span>
     file, _ := os.<span class="function">Create</span>(<span class="string">"output.txt"</span>)
     <span class="keyword">defer</span> file.<span class="function">Close</span>()
     
-    writer := bufio.<span class="function">NewWriter</span>(file)
-    <span class="keyword">defer</span> writer.<span class="function">Flush</span>()
+    bufWriter := bufio.<span class="function">NewWriter</span>(file)
+    bufWriter.<span class="function">WriteString</span>(<span class="string">"File content\n"</span>)
+    bufWriter.<span class="function">Flush</span>() <span class="comment">// 必须刷新</span>
     
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">10</span>; i++ {
-        fmt.<span class="function">Fprintln</span>(writer, <span class="string">"Line"</span>, i)
-    }
+    <span class="comment">// 可用字节数</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"Available: %d\n"</span>, bufWriter.<span class="function">Available</span>())
+    
+    <span class="comment">// 缓冲大小</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"Size: %d\n"</span>, bufWriter.<span class="function">BufferSize</span>())
 }</code></pre>
+            </div>
 
-            <h3>从标准输入读取</h3>
-            <pre><code><span class="keyword">package</span> main
+            <div class="warning-box">
+                <h3>⚠️ Writer 注意事项</h3>
+                <ul>
+                    <li><strong>必须 Flush</strong>: 数据在缓冲区，必须调用 Flush</li>
+                    <li><strong>错误处理</strong>: Flush 可能返回错误</li>
+                    <li><strong>资源清理</strong>: 使用 defer 确保 Flush 被调用</li>
+                </ul>
+            </div>
+
+            <!-- bufio.Scanner -->
+            <h2 id="scanner">bufio.Scanner 文本扫描</h2>
+            <div class="example-box">
+                <h3>📝 Scanner 逐行读取</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"bufio"</span>
     <span class="string">"fmt"</span>
     <span class="string">"os"</span>
+    <span class="string">"strings"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    scanner := bufio.<span class="function">NewScanner</span>(os.Stdin)
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 逐行读取字符串</span>
+    text := <span class="string">"Line 1\nLine 2\nLine 3\n"</span>
+    scanner := bufio.<span class="function">NewScanner</span>(strings.<span class="function">NewReader</span>(text))
     
-    fmt.<span class="function">Print</span>(<span class="string">"Enter your name: "</span>)
-    scanner.<span class="function">Scan</span>()
-    name := scanner.<span class="function">Text</span>()
+    <span class="keyword">for</span> scanner.<span class="function">Scan</span>() {
+        line := scanner.<span class="function">Text</span>()
+        fmt.<span class="function">Println</span>(line)
+    }
     
-    fmt.<span class="function">Printf</span>(<span class="string">"Hello, %s!\n"</span>, name)
+    <span class="comment">// 检查错误</span>
+    <span class="keyword">if</span> err := scanner.<span class="function">Err</span>(); err != <span class="keyword">nil</span> {
+        fmt.<span class="function">Printf</span>(<span class="string">"Scan error: %v\n"</span>, err)
+    }
+    
+    <span class="comment">// 从文件逐行读取</span>
+    file, _ := os.<span class="function">Open</span>(<span class="string">"test.txt"</span>)
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    scanner2 := bufio.<span class="function">NewScanner</span>(file)
+    lineNum := <span class="number">0</span>
+    <span class="keyword">for</span> scanner2.<span class="function">Scan</span>() {
+        lineNum++
+        fmt.<span class="function">Printf</span>(<span class="string">"Line %d: %s\n"</span>, lineNum, scanner2.<span class="function">Text</span>())
+    }
 }</code></pre>
+            </div>
 
-            <h3>读取分隔符</h3>
-            <pre><code><span class="keyword">package</span> main
+            <div class="example-box">
+                <h3>📝 自定义分割函数</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"bufio"</span>
@@ -86,20 +205,117 @@
     <span class="string">"strings"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    reader := strings.<span class="function">NewReader</span>(<span class="string">"apple,banana,cherry"</span>)
-    scanner := bufio.<span class="function">NewScanner</span>(reader)
-    
-    <span class="comment">// 设置分隔符</span>
-    scanner.<span class="function">Split</span>(bufio.<span class="function">ScanWords</span>)
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 按单词扫描</span>
+    text := <span class="string">"Hello world from Go"</span>
+    scanner := bufio.<span class="function">NewScanner</span>(strings.<span class="function">NewReader</span>(text))
+    scanner.<span class="function">Split</span>(bufio.ScanWords)
     
     <span class="keyword">for</span> scanner.<span class="function">Scan</span>() {
         fmt.<span class="function">Println</span>(scanner.<span class="function">Text</span>())
     }
+    
+    <span class="comment">// 按 rune 扫描</span>
+    scanner2 := bufio.<span class="function">NewScanner</span>(strings.<span class="function">NewReader</span>(<span class="string">"ABC"</span>))
+    scanner2.<span class="function">Split</span>(bufio.ScanRunes)
+    
+    <span class="keyword">for</span> scanner2.<span class="function">Scan</span>() {
+        fmt.<span class="function">Printf</span>(<span class="string">"Rune: %s\n"</span>, scanner2.<span class="function">Text</span>())
+    }
+    
+    <span class="comment">// 自定义分割函数：按逗号分割</span>
+    commaSplit := <span class="keyword">func</span>(data []<span class="keyword">byte</span>, atEOF <span class="keyword">bool</span>) (<span class="keyword">int</span>, []<span class="keyword">byte</span>, <span class="keyword">error</span>) {
+        <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="function">len</span>(data); i++ {
+            <span class="keyword">if</span> data[i] == <span class="string">','</span> {
+                <span class="keyword">return</span> i + <span class="number">1</span>, data[:i], <span class="keyword">nil</span>
+            }
+        }
+        <span class="keyword">return</span> <span class="number">0</span>, <span class="keyword">nil</span>, <span class="keyword">nil</span>
+    }
+    
+    text2 := <span class="string">"apple,banana,orange,grape"</span>
+    scanner3 := bufio.<span class="function">NewScanner</span>(strings.<span class="function">NewReader</span>(text2))
+    scanner3.<span class="function">Split</span>(commaSplit)
+    
+    <span class="keyword">for</span> scanner3.<span class="function">Scan</span>() {
+        fmt.<span class="function">Println</span>(scanner3.<span class="function">Text</span>())
+    }
 }</code></pre>
+            </div>
 
-            <h3>使用 bufio.Reader</h3>
-            <pre><code><span class="keyword">package</span> main
+            <!-- 性能对比 -->
+            <h2 id="performance">性能对比</h2>
+            <div class="example-box">
+                <h3>📊 bufio vs 直接 I/O</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"bufio"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"io"</span>
+    <span class="string">"os"</span>
+    <span class="string">"time"</span>
+)
+
+<span class="comment">// 直接读取（无缓冲）</span>
+<span class="keyword">func</span> <span class="function">readWithoutBuffer</span>(filename <span class="keyword">string</span>) <span class="keyword">error</span> {
+    file, _ := os.<span class="function">Open</span>(filename)
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    buf := <span class="function">make</span>([]<span class="keyword">byte</span>, <span class="number">1</span>) <span class="comment">// 每次 1 字节</span>
+    <span class="keyword">for</span> {
+        _, err := file.<span class="function">Read</span>(buf)
+        <span class="keyword">if</span> err == io.EOF {
+            <span class="keyword">break</span>
+        }
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="comment">// 缓冲读取</span>
+<span class="keyword">func</span> <span class="function">readWithBuffer</span>(filename <span class="keyword">string</span>) <span class="keyword">error</span> {
+    file, _ := os.<span class="function">Open</span>(filename)
+    <span class="keyword">defer</span> file.<span class="function">Close</span>()
+    
+    reader := bufio.<span class="function">NewReader</span>(file)
+    buf := <span class="function">make</span>([]<span class="keyword">byte</span>, <span class="number">1</span>)
+    <span class="keyword">for</span> {
+        _, err := reader.<span class="function">Read</span>(buf)
+        <span class="keyword">if</span> err == io.EOF {
+            <span class="keyword">break</span>
+        }
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建测试文件</span>
+    file, _ := os.<span class="function">Create</span>(<span class="string">"test.dat"</span>)
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">100000</span>; i++ {
+        file.<span class="function">Write</span>([]<span class="keyword">byte</span>(<span class="string">"0123456789\n"</span>))
+    }
+    file.<span class="function">Close</span>()
+    
+    <span class="comment">// 测试无缓冲</span>
+    start := time.<span class="function">Now</span>()
+    <span class="function">readWithoutBuffer</span>(<span class="string">"test.dat"</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"Without buffer: %v\n"</span>, time.<span class="function">Since</span>(start))
+    
+    <span class="comment">// 测试有缓冲</span>
+    start = time.<span class="function">Now</span>()
+    <span class="function">readWithBuffer</span>(<span class="string">"test.dat"</span>)
+    fmt.<span class="function">Printf</span>(<span class="string">"With buffer: %v\n"</span>, time.<span class="function">Since</span>(start))
+    
+    <span class="comment">// 结果：缓冲读取快 100-1000 倍</span>
+}</code></pre>
+            </div>
+
+            <!-- 实用模式 -->
+            <h2 id="patterns">实用模式</h2>
+
+            <div class="example-box">
+                <h3>📝 文件处理模式</h3>
+                <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
     <span class="string">"bufio"</span>
@@ -107,52 +323,89 @@
     <span class="string">"os"</span>
 )
 
-<span class="function">func</span> <span class="function">main</span>() {
-    file, _ := os.<span class="function">Open</span>(<span class="string">"test.txt"</span>)
+<span class="comment">// 模式 1: 大文件逐行处理</span>
+<span class="keyword">func</span> <span class="function">processLargeFile</span>(filename <span class="keyword">string</span>) <span class="keyword">error</span> {
+    file, err := os.<span class="function">Open</span>(filename)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
     <span class="keyword">defer</span> file.<span class="function">Close</span>()
     
-    reader := bufio.<span class="function">NewReader</span>(file)
+    scanner := bufio.<span class="function">NewScanner</span>(file)
+    <span class="keyword">for</span> scanner.<span class="function">Scan</span>() {
+        line := scanner.<span class="function">Text</span>()
+        <span class="comment">// 处理每一行...</span>
+        fmt.<span class="function">Println</span>(line)
+    }
     
-    <span class="comment">// 读取到分隔符</span>
-    line, _ := reader.<span class="function">ReadString</span>(<span class="string">'\n'</span>)
-    fmt.<span class="function">Println</span>(<span class="string">"Line:"</span>, line)
-    
-    <span class="comment">// 读取字节</span>
-    data := <span class="function">make</span>([]<span class="keyword">byte</span>, <span class="number">10</span>)
-    n, _ := reader.<span class="function">Read</span>(data)
-    fmt.<span class="function">Printf</span>(<span class="string">"Read %d bytes: %s\n"</span>, n, data)
-}</code></pre>
+    <span class="keyword">return</span> scanner.<span class="function">Err</span>()
+}
 
-            <h3>使用 bufio.Writer</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"bufio"</span>
-    <span class="string">"os"</span>
-)
-
-<span class="function">func</span> <span class="function">main</span>() {
-    file, _ := os.<span class="function">Create</span>(<span class="string">"output.txt"</span>)
+<span class="comment">// 模式 2: 高效写入文件</span>
+<span class="keyword">func</span> <span class="function">writeLargeFile</span>(filename <span class="keyword">string</span>, lines []<span class="keyword">string</span>) <span class="keyword">error</span> {
+    file, err := os.<span class="function">Create</span>(filename)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="keyword">return</span> err
+    }
     <span class="keyword">defer</span> file.<span class="function">Close</span>()
     
     writer := bufio.<span class="function">NewWriter</span>(file)
-    
-    <span class="comment">// 写入字节</span>
-    writer.<span class="function">Write</span>([]<span class="keyword">byte</span>(<span class="string">"Hello"</span>))
-    
-    <span class="comment">// 写入字符串</span>
-    writer.<span class="function">WriteString</span>(<span class="string">", World!"</span>)
-    
-    <span class="comment">// 刷新缓冲区</span>
-    writer.<span class="function">Flush</span>()
-}</code></pre>
+    <span class="keyword">for</span> _, line := <span class="keyword">range</span> lines {
+        writer.<span class="function">WriteString</span>(line + <span class="string">"\n"</span>)
+    }
+    <span class="keyword">return</span> writer.<span class="function">Flush</span>()
+}
 
-            
+<span class="comment">// 模式 3: 交互式输入</span>
+<span class="keyword">func</span> <span class="function">readUserInput</span>() <span class="keyword">string</span> {
+    reader := bufio.<span class="function">NewReader</span>(os.Stdin)
+    fmt.<span class="function">Print</span>(<span class="string">"Enter something: "</span>)
+    input, _ := reader.<span class="function">ReadString</span>(<span class="string">'\n'</span>)
+    <span class="keyword">return</span> input[:<span class="function">len</span>(input)-<span class="number">1</span>] <span class="comment">// 去掉换行符</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="function">processLargeFile</span>(<span class="string">"large.txt"</span>)
+    <span class="function">writeLargeFile</span>(<span class="string">"output.txt"</span>, []<span class="keyword">string</span>{<span class="string">"Line 1"</span>, <span class="string">"Line 2"</span>})
+    input := <span class="function">readUserInput</span>()
+    fmt.<span class="function">Printf</span>(<span class="string">"You entered: %s\n"</span>, input)
+}</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ bufio 使用建议</h3>
+                <ul>
+                    <li><strong>大文件处理</strong>: 使用 Scanner 逐行读取</li>
+                    <li><strong>高效写入</strong>: 使用 Writer 缓冲写入</li>
+                    <li><strong>必须 Flush</strong>: Writer 用后必须调用 Flush</li>
+                    <li><strong>错误检查</strong>: Scanner 用后检查 Err()</li>
+                    <li><strong>自定义缓冲</strong>: 大记录使用 NewReaderSize</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <h3>🚨 常见陷阱</h3>
+                <ul>
+                    <li><strong>忘记 Flush</strong>: Writer 数据丢失</li>
+                    <li><strong>Scanner 限制</strong>: 默认最大行 64KB</li>
+                    <li><strong>并发使用</strong>: Reader/Writer 不是并发安全的</li>
+                    <li><strong>资源泄漏</strong>: 文件用后必须 Close</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="stdlib-io.html">io 包</a></li>
+                    <li><a href="stdlib-embed.html">embed 包</a></li>
+                    <li><a href="stdlib-json.html">JSON 编解码</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

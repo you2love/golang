@@ -4,890 +4,338 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>gRPC RPC框架 - Go 学习教程</title>
-    <link rel="stylesheet" href="styles.css?v=1.4">
-    </head>
+    <title>gRPC - Go RPC 框架</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
 <body>
     <div class="container">
         <aside class="sidebar">
-        <!-- 导航栏将通过JavaScript动态加载 -->
-    </aside>
+            <!-- 导航栏通过 JavaScript 动态加载 -->
+        </aside>
         <div class="content">
-            <a href="ecosystem.html" class="back-link">← 返回社区库</a>
-            <h2 id="grpc">gRPC RPC框架</h2>
-            <p>gRPC 是 Google 开发的高性能、开源的通用 RPC 框架，基于 HTTP/2 和 Protocol Buffers。它支持多种语言，提供了简单、高效的远程调用方式，广泛应用于微服务架构中。</p>
-            
-            <h3>核心特性</h3>
-            <ul>
-                <li><strong>基于 HTTP/2</strong>：支持双向流、多路复用、头部压缩</li>
-                <li><strong>使用 Protobuf</strong>：高效的二进制序列化格式</li>
-                <li><strong>多语言支持</strong>：支持 Go、Java、Python、C++ 等多种语言</li>
-                <li><strong>四种服务方法</strong>：一元调用、服务端流、客户端流、双向流</li>
-                <li><strong>拦截器</strong>：支持请求拦截和响应处理</li>
-            </ul>
-            
-            <h3>安装</h3>
-            <pre><code><span class="keyword">go</span> get -u google.golang.org/grpc
-<span class="keyword">go</span> install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-<span class="keyword">go</span> install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest</code></pre>
-            
-            <h3>定义服务</h3>
-            <pre><code>syntax = <span class="string">"proto3"</span>;
+            <a href="ecosystem-protobuf.html" class="back-link">← Protobuf</a>
+            <span style="margin: 0 10px; color: #999;">|</span>
+            <a href="ecosystem-etcd.html" class="back-link">Etcd →</a>
 
-<span class="keyword">package</span> example;
+            <h1>gRPC - Go RPC 框架</h1>
+            <p class="intro">gRPC 是 Google 开源的高性能 RPC 框架，基于 HTTP/2 和 Protocol Buffers。掌握 gRPC 是开发微服务、分布式系统的基础。</p>
 
-<span class="keyword">option</span> go_package = <span class="string">"./example"</span>;
+            <!-- 核心概念 -->
+            <h2>📌 核心概念</h2>
+            <div class="feature-grid">
+                <div class="feature-card highlight">
+                    <div class="icon">🚀</div>
+                    <h4>高性能</h4>
+                    <p>基于 HTTP/2</p>
+                    <code class="tag">二进制协议</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📝</div>
+                    <h4>IDL 定义</h4>
+                    <p>.proto 文件</p>
+                    <code class="tag">protobuf</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔄</div>
+                    <h4>四种服务</h4>
+                    <p>Unary/Stream</p>
+                    <code class="tag">RPC 类型</code>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔌</div>
+                    <h4>中间件</h4>
+                    <p>Interceptor</p>
+                    <code class="tag">拦截器</code>
+                </div>
+            </div>
 
-<span class="keyword">service</span> Greeter {
-    <span class="keyword">rpc</span> SayHello (HelloRequest) <span class="keyword">returns</span> (HelloReply) {}
-    <span class="keyword">rpc</span> SayHelloStream (HelloRequest) <span class="keyword">returns</span> (stream HelloReply) {}
+            <!-- 快速开始 -->
+            <h2 id="quickstart">快速开始</h2>
+
+            <div class="example-box">
+                <h3>📝 定义服务</h3>
+                <pre><code><span class="comment">// service.proto</span>
+<span class="keyword">syntax</span> = <span class="string">"proto3"</span>;
+
+<span class="keyword">package</span> user;
+
+<span class="comment">// 请求消息</span>
+<span class="keyword">message</span> GetUserRequest {
+    <span class="keyword">int64</span> user_id = <span class="number">1</span>;
 }
 
-<span class="keyword">message</span> HelloRequest {
-    <span class="keyword">string</span> name = 1;
+<span class="comment">// 响应消息</span>
+<span class="keyword">message</span> GetUserResponse {
+    <span class="keyword">int64</span> user_id = <span class="number">1</span>;
+    <span class="keyword">string</span> name = <span class="number">2</span>;
+    <span class="keyword">string</span> email = <span class="number">3</span>;
 }
 
-<span class="keyword">message</span> HelloReply {
-    <span class="keyword">string</span> message = 1;
-}</code></pre>
-            
-            <h3>实现服务端</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"context"</span>
-    <span class="string">"log"</span>
-    <span class="string">"net"</span>
-    <span class="string">"google.golang.org/grpc"</span>
-    pb <span class="string">"path/to/your/proto"</span>
-)
-
-<span class="keyword">type</span> server <span class="keyword">struct</span> {
-    pb.UnimplementedGreeterServer
-}
-
-<span class="function">func</span> (s *server) <span class="function">SayHello</span>(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, <span class="keyword">error</span>) {
-    log.<span class="function">Printf</span>(<span class="string">"Received: %v"</span>, in.GetName())
-    <span class="keyword">return</span> &pb.HelloReply{Message: <span class="string">"Hello "</span> + in.GetName()}, <span class="keyword">nil</span>
-}
-
-<span class="function">func</span> (s *server) <span class="function">SayHelloStream</span>(in *pb.HelloRequest, stream pb.Greeter_SayHelloStreamServer) <span class="keyword">error</span> {
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">5</span>; i++ {
-        stream.<span class="function">Send</span>(&pb.HelloReply{
-            Message: <span class="string">"Hello "</span> + in.GetName() + <span class="string">" "</span> + string(rune(<span class="string">'0'</span>+i)),
-        })
-    }
-    <span class="keyword">return</span> <span class="keyword">nil</span>
-}
-
-<span class="function">func</span> <span class="function">main</span>() {
-    lis, err := net.<span class="function">Listen</span>(<span class="string">"tcp"</span>, <span class="string">":50051"</span>)
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        log.<span class="function">Fatalf</span>(<span class="string">"failed to listen: %v"</span>, err)
-    }
+<span class="comment">// 服务定义</span>
+<span class="keyword">service</span> UserService {
+    <span class="comment">// 一元 RPC</span>
+    <span class="keyword">rpc</span> GetUser(GetUserRequest) <span class="keyword">returns</span> (GetUserResponse);
     
-    s := grpc.<span class="function">NewServer</span>()
-    pb.<span class="function">RegisterGreeterServer</span>(s, &server{})
-    
-    log.<span class="function">Printf</span>(<span class="string">"server listening at %v"</span>, lis.<span class="function">Addr</span>())
-    <span class="keyword">if</span> err := s.<span class="function">Serve</span>(lis); err != <span class="keyword">nil</span> {
-        log.<span class="function">Fatalf</span>(<span class="string">"failed to serve: %v"</span>, err)
-    }
-}</code></pre>
-            
-            <h3>实现客户端</h3>
-            <pre><code><span class="keyword">package</span> main
-
-<span class="keyword">import</span> (
-    <span class="string">"context"</span>
-    <span class="string">"io"</span>
-    <span class="string">"log"</span>
-    <span class="string">"time"</span>
-    <span class="string">"google.golang.org/grpc"</span>
-    <span class="string">"google.golang.org/grpc/credentials/insecure"</span>
-    pb <span class="string">"path/to/your/proto"</span>
-)
-
-<span class="function">func</span> <span class="function">main</span>() {
-    conn, err := grpc.<span class="function">Dial</span>(<span class="string">"localhost:50051"</span>, grpc.<span class="function">WithTransportCredentials</span>(insecure.<span class="function">NewCredentials</span>()))
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        log.<span class="function">Fatalf</span>(<span class="string">"did not connect: %v"</span>, err)
-    }
-    <span class="keyword">defer</span> conn.<span class="function">Close</span>()
-    
-    c := pb.<span class="function">NewGreeterClient</span>(conn)
-    
-    <span class="comment">// 一元调用</span>
-    ctx, cancel := context.<span class="function">WithTimeout</span>(context.<span class="function">Background</span>(), time.Second)
-    <span class="keyword">defer</span> cancel()
-    
-    r, err := c.<span class="function">SayHello</span>(ctx, &pb.HelloRequest{Name: <span class="string">"World"</span>})
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        log.<span class="function">Fatalf</span>(<span class="string">"could not greet: %v"</span>, err)
-    }
-    log.<span class="function">Printf</span>(<span class="string">"Greeting: %s"</span>, r.GetMessage())
-    
-    <span class="comment">// 流式调用</span>
-    stream, err := c.<span class="function">SayHelloStream</span>(ctx, &pb.HelloRequest{Name: <span class="string">"Stream"</span>})
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        log.<span class="function">Fatalf</span>(<span class="string">"could not stream: %v"</span>, err)
-    }
-    
-    <span class="keyword">for</span> {
-        reply, err := stream.<span class="function">Recv</span>()
-        <span class="keyword">if</span> err == io.EOF {
-            <span class="keyword">break</span>
-        }
-        <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-            log.<span class="function">Fatalf</span>(<span class="string">"failed to recv: %v"</span>, err)
-        }
-        log.<span class="function">Printf</span>(<span class="string">"Stream reply: %s"</span>, reply.GetMessage())
-    }
-}</code></pre>
-            
-            <h3>四种服务方法详解</h3>
-            <div class="note-box">
-                <h4>1. 一元调用 (Unary RPC)</h4>
-                <pre><code><span class="comment">// proto 定义</span>
-<span class="keyword">service</span> Greeter {
-    <span class="keyword">rpc</span> SayHello (HelloRequest) <span class="keyword">returns</span> (HelloReply) {}
-}
-
-<span class="comment">// 客户端</span>
-response, err := client.<span class="function">SayHello</span>(ctx, &pb.HelloRequest{Name: <span class="string">"Alice"</span>})</code></pre>
-                
-                <h4>2. 服务端流式 (Server Streaming)</h4>
-                <pre><code><span class="comment">// proto 定义</span>
-<span class="keyword">service</span> Greeter {
-    <span class="keyword">rpc</span> SayHelloStream (HelloRequest) <span class="keyword">returns</span> (stream HelloReply) {}
-}
-
-<span class="comment">// 服务端</span>
-<span class="function">func</span> (s *server) <span class="function">SayHelloStream</span>(in *pb.HelloRequest, stream pb.Greeter_SayHelloStreamServer) <span class="keyword">error</span> {
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">5</span>; i++ {
-        stream.<span class="function">Send</span>(&pb.HelloReply{Message: <span class="string">"Hello "</span> + in.GetName()})
-    }
-    <span class="keyword">return</span> <span class="keyword">nil</span>
-}
-
-<span class="comment">// 客户端</span>
-stream, err := client.<span class="function">SayHelloStream</span>(ctx, &pb.HelloRequest{Name: <span class="string">"Alice"</span>})
-<span class="keyword">for</span> {
-    msg, err := stream.<span class="function">Recv</span>()
-    <span class="keyword">if</span> err == io.EOF { <span class="keyword">break</span> }
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> { <span class="keyword">return</span> err }
-    fmt.<span class="function">Println</span>(msg.Message)
-}</code></pre>
-                
-                <h4>3. 客户端流式 (Client Streaming)</h4>
-                <pre><code><span class="comment">// proto 定义</span>
-<span class="keyword">service</span> Greeter {
-    <span class="keyword">rpc</span> SayHelloClientStream (stream HelloRequest) <span class="keyword">returns</span> (HelloReply) {}
-}
-
-<span class="comment">// 服务端</span>
-<span class="function">func</span> (s *server) <span class="function">SayHelloClientStream</span>(stream pb.Greeter_SayHelloClientStreamServer) <span class="keyword">error</span> {
-    <span class="keyword">var</span> names []<span class="keyword">string</span>
-    <span class="keyword">for</span> {
-        req, err := stream.<span class="function">Recv</span>()
-        <span class="keyword">if</span> err == io.EOF { <span class="keyword">break</span> }
-        <span class="keyword">if</span> err != <span class="keyword">nil</span> { <span class="keyword">return</span> err }
-        names = <span class="function">append</span>(names, req.GetName())
-    }
-    <span class="keyword">return</span> stream.<span class="function">SendAndClose</span>(&pb.HelloReply{Message: strings.<span class="function">Join</span>(names, <span class="string">", "</span>)})
-}
-
-<span class="comment">// 客户端</span>
-stream, err := client.<span class="function">SayHelloClientStream</span>(ctx)
-stream.<span class="function">Send</span>(&pb.HelloRequest{Name: <span class="string">"Alice"</span>})
-stream.<span class="function">Send</span>(&pb.HelloRequest{Name: <span class="string">"Bob"</span>})
-reply, err := stream.<span class="function">CloseAndRecv</span>()</code></pre>
-                
-                <h4>4. 双向流式 (Bidirectional Streaming)</h4>
-                <pre><code><span class="comment">// proto 定义</span>
-<span class="keyword">service</span> Greeter {
-    <span class="keyword">rpc</span> SayHelloBidirectional (stream HelloRequest) <span class="keyword">returns</span> (stream HelloReply) {}
-}
-
-<span class="comment">// 服务端</span>
-<span class="function">func</span> (s *server) <span class="function">SayHelloBidirectional</span>(stream pb.Greeter_SayHelloBidirectionalServer) <span class="keyword">error</span> {
-    <span class="keyword">for</span> {
-        req, err := stream.<span class="function">Recv</span>()
-        <span class="keyword">if</span> err == io.EOF { <span class="keyword">return</span> <span class="keyword">nil</span> }
-        <span class="keyword">if</span> err != <span class="keyword">nil</span> { <span class="keyword">return</span> err }
-        stream.<span class="function">Send</span>(&pb.HelloReply{Message: <span class="string">"Hello "</span> + req.GetName()})
-    }
-}
-
-<span class="comment">// 客户端</span>
-stream, err := client.<span class="function">SayHelloBidirectional</span>(ctx)
-<span class="keyword">go</span> <span class="function">func</span>() {
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">10</span>; i++ {
-        stream.<span class="function">Send</span>(&pb.HelloRequest{Name: fmt.<span class="function">Sprintf</span>(<span class="string">"User%d"</span>, i)})
-    }
-    stream.<span class="function">CloseSend</span>()
-}()
-<span class="keyword">for</span> {
-    reply, err := stream.<span class="function">Recv</span>()
-    <span class="keyword">if</span> err == io.EOF { <span class="keyword">break</span> }
-    fmt.<span class="function">Println</span>(reply.Message)
+    <span class="comment">// 流式 RPC</span>
+    <span class="keyword">rpc</span> ListUsers(ListUsersRequest) <span class="keyword">returns</span> (<span class="keyword">stream</span> User);
 }</code></pre>
             </div>
-            
-            <h3>拦截器 (Interceptors)</h3>
-            <div class="note-box">
-                <h4>服务端拦截器</h4>
-                <pre><code><span class="keyword">import</span> (
-    <span class="string">"context"</span>
-    <span class="string">"log"</span>
-    <span class="string">"time"</span>
-    <span class="string">"google.golang.org/grpc"</span>
-)
 
-<span class="comment">// 日志拦截器</span>
-<span class="function">func</span> <span class="function">loggingInterceptor</span>(
-    ctx context.Context,
-    req <span class="keyword">interface</span>{},
-    info *grpc.UnaryServerInfo,
-    handler grpc.UnaryHandler,
-) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
-    start := time.<span class="function">Now</span>()
-    log.<span class="function">Printf</span>(<span class="string">"Method: %s, Request: %v"</span>, info.FullMethod, req)
-    
-    resp, err := <span class="function">handler</span>(ctx, req)
-    
-    log.<span class="function">Printf</span>(<span class="string">"Method: %s, Duration: %v, Error: %v"</span>, 
-        info.FullMethod, time.<span class="function">Since</span>(start), err)
-    <span class="keyword">return</span> resp, err
-}
+            <div class="example-box">
+                <h3>📝 生成 Go 代码</h3>
+                <pre><code><span class="comment"># 安装 protoc 和插件</span>
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
-<span class="comment">// 认证拦截器</span>
-<span class="function">func</span> <span class="function">authInterceptor</span>(
-    ctx context.Context,
-    req <span class="keyword">interface</span>{},
-    info *grpc.UnaryServerInfo,
-    handler grpc.UnaryHandler,
-) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
-    token := metadata.<span class="function">ValueFromIncomingContext</span>(ctx, <span class="string">"authorization"</span>)
-    <span class="keyword">if</span> <span class="function">len</span>(token) == <span class="number">0</span> || token[<span class="number">0</span>] != <span class="string">"valid-token"</span> {
-        <span class="keyword">return</span> <span class="keyword">nil</span>, status.<span class="function">Error</span>(codes.Unauthenticated, <span class="string">"invalid token"</span>)
-    }
-    <span class="keyword">return</span> <span class="function">handler</span>(ctx, req)
-}
+<span class="comment"># 生成代码</span>
+protoc --go_out=. --go_opt=paths=source_relative \
+       --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+       service.proto
 
-<span class="comment">// 使用拦截器</span>
-s := grpc.<span class="function">NewServer</span>(
-    grpc.<span class="function">ChainUnaryInterceptor</span>(
-        <span class="function">loggingInterceptor</span>,
-        <span class="function">authInterceptor</span>,
-    ),
-)</code></pre>
-                
-                <h4>客户端拦截器</h4>
-                <pre><code><span class="comment">// 添加认证令牌</span>
-<span class="function">func</span> <span class="function">authClientInterceptor</span>(
-    ctx context.Context,
-    method <span class="keyword">string</span>,
-    req, reply <span class="keyword">interface</span>{},
-    cc *grpc.ClientConn,
-    invoker grpc.UnaryInvoker,
-    opts ...grpc.CallOption,
-) <span class="keyword">error</span> {
-    ctx = metadata.<span class="function">AppendToOutgoingContext</span>(ctx, <span class="string">"authorization"</span>, <span class="string">"valid-token"</span>)
-    <span class="keyword">return</span> <span class="function">invoker</span>(ctx, method, req, reply, cc, opts...)
-}
-
-<span class="comment">// 重试拦截器</span>
-<span class="function">func</span> <span class="function">retryInterceptor</span>(
-    ctx context.Context,
-    method <span class="keyword">string</span>,
-    req, reply <span class="keyword">interface</span>{},
-    cc *grpc.ClientConn,
-    invoker grpc.UnaryInvoker,
-    opts ...grpc.CallOption,
-) <span class="keyword">error</span> {
-    <span class="keyword">var</span> lastErr <span class="keyword">error</span>
-    <span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">3</span>; i++ {
-        err := <span class="function">invoker</span>(ctx, method, req, reply, cc, opts...)
-        <span class="keyword">if</span> err == <span class="keyword">nil</span> {
-            <span class="keyword">return</span> <span class="keyword">nil</span>
-        }
-        lastErr = err
-        time.<span class="function">Sleep</span>(time.Second * time.Duration(i+<span class="number">1</span>))
-    }
-    <span class="keyword">return</span> lastErr
-}
-
-<span class="comment">// 使用拦截器</span>
-conn, err := grpc.<span class="function">Dial</span>(address,
-    grpc.<span class="function">WithChainUnaryInterceptor</span>(
-        <span class="function">authClientInterceptor</span>,
-        <span class="function">retryInterceptor</span>,
-    ),
-)</code></pre>
-                
-                <h4>流式拦截器</h4>
-                <pre><code><span class="comment">// 服务端流式拦截器</span>
-<span class="function">func</span> <span class="function">loggingStreamInterceptor</span>(
-    srv <span class="keyword">interface</span>{},
-    ss grpc.ServerStream,
-    info *grpc.StreamServerInfo,
-    handler grpc.StreamHandler,
-) <span class="keyword">error</span> {
-    log.<span class="function">Printf</span>(<span class="string">"Stream method: %s"</span>, info.FullMethod)
-    err := <span class="function">handler</span>(srv, ss)
-    log.<span class="function">Printf</span>(<span class="string">"Stream completed: %v"</span>, err)
-    <span class="keyword">return</span> err
-}
-
-<span class="comment">// 客户端流式拦截器</span>
-<span class="function">func</span> <span class="function">authStreamInterceptor</span>(
-    ctx context.Context,
-    desc *grpc.StreamDesc,
-    cc *grpc.ClientConn,
-    method <span class="keyword">string</span>,
-    streamer grpc.Streamer,
-    opts ...grpc.CallOption,
-) (grpc.ClientStream, <span class="keyword">error</span>) {
-    ctx = metadata.<span class="function">AppendToOutgoingContext</span>(ctx, <span class="string">"authorization"</span>, <span class="string">"valid-token"</span>)
-    <span class="keyword">return</span> <span class="function">streamer</span>(ctx, desc, cc, method, opts...)
-}</code></pre>
+<span class="comment"># 生成文件:</span>
+<span class="comment"># - service.pb.go (消息定义)</span>
+<span class="comment"># - service_grpc.pb.go (服务接口)</span></code></pre>
             </div>
-            
-            <h3>元数据 (Metadata)</h3>
-            <div class="note-box">
-                <pre><code><span class="keyword">import</span> <span class="string">"google.golang.org/grpc/metadata"</span>
 
-<span class="comment">// 客户端发送元数据</span>
-md := metadata.<span class="function">New</span>(map[<span class="keyword">string</span>]<span class="keyword">string</span>{
-    <span class="string">"user-id"</span>:     <span class="string">"12345"</span>,
-    <span class="string">"request-id"</span>:  <span class="string">"req-123"</span>,
-    <span class="string">"trace-id"</span>:    <span class="string">"trace-456"</span>,
-})
-ctx = metadata.<span class="function">NewOutgoingContext</span>(ctx, md)
-
-<span class="comment">// 或者追加元数据</span>
-ctx = metadata.<span class="function">AppendToOutgoingContext</span>(ctx, <span class="string">"key"</span>, <span class="string">"value"</span>)
-
-<span class="comment">// 服务端接收元数据</span>
-<span class="function">func</span> (s *server) <span class="function">SayHello</span>(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, <span class="keyword">error</span>) {
-    md, ok := metadata.<span class="function">FromIncomingContext</span>(ctx)
-    <span class="keyword">if</span> !ok {
-        <span class="keyword">return</span> <span class="keyword">nil</span>, status.<span class="function">Error</span>(codes.Internal, <span class="string">"no metadata"</span>)
-    }
-    
-    userID := md.<span class="function">Get</span>(<span class="string">"user-id"</span>)
-    requestID := md.<span class="function">Get</span>(<span class="string">"request-id"</span>)
-    
-    log.<span class="function">Printf</span>(<span class="string">"User ID: %s, Request ID: %s"</span>, userID, requestID)
-    
-    <span class="comment">// 发送响应元数据</span>
-    header := metadata.<span class="function">New</span>(map[<span class="keyword">string</span>]<span class="keyword">string</span>{
-        <span class="string">"response-id"</span>: <span class="string">"resp-123"</span>,
-    })
-    grpc.<span class="function">SendHeader</span>(ctx, header)
-    
-    <span class="comment">// 发送尾部元数据</span>
-    trailer := metadata.<span class="function">New</span>(map[<span class="keyword">string</span>]<span class="keyword">string</span>{
-        <span class="string">"trace-id"</span>: <span class="string">"trace-456"</span>,
-    })
-    grpc.<span class="function">SetTrailer</span>(ctx, trailer)
-    
-    <span class="keyword">return</span> &pb.HelloReply{Message: <span class="string">"Hello "</span> + in.GetName()}, <span class="keyword">nil</span>
-}
-
-<span class="comment">// 客户端接收响应元数据</span>
-var header, trailer metadata.MD
-r, err := c.<span class="function">SayHello</span>(
-    ctx,
-    &pb.HelloRequest{Name: <span class="string">"World"</span>},
-    grpc.<span class="function">Header</span>(&header),
-    grpc.<span class="function">Trailer</span>(&trailer),
-)</code></pre>
+            <div class="info-box">
+                <h3>💡 gRPC 要点</h3>
+                <ul>
+                    <li><strong>HTTP/2</strong>: 多路复用、头部压缩</li>
+                    <li><strong>Protobuf</strong>: 二进制序列化，高效紧凑</li>
+                    <li><strong>代码生成</strong>: 从 .proto 生成客户端/服务端代码</li>
+                    <li><strong>四种 RPC</strong>: Unary、Server Stream、Client Stream、Bidirectional</li>
+                </ul>
             </div>
-            
-            <h3>错误处理</h3>
-            <div class="note-box">
-                <pre><code><span class="keyword">import</span> (
-    <span class="string">"google.golang.org/grpc/codes"</span>
-    <span class="string">"google.golang.org/grpc/status"</span>
-)
 
-<span class="comment">// 服务端返回错误</span>
-<span class="function">func</span> (s *server) <span class="function">SayHello</span>(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, <span class="keyword">error</span>) {
-    <span class="keyword">if</span> in.GetName() == <span class="string">""</span> {
-        <span class="keyword">return</span> <span class="keyword">nil</span>, status.<span class="function">Error</span>(codes.InvalidArgument, <span class="string">"name cannot be empty"</span>)
-    }
-    
-    <span class="keyword">if</span> in.GetName() == <span class="string">"admin"</span> {
-        <span class="keyword">return</span> <span class="keyword">nil</span>, status.<span class="function">Error</span>(codes.PermissionDenied, <span class="string">"access denied"</span>)
-    }
-    
-    <span class="comment">// 带详细信息的错误</span>
-    <span class="keyword">return</span> <span class="keyword">nil</span>, status.<span class="function">Errorf</span>(codes.NotFound, <span class="string">"user %s not found"</span>, in.GetName())
-}
+            <!-- 服务端 -->
+            <h2 id="server">gRPC 服务端</h2>
 
-<span class="comment">// 客户端处理错误</span>
-r, err := c.<span class="function">SayHello</span>(ctx, &pb.HelloRequest{Name: <span class="string">""</span>})
-<span class="keyword">if</span> err != <span class="keyword">nil</span> {
-    st, ok := status.<span class="function">FromError</span>(err)
-    <span class="keyword">if</span> ok {
-        <span class="keyword">switch</span> st.<span class="function">Code</span>() {
-        <span class="keyword">case</span> codes.InvalidArgument:
-            log.<span class="function">Printf</span>(<span class="string">"Invalid argument: %v"</span>, st.Message())
-        <span class="keyword">case</span> codes.NotFound:
-            log.<span class="function">Printf</span>(<span class="string">"Not found: %v"</span>, st.Message())
-        <span class="keyword">case</span> codes.PermissionDenied:
-            log.<span class="function">Printf</span>(<span class="string">"Permission denied: %v"</span>, st.Message())
-        <span class="keyword">default</span>:
-            log.<span class="function">Printf</span>(<span class="string">"Error: %v"</span>, err)
-        }
-    }
-}</code></pre>
-            </div>
-            
-            <h3>TLS 安全连接</h3>
-            <div class="note-box">
-                <pre><code><span class="keyword">import</span> (
-    <span class="string">"google.golang.org/grpc/credentials"</span>
-)
-
-<span class="comment">// 生成证书（使用 openssl）</span>
-<span class="comment">// openssl req -x509 -newkey rsa:4096 -nodes -keyout server.key -out server.crt -days 365</span>
-
-<span class="comment">// 服务端使用 TLS</span>
-creds, err := credentials.<span class="function">NewServerTLSFromFile</span>(<span class="string">"server.crt"</span>, <span class="string">"server.key"</span>)
-<span class="keyword">if</span> err != <span class="keyword">nil</span> {
-    log.<span class="function">Fatalf</span>(<span class="string">"failed to create credentials: %v"</span>, err)
-}
-
-s := grpc.<span class="function">NewServer</span>(grpc.<span class="function">Creds</span>(creds))
-
-<span class="comment">// 客户端使用 TLS（不验证证书）</span>
-creds := credentials.<span class="function">NewTLS</span>(&tls.Config{
-    InsecureSkipVerify: <span class="keyword">true</span>,
-})
-conn, err := grpc.<span class="function">Dial</span>(address, grpc.<span class="function">WithTransportCredentials</span>(creds))
-
-<span class="comment">// 客户端使用 TLS（验证证书）</span>
-creds, err := credentials.<span class="function">NewClientTLSFromFile</span>(<span class="string">"server.crt"</span>, <span class="string">""</span>)
-<span class="keyword">if</span> err != <span class="keyword">nil</span> {
-    log.<span class="function">Fatalf</span>(<span class="string">"failed to create credentials: %v"</span>, err)
-}
-conn, err := grpc.<span class="function">Dial</span>(address, grpc.<span class="function">WithTransportCredentials</span>(creds))</code></pre>
-            </div>
-            
-            <h3>超时和取消</h3>
-            <div class="note-box">
-                <pre><code><span class="comment">// 客户端设置超时</span>
-ctx, cancel := context.<span class="function">WithTimeout</span>(context.<span class="function">Background</span>(), <span class="number">3</span>*time.Second)
-<span class="keyword">defer</span> cancel()
-
-r, err := c.<span class="function">SayHello</span>(ctx, &pb.HelloRequest{Name: <span class="string">"World"</span>})
-<span class="keyword">if</span> err != <span class="keyword">nil</span> {
-    <span class="keyword">if</span> ctx.<span class="function">Err</span>() == context.DeadlineExceeded {
-        log.<span class="function">Printf</span>(<span class="string">"Request timeout"</span>)
-    } <span class="keyword">else</span> {
-        log.<span class="function">Printf</span>(<span class="string">"Request failed: %v"</span>, err)
-    }
-}
-
-<span class="comment">// 服务端检查超时</span>
-<span class="function">func</span> (s *server) <span class="function">SayHello</span>(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, <span class="keyword">error</span>) {
-    <span class="keyword">select</span> {
-    <span class="keyword">case</span> <-ctx.<span class="function">Done</span>():
-        <span class="keyword">return</span> <span class="keyword">nil</span>, status.<span class="function">Error</span>(codes.Canceled, ctx.<span class="function">Err</span>().<span class="function">Error</span>())
-    <span class="keyword">default</span>:
-        <span class="comment">// 处理请求</span>
-        time.<span class="function">Sleep</span>(<span class="number">2</span> * time.Second)
-        <span class="keyword">return</span> &pb.HelloReply{Message: <span class="string">"Hello "</span> + in.GetName()}, <span class="keyword">nil</span>
-    }
-}</code></pre>
-            </div>
-            
-            <h3>重试机制</h3>
-            <div class="note-box">
-                <pre><code><span class="keyword">import</span> <span class="string">"google.golang.org/grpc/backoff"</span>
-
-<span class="comment">// 使用内置重试策略</span>
-retryParams := []grpc.<span class="function">RetryOption</span>{
-    grpc.<span class="function">WithBackoff</span>(backoff.<span class="function">Config</span>{
-        BaseDelay:  <span class="number">100</span> * time.Millisecond,
-        MaxDelay:   <span class="number">5</span> * time.Second,
-        Multiplier: <span class="number">2.0</span>,
-        Jitter:     <span class="number">0.2</span>,
-    }),
-    grpc.<span class="function">WithMax</span>(<span class="number">3</span>),
-    grpc.<span class="function">WithPerRetryTimeout</span>(<span class="number">2</span> * time.Second),
-    grpc.<span class="function">WithCodes</span>(codes.Unavailable, codes.ResourceExhausted),
-}
-
-conn, err := grpc.<span class="function">Dial</span>(address,
-    grpc.<span class="function">WithTransportCredentials</span>(insecure.<span class="function">NewCredentials</span>()),
-    grpc.<span class="function">WithDefaultCallOptions</span>(grpc.<span class="function">WithRetry</span>(retryParams...)),
-)</code></pre>
-            </div>
-            
-            <h3>负载均衡</h3>
-            <div class="note-box">
-                <pre><code><span class="keyword">import</span> <span class="string">"google.golang.org/grpc/resolver"</span>
-
-<span class="comment">// 手动配置负载均衡</span>
-conn, err := grpc.<span class="function">Dial</span>(
-    <span class="string">"my-service"</span>,
-    grpc.<span class="function">WithTransportCredentials</span>(insecure.<span class="function">NewCredentials</span>()),
-    grpc.<span class="function">WithDefaultServiceConfig</span>(<span class="string">`{"loadBalancingPolicy":"round_robin"}`</span>),
-)
-
-<span class="comment">// 使用 DNS 解析</span>
-conn, err := grpc.<span class="function">Dial</span>(
-    <span class="string">"dns:///my-service.example.com:50051"</span>,
-    grpc.<span class="function">WithTransportCredentials</span>(insecure.<span class="function">NewCredentials</span>()),
-)
-
-<span class="comment">// 自定义解析器</span>
-<span class="keyword">type</span> customResolver <span class="keyword">struct</span> {}
-
-<span class="function">func</span> (r *customResolver) <span class="function">Resolve</span>(target resolver.Target, cc resolver.ClientConn, opts resolver.ResolveOptions) {
-    addresses := []resolver.Address{
-        {Addr: <span class="string">"localhost:50051"</span>},
-        {Addr: <span class="string">"localhost:50052"</span>},
-        {Addr: <span class="string">"localhost:50053"</span>},
-    }
-    cc.<span class="function">UpdateState</span>(resolver.State{Addresses: addresses})
-}
-
-<span class="function">func</span> <span class="function">init</span>() {
-    resolver.<span class="function">Register</span>(&customResolver{})
-}</code></pre>
-            </div>
-            
-            <h3>健康检查</h3>
-            <div class="note-box">
-                <pre><code><span class="keyword">import</span> (
-    <span class="string">"google.golang.org/grpc/health"</span>
-    <span class="string">"google.golang.org/grpc/health/grpc_health_v1"</span>
-)
-
-<span class="comment">// 服务端</span>
-healthServer := health.<span class="function">NewServer</span>()
-healthServer.<span class="function">SetServingStatus</span>(<span class="string">""</span>, grpc_health_v1.HealthCheckResponse_SERVING)
-grpc_health_v1.<span class="function">RegisterHealthServer</span>(s, healthServer)
-
-<span class="comment">// 客户端</span>
-healthClient := grpc_health_v1.<span class="function">NewHealthClient</span>(conn)
-resp, err := healthClient.<span class="function">Check</span>(ctx, &grpc_health_v1.HealthCheckRequest{})
-<span class="keyword">if</span> err != <span class="keyword">nil</span> || resp.Status != grpc_health_v1.HealthCheckResponse_SERVING {
-    log.<span class="function">Printf</span>(<span class="string">"Service not healthy"</span>)
-}</code></pre>
-            </div>
-            
-            <h3>反射服务</h3>
-            <div class="note-box">
-                <pre><code><span class="keyword">import</span> <span class="string">"google.golang.org/grpc/reflection"</span>
-
-<span class="comment">// 注册反射服务</span>
-reflection.<span class="function">Register</span>(s)
-
-<span class="comment">// 使用 grpcurl 工具测试</span>
-<span class="comment">// grpcurl -plaintext localhost:50051 list</span>
-<span class="comment">// grpcurl -plaintext localhost:50051 describe</span>
-<span class="comment">// grpcurl -plaintext localhost:50051 describe example.Greeter</span>
-<span class="comment">// grpcurl -plaintext -d '{"name":"World"}' localhost:50051 example.Greeter/SayHello</span></code></pre>
-            </div>
-            
-            <h2 id="grpc-bestpractices">gRPC 最佳实践</h2>
-            
-            <h3>1. 项目结构</h3>
-            <div class="note-box">
-                <pre><code>project/
-├── proto/
-│   ├── service/
-│   │   └── greeter.proto
-│   └── third_party/
-├── client/
-│   └── main.go
-├── server/
-│   ├── main.go
-│   └── handler/
-├── pkg/
-│   ├── middleware/
-│   └── interceptor/
-└── go.mod</code></pre>
-            </div>
-            
-            <h3>2. 使用 Context 传递请求范围数据</h3>
-            <div class="note-box">
-                <pre><code><span class="comment">// 定义 context key</span>
-<span class="keyword">type</span> contextKey <span class="keyword">string</span>
-<span class="keyword">const</span> (
-    userIDKey    contextKey = <span class="string">"user_id"</span>
-    requestIDKey contextKey = <span class="string">"request_id"</span>
-)
-
-<span class="comment">// 在拦截器中设置</span>
-<span class="function">func</span> <span class="function">contextInterceptor</span>(ctx context.Context, req <span class="keyword">interface</span>{}, 
-    info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
-    
-    requestID := uuid.<span class="function">New</span>().<span class="function">String</span>()
-    ctx = context.<span class="function">WithValue</span>(ctx, requestIDKey, requestID)
-    
-    <span class="keyword">return</span> <span class="function">handler</span>(ctx, req)
-}
-
-<span class="comment">// 在 handler 中获取</span>
-<span class="function">func</span> (s *server) <span class="function">SayHello</span>(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, <span class="keyword">error</span>) {
-    requestID := ctx.<span class="function">Value</span>(requestIDKey).(<span class="keyword">string</span>)
-    log.<span class="function">Printf</span>(<span class="string">"Request ID: %s"</span>, requestID)
-}</code></pre>
-            </div>
-            
-            <h3>3. 统一错误处理</h3>
-            <div class="note-box">
-                <pre><code><span class="keyword">package</span> errors
-
-<span class="keyword">import</span> <span class="string">"google.golang.org/grpc/status"</span>
-
-<span class="keyword">type</span> AppError <span class="keyword">struct</span> {
-    Code    <span class="keyword">int</span>
-    Message <span class="keyword">string</span>
-}
-
-<span class="function">func</span> (e *AppError) <span class="function">Error</span>() <span class="keyword">string</span> {
-    <span class="keyword">return</span> e.Message
-}
-
-<span class="function">func</span> <span class="function">NewNotFoundError</span>(msg <span class="keyword">string</span>) <span class="keyword">error</span> {
-    <span class="keyword">return</span> &AppError{Code: <span class="number">404</span>, Message: msg}
-}
-
-<span class="function">func</span> <span class="function">ToGRPCError</span>(err <span class="keyword">error</span>) <span class="keyword">error</span> {
-    <span class="keyword">if</span> appErr, ok := err.(*AppError); ok {
-        <span class="keyword">switch</span> appErr.Code {
-        <span class="keyword">case</span> <span class="number">404</span>:
-            <span class="keyword">return</span> status.<span class="function">Error</span>(codes.NotFound, appErr.Message)
-        <span class="keyword">case</span> <span class="number">400</span>:
-            <span class="keyword">return</span> status.<span class="function">Error</span>(codes.InvalidArgument, appErr.Message)
-        <span class="keyword">default</span>:
-            <span class="keyword">return</span> status.<span class="function">Error</span>(codes.Internal, appErr.Message)
-        }
-    }
-    <span class="keyword">return</span> status.<span class="function">Error</span>(codes.Internal, <span class="string">"internal error"</span>)
-}</code></pre>
-            </div>
-            
-            <h3>4. 连接池管理</h3>
-            <div class="note-box">
-                <pre><code><span class="keyword">type</span> ClientPool <span class="keyword">struct</span> {
-    mu      sync.RWMutex
-    clients map[<span class="keyword">string</span>]*grpc.ClientConn
-}
-
-<span class="keyword">var</span> pool = &ClientPool{
-    clients: <span class="function">make</span>(map[<span class="keyword">string</span>]*grpc.ClientConn),
-}
-
-<span class="function">func</span> <span class="function">GetClient</span>(address <span class="keyword">string</span>) (*grpc.ClientConn, <span class="keyword">error</span>) {
-    pool.mu.RLock()
-    conn, ok := pool.clients[address]
-    pool.mu.RUnlock()
-    
-    <span class="keyword">if</span> ok {
-        <span class="keyword">return</span> conn, <span class="keyword">nil</span>
-    }
-    
-    pool.mu.Lock()
-    <span class="keyword">defer</span> pool.mu.Unlock()
-    
-    <span class="comment">// Double-check</span>
-    <span class="keyword">if</span> conn, ok := pool.clients[address]; ok {
-        <span class="keyword">return</span> conn, <span class="keyword">nil</span>
-    }
-    
-    conn, err := grpc.<span class="function">Dial</span>(address, grpc.<span class="function">WithTransportCredentials</span>(insecure.<span class="function">NewCredentials</span>()))
-    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        <span class="keyword">return</span> <span class="keyword">nil</span>, err
-    }
-    
-    pool.clients[address] = conn
-    <span class="keyword">return</span> conn, <span class="keyword">nil</span>
-}</code></pre>
-            </div>
-            
-            <h3>5. 链路追踪</h3>
-            <div class="note-box">
-                <pre><code><span class="keyword">import</span> (
-    <span class="string">"go.opentelemetry.io/otel"</span>
-    <span class="string">"go.opentelemetry.io/otel/trace"</span>
-)
-
-<span class="comment">// 拦截器</span>
-<span class="function">func</span> <span class="function">tracingInterceptor</span>(ctx context.Context, req <span class="keyword">interface</span>{},
-    info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
-    
-    tracer := otel.<span class="function">Tracer</span>(<span class="string">"server"</span>)
-    ctx, span := tracer.<span class="function">Start</span>(ctx, info.FullMethod)
-    <span class="keyword">defer</span> span.<span class="function">End</span>()
-    
-    <span class="keyword">return</span> <span class="function">handler</span>(ctx, req)
-}</code></pre>
-            </div>
-            
-            <h3>6. 版本控制</h3>
-            <div class="note-box">
-                <pre><code><span class="comment">// 在包名中包含版本</span>
-<span class="keyword">option</span> go_package = <span class="string">"github.com/user/project/api/v1;v1"</span>;
-
-<span class="comment">// 或者使用 URL 路径</span>
-<span class="keyword">option</span> go_package = <span class="string">"github.com/user/project/api/v1"</span>;
-
-<span class="comment">// 保持向后兼容</span>
-<span class="keyword">service</span> GreeterV1 {
-    <span class="keyword">rpc</span> SayHello (HelloRequest) <span class="keyword">returns</span> (HelloReply) {}
-}
-
-<span class="keyword">service</span> GreeterV2 {
-    <span class="keyword">rpc</span> SayHelloV2 (HelloRequestV2) <span class="keyword">returns</span> (HelloReplyV2) {}
-}</code></pre>
-            </div>
-            
-            <h3>7. 性能优化</h3>
-            <div class="note-box">
-                <pre><code><span class="comment">// 1. 使用连接复用</span>
-<span class="comment">// 不要为每个请求创建新连接</span>
-
-<span class="comment">// 2. 启用消息压缩</span>
-conn, err := grpc.<span class="function">Dial</span>(address,
-    grpc.<span class="function">WithCompressor</span>(gzip.<span class="function">New</span>()),
-)
-
-<span class="comment">// 3. 调整缓冲区大小</span>
-conn, err := grpc.<span class="function">Dial</span>(address,
-    grpc.<span class="function">WithDefaultCallOptions</span>(
-        grpc.<span class="function">MaxCallRecvMsgSize</span>(<span class="number">1024</span>*<span class="number">1024</span>*<span class="number">10</span>), <span class="comment">// 10MB</span>
-        grpc.<span class="function">MaxCallSendMsgSize</span>(<span class="number">1024</span>*<span class="number">1024</span>*<span class="number">10</span>),
-    ),
-)
-
-<span class="comment">// 4. 使用 Keepalive</span>
-conn, err := grpc.<span class="function">Dial</span>(address,
-    grpc.<span class="function">WithKeepaliveParams</span>(keepalive.ClientParameters{
-        Time:                <span class="number">10</span> * time.Second,
-        Timeout:             time.Second,
-        PermitWithoutStream: <span class="keyword">true</span>,
-    }),
-)</code></pre>
-            </div>
-            
-            <h3>8. 安全最佳实践</h3>
-            <div class="note-box">
-                <pre><code><span class="comment">// 1. 始终使用 TLS</span>
-<span class="comment">// 生产环境不要使用 insecure.NewCredentials()</span>
-
-<span class="comment">// 2. 实现认证和授权</span>
-<span class="function">func</span> <span class="function">authInterceptor</span>(ctx context.Context, req <span class="keyword">interface</span>{},
-    info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
-    
-    token := metadata.<span class="function">ValueFromIncomingContext</span>(ctx, <span class="string">"authorization"</span>)
-    <span class="keyword">if</span> !<span class="function">validateToken</span>(token) {
-        <span class="keyword">return</span> <span class="keyword">nil</span>, status.<span class="function">Error</span>(codes.Unauthenticated, <span class="string">"invalid token"</span>)
-    }
-    
-    <span class="comment">// 检查权限</span>
-    <span class="keyword">if</span> !<span class="function">checkPermission</span>(ctx, info.FullMethod) {
-        <span class="keyword">return</span> <span class="keyword">nil</span>, status.<span class="function">Error</span>(codes.PermissionDenied, <span class="string">"permission denied"</span>)
-    }
-    
-    <span class="keyword">return</span> <span class="function">handler</span>(ctx, req)
-}
-
-<span class="comment">// 3. 限制消息大小</span>
-s := grpc.<span class="function">NewServer</span>(
-    grpc.<span class="function">MaxRecvMsgSize</span>(<span class="number">1024</span>*<span class="number">1024</span>*<span class="number">10</span>),
-    grpc.<span class="function">MaxSendMsgSize</span>(<span class="number">1024</span>*<span class="number">1024</span>*<span class="number">10</span>),
-)</code></pre>
-            </div>
-            
-            <h3>9. 测试</h3>
-            <div class="note-box">
+            <div class="example-box">
+                <h3>📝 实现服务</h3>
                 <pre><code><span class="keyword">package</span> main
 
 <span class="keyword">import</span> (
-    <span class="string">"testing"</span>
-    <span class="string">"github.com/stretchr/testify/assert"</span>
-    <span class="string">"google.golang.org/grpc/test/bufconn"</span>
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"net"</span>
+    <span class="string">"google.golang.org/grpc"</span>
+    pb <span class="string">"path/to/proto"</span>
 )
 
-<span class="keyword">func</span> <span class="function">TestSayHello</span>(t *testing.T) {
-    <span class="comment">// 使用 bufconn 进行测试</span>
-    lis := bufconn.<span class="function">Listen</span>(<span class="number">1024</span> * <span class="number">1024</span>)
-    s := grpc.<span class="function">NewServer</span>()
-    pb.<span class="function">RegisterGreeterServer</span>(s, &server{})
+<span class="comment">// 实现服务接口</span>
+<span class="keyword">type</span> userServiceServer <span class="keyword">struct</span> {
+    pb.UnimplementedUserServiceServer
+}
+
+<span class="comment">// 实现一元 RPC</span>
+<span class="keyword">func</span> (s *userServiceServer) <span class="function">GetUser</span>(
+    ctx context.Context, 
+    req *pb.GetUserRequest,
+) (*pb.GetUserResponse, <span class="keyword">error</span>) {
+    <span class="comment">// 业务逻辑</span>
+    <span class="keyword">return</span> &pb.GetUserResponse{
+        UserId: req.UserId,
+        Name:   <span class="string">"Alice"</span>,
+        Email:  <span class="string">"alice@example.com"</span>,
+    }, <span class="keyword">nil</span>
+}
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 创建监听</span>
+    lis, err := net.<span class="function">Listen</span>(<span class="string">"tcp"</span>, <span class="string">":50051"</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
     
-    <span class="keyword">go</span> <span class="function">func</span>() {
-        <span class="keyword">if</span> err := s.<span class="function">Serve</span>(lis); err != <span class="keyword">nil</span> {
-            t.<span class="function">Fatal</span>(err)
-        }
-    }()
-    <span class="keyword">defer</span> s.<span class="function">Stop</span>()
+    <span class="comment">// 创建 gRPC 服务器</span>
+    server := grpc.<span class="function">NewServer</span>()
     
-    <span class="comment">// 创建连接</span>
-    conn, err := grpc.<span class="function">Dial</span>(<span class="string">""</span>,
-        grpc.<span class="function">WithContextDialer</span>(<span class="keyword">func</span>(ctx context.Context, s <span class="keyword">string</span>) (net.Conn, <span class="keyword">error</span>) {
-            <span class="keyword">return</span> lis.<span class="function">Dial</span>()
-        }),
-        grpc.<span class="function">WithTransportCredentials</span>(insecure.<span class="function">NewCredentials</span>()),
+    <span class="comment">// 注册服务</span>
+    pb.<span class="function">RegisterUserServiceServer</span>(server, &userServiceServer{})
+    
+    fmt.<span class="function">Println</span>(<span class="string">"Server starting on :50051"</span>)
+    
+    <span class="comment">// 启动服务</span>
+    <span class="keyword">if</span> err := server.<span class="function">Serve</span>(lis); err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
+}</code></pre>
+            </div>
+
+            <!-- 客户端 -->
+            <h2 id="client">gRPC 客户端</h2>
+            <div class="example-box">
+                <h3>📝 调用服务</h3>
+                <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"google.golang.org/grpc"</span>
+    pb <span class="string">"path/to/proto"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 建立连接</span>
+    conn, err := grpc.<span class="function">Dial</span>(
+        <span class="string">"localhost:50051"</span>,
+        grpc.<span class="function">WithInsecure</span>(),
     )
     <span class="keyword">if</span> err != <span class="keyword">nil</span> {
-        t.<span class="function">Fatal</span>(err)
+        <span class="function">panic</span>(err)
     }
     <span class="keyword">defer</span> conn.<span class="function">Close</span>()
     
-    <span class="comment">// 测试</span>
-    client := pb.<span class="function">NewGreeterClient</span>(conn)
-    resp, err := client.<span class="function">SayHello</span>(ctx, &pb.HelloRequest{Name: <span class="string">"Test"</span>})
-    <span class="keyword">assert</span>.<span class="function">NoError</span>(t, err)
-    <span class="keyword">assert</span>.<span class="function">Equal</span>(t, <span class="string">"Hello Test"</span>, resp.Message)
+    <span class="comment">// 创建客户端</span>
+    client := pb.<span class="function">NewUserServiceClient</span>(conn)
+    
+    <span class="comment">// 调用一元 RPC</span>
+    ctx := context.<span class="function">Background</span>()
+    resp, err := client.<span class="function">GetUser</span>(ctx, &pb.GetUserRequest{
+        UserId: <span class="number">123</span>,
+    })
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        <span class="function">panic</span>(err)
+    }
+    
+    fmt.<span class="function">Printf</span>(<span class="string">"User: %s (%s)\n"</span>, resp.Name, resp.Email)
 }</code></pre>
             </div>
-            
-            <h3>10. 监控和日志</h3>
-            <div class="note-box">
-                <pre><code><span class="keyword">import</span> (
-    <span class="string">"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"</span>
-)
 
-<span class="comment">// 启用 OpenTelemetry 监控</span>
-conn, err := grpc.<span class="function">Dial</span>(address,
-    grpc.<span class="function">WithTransportCredentials</span>(insecure.<span class="function">NewCredentials</span>()),
-    grpc.<span class="function">WithChainUnaryInterceptor</span>(otelgrpc.<span class="function">UnaryClientInterceptor</span>()),
-)
-
-<span class="comment">// 记录请求日志</span>
-<span class="function">func</span> <span class="function">loggingInterceptor</span>(ctx context.Context, req <span class="keyword">interface</span>{},
-    info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
+            <!-- 拦截器 -->
+            <h2 id="interceptor">拦截器 (中间件)</h2>
+            <div class="example-box">
+                <h3>📝 客户端/服务端拦截器</h3>
+                <pre><code><span class="comment">// 客户端拦截器</span>
+<span class="keyword">func</span> <span class="function">clientInterceptor</span>(
+    ctx context.Context,
+    method <span class="keyword">string</span>,
+    req, reply <span class="keyword">interface</span>{},
+    cc *grpc.ClientConn,
+    invoker grpc.UnaryInvoker,
+    opts ...grpc.CallOption,
+) <span class="keyword">error</span> {
+    fmt.<span class="function">Printf</span>(<span class="string">"Calling: %s\n"</span>, method)
     
-    log.<span class="function">Info</span>(<span class="string">"gRPC request"</span>,
-        zap.<span class="function">String</span>(<span class="string">"method"</span>, info.FullMethod),
-        zap.<span class="function">Any</span>(<span class="string">"request"</span>, req),
+    <span class="comment">// 添加认证头</span>
+    ctx = metadata.<span class="function">AppendToOutgoingContext</span>(
+        ctx, <span class="string">"authorization"</span>, <span class="string">"Bearer token"</span>,
     )
     
-    resp, err := <span class="function">handler</span>(ctx, req)
+    <span class="comment">// 调用实际 RPC</span>
+    err := <span class="function">invoker</span>(ctx, method, req, reply, cc, opts...)
     
-    log.<span class="function">Info</span>(<span class="string">"gRPC response"</span>,
-        zap.<span class="function">String</span>(<span class="string">"method"</span>, info.FullMethod),
-        zap.<span class="function">Any</span>(<span class="string">"response"</span>, resp),
-        zap.<span class="function">Error</span>(err),
+    fmt.<span class="function">Printf</span>(<span class="string">"Response: %v\n"</span>, reply)
+    <span class="keyword">return</span> err
+}
+
+<span class="comment">// 服务端拦截器</span>
+<span class="keyword">func</span> <span class="function">serverInterceptor</span>(
+    ctx context.Context,
+    req <span class="keyword">interface</span>{},
+    info *grpc.UnaryServerInfo,
+    handler grpc.UnaryHandler,
+) (<span class="keyword">interface</span>{}, <span class="keyword">error</span>) {
+    <span class="comment">// 日志记录</span>
+    fmt.<span class="function">Printf</span>(<span class="string">"Handling: %s\n"</span>, info.FullMethod)
+    
+    <span class="comment">// 认证检查</span>
+    md, ok := metadata.<span class="function">FromIncomingContext</span>(ctx)
+    <span class="keyword">if</span> !ok {
+        <span class="keyword">return</span> <span class="keyword">nil</span>, grpc.<span class="function">Errorf</span>(codes.Unauthenticated, <span class="string">"missing metadata"</span>)
+    }
+    
+    <span class="comment">// 调用实际处理函数</span>
+    <span class="keyword">return</span> <span class="function">handler</span>(ctx, req)
+}
+
+<span class="comment">// 使用拦截器</span>
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// 服务端</span>
+    server := grpc.<span class="function">NewServer</span>(
+        grpc.<span class="function">UnaryInterceptor</span>(serverInterceptor),
     )
     
-    <span class="keyword">return</span> resp, err
+    <span class="comment">// 客户端</span>
+    conn, _ := grpc.<span class="function">Dial</span>(
+        <span class="string">"localhost:50051"</span>,
+        grpc.<span class="function">WithInsecure</span>(),
+        grpc.<span class="function">WithUnaryInterceptor</span>(clientInterceptor),
+    )
 }</code></pre>
+            </div>
+
+            <!-- 流式 RPC -->
+            <h2 id="streaming">流式 RPC</h2>
+            <div class="example-box">
+                <h3>📝 服务端流式</h3>
+                <pre><code><span class="comment">// .proto 定义</span>
+<span class="keyword">service</span> ChatService {
+    <span class="comment">// 服务端流式</span>
+    <span class="keyword">rpc</span> Subscribe(ChatRequest) <span class="keyword">returns</span> (<span class="keyword">stream</span> ChatMessage);
+    
+    <span class="comment">// 客户端流式</span>
+    <span class="keyword">rpc</span> SendMessages(<span class="keyword">stream</span> ChatMessage) <span class="keyword">returns</span> (Summary);
+    
+    <span class="comment">// 双向流式</span>
+    <span class="keyword">rpc</span> Chat(<span class="keyword">stream</span> ChatMessage) <span class="keyword">returns</span> (<span class="keyword">stream</span> ChatMessage);
+}
+
+<span class="comment">// 服务端实现</span>
+<span class="keyword">func</span> (s *chatServer) <span class="function">Subscribe</span>(
+    req *ChatRequest,
+    stream ChatService_SubscribeServer,
+) <span class="keyword">error</span> {
+    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ {
+        msg := &ChatMessage{
+            Content: fmt.<span class="function">Sprintf</span>(<span class="string">"Message %d"</span>, i),
+        }
+        <span class="keyword">if</span> err := stream.<span class="function">Send</span>(msg); err != <span class="keyword">nil</span> {
+            <span class="keyword">return</span> err
+        }
+        time.<span class="function">Sleep</span>(time.Second)
+    }
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+}
+
+<span class="comment">// 客户端调用</span>
+<span class="keyword">func</span> <span class="function">main</span>() {
+    stream, _ := client.<span class="function">Subscribe</span>(ctx, &ChatRequest{})
+    
+    <span class="keyword">for</span> {
+        msg, err := stream.<span class="function">Recv</span>()
+        <span class="keyword">if</span> err == io.EOF {
+            <span class="keyword">break</span>
+        }
+        fmt.<span class="function">Println</span>(msg.Content)
+    }
+}</code></pre>
+            </div>
+
+            <!-- 最佳实践 -->
+            <h2 id="best-practices">最佳实践</h2>
+
+            <div class="success-box">
+                <h3>✅ gRPC 使用建议</h3>
+                <ul>
+                    <li><strong>TLS 加密</strong>: 生产环境使用 TLS</li>
+                    <li><strong>超时控制</strong>: 设置合理的超时时间</li>
+                    <li><strong>错误处理</strong>: 使用 status 包返回错误</li>
+                    <li><strong>拦截器</strong>: 统一日志、认证、监控</li>
+                    <li><strong>连接池</strong>: 复用 gRPC 连接</li>
+                </ul>
+            </div>
+
+            <div class="note-box">
+                <h3>📖 延伸阅读</h3>
+                <ul>
+                    <li><a href="ecosystem-protobuf.html">Protobuf</a></li>
+                    <li><a href="concurrency-context.html">Context 超时控制</a></li>
+                    <li><a href="ecosystem-gomicro.html">Go-Micro 微服务</a></li>
+                </ul>
             </div>
         </div>
     </div>
-<script src="assets/js/navigation.js"
-    <script src="assets/js/code-blocks.js""></script>
-
-</body>
     <script src="navigation.js"></script>
+</body>
 </html>

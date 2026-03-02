@@ -464,6 +464,474 @@ func main() {
 *ast.ChanType      <span class="comment">// Channel 类型</span></code></pre>
             </div>
 
+            <h2 id="node-details">节点类型详解</h2>
+
+            <h3>声明节点 (Declarations)</h3>
+            <div class="example-box">
+                <h3>📖 FuncDecl - 函数声明</h3>
+                <pre><code><span class="keyword">type</span> FuncDecl <span class="keyword">struct</span> {
+    Doc  *CommentGroup  <span class="comment">// 关联的文档注释</span>
+    Recv *FieldList     <span class="comment">// 接收者 (方法); 无则为 nil</span>
+    Name *Ident         <span class="comment">// 函数名</span>
+    Type *FuncType      <span class="comment">// 函数类型 (参数、结果)</span>
+    Body *BlockStmt     <span class="comment">// 函数体; 无则为 nil</span>
+}
+
+<span class="comment">// 示例代码:</span>
+<span class="keyword">func</span> (p *Person) <span class="function">Say</span>(msg <span class="keyword">string</span>) <span class="keyword">string</span> {
+    <span class="keyword">return</span> msg
+}
+
+<span class="comment">// AST 结构:</span>
+*ast.FuncDecl {
+    .Recv: *ast.FieldList {
+        .List: []*ast.Field {
+            {
+                .Names: []*ast.Ident {{.Name: "p"}},
+                .Type:  &ast.StarExpr{X: &ast.Ident{Name: "Person"}},
+            },
+        },
+    },
+    .Name: *ast.Ident {.Name: "Say"},
+    .Type: *ast.FuncType {
+        .Params: *ast.FieldList {...},
+        .Results: *ast.FieldList {...},
+    },
+    .Body: *ast.BlockStmt {...},
+}</code></pre>
+            </div>
+
+            <div class="example-box">
+                <h3>📖 GenDecl - 通用声明</h3>
+                <pre><code><span class="keyword">type</span> GenDecl <span class="keyword">struct</span> {
+    Doc  *CommentGroup  <span class="comment">// 关联的文档注释</span>
+    TokPos token.Pos   <span class="comment">// import/var/const/type 的位置</span>
+    Tok  token.Token    <span class="comment">// IMPORT, VAR, CONST, 或 TYPE</span>
+    Lparen token.Pos   <span class="comment">// 左括号位置</span>
+    Specs []Spec        <span class="comment">// 声明列表</span>
+    Rparen token.Pos   <span class="comment">// 右括号位置</span>
+}
+
+<span class="comment">// 示例代码:</span>
+<span class="keyword">import</span> (
+    <span class="string">"fmt"</span>
+    <span class="string">"os"</span>
+)
+
+<span class="keyword">var</span> (
+    count <span class="keyword">int</span>
+    name  <span class="keyword">string</span>
+)
+
+<span class="keyword">const</span> Pi = <span class="number">3.14</span>
+
+<span class="keyword">type</span> Person <span class="keyword">struct</span> {
+    Name <span class="keyword">string</span>
+}
+
+<span class="comment">// Tok 字段值:</span>
+<span class="comment">// token.IMPORT - import 声明</span>
+<span class="comment">// token.VAR    - var 声明</span>
+<span class="comment">// token.CONST  - const 声明</span>
+<span class="comment">// token.TYPE   - type 声明</span></code></pre>
+            </div>
+
+            <div class="example-box">
+                <h3>📖 ValueSpec - 值声明 (var/const)</h3>
+                <pre><code><span class="keyword">type</span> ValueSpec <span class="keyword">struct</span> {
+    Doc     *CommentGroup  <span class="comment">// 关联的文档注释</span>
+    Names   []*Ident       <span class="comment">// 变量/常量名列表</span>
+    Type    Expr           <span class="comment">// 类型表达式; 无则为 nil</span>
+    Values  []Expr         <span class="comment">// 初始值; 无则为 nil</span>
+    Comment *CommentGroup  <span class="comment">// 行尾注释</span>
+}
+
+<span class="comment">// 示例代码:</span>
+<span class="keyword">var</span> count <span class="keyword">int</span> = <span class="number">0</span>
+<span class="keyword">const</span> MaxSize = <span class="number">100</span>
+<span class="keyword">var</span> x, y, z <span class="keyword">int</span>
+
+<span class="comment">// AST 结构 (var count int = 0):</span>
+*ast.ValueSpec {
+    .Names: []*ast.Ident {{.Name: "count"}},
+    .Type:  &ast.Ident{Name: "int"},
+    .Values: []ast.Expr {
+        &ast.BasicLit{Kind: token.INT, Value: "0"},
+    },
+}</code></pre>
+            </div>
+
+            <div class="example-box">
+                <h3>📖 TypeSpec - 类型声明</h3>
+                <pre><code><span class="keyword">type</span> TypeSpec <span class="keyword">struct</span> {
+    Doc     *CommentGroup  <span class="comment">// 关联的文档注释</span>
+    Name    *Ident         <span class="comment">// 类型名</span>
+    TypeParams *FieldList  <span class="comment">// 泛型参数; Go 1.18+</span>
+    Assign  token.Pos      <span class="comment">// "= "的位置; 无则为 0</span>
+    Type    Expr           <span class="comment">// 类型表达式</span>
+    Comment *CommentGroup  <span class="comment">// 行尾注释</span>
+}
+
+<span class="comment">// 示例代码:</span>
+<span class="keyword">type</span> Person <span class="keyword">struct</span> {
+    Name <span class="keyword">string</span>
+}
+
+<span class="keyword">type</span> Handler <span class="keyword">func</span>(<span class="keyword">string</span>) <span class="keyword">error</span>
+
+<span class="keyword">type</span> IntList []<span class="keyword">int</span>
+
+<span class="comment">// AST 结构 (type Person struct{...}):</span>
+*ast.TypeSpec {
+    .Name: &ast.Ident{Name: "Person"},
+    .Type: &ast.StructType{
+        .Fields: &ast.FieldList{
+            .List: []*ast.Field{
+                {
+                    .Names: []*ast.Ident{{.Name: "Name"}},
+                    .Type:  &ast.Ident{Name: "string"},
+                },
+            },
+        },
+    },
+}</code></pre>
+            </div>
+
+            <h3>语句节点 (Statements)</h3>
+            <div class="example-box">
+                <h3>📖 BlockStmt - 代码块</h3>
+                <pre><code><span class="keyword">type</span> BlockStmt <span class="keyword">struct</span> {
+    Lbrace token.Pos   <span class="comment">// 左括号 { 的位置</span>
+    List   []Stmt      <span class="comment">// 语句列表</span>
+    Rbrace token.Pos   <span class="comment">// 右括号 } 的位置</span>
+}
+
+<span class="comment">// 示例代码:</span>
+{
+    x := <span class="number">1</span>
+    fmt.<span class="function">Println</span>(x)
+}</code></pre>
+            </div>
+
+            <div class="example-box">
+                <h3>📖 IfStmt - if 语句</h3>
+                <pre><code><span class="keyword">type</span> IfStmt <span class="keyword">struct</span> {
+    If   token.Pos    <span class="comment">// if 关键字位置</span>
+    Init Stmt         <span class="comment">// 初始化语句; 无则为 nil</span>
+    Cond Expr         <span class="comment">// 条件表达式</span>
+    Body *BlockStmt   <span class="comment">// if 分支代码块</span>
+    Else Stmt         <span class="comment">// else 分支; 无则为 nil</span>
+}
+
+<span class="comment">// 示例代码:</span>
+<span class="keyword">if</span> x > <span class="number">0</span> {
+    fmt.<span class="function">Println</span>(<span class="string">"positive"</span>)
+} <span class="keyword">else</span> {
+    fmt.<span class="function">Println</span>(<span class="string">"non-positive"</span>)
+}
+
+<span class="comment">// 带初始化:</span>
+<span class="keyword">if</span> err := <span class="function">doSomething</span>(); err != <span class="keyword">nil</span> {
+    <span class="keyword">return</span> err
+}</code></pre>
+            </div>
+
+            <div class="example-box">
+                <h3>📖 ForStmt - for 循环</h3>
+                <pre><code><span class="keyword">type</span> ForStmt <span class="keyword">struct</span> {
+    For  token.Pos    <span class="comment">// for 关键字位置</span>
+    Init Stmt         <span class="comment">// 初始化语句; 无则为 nil</span>
+    Cond Expr         <span class="comment">// 条件表达式; 无则为 nil</span>
+    Post Stmt         <span class="comment">// 后置语句; 无则为 nil</span>
+    Body *BlockStmt   <span class="comment">// 循环体</span>
+}
+
+<span class="comment">// 示例代码:</span>
+<span class="comment">// 标准 for 循环</span>
+<span class="keyword">for</span> i := <span class="number">0</span>; i < <span class="number">10</span>; i++ {
+    fmt.<span class="function">Println</span>(i)
+}
+
+<span class="comment">// while 风格</span>
+<span class="keyword">for</span> condition {
+    <span class="comment">// ...</span>
+}
+
+<span class="comment">// 无限循环</span>
+<span class="keyword">for</span> {
+    <span class="comment">// ...</span>
+}</code></pre>
+            </div>
+
+            <div class="example-box">
+                <h3>📖 RangeStmt - range 循环</h3>
+                <pre><code><span class="keyword">type</span> RangeStmt <span class="keyword">struct</span> {
+    For        token.Pos   <span class="comment">// for 关键字位置</span>
+    Key, Value Expr        <span class="comment">// key, value 变量</span>
+    TokPos     token.Pos   <span class="comment">// = 或 := 的位置</span>
+    Tok        token.Token <span class="comment">// ASSIGN 或 DEFINE</span>
+    Body       *BlockStmt  <span class="comment">// 循环体</span>
+    X          Expr        <span class="comment">// 要 range 的表达式</span>
+}
+
+<span class="comment">// 示例代码:</span>
+<span class="keyword">for</span> i, v := <span class="keyword">range</span> slice {
+    fmt.<span class="function">Printf</span>(<span class="string">"%d: %v\n"</span>, i, v)
+}
+
+<span class="keyword">for</span> key, value := <span class="keyword">range</span> m {
+    fmt.<span class="function">Printf</span>(<span class="string">"%s: %v\n"</span>, key, value)
+}
+
+<span class="keyword">for</span> _, ch := <span class="keyword">range</span> <span class="string">"hello"</span> {
+    fmt.<span class="function">Printf</span>(<span class="string">"%c\n"</span>, ch)
+}</code></pre>
+            </div>
+
+            <h3>表达式节点 (Expressions)</h3>
+            <div class="example-box">
+                <h3>📖 Ident - 标识符</h3>
+                <pre><code><span class="keyword">type</span> Ident <span class="keyword">struct</span> {
+    NamePos token.Pos  <span class="comment">// 标识符位置</span>
+    Name    <span class="keyword">string</span>     <span class="comment">// 标识符名称</span>
+}
+
+<span class="comment">// 示例代码:</span>
+x
+Person
+fmt.Println
+
+<span class="comment">// AST 结构:</span>
+*ast.Ident {.Name: "x"}
+*ast.Ident {.Name: "Person"}
+*ast.Ident {.Name: "Println"}</code></pre>
+            </div>
+
+            <div class="example-box">
+                <h3>📖 BasicLit - 字面量</h3>
+                <pre><code><span class="keyword">type</span> BasicLit <span class="keyword">struct</span> {
+    ValuePos token.Pos    <span class="comment">// 字面量位置</span>
+    Kind     token.Token  <span class="comment">// INT, FLOAT, IMAG, CHAR, STRING</span>
+    Value    <span class="keyword">string</span>       <span class="comment">// 字面量值</span>
+}
+
+<span class="comment">// 示例代码:</span>
+<span class="number">42</span>
+<span class="number">3.14</span>
+<span class="string">"hello"</span>
+<span class="string">'a'</span>
+<span class="number">1e10</span>
+
+<span class="comment">// AST 结构:</span>
+*ast.BasicLit {
+    .Kind: token.INT,
+    .Value: "42",
+}
+*ast.BasicLit {
+    .Kind: token.STRING,
+    .Value: "\"hello\"",
+}</code></pre>
+            </div>
+
+            <div class="example-box">
+                <h3>📖 CallExpr - 函数调用</h3>
+                <pre><code><span class="keyword">type</span> CallExpr <span class="keyword">struct</span> {
+    Fun      Expr        <span class="comment">// 函数表达式</span>
+    Lparen   token.Pos   <span class="comment">// 左括号位置</span>
+    Args     []Expr      <span class="comment">// 参数列表</span>
+    Ellipsis token.Pos   <span class="comment">// ... 的位置; 无则为 0</span>
+    Rparen   token.Pos   <span class="comment">// 右括号位置</span>
+}
+
+<span class="comment">// 示例代码:</span>
+<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"hello"</span>, <span class="number">42</span>)
+<span class="function">make</span>([]<span class="keyword">int</span>, <span class="number">10</span>)
+<span class="function">append</span>(slice, elems...)
+
+<span class="comment">// AST 结构 (fmt.Println("hello")):</span>
+*ast.CallExpr {
+    .Fun: &ast.SelectorExpr{
+        .X:   &ast.Ident{Name: "fmt"},
+        .Sel: &ast.Ident{Name: "Println"},
+    },
+    .Args: []ast.Expr{
+        &ast.BasicLit{Kind: token.STRING, Value: "\"hello\""},
+    },
+}</code></pre>
+            </div>
+
+            <div class="example-box">
+                <h3>📖 SelectorExpr - 选择器表达式</h3>
+                <pre><code><span class="keyword">type</span> SelectorExpr <span class="keyword">struct</span> {
+    X   Expr   <span class="comment">// 表达式</span>
+    Sel *Ident <span class="comment">// 选择的字段/方法名</span>
+}
+
+<span class="comment">// 示例代码:</span>
+fmt.Println
+person.Name
+response.StatusCode
+
+<span class="comment">// AST 结构 (fmt.Println):</span>
+*ast.SelectorExpr {
+    .X:   &ast.Ident{Name: "fmt"},
+    .Sel: &ast.Ident{Name: "Println"},
+}</code></pre>
+            </div>
+
+            <div class="example-box">
+                <h3>📖 BinaryExpr - 二元表达式</h3>
+                <pre><code><span class="keyword">type</span> BinaryExpr <span class="keyword">struct</span> {
+    X     Expr          <span class="comment">// 左操作数</span>
+    Op    token.Token   <span class="comment">// 运算符</span>
+    OpPos token.Pos     <span class="comment">// 运算符位置</span>
+    Y     Expr          <span class="comment">// 右操作数</span>
+}
+
+<span class="comment">// 示例代码:</span>
+a + b
+x == <span class="number">10</span>
+name != <span class="string">""</span>
+count >= <span class="number">0</span>
+
+<span class="comment">// AST 结构 (a + b):</span>
+*ast.BinaryExpr {
+    .X:   &ast.Ident{Name: "a"},
+    .Op:  token.ADD,
+    .Y:   &ast.Ident{Name: "b"},
+}</code></pre>
+            </div>
+
+            <h3>类型节点 (Types)</h3>
+            <div class="example-box">
+                <h3>📖 StructType - 结构体类型</h3>
+                <pre><code><span class="keyword">type</span> StructType <span class="keyword">struct</span> {
+    Struct     token.Pos   <span class="comment">// struct 关键字位置</span>
+    Fields     *FieldList  <span class="comment">// 字段列表</span>
+    Incomplete <span class="keyword">bool</span>        <span class="comment">// 如果有未解析的字段则为 true</span>
+}
+
+<span class="comment">// 示例代码:</span>
+<span class="keyword">type</span> Person <span class="keyword">struct</span> {
+    Name <span class="keyword">string</span>
+    Age  <span class="keyword">int</span>
+}
+
+<span class="comment">// AST 结构:</span>
+*ast.StructType {
+    .Fields: &ast.FieldList{
+        .List: []*ast.Field{
+            {
+                .Names: []*ast.Ident{{.Name: "Name"}},
+                .Type:  &ast.Ident{Name: "string"},
+            },
+            {
+                .Names: []*ast.Ident{{.Name: "Age"}},
+                .Type:  &ast.Ident{Name: "int"},
+            },
+        },
+    },
+}</code></pre>
+            </div>
+
+            <div class="example-box">
+                <h3>📖 InterfaceType - 接口类型</h3>
+                <pre><code><span class="keyword">type</span> InterfaceType <span class="keyword">struct</span> {
+    Interface  token.Pos   <span class="comment">// interface 关键字位置</span>
+    Methods    *FieldList  <span class="comment">// 方法列表</span>
+    Incomplete <span class="keyword">bool</span>        <span class="comment">// 如果有未解析的方法则为 true</span>
+}
+
+<span class="comment">// 示例代码:</span>
+<span class="keyword">type</span> Reader <span class="keyword">interface</span> {
+    <span class="function">Read</span>(p []<span class="keyword">byte</span>) (n <span class="keyword">int</span>, err <span class="keyword">error</span>)
+}
+
+<span class="keyword">type</span> Writer <span class="keyword">interface</span> {
+    <span class="function">Write</span>(p []<span class="keyword">byte</span>) (n <span class="keyword">int</span>, err <span class="keyword">error</span>)
+}</code></pre>
+            </div>
+
+            <div class="example-box">
+                <h3>📖 ArrayType - 数组/切片类型</h3>
+                <pre><code><span class="keyword">type</span> ArrayType <span class="keyword">struct</span> {
+    Lbrack token.Pos  <span class="comment">// 左括号位置</span>
+    Len    Expr       <span class="comment">// 数组长度; nil 表示切片</span>
+    Elt    Expr       <span class="comment">// 元素类型</span>
+}
+
+<span class="comment">// 示例代码:</span>
+[]<span class="keyword">int</span>           <span class="comment">// 切片: Len = nil</span>
+[<span class="number">10</span>]<span class="keyword">int</span>         <span class="comment">// 数组：Len = &ast.BasicLit{Value: "10"}</span>
+[...]<span class="keyword">byte</span>        <span class="comment">// 数组：Len = &ast.Ellipsis</span>
+[][]<span class="keyword">string</span>      <span class="comment">// 切片的切片</span>
+
+<span class="comment">// AST 结构 ([]int):</span>
+*ast.ArrayType {
+    .Len:  nil,
+    .Elt:  &ast.Ident{Name: "int"},
+}
+
+<span class="comment">// AST 结构 ([10]int):</span>
+*ast.ArrayType {
+    .Len:  &ast.BasicLit{Kind: token.INT, Value: "10"},
+    .Elt:  &ast.Ident{Name: "int"},
+}</code></pre>
+            </div>
+
+            <div class="example-box">
+                <h3>📖 MapType - Map 类型</h3>
+                <pre><code><span class="keyword">type</span> MapType <span class="keyword">struct</span> {
+    Map   token.Pos  <span class="comment">// map 关键字位置</span>
+    Key   Expr       <span class="comment">// 键类型</span>
+    Value Expr       <span class="comment">// 值类型</span>
+}
+
+<span class="comment">// 示例代码:</span>
+<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>
+<span class="keyword">map</span>[<span class="keyword">int</span>]*Person
+<span class="keyword">map</span>[<span class="keyword">string</span>][]<span class="keyword">byte</span>
+
+<span class="comment">// AST 结构 (map[string]int):</span>
+*ast.MapType {
+    .Key:   &ast.Ident{Name: "string"},
+    .Value: &ast.Ident{Name: "int"},
+}</code></pre>
+            </div>
+
+            <div class="example-box">
+                <h3>📖 ChanType - Channel 类型</h3>
+                <pre><code><span class="keyword">type</span> ChanType <span class="keyword">struct</span> {
+    Begin token.Pos      <span class="comment">// chan 关键字位置或 <- 位置</span>
+    Dir   ChanDir        <span class="comment">// 方向：SEND, RECV, SEND|RECV</span>
+    Value Expr           <span class="comment">// 元素类型</span>
+}
+
+<span class="keyword">type</span> ChanDir <span class="keyword">int</span>
+
+<span class="keyword">const</span> (
+    SEND <span class="keyword">ChanDir</span> = <span class="number">1</span> <span class="comment">// <- chan</span>
+    RECV <span class="keyword">ChanDir</span> = <span class="number">2</span> <span class="comment">// chan <-</span>
+)
+
+<span class="comment">// 示例代码:</span>
+<span class="keyword">chan</span> <span class="keyword">int</span>            <span class="comment">// 双向 channel</span>
+<span class="keyword">chan</span>&lt;- <span class="keyword">int</span>          <span class="comment">// 只接收</span>
+<span class="keyword">chan</span>&lt;- <span class="keyword">string</span>       <span class="comment">// 只发送</span>
+
+<span class="comment">// AST 结构 (chan int):</span>
+*ast.ChanType {
+    .Dir:   ast.SEND | ast.RECV,
+    .Value: &ast.Ident{Name: "int"},
+}
+
+<span class="comment">// AST 结构 (chan<- string):</span>
+*ast.ChanType {
+    .Dir:   ast.SEND,
+    .Value: &ast.Ident{Name: "string"},
+}</code></pre>
+            </div>
+
             <!-- 最佳实践 -->
             <h2 id="best-practices">最佳实践</h2>
 
